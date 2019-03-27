@@ -23,7 +23,12 @@
 #pragma once
 
 #include "Sample.h"
+#include <memory>
 
+namespace Urho3D
+{
+	class CEGuiBaseApplication;
+}
 /// This first example, maintaining tradition, prints a "Hello World" message.
 /// Furthermore it shows:
 ///     - Using the Sample / Application classes, which initialize the Urho3D engine and run the main loop
@@ -57,4 +62,6 @@ private:
     void SubscribeToEvents();
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
+private:
+	std::unique_ptr<CEGuiBaseApplication> cegui_proxy_;
 };

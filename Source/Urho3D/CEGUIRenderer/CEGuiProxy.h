@@ -17,6 +17,10 @@
 #       endif
 #   endif
 #endif
+#include "Core/Object.h"
+#include "Container/Str.h"
+#include "Core/Variant.h"
+#include "Input/InputConstants.h"
 
 /*************************************************************************
 	Forward refs
@@ -31,9 +35,8 @@ namespace CEGUI
 	class EventArgs;
 	class GUIContext;
 }
-
-CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key);
-
+namespace Urho3D
+{
 /*!
 \brief
 	Base application abstract base class.
@@ -41,8 +44,9 @@ CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key);
 	The "BaseApplication" family of classes are used to start up and run a
 	host application for CeGui samples in a consistent manner.
 */
-class CEGuiBaseApplication
-{
+	class URHO3D_API CEGui : public Object
+	{
+		URHO3D_OBJECT(CEGui, Object);
 public:
 	//! Constructor.
 	CEGuiBaseApplication();
@@ -69,9 +73,7 @@ public:
 		- true if the application initialised okay (cleanup function will be
 		  called).
 	*/
-	virtual bool init(SampleBrowserBase* sampleApp,
-		const CEGUI::String& logFile,
-		const CEGUI::String& dataPathPrefixOverride);
+	virtual bool init(SampleBrowserBase* sampleApp, const CEGUI::String& logFile, const CEGUI::String& dataPathPrefixOverride);
 
 	/*!
 	\brief
@@ -128,6 +130,19 @@ public:
 	bool injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton);
 	bool injectMouseWheelChange(float position);
 	bool injectMousePosition(float x, float y);
+
+	// Urho3D proxy
+	void OnMouseButtonDown(MouseButton mouseButtons);
+	void OnMouseButtonUp(MouseButton mouseButtons);
+	void HandleMouseButtonDown(StringHash eventType, VariantMap& eventData);
+	void HandleMouseButtonUp(StringHash eventType, VariantMap& eventData);
+	void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
+	void HandleTouchBegin(StringHash eventType, VariantMap& eventData);
+	void HandleTouchEnd(StringHash eventType, VariantMap& eventData);
+	void HandleTouchMove(StringHash eventType, VariantMap& eventData);
+	void HandleKeyDown(StringHash eventType, VariantMap& eventData);
+	void HandleKeyUp(StringHash eventType, VariantMap& eventData);
+	void HandleTextInput(StringHash eventType, VariantMap& eventData);
 
 protected:
 	//! name of env var that holds the path prefix to the data files.
@@ -201,3 +216,4 @@ private:
 	CEGUI::String				d_dataPathPrefix;
 	CEGUI::InputAggregator*		d_systemInputAggregator;
 };
+}
