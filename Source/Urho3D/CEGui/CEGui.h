@@ -31,17 +31,17 @@ namespace Urho3D
 {
 
 	/// Font hinting level (only used for FreeType fonts)
-	enum FontHintLevel
-	{
-		/// Completely disable font hinting. Output will be blurrier but more "correct".
-		FONT_HINT_LEVEL_NONE = 0,
-
-		/// Light hinting. FreeType will pixel-align fonts vertically, but not horizontally.
-		FONT_HINT_LEVEL_LIGHT,
-
-		/// Full hinting, using either the font's own hinting or FreeType's auto-hinter.
-		FONT_HINT_LEVEL_NORMAL
-	};
+// 	enum FontHintLevel
+// 	{
+// 		/// Completely disable font hinting. Output will be blurrier but more "correct".
+// 		FONT_HINT_LEVEL_NONE = 0,
+// 
+// 		/// Light hinting. FreeType will pixel-align fonts vertically, but not horizontally.
+// 		FONT_HINT_LEVEL_LIGHT,
+// 
+// 		/// Full hinting, using either the font's own hinting or FreeType's auto-hinter.
+// 		FONT_HINT_LEVEL_NORMAL
+// 	};
 
 // 	class Cursor;
 // 	class Graphics;
@@ -113,7 +113,7 @@ namespace Urho3D
 		/// Set whether to force font autohinting instead of using FreeType's TTF bytecode interpreter.
 		void SetForceAutoHint(bool enable);
 		/// Set the hinting level used by FreeType fonts.
-		void SetFontHintLevel(FontHintLevel level);
+		//void SetFontHintLevel(FontHintLevel level);
 		/// Set the font subpixel threshold. Below this size, if the hint level is LIGHT or NONE, fonts will use subpixel positioning plus oversampling for higher-quality rendering. Has no effect at hint level NORMAL.
 		void SetFontSubpixelThreshold(float threshold);
 		/// Set the oversampling (horizonal stretching) used to improve subpixel font rendering. Only affects fonts smaller than the subpixel limit.
@@ -197,7 +197,7 @@ namespace Urho3D
 		bool GetForceAutoHint() const { return forceAutoHint_; }
 
 		/// Return the current FreeType font hinting level.
-		FontHintLevel GetFontHintLevel() const { return fontHintLevel_; }
+		//FontHintLevel GetFontHintLevel() const { return fontHintLevel_; }
 
 		/// Get the font subpixel threshold. Below this size, if the hint level is LIGHT or NONE, fonts will use subpixel positioning plus oversampling for higher-quality rendering. Has no effect at hint level NORMAL.
 		float GetFontSubpixelThreshold() const { return fontSubpixelThreshold_; }
@@ -370,7 +370,7 @@ namespace Urho3D
 		/// Flag for forcing FreeType auto hinting.
 		bool forceAutoHint_;
 		/// FreeType hinting level (default is FONT_HINT_LEVEL_NORMAL).
-		FontHintLevel fontHintLevel_;
+		//FontHintLevel fontHintLevel_;
 		/// Maxmimum font size for subpixel glyph positioning and oversampling (default is 12).
 		float fontSubpixelThreshold_;
 		/// Horizontal oversampling for subpixel fonts (default is 2).
