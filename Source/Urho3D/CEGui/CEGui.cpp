@@ -985,6 +985,7 @@ namespace Urho3D
 		// start up CEGUI system using objects created in subclass constructor.
 		CEGUI::System::create(*d_renderer, d_resourceProvider, nullptr, d_imageCodec, nullptr, "", logFile);
 
+		auto& cegui_system = CEGUI::System::getSingleton();
 		// initialise resource system
 		initDataPathPrefix(dataPathPrefixOverride);
 		initialiseResourceGroupDirectories();
@@ -997,11 +998,9 @@ namespace Urho3D
 
 		CEGUI::ImageRenderSettings imgRenderSettings(CEGUI::Rectf(0, 0, 183, 89));
 
-		auto ceguiLogoGeomBuffers = ceguiLogo.createRenderGeometry(
-			imgRenderSettings);
+		auto ceguiLogoGeomBuffers = ceguiLogo.createRenderGeometry(imgRenderSettings);
 
-		d_logoGeometry.insert(d_logoGeometry.end(), ceguiLogoGeomBuffers.begin(),
-			ceguiLogoGeomBuffers.end());
+		d_logoGeometry.insert(d_logoGeometry.end(), ceguiLogoGeomBuffers.begin(), ceguiLogoGeomBuffers.end());
 
 		// initial position update of the logo
 		updateLogoGeometry();
@@ -1009,23 +1008,16 @@ namespace Urho3D
 		updateLogoGeometryRotation();
 
 		// clearing this queue actually makes sure it's created(!)
-		CEGUI::System::getSingleton().getDefaultGUIContext().clearGeometry(CEGUI::RenderQueueID::Overlay);
+		cegui_system.getDefaultGUIContext().clearGeometry(CEGUI::RenderQueueID::Overlay);
 
 		// subscribe handler to render overlay items
-		CEGUI::System::getSingleton().getDefaultGUIContext().
-			subscribeEvent(CEGUI::RenderingSurface::EventRenderQueueStarted,
-				CEGUI::Event::Subscriber(&CEGui::sampleBrowserOverlayHandler,
-					this));
+		cegui_system.getDefaultGUIContext().subscribeEvent(CEGUI::RenderingSurface::EventRenderQueueStarted, CEGUI::Event::Subscriber(&CEGui::sampleBrowserOverlayHandler, this));
 
 		// subscribe handler to reposition logo when window is sized.
-		CEGUI::System::getSingleton().subscribeEvent(
-			CEGUI::System::EventDisplaySizeChanged,
-			CEGUI::Event::Subscriber(&CEGui::resizeHandler,
-				this));
+		cegui_system.subscribeEvent(CEGUI::System::EventDisplaySizeChanged, CEGUI::Event::Subscriber(&CEGui::resizeHandler, this));
 
-		const CEGUI::Rectf& area(CEGUI::System::getSingleton().getRenderer()->getDefaultRenderTarget().getArea());
+		const CEGUI::Rectf& area(cegui_system.getRenderer()->getDefaultRenderTarget().getArea());
 		//d_sampleApp->setApplicationWindowSize(static_cast<int>(area.getWidth()), static_cast<int>(area.getHeight()));
-
 
 // 		graphics_ = graphics;
 // 		UIBatch::posAdjust = Vector3(Graphics::GetPixelUVOffset(), 0.0f);
