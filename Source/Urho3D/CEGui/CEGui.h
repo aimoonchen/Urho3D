@@ -27,6 +27,15 @@
 // #include "../CEGui/Cursor.h"
 // #include "../CEGui/UIBatch.h"
 
+namespace CEGUI
+{
+	class Renderer;
+	class ImageCodec;
+	class ResourceProvider;
+	class GeometryBuffer;
+	class EventArgs;
+}
+
 namespace Urho3D
 {
 
@@ -237,7 +246,23 @@ namespace Urho3D
 			IntVector2 dragBeginSumPos;
 		};
 
+		String getDataPathPrefix() const { return d_dataPathPrefix; }
+		void initDataPathPrefix(const String &override);
 	private:
+		void updateFPS(const float elapsed);
+		void updateLogo(const float elapsed);
+		void updateLogoGeometry();
+		void updateFPSGeometry();
+		void updateLogoGeometryRotation();
+		//! event handler function that draws the logo and FPS overlay elements.
+		bool sampleBrowserOverlayHandler(const CEGUI::EventArgs& args);
+		//! event handler function that draws the FPS overlay elements.
+		bool sampleOverlayHandler(const CEGUI::EventArgs& args);
+		//! event handler function called when main view is resized
+		bool resizeHandler(const CEGUI::EventArgs& args);
+		void initialiseResourceGroupDirectories();
+		void initialiseDefaultResourceGroups();
+		
 		/// Initialize when screen mode initially set.
 		void Initialize();
 		/// Update CEGui element logic recursively.
@@ -405,6 +430,28 @@ namespace Urho3D
 		IntVector2 customSize_;
 		/// Elements that should be rendered to textures.
 		//HashMap<UIElement*, RenderToTextureData> renderToTexture_;
+
+		//! Renderer to use.  This MUST be set in the subclass constructor.
+		CEGUI::Renderer* d_renderer;
+		//! ImageCodec to use.  Set in subclass constructor, may be 0.
+		CEGUI::ImageCodec* d_imageCodec;
+		//! ResourceProvider to use.  Set in subclass constructor, may be 0.
+		CEGUI::ResourceProvider* d_resourceProvider;
+		//! GeometryBuffer used for drawing the spinning CEGUI logo
+		std::vector<CEGUI::GeometryBuffer*> d_logoGeometry;
+		//! GeometryBuffers used for drawing the FPS value.
+		std::vector<CEGUI::GeometryBuffer*> d_FPSGeometry;
+		static const char DATAPATH_VAR_NAME[];
+		//CEGUI::String d_dataPathPrefix;
+		String d_dataPathPrefix;
+		//! Fraction of second elapsed (used for counting frames per second).
+		float d_FPSElapsed;
+		//! Number of frames drawn so far.
+		int d_FPSFrames;
+		//! Last changed FPS value.
+		int d_FPSValue;
+		//! whether to spin the logo
+		bool d_spinLogo;
 	};
 
 	/// Register CEGui library objects.
