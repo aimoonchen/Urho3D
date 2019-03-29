@@ -57,6 +57,7 @@
 #include "CEGUI/RenderTarget.h"
 #include "CEGUI/AnimationManager.h"
 #include "CEGUI/FontManager.h"
+#include "CEGUI/InputAggregator.h"
 
 // #include "../CEGui/CheckBox.h"
 // #include "../CEGui/Cursor.h"
@@ -109,6 +110,77 @@ namespace Urho3D
 	const int DEFAULT_FONT_TEXTURE_MAX_SIZE = 2048;
 
 	const char* UI_CATEGORY = "CEGui";
+
+	static CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key)
+	{
+		switch (key)
+		{
+		case Urho3D::KEY_ESCAPE: return CEGUI::Key::Scan::Esc;
+		case Urho3D::KEY_F1: return CEGUI::Key::Scan::F1;
+		case Urho3D::KEY_F2: return CEGUI::Key::Scan::F2;
+		case Urho3D::KEY_F3: return CEGUI::Key::Scan::F3;
+		case Urho3D::KEY_F4: return CEGUI::Key::Scan::F4;
+		case Urho3D::KEY_F5: return CEGUI::Key::Scan::F5;
+		case Urho3D::KEY_F6: return CEGUI::Key::Scan::F6;
+		case Urho3D::KEY_F7: return CEGUI::Key::Scan::F7;
+		case Urho3D::KEY_F8: return CEGUI::Key::Scan::F8;
+		case Urho3D::KEY_F9: return CEGUI::Key::Scan::F9;
+		case Urho3D::KEY_F10: return CEGUI::Key::Scan::F10;
+		case Urho3D::KEY_F11: return CEGUI::Key::Scan::F11;
+		case Urho3D::KEY_F12: return CEGUI::Key::Scan::F12;
+		case Urho3D::KEY_F13: return CEGUI::Key::Scan::F13;
+		case Urho3D::KEY_F14: return CEGUI::Key::Scan::F14;
+		case Urho3D::KEY_F15: return CEGUI::Key::Scan::F15;
+		case Urho3D::KEY_UP: return CEGUI::Key::Scan::ArrowUp;
+		case Urho3D::KEY_DOWN: return CEGUI::Key::Scan::ArrowDown;
+		case Urho3D::KEY_LEFT: return CEGUI::Key::Scan::ArrowLeft;
+		case Urho3D::KEY_RIGHT: return CEGUI::Key::Scan::ArrowRight;
+		case Urho3D::KEY_LSHIFT: return CEGUI::Key::Scan::LeftShift;
+		case Urho3D::KEY_RSHIFT: return CEGUI::Key::Scan::RightShift;
+		case Urho3D::KEY_LCTRL: return CEGUI::Key::Scan::LeftControl;
+		case Urho3D::KEY_RCTRL: return CEGUI::Key::Scan::RightControl;
+		case Urho3D::KEY_LALT: return CEGUI::Key::Scan::LeftAlt;
+		case Urho3D::KEY_RALT: return CEGUI::Key::Scan::RightAlt;
+		case Urho3D::KEY_TAB: return CEGUI::Key::Scan::Tab;
+		case Urho3D::KEY_RETURN: return CEGUI::Key::Scan::Return;
+		case Urho3D::KEY_BACKSPACE: return CEGUI::Key::Scan::Backspace;
+		case Urho3D::KEY_INSERT: return CEGUI::Key::Scan::Insert;
+		case Urho3D::KEY_DELETE: return CEGUI::Key::Scan::DeleteKey;
+		case Urho3D::KEY_PAGEUP: return CEGUI::Key::Scan::PageUp;
+		case Urho3D::KEY_PAGEDOWN: return CEGUI::Key::Scan::PageDown;
+		case Urho3D::KEY_HOME: return CEGUI::Key::Scan::Home;
+		case Urho3D::KEY_END: return CEGUI::Key::Scan::End;
+		case Urho3D::KEY_KP_ENTER: return CEGUI::Key::Scan::NumpadEnter;
+		case Urho3D::KEY_SPACE: return CEGUI::Key::Scan::Space;
+		case Urho3D::KEY_A: return CEGUI::Key::Scan::A;
+		case Urho3D::KEY_B: return CEGUI::Key::Scan::B;
+		case Urho3D::KEY_C: return CEGUI::Key::Scan::C;
+		case Urho3D::KEY_D: return CEGUI::Key::Scan::D;
+		case Urho3D::KEY_E: return CEGUI::Key::Scan::E;
+		case Urho3D::KEY_F: return CEGUI::Key::Scan::F;
+		case Urho3D::KEY_G: return CEGUI::Key::Scan::G;
+		case Urho3D::KEY_H: return CEGUI::Key::Scan::H;
+		case Urho3D::KEY_I: return CEGUI::Key::Scan::I;
+		case Urho3D::KEY_J: return CEGUI::Key::Scan::J;
+		case Urho3D::KEY_K: return CEGUI::Key::Scan::K;
+		case Urho3D::KEY_L: return CEGUI::Key::Scan::L;
+		case Urho3D::KEY_M: return CEGUI::Key::Scan::M;
+		case Urho3D::KEY_N: return CEGUI::Key::Scan::N;
+		case Urho3D::KEY_O: return CEGUI::Key::Scan::O;
+		case Urho3D::KEY_P: return CEGUI::Key::Scan::P;
+		case Urho3D::KEY_Q: return CEGUI::Key::Scan::Q;
+		case Urho3D::KEY_R: return CEGUI::Key::Scan::R;
+		case Urho3D::KEY_S: return CEGUI::Key::Scan::S;
+		case Urho3D::KEY_T: return CEGUI::Key::Scan::T;
+		case Urho3D::KEY_U: return CEGUI::Key::Scan::U;
+		case Urho3D::KEY_V: return CEGUI::Key::Scan::V;
+		case Urho3D::KEY_W: return CEGUI::Key::Scan::W;
+		case Urho3D::KEY_X: return CEGUI::Key::Scan::X;
+		case Urho3D::KEY_Y: return CEGUI::Key::Scan::Y;
+		case Urho3D::KEY_Z: return CEGUI::Key::Scan::Z;
+		default: return CEGUI::Key::Scan::Unknown;
+		}
+	}
 
 	CEGui::CEGui(Context* context) :
 		Object(context),
@@ -163,6 +235,7 @@ namespace Urho3D
 		SubscribeToEvent(E_TOUCHEND, URHO3D_HANDLER(CEGui, HandleTouchEnd));
 		SubscribeToEvent(E_TOUCHMOVE, URHO3D_HANDLER(CEGui, HandleTouchMove));
 		SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(CEGui, HandleKeyDown));
+		SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(CEGui, HandleKeyUp));
 		SubscribeToEvent(E_TEXTINPUT, URHO3D_HANDLER(CEGui, HandleTextInput));
 //		SubscribeToEvent(E_DROPFILE, URHO3D_HANDLER(CEGui, HandleDropFile));
 
@@ -326,6 +399,10 @@ namespace Urho3D
 
 	void CEGui::Clear()
 	{
+		if (d_systemInputAggregator != nullptr) {
+			delete d_systemInputAggregator;
+			d_systemInputAggregator = nullptr;
+		}
 // 		rootElement_->RemoveAllChildren();
 // 		rootModalElement_->RemoveAllChildren();
 // 		if (cursor_)
@@ -975,12 +1052,11 @@ namespace Urho3D
 
 		URHO3D_PROFILE(InitUI);
 
-		CEGUI::String logFile;
+		CEGUI::String logFile{ "CEGUI.log" };
 		String dataPathPrefixOverride;
 
 		if (!d_renderer)
-			throw CEGUI::InvalidRequestException("CEGuiBaseApplication::run: "
-				"Base application subclass did not create Renderer!");
+			throw CEGUI::InvalidRequestException("CEGuiBaseApplication::run: Base application subclass did not create Renderer!");
 
 		// start up CEGUI system using objects created in subclass constructor.
 		CEGUI::System::create(*d_renderer, d_resourceProvider, nullptr, d_imageCodec, nullptr, "", logFile);
@@ -1018,6 +1094,10 @@ namespace Urho3D
 
 		const CEGUI::Rectf& area(cegui_system.getRenderer()->getDefaultRenderTarget().getArea());
 		//d_sampleApp->setApplicationWindowSize(static_cast<int>(area.getWidth()), static_cast<int>(area.getHeight()));
+
+
+		d_systemInputAggregator = new CEGUI::InputAggregator(&cegui_system.getDefaultGUIContext());
+		d_systemInputAggregator->initialise();
 
 // 		graphics_ = graphics;
 // 		UIBatch::posAdjust = Vector3(Graphics::GetPixelUVOffset(), 0.0f);
@@ -1276,7 +1356,13 @@ namespace Urho3D
 			d_logoGeometry[i]->setPivot(glm::vec3(91.5f, 44.5f, 0));
 		}
 	}
+	CEGUI::InputAggregator* CEGui::getCurrentInputAggregator()
+	{
+// 		if (d_selectedSampleData != nullptr)
+// 			return d_selectedSampleData->getInputAggregator();
 
+		return d_systemInputAggregator;
+	}
 // 	void CEGui::Update(float timeStep, UIElement* element)
 // 	{
 // 		// Keep a weak pointer to the element in case it destroys itself on update
@@ -1612,10 +1698,12 @@ namespace Urho3D
 
 	void CEGui::ProcessClickBegin(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
+		OnMouseButtonDown(button);
 	}
 
 	void CEGui::ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
+		OnMouseButtonUp(button);
 	}
 
 	void CEGui::ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
@@ -1844,6 +1932,8 @@ namespace Urho3D
 			return;
 		}
 
+		injectKeyDown(urho3DKeyToCeguiKey(key));
+
 // 		// Dismiss modal element if any when ESC key is pressed
 // 		if (key == KEY_ESCAPE && HasModalElement())
 // 		{
@@ -1901,6 +1991,17 @@ namespace Urho3D
 // 			else
 // 				element->OnKey(key, mouseButtons_, qualifiers_);
 // 		}
+	}
+	
+	void CEGui::HandleKeyUp(StringHash eventType, VariantMap& eventData)
+	{
+		using namespace KeyUp;
+
+		mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
+		qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetUInt());
+		auto key = (Key)eventData[P_KEY].GetUInt();
+
+		injectKeyUp(urho3DKeyToCeguiKey(key));
 	}
 
 	void CEGui::HandleTextInput(StringHash eventType, VariantMap& eventData)
@@ -2118,4 +2219,102 @@ namespace Urho3D
 // 		UIComponent::RegisterObject(context);
 	}
 
+	bool CEGui::injectKeyDown(const CEGUI::Key::Scan& ceguiKey)
+	{
+		if (CEGUI::Key::Scan::Esc != ceguiKey)
+			return getCurrentInputAggregator()->injectKeyDown(ceguiKey);
+		// 	else
+		// 	{
+		// 		if (d_selectedSampleData)
+		// 			stopDisplaySample();
+		// 		else
+		// 			setQuitting(true);
+		// 	}
+
+		return false;
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectKeyUp(const CEGUI::Key::Scan& ceguiKey)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectKeyUp(ceguiKey);
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectChar(int character)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectChar(character);
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectMouseButtonDown(const CEGUI::MouseButton& ceguiMouseButton)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectMouseButtonDown(ceguiMouseButton);
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectMouseButtonUp(ceguiMouseButton);
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectMouseWheelChange(float position)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectMouseWheelChange(position);
+	}
+
+	//----------------------------------------------------------------------------//
+	bool CEGui::injectMousePosition(float x, float y)
+	{
+		if (getCurrentInputAggregator() == nullptr)
+			return false;
+
+		return getCurrentInputAggregator()->injectMousePosition(x, y);
+	}
+
+	void CEGui::OnMouseButtonDown(MouseButton mouseButtons)
+	{
+		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
+		if (mouseButtons == MOUSEB_LEFT) {
+			mb = CEGUI::MouseButton::Left;
+		}
+		else if (mouseButtons == MOUSEB_RIGHT) {
+			mb = CEGUI::MouseButton::Right;
+		}
+		else if (mouseButtons == MOUSEB_MIDDLE) {
+			mb = CEGUI::MouseButton::Middle;
+		}
+		injectMouseButtonDown(mb);
+	}
+
+	void CEGui::OnMouseButtonUp(MouseButton mouseButtons)
+	{
+		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
+		if (mouseButtons == MOUSEB_LEFT) {
+			mb = CEGUI::MouseButton::Left;
+		}
+		else if (mouseButtons == MOUSEB_RIGHT) {
+			mb = CEGUI::MouseButton::Right;
+		}
+		else if (mouseButtons == MOUSEB_MIDDLE) {
+			mb = CEGUI::MouseButton::Middle;
+		}
+		injectMouseButtonUp(mb);
+	}
 }

@@ -34,6 +34,7 @@ namespace CEGUI
 	class ResourceProvider;
 	class GeometryBuffer;
 	class EventArgs;
+	class InputAggregator;
 }
 
 namespace Urho3D
@@ -254,6 +255,7 @@ namespace Urho3D
 		void updateLogoGeometry();
 		void updateFPSGeometry();
 		void updateLogoGeometryRotation();
+		CEGUI::InputAggregator* getCurrentInputAggregator();
 		//! event handler function that draws the logo and FPS overlay elements.
 		bool sampleBrowserOverlayHandler(const CEGUI::EventArgs& args);
 		//! event handler function that draws the FPS overlay elements.
@@ -262,7 +264,17 @@ namespace Urho3D
 		bool resizeHandler(const CEGUI::EventArgs& args);
 		void initialiseResourceGroupDirectories();
 		void initialiseDefaultResourceGroups();
-		
+		bool injectKeyDown(const CEGUI::Key::Scan& ceguiKey);
+		bool injectKeyUp(const CEGUI::Key::Scan& ceguiKey);
+		bool injectChar(int character);
+		bool injectMouseButtonDown(const CEGUI::MouseButton& ceguiMouseButton);
+		bool injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton);
+		bool injectMouseWheelChange(float position);
+		bool injectMousePosition(float x, float y);
+
+		// Urho3D proxy
+		void OnMouseButtonDown(MouseButton mouseButtons);
+		void OnMouseButtonUp(MouseButton mouseButtons);
 		/// Initialize when screen mode initially set.
 		void Initialize();
 		/// Update CEGui element logic recursively.
@@ -317,6 +329,8 @@ namespace Urho3D
 		void HandleTouchMove(StringHash eventType, VariantMap& eventData);
 		/// Handle keypress event.
 		void HandleKeyDown(StringHash eventType, VariantMap& eventData);
+		/// Handle keyup event.
+		void HandleKeyUp(StringHash eventType, VariantMap& eventData);
 		/// Handle text input event.
 		void HandleTextInput(StringHash eventType, VariantMap& eventData);
 		/// Handle frame begin event.
@@ -452,6 +466,7 @@ namespace Urho3D
 		int d_FPSValue;
 		//! whether to spin the logo
 		bool d_spinLogo;
+		CEGUI::InputAggregator*         d_systemInputAggregator{ nullptr };
 	};
 
 	/// Register CEGui library objects.
