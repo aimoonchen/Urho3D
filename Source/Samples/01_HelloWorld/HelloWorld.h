@@ -27,7 +27,7 @@
 
 namespace Urho3D
 {
-	class CEGuiBaseApplication;
+	class CEGui;
 }
 /// This first example, maintaining tradition, prints a "Hello World" message.
 /// Furthermore it shows:
@@ -63,5 +63,5 @@ private:
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 private:
-	std::unique_ptr<CEGuiBaseApplication> cegui_proxy_;
+	std::unique_ptr<Gui> gui_;
 };

@@ -24,22 +24,16 @@
 
 #include "../Core/Object.h"
 #include "../Graphics/VertexBuffer.h"
-// #include "../CEGui/Cursor.h"
-// #include "../CEGui/UIBatch.h"
+#include <memory>
 
-namespace CEGUI
-{
-	class Renderer;
-	class ImageCodec;
-	class ResourceProvider;
-	class GeometryBuffer;
-	class EventArgs;
-	class InputAggregator;
-}
+// #include "../Gui/Cursor.h"
+// #include "../Gui/UIBatch.h"
+
 
 namespace Urho3D
 {
 
+class CEGui;
 	/// Font hinting level (only used for FreeType fonts)
 // 	enum FontHintLevel
 // 	{
@@ -64,49 +58,49 @@ namespace Urho3D
 // 	class RenderSurface;
 // 	class UIComponent;
 
-	/// %CEGui subsystem. Manages the graphical user interface.
-	class URHO3D_API CEGui : public Object
+	/// %Gui subsystem. Manages the graphical user interface.
+	class URHO3D_API Gui : public Object
 	{
-		URHO3D_OBJECT(CEGui, Object);
+		URHO3D_OBJECT(Gui, Object);
 
 	public:
 		/// Construct.
-		explicit CEGui(Context* context);
+		explicit Gui(Context* context);
 		/// Destruct.
-		~CEGui() override;
+		~Gui() override;
 
-// 		/// Set cursor CEGui element.
+// 		/// Set cursor Gui element.
 // 		void SetCursor(Cursor* cursor);
-// 		/// Set focused CEGui element.
+// 		/// Set focused Gui element.
 // 		void SetFocusElement(UIElement* element, bool byKey = false);
 // 		/// Set modal element. Until all the modal elements are dismissed, all the inputs and events are only sent to them. Return true when successful.
 // 		/// Only the modal element can clear its modal status or when it is being destructed.
 // 		bool SetModalElement(UIElement* modalElement, bool enable);
-		/// Clear the CEGui (excluding the cursor.)
+		/// Clear the Gui (excluding the cursor.)
 		void Clear();
-		/// Update the CEGui logic. Called by HandlePostUpdate().
+		/// Update the Gui logic. Called by HandlePostUpdate().
 		void Update(float timeStep);
-		/// Update the CEGui for rendering. Called by HandleRenderUpdate().
+		/// Update the Gui for rendering. Called by HandleRenderUpdate().
 		void RenderUpdate();
-		/// Render the CEGui. If renderUICommand is false (default), is assumed to be the default CEGui render to backbuffer called by Engine, and will be performed only once. Additional CEGui renders to a different rendertarget may be triggered from the renderpath.
+		/// Render the Gui. If renderUICommand is false (default), is assumed to be the default Gui render to backbuffer called by Engine, and will be performed only once. Additional Gui renders to a different rendertarget may be triggered from the renderpath.
 		void Render(bool renderUICommand = false);
-		/// Debug draw a CEGui element.
+		/// Debug draw a Gui element.
 //		void DebugDraw(UIElement* element);
-// 		/// Load a CEGui layout from an XML file. Optionally specify another XML file for element style. Return the root element.
+// 		/// Load a Gui layout from an XML file. Optionally specify another XML file for element style. Return the root element.
 // 		SharedPtr<UIElement> LoadLayout(Deserializer& source, XMLFile* styleFile = nullptr);
-// 		/// Load a CEGui layout from an XML file. Optionally specify another XML file for element style. Return the root element.
+// 		/// Load a Gui layout from an XML file. Optionally specify another XML file for element style. Return the root element.
 // 		SharedPtr<UIElement> LoadLayout(XMLFile* file, XMLFile* styleFile = nullptr);
-// 		/// Save a CEGui layout to an XML file. Return true if successful.
+// 		/// Save a Gui layout to an XML file. Return true if successful.
 // 		bool SaveLayout(Serializer& dest, UIElement* element);
 		/// Set clipboard text.
 		void SetClipboardText(const String& text);
-		/// Set CEGui element double click interval in seconds.
+		/// Set Gui element double click interval in seconds.
 		void SetDoubleClickInterval(float interval);
 		/// Set max screen distance in pixels between double click clicks.
 		void SetMaxDoubleClickDistance(float distPixels);
-		/// Set CEGui drag event start interval in seconds.
+		/// Set Gui drag event start interval in seconds.
 		void SetDragBeginInterval(float interval);
-		/// Set CEGui drag event start distance threshold in pixels.
+		/// Set Gui drag event start distance threshold in pixels.
 		void SetDragBeginDistance(int pixels);
 		/// Set tooltip default display delay in seconds.
 		void SetDefaultToolTipDelay(float delay);
@@ -128,18 +122,18 @@ namespace Urho3D
 		void SetFontSubpixelThreshold(float threshold);
 		/// Set the oversampling (horizonal stretching) used to improve subpixel font rendering. Only affects fonts smaller than the subpixel limit.
 		void SetFontOversampling(int oversampling);
-		/// Set %CEGui scale. 1.0 is default (pixel perfect). Resize the root element to match.
+		/// Set %Gui scale. 1.0 is default (pixel perfect). Resize the root element to match.
 		void SetScale(float scale);
-		/// Scale %CEGui to the specified width in pixels.
+		/// Scale %Gui to the specified width in pixels.
 		void SetWidth(float width);
-		/// Scale %CEGui to the specified height in pixels.
+		/// Scale %Gui to the specified height in pixels.
 		void SetHeight(float height);
 		/// Set custom size of the root element. This disables automatic resizing of the root element according to window size. Set custom size 0,0 to return to automatic resizing.
 		void SetCustomSize(const IntVector2& size);
 		/// Set custom size of the root element.
 		void SetCustomSize(int width, int height);
 
-		/// Return root CEGui element.
+		/// Return root Gui element.
 // 		UIElement* GetRoot() const { return rootElement_; }
 // 
 // 		/// Return root modal element.
@@ -150,9 +144,9 @@ namespace Urho3D
 
 		/// Return cursor position.
 		IntVector2 GetCursorPosition() const;
-		/// Return CEGui element at global screen coordinates. By default returns only input-enabled elements.
+		/// Return Gui element at global screen coordinates. By default returns only input-enabled elements.
 // 		UIElement* GetElementAt(const IntVector2& position, bool enabledOnly = true);
-// 		/// Return CEGui element at global screen coordinates. By default returns only input-enabled elements.
+// 		/// Return Gui element at global screen coordinates. By default returns only input-enabled elements.
 // 		UIElement* GetElementAt(int x, int y, bool enabledOnly = true);
 // 		/// Get a child element at element's screen position relative to specified root element.
 // 		UIElement* GetElementAt(UIElement* root, const IntVector2& position, bool enabledOnly = true);
@@ -173,16 +167,16 @@ namespace Urho3D
 		/// Return clipboard text.
 		const String& GetClipboardText() const;
 
-		/// Return CEGui element double click interval in seconds.
+		/// Return Gui element double click interval in seconds.
 		float GetDoubleClickInterval() const { return doubleClickInterval_; }
 
 		/// Get max screen distance in pixels for double clicks to register. 
 		float GetMaxDoubleClickDistance() const { return maxDoubleClickDist_; }
 
-		/// Return CEGui drag start event interval in seconds.
+		/// Return Gui drag start event interval in seconds.
 		float GetDragBeginInterval() const { return dragBeginInterval_; }
 
-		/// Return CEGui drag start event distance threshold in pixels.
+		/// Return Gui drag start event distance threshold in pixels.
 		int GetDragBeginDistance() const { return dragBeginDistance_; }
 
 		/// Return tooltip default display delay in seconds.
@@ -215,13 +209,13 @@ namespace Urho3D
 		/// Get the oversampling (horizonal stretching) used to improve subpixel font rendering. Only affects fonts smaller than the subpixel limit.
 		int GetFontOversampling() const { return fontOversampling_; }
 
-		/// Return true when CEGui has modal element(s).
+		/// Return true when Gui has modal element(s).
 		bool HasModalElement() const;
 
 		/// Return whether a drag is in progress.
 		bool IsDragging() const { return dragConfirmedCount_ > 0; };
 
-		/// Return current CEGui scale.
+		/// Return current Gui scale.
 		float GetScale() const { return uiScale_; }
 
 		/// Return root element custom size. Returns 0,0 when custom size is not being used and automatic resizing according to window size is in use instead (default.)
@@ -246,48 +240,45 @@ namespace Urho3D
 			/// Drag start position.
 			IntVector2 dragBeginSumPos;
 		};
-
-		String getDataPathPrefix() const { return d_dataPathPrefix; }
-		void initDataPathPrefix(const String &override);
 	private:
-		void updateFPS(const float elapsed);
-		void updateLogo(const float elapsed);
-		void updateLogoGeometry();
-		void updateFPSGeometry();
-		void updateLogoGeometryRotation();
-		CEGUI::InputAggregator* getCurrentInputAggregator();
-		//! event handler function that draws the logo and FPS overlay elements.
-		bool sampleBrowserOverlayHandler(const CEGUI::EventArgs& args);
-		//! event handler function that draws the FPS overlay elements.
-		bool sampleOverlayHandler(const CEGUI::EventArgs& args);
-		//! event handler function called when main view is resized
-		bool resizeHandler(const CEGUI::EventArgs& args);
-		void initialiseResourceGroupDirectories();
-		void initialiseDefaultResourceGroups();
-		bool injectKeyDown(const CEGUI::Key::Scan& ceguiKey);
-		bool injectKeyUp(const CEGUI::Key::Scan& ceguiKey);
-		bool injectChar(int character);
-		bool injectMouseButtonDown(const CEGUI::MouseButton& ceguiMouseButton);
-		bool injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton);
-		bool injectMouseWheelChange(float position);
-		bool injectMousePosition(float x, float y);
+// 		void updateFPS(const float elapsed);
+// 		void updateLogo(const float elapsed);
+// 		void updateLogoGeometry();
+// 		void updateFPSGeometry();
+// 		void updateLogoGeometryRotation();
+// 		CEGUI::InputAggregator* getCurrentInputAggregator();
+// 		//! event handler function that draws the logo and FPS overlay elements.
+// 		bool sampleBrowserOverlayHandler(const CEGUI::EventArgs& args);
+// 		//! event handler function that draws the FPS overlay elements.
+// 		bool sampleOverlayHandler(const CEGUI::EventArgs& args);
+// 		//! event handler function called when main view is resized
+// 		bool resizeHandler(const CEGUI::EventArgs& args);
+// 		void initialiseResourceGroupDirectories();
+// 		void initialiseDefaultResourceGroups();
+// 		bool injectKeyDown(const CEGUI::Key::Scan& ceguiKey);
+// 		bool injectKeyUp(const CEGUI::Key::Scan& ceguiKey);
+// 		bool injectChar(int character);
+// 		bool injectMouseButtonDown(const CEGUI::MouseButton& ceguiMouseButton);
+// 		bool injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton);
+// 		bool injectMouseWheelChange(float position);
+// 		bool injectMousePosition(float x, float y);
 
 		// Urho3D proxy
 		void OnMouseButtonDown(MouseButton mouseButtons);
 		void OnMouseButtonUp(MouseButton mouseButtons);
 		/// Initialize when screen mode initially set.
 		void Initialize();
-		/// Update CEGui element logic recursively.
+		/// Update Gui element logic recursively.
 // 		void Update(float timeStep, UIElement* element);
-// 		/// Upload CEGui geometry into a vertex buffer.
+// 		/// Upload Gui geometry into a vertex buffer.
 // 		void SetVertexData(VertexBuffer* dest, const PODVector<float>& vertexData);
-// 		/// Render CEGui batches to the current rendertarget. Geometry must have been uploaded first.
+// 		/// Render Gui batches to the current rendertarget. Geometry must have been uploaded first.
 // 		void Render(VertexBuffer* buffer, const PODVector<UIBatch>& batches, unsigned batchStart, unsigned batchEnd);
-// 		/// Generate batches from an CEGui element recursively. Skip the cursor element.
+// 		/// Generate batches from an Gui element recursively. Skip the cursor element.
 // 		void GetBatches(PODVector<UIBatch>& batches, PODVector<float>& vertexData, UIElement* element, IntRect currentScissor);
-// 		/// Return CEGui element at global screen coordinates. Return position converted to element's screen coordinates.
+// 		/// Return Gui element at global screen coordinates. Return position converted to element's screen coordinates.
 // 		UIElement* GetElementAt(const IntVector2& position, bool enabledOnly, IntVector2* elementScreenPosition);
-// 		/// Return CEGui element at screen position recursively.
+// 		/// Return Gui element at screen position recursively.
 // 		void GetElementAt(UIElement*& result, UIElement* current, const IntVector2& position, bool enabledOnly);
 // 		/// Return the first element in hierarchy that can alter focus.
 // 		UIElement* GetFocusableElement(UIElement* element);
@@ -305,11 +296,11 @@ namespace Urho3D
 		void ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/);
 		/// Handle mouse or touch move.
 		void ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/);
-		/// Send a CEGui element drag or hover begin event.
-// 		void SendDragOrHoverEvent(StringHash eventType, UIElement* element, const IntVector2& screenPos, const IntVector2& deltaPos, CEGui::DragData* dragData);
-// 		/// Send a CEGui click event.
+		/// Send a Gui element drag or hover begin event.
+// 		void SendDragOrHoverEvent(StringHash eventType, UIElement* element, const IntVector2& screenPos, const IntVector2& deltaPos, Gui::DragData* dragData);
+// 		/// Send a Gui click event.
 // 		void SendClickEvent(StringHash eventType, UIElement* beginElement, UIElement* endElement, const IntVector2& pos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers);
-// 		/// Send a CEGui double click event
+// 		/// Send a Gui double click event
 // 		void SendDoubleClickEvent(UIElement* beginElement, UIElement* endElement, const IntVector2& firstPos, const IntVector2& secondPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers);
 		/// Handle screen mode event.
 		void HandleScreenMode(StringHash eventType, VariantMap& eventData);
@@ -346,35 +337,35 @@ namespace Urho3D
 		/// Handle clean up on a drag cancel.
 		void ProcessDragCancel();
 		/// Sum touch positions and return the begin position ready to send.
-		IntVector2 SumTouchPositions(CEGui::DragData* dragData, const IntVector2& oldSendPos);
+		IntVector2 SumTouchPositions(Gui::DragData* dragData, const IntVector2& oldSendPos);
 		/// Resize root element to effective size.
 		void ResizeRootElement();
-		/// Return effective size of the root element, according to CEGui scale and resolution / custom size.
+		/// Return effective size of the root element, according to Gui scale and resolution / custom size.
 		IntVector2 GetEffectiveRootElementSize(bool applyScale = true) const;
 
 // 		/// Graphics subsystem.
 // 		WeakPtr<Graphics> graphics_;
-// 		/// CEGui root element.
+// 		/// Gui root element.
 // 		SharedPtr<UIElement> rootElement_;
-// 		/// CEGui root modal element.
+// 		/// Gui root modal element.
 // 		SharedPtr<UIElement> rootModalElement_;
 // 		/// Cursor.
 // 		SharedPtr<Cursor> cursor_;
 // 		/// Currently focused element.
 // 		WeakPtr<UIElement> focusElement_;
-// 		/// CEGui rendering batches.
+// 		/// Gui rendering batches.
 // 		PODVector<UIBatch> batches_;
-// 		/// CEGui rendering vertex data.
+// 		/// Gui rendering vertex data.
 // 		PODVector<float> vertexData_;
-// 		/// CEGui rendering batches for debug draw.
+// 		/// Gui rendering batches for debug draw.
 // 		PODVector<UIBatch> debugDrawBatches_;
-// 		/// CEGui rendering vertex data for debug draw.
+// 		/// Gui rendering vertex data for debug draw.
 // 		PODVector<float> debugVertexData_;
-// 		/// CEGui vertex buffer.
+// 		/// Gui vertex buffer.
 // 		SharedPtr<VertexBuffer> vertexBuffer_;
-// 		/// CEGui debug geometry vertex buffer.
+// 		/// Gui debug geometry vertex buffer.
 // 		SharedPtr<VertexBuffer> debugVertexBuffer_;
-// 		/// CEGui element query vector.
+// 		/// Gui element query vector.
 // 		PODVector<UIElement*> tempElements_;
 		/// Clipboard text.
 		mutable String clipBoard_;
@@ -414,13 +405,13 @@ namespace Urho3D
 		float fontSubpixelThreshold_;
 		/// Horizontal oversampling for subpixel fonts (default is 2).
 		int fontOversampling_;
-		/// Flag for CEGui already being rendered this frame.
+		/// Flag for Gui already being rendered this frame.
 		bool uiRendered_;
 		/// Non-modal batch size (used internally for rendering).
 		unsigned nonModalBatchSize_;
 		/// Timer used to trigger double click.
 		Timer clickTimer_;
-		/// CEGui element last clicked for tracking double clicks.
+		/// Gui element last clicked for tracking double clicks.
 //		WeakPtr<UIElement> doubleClickElement_;
 		/// Screen position of first mouse click for double click distance checking.
 		IntVector2 doubleClickFirstPos_;
@@ -434,42 +425,20 @@ namespace Urho3D
 		int dragElementsCount_;
 		/// Number of elements in dragElements_ with dragPending = false.
 		int dragConfirmedCount_;
-		/// CEGui elements that are being touched with touch input.
+		/// Gui elements that are being touched with touch input.
 // 		HashMap<WeakPtr<UIElement>, MouseButtonFlags> touchDragElements_;
 // 		/// Confirmed drag elements cache.
 // 		Vector<UIElement*> dragElementsConfirmed_;
-		/// Current scale of CEGui.
+		/// Current scale of Gui.
 		float uiScale_;
 		/// Root element custom size. 0,0 for automatic resizing (default.)
 		IntVector2 customSize_;
 		/// Elements that should be rendered to textures.
 		//HashMap<UIElement*, RenderToTextureData> renderToTexture_;
-
-		//! Renderer to use.  This MUST be set in the subclass constructor.
-		CEGUI::Renderer* d_renderer;
-		//! ImageCodec to use.  Set in subclass constructor, may be 0.
-		CEGUI::ImageCodec* d_imageCodec;
-		//! ResourceProvider to use.  Set in subclass constructor, may be 0.
-		CEGUI::ResourceProvider* d_resourceProvider;
-		//! GeometryBuffer used for drawing the spinning CEGUI logo
-		std::vector<CEGUI::GeometryBuffer*> d_logoGeometry;
-		//! GeometryBuffers used for drawing the FPS value.
-		std::vector<CEGUI::GeometryBuffer*> d_FPSGeometry;
-		static const char DATAPATH_VAR_NAME[];
-		//CEGUI::String d_dataPathPrefix;
-		String d_dataPathPrefix;
-		//! Fraction of second elapsed (used for counting frames per second).
-		float d_FPSElapsed;
-		//! Number of frames drawn so far.
-		int d_FPSFrames;
-		//! Last changed FPS value.
-		int d_FPSValue;
-		//! whether to spin the logo
-		bool d_spinLogo;
-		CEGUI::InputAggregator*         d_systemInputAggregator{ nullptr };
+		std::unique_ptr<CEGui> gui_impl_;
 	};
 
-	/// Register CEGui library objects.
+	/// Register Gui library objects.
 	void URHO3D_API RegisterUILibrary(Context* context);
 
 }
