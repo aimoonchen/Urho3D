@@ -6,8 +6,8 @@
 
 #include "glm/glm.hpp"
 
-#include "Urho3D/Urho3D.h"
-#include "Urho3D/Container/Ptr.h"
+#include "Urho3D.h"
+#include "Container/Ptr.h"
 
 namespace Urho3D
 {

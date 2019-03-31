@@ -5,9 +5,9 @@
 #include "CEGUI/Logger.h"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "Urho3D/Math/Matrix4.h"
-#include "Urho3D/Graphics/RenderSurface.h"
-#include "Urho3D/Graphics/Graphics.h"
+#include "Math/Matrix4.h"
+#include "Graphics/RenderSurface.h"
+#include "Graphics/Graphics.h"
 
 #include "GeometryBuffer.h"
 #include "TextureTarget.h"
@@ -544,7 +544,7 @@ namespace CEGUI
 	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics)
 	{
 		checkUrho3DInitialised();
-		g_graphics = graphics;
+		g_graphics = d_graphics = graphics;
 // 		// get auto created window
 // 		Ogre::RenderWindow* rwnd = d_pimpl->d_ogreRoot->getAutoCreatedWindow();
 // 		if (!rwnd)
@@ -559,7 +559,7 @@ namespace CEGUI
 	Urho3DRenderer::Urho3DRenderer(Urho3D::Graphics* graphics, Urho3D::RenderSurface& target)
 	{
 		checkUrho3DInitialised();
-		g_graphics = graphics;
+		g_graphics = d_graphics = graphics;
 		constructor_impl(/*target*/);
 	}
 

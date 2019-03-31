@@ -439,6 +439,6 @@ class CEGui;
 	};
 
 	/// Register Gui library objects.
-	void URHO3D_API RegisterUILibrary(Context* context);
+	//void URHO3D_API RegisterUILibrary(Context* context);
 
 }

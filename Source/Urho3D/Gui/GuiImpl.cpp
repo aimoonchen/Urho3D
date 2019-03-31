@@ -1,4 +1,4 @@
-#include "CEGui.h"
+#include "GuiImpl.h"
 
 #include "CEGUI/System.h"
 #include "CEGUI/DefaultResourceProvider.h"
@@ -17,6 +17,8 @@
 #include "CEGUI/FontManager.h"
 #include "CEGUI/InputAggregator.h"
 
+#include "CEGUIRenderer/Renderer.h"
+
 namespace Urho3D {
 
 #ifndef CEGUI_SAMPLE_DATAPATH
@@ -25,15 +27,17 @@ namespace Urho3D {
 
 const char CEGui::DATAPATH_VAR_NAME[] = "CEGUI_SAMPLE_DATAPATH";
 
-void CEGui::Initialize()
+CEGui::CEGui()
 {
-	// 		auto* graphics = GetSubsystem<Graphics>();
-	// 
-	// 		if (!graphics || !graphics->IsInitialized())
-	// 			return;
+	
+}
 
+void CEGui::Initialize(Graphics* graphics)
+{
 	CEGUI::String logFile{ "CEGUI.log" };
 	String dataPathPrefixOverride;
+
+	d_renderer = &CEGUI::Urho3DRenderer::create(graphics);
 
 	if (!d_renderer)
 		throw CEGUI::InvalidRequestException("CEGuiBaseApplication::run: Base application subclass did not create Renderer!");

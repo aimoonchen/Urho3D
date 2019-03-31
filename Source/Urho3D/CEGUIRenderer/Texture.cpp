@@ -3,13 +3,13 @@
 #include "CEGUI/System.h"
 #include "ImageCodec.h"
 
-#include "Urho3D/Container/Str.h"
-#include "Urho3D/Core/Context.h"
-#include "Urho3D/Resource/ResourceCache.h"
-#include "Urho3D/IO/MemoryBuffer.h"
-#include "Urho3D/Resource/Image.h"
-#include "Urho3D/Graphics/Texture2D.h"
-#include "Urho3D/Graphics/Graphics.h"
+#include "Container/Str.h"
+#include "Core/Context.h"
+#include "Resource/ResourceCache.h"
+#include "IO/MemoryBuffer.h"
+#include "Resource/Image.h"
+#include "Graphics/Texture2D.h"
+#include "Graphics/Graphics.h"
 
 #include <cstdint>
 

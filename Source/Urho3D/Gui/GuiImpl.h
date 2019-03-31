@@ -14,10 +14,15 @@ class InputAggregator;
 
 namespace Urho3D {
 
+class Graphics;
+
 class CEGui
 {
 public:
-	void Initialize();
+	CEGui();
+
+public:
+	void Initialize(Graphics* graphics);
 	void Update(float timeStep);
 	void Render();
 	void Clear();

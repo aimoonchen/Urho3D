@@ -3,8 +3,8 @@
 #include "CEGUI/Sizef.h"
 #include "CEGUI/Config.h"
 
-#include "Urho3D/Urho3D.h"
-#include "Urho3D/Container/Ptr.h"
+#include "Urho3D.h"
+#include "Container/Ptr.h"
 #include <vector>
 #include <unordered_map>
 

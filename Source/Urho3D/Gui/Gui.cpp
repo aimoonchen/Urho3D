@@ -45,7 +45,7 @@
 #include "CEGUI/InputEvent.h"
 
 #include "Gui.h"
-#include "CEGui.h"
+#include "GuiImpl.h"
 
 // #include "../Gui/UIEvents.h"
 // #include "../Gui/Window.h"
@@ -64,18 +64,18 @@ namespace Urho3D
 		return static_cast<MouseButton>(1u << static_cast<MouseButtonFlags::Integer>(id)); // NOLINT(misc-misplaced-widening-cast)
 	}
 
-	StringHash VAR_ORIGIN("Origin");
-	const StringHash VAR_ORIGINAL_PARENT("OriginalParent");
-	const StringHash VAR_ORIGINAL_CHILD_INDEX("OriginalChildIndex");
-	const StringHash VAR_PARENT_CHANGED("ParentChanged");
-
+// 	StringHash VAR_ORIGIN("Origin");
+// 	const StringHash VAR_ORIGINAL_PARENT("OriginalParent");
+// 	const StringHash VAR_ORIGINAL_CHILD_INDEX("OriginalChildIndex");
+// 	const StringHash VAR_PARENT_CHANGED("ParentChanged");
+// 
 	const float DEFAULT_DOUBLECLICK_INTERVAL = 0.5f;
 	const float DEFAULT_DRAGBEGIN_INTERVAL = 0.5f;
 	const float DEFAULT_TOOLTIP_DELAY = 0.5f;
 	const int DEFAULT_DRAGBEGIN_DISTANCE = 5;
 	const int DEFAULT_FONT_TEXTURE_MAX_SIZE = 2048;
-
-	const char* UI_CATEGORY = "Gui";
+// 
+// 	const char* UI_CATEGORY = "Gui";
 
 	static CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key)
 	{
@@ -190,7 +190,7 @@ namespace Urho3D
 // 		rootModalElement_->SetTraversalMode(TM_DEPTH_FIRST);
 
 		// Register Gui library object factories
-		RegisterUILibrary(context_);
+		//RegisterUILibrary(context_);
 
 		SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(Gui, HandleScreenMode));
 		SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(Gui, HandleMouseButtonDown));
@@ -989,7 +989,7 @@ namespace Urho3D
 
 		URHO3D_PROFILE(InitUI);
 
-		gui_impl_->Initialize();
+		gui_impl_->Initialize(graphics);
 
 // 		graphics_ = graphics;
 // 		UIBatch::posAdjust = Vector3(Graphics::GetPixelUVOffset(), 0.0f);
@@ -1836,8 +1836,8 @@ namespace Urho3D
 // 		}
 // 	}
 
-	void RegisterUILibrary(Context* context)
-	{
+// 	void RegisterUILibrary(Context* context)
+// 	{
 // 		Font::RegisterObject(context);
 // 
 // 		UIElement::RegisterObject(context);
@@ -1863,7 +1863,7 @@ namespace Urho3D
 // 		ProgressBar::RegisterObject(context);
 // 		ToolTip::RegisterObject(context);
 // 		UIComponent::RegisterObject(context);
-	}
+// 	}
 
 
 	void Gui::OnMouseButtonDown(MouseButton mouseButtons)

@@ -63,5 +63,5 @@ private:
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 private:
-	std::unique_ptr<Gui> gui_;
+	//std::unique_ptr<Gui> gui_;
 };

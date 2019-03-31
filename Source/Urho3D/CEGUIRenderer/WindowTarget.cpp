@@ -1,5 +1,5 @@
 #include "WindowTarget.h"
-#include "Urho3D/Graphics/RenderSurface.h"
+#include "Graphics/RenderSurface.h"
 
 namespace CEGUI
 {

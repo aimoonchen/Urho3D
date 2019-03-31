@@ -1,6 +1,6 @@
 #pragma once
 #include "RenderTarget.h"
-#include "Urho3D/Urho3D.h"
+#include "Urho3D.h"
 
 namespace CEGUI
 {

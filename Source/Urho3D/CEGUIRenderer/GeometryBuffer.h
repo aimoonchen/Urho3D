@@ -4,9 +4,9 @@
 #include "ShaderWrapper.h"
 #include "CEGUI/Rectf.h"
 
-#include "Urho3D/Urho3D.h"
-#include "Urho3D/Container/Ptr.h"
-#include "Urho3D/Graphics/VertexBuffer.h"
+#include "Urho3D.h"
+#include "Container/Ptr.h"
+#include "Graphics/VertexBuffer.h"
 
 namespace Urho3D
 {

@@ -1,6 +1,6 @@
 #pragma once
 #include "CEGUI/ImageCodec.h"
-#include "Urho3D/Urho3D.h"
+#include "Urho3D.h"
 namespace CEGUI
 {
 	class URHO3D_API Urho3DImageCodec : public ImageCodec

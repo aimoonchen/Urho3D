@@ -26,7 +26,7 @@
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
-#include <Urho3D/Gui/Gui.h>
+//#include <Urho3D/Gui/Gui.h>
 
 #include "HelloWorld.h"
 
@@ -56,7 +56,7 @@ void HelloWorld::Start()
     // Set the mouse mode to use in the sample
     Sample::InitMouseMode(MM_FREE);
 
-	gui_ = std::make_unique<Gui>(context_);
+	//gui_ = std::make_unique<Gui>(context_);
 	//gui_->init(nullptr, "CEGUI.log", CEGUI::String());
 }
 

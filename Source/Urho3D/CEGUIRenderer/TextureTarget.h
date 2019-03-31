@@ -1,7 +1,7 @@
 #pragma once
 #include "CEGUI/TextureTarget.h"
 #include "RenderTarget.h"
-#include "Urho3D/Urho3D.h"
+#include "Urho3D.h"
 
 namespace Urho3D
 {

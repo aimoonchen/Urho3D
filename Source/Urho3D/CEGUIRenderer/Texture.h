@@ -1,8 +1,9 @@
 #pragma once
 #include "CEGUI/Texture.h"
 #include "Renderer.h"
-#include "Urho3D/Urho3D.h"
-#include "Urho3D/Container/Ptr.h"
+#include "Urho3D.h"
+#include "Container/Ptr.h"
+#include "Graphics/Texture2D.h"
 
 namespace Urho3D
 {

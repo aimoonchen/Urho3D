@@ -1,10 +1,10 @@
 #include "ShaderWrapper.h"
 #include "CEGUI/ShaderParameterBindings.h"
 #include "CEGUI/Exceptions.h"
-#include "Urho3D/Core/Context.h"
-#include "Urho3D/Core/Timer.h"
-#include "Urho3D/Graphics/Graphics.h"
-#include "Urho3D/Graphics/Texture2D.h"
+#include "Core/Context.h"
+#include "Core/Timer.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/Texture2D.h"
 #include "Texture.h"
 
 namespace CEGUI

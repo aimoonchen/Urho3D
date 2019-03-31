@@ -3,7 +3,7 @@
 #include "glm/gtc/quaternion.hpp"
 #include "glm/gtc/type_ptr.hpp"
 
-#include "Urho3D/Graphics/Graphics.h"
+#include "Graphics/Graphics.h"
 
 #include "CEGUI/Vertex.h"
 #include "CEGUI/RenderEffect.h"
