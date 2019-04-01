@@ -37,8 +37,8 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTextureTarget::clear()
 	{
-// 		if (!d_viewportValid)
-// 			updateViewport();
+		if (!d_viewportValid)
+			updateViewport();
 // 
 // 		Ogre::Viewport* const saved_vp = d_renderSystem._getViewport();
 // 

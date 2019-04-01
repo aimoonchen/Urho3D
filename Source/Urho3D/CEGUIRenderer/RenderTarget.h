@@ -34,7 +34,7 @@ namespace CEGUI
 			This function is deprecated and will be removed or changed considerably
 			in future releases.
 		*/
-		void setOgreViewportDimensions(const Rectf& area);
+		void setUrho3DViewportDimensions(const Rectf& area);
 
 		// implement parts of CEGUI::RenderTarget interface
 		virtual void activate();
@@ -49,19 +49,19 @@ namespace CEGUI
 		//! helper that initialises the viewport
 		void updateViewport();
 		//! helper to update the actual Ogre viewport dimensions
-		void updateOgreViewportDimensions(const Urho3D::RenderSurface* const rt);
+		void updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt);
 
 		//! Urho3DRenderer object that owns this RenderTarget
 		Urho3DRenderer& d_owner;
 		//! Urho3D RendererSystem used to affect the rendering process
-		Urho3D::Graphics& d_renderSystem;
+		Urho3D::Graphics& d_graphics;
 		//! Urho3D render target that we are effectively wrapping
 		Urho3D::RenderSurface* d_renderTarget{ nullptr };
 
 		//! Urho3D viewport used for this target.
 		Urho3D::Viewport* d_viewport{ nullptr };
 		//! holds set Ogre viewport dimensions
-		Rectf d_ogreViewportDimensions{ 0, 0, 0, 0 };
+		Rectf d_urho3DViewportDimensions{ 0, 0, 0, 0 };
 
 		//! true when d_viewport is up to date and valid.
 		//! \version Beginning from Ogre 2.0 this indicates whether the workspace is

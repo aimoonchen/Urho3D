@@ -6,10 +6,12 @@
 #include <glm/gtc/type_ptr.hpp>
 #include <glm/gtc/matrix_transform.hpp>
 
+#include "Graphics/Graphics.h"
+
 namespace CEGUI
 {
 	Urho3DRenderTarget::Urho3DRenderTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs)
-		: d_owner{ owner }, d_renderSystem{ rs }
+		: d_owner{ owner }, d_graphics{ rs }
 	{
 	}
 
@@ -18,18 +20,18 @@ namespace CEGUI
 		delete d_viewport;
 	}
 
-	void Urho3DRenderTarget::setOgreViewportDimensions(const Rectf& area)
+	void Urho3DRenderTarget::setUrho3DViewportDimensions(const Rectf& area)
 	{
-// 		d_ogreViewportDimensions = area;
-// 
-// 		if (d_viewport)
-// 			updateOgreViewportDimensions(d_viewport->getTarget());
-// 
-// 		d_viewportValid = false;
+		d_urho3DViewportDimensions = area;
+
+		if (true/*d_viewport*/)
+			updateUrho3DViewportDimensions(nullptr/*d_viewport->getTarget()*/);
+
+		d_viewportValid = false;
 	}
 
 
-	void Urho3DRenderTarget::updateOgreViewportDimensions(const Urho3D::RenderSurface* const rt)
+	void Urho3DRenderTarget::updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt)
 	{
 // 		if (rt)
 // 		{
@@ -40,16 +42,20 @@ namespace CEGUI
 // 					d_ogreViewportDimensions.getWidth() / rt->getWidth(),
 // 					d_ogreViewportDimensions.getHeight() / rt->getHeight());
 // 		}
+		d_graphics.SetViewport({static_cast<int>(d_urho3DViewportDimensions.left()),
+			static_cast<int>(d_urho3DViewportDimensions.top()),
+			static_cast<int>(d_urho3DViewportDimensions.right()),
+			static_cast<int>(d_urho3DViewportDimensions.bottom())});
 	}
 
 
 	void Urho3DRenderTarget::activate()
 	{
-// 		if (!RenderTarget::d_matrixValid)
-// 			updateMatrix();
-// 
-// 		if (!d_viewportValid)
-// 			updateViewport();
+		if (!RenderTarget::d_matrixValid)
+			updateMatrix();
+
+		if (!d_viewportValid)
+			updateViewport();
 // 
 // 		d_renderSystem._setViewport(d_viewport);
 // 
@@ -60,7 +66,7 @@ namespace CEGUI
 // 		d_owner.initialiseRenderStateSettings();
 // #endif
 // 
-// 		RenderTarget::activate();
+ 		RenderTarget::activate();
 	}
 
 
@@ -152,12 +158,12 @@ namespace CEGUI
 // 			d_viewport = OGRE_NEW Ogre::Viewport(0, d_renderTarget, 0, 0, 1, 1, 0);
 // #endif // CEGUI_USE_OGRE_COMPOSITOR2
 // 
-// 			updateOgreViewportDimensions(d_renderTarget);
+ 			updateUrho3DViewportDimensions(d_renderTarget);
 // 		}
 // 
 // 		d_viewport->_updateDimensions();
 // 
-// 		d_viewportValid = true;
+ 		d_viewportValid = true;
 	}
 
 
@@ -169,7 +175,7 @@ namespace CEGUI
 
 	void Urho3DRenderTarget::setArea(const Rectf& area)
 	{
-		setOgreViewportDimensions(area);
+		setUrho3DViewportDimensions(area);
 
 		RenderTarget::setArea(area);
 	}
