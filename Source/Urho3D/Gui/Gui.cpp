@@ -205,6 +205,8 @@ namespace Urho3D
 		SubscribeToEvent(E_TEXTINPUT, URHO3D_HANDLER(Gui, HandleTextInput));
 //		SubscribeToEvent(E_DROPFILE, URHO3D_HANDLER(Gui, HandleDropFile));
 
+		gui_impl_ = std::make_unique<CEGui>();
+
 		// Try to initialize right now, but skip if screen mode is not yet set
 		Initialize();
 	}

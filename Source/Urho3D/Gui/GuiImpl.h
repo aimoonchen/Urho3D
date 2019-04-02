@@ -53,11 +53,11 @@ private:
 protected:
 private:
 	//! Renderer to use.  This MUST be set in the subclass constructor.
-	CEGUI::Renderer* d_renderer;
+	CEGUI::Renderer* d_renderer{ nullptr };
 	//! ImageCodec to use.  Set in subclass constructor, may be 0.
-	CEGUI::ImageCodec* d_imageCodec;
+	CEGUI::ImageCodec* d_imageCodec{ nullptr };
 	//! ResourceProvider to use.  Set in subclass constructor, may be 0.
-	CEGUI::ResourceProvider* d_resourceProvider;
+	CEGUI::ResourceProvider* d_resourceProvider{ nullptr };
 	//! GeometryBuffer used for drawing the spinning CEGUI logo
 	std::vector<CEGUI::GeometryBuffer*> d_logoGeometry;
 	//! GeometryBuffers used for drawing the FPS value.

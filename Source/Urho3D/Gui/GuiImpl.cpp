@@ -19,10 +19,21 @@
 
 #include "CEGUIRenderer/Renderer.h"
 
+#if defined(__WIN32__) || defined(_WIN32)
+#ifndef WIN32_LEAN_AND_MEAN
+#define WIN32_LEAN_AND_MEAN
+#endif
+#ifndef NOMINMAX
+#define NOMINMAX
+#endif
+#include <windows.h>
+#endif
+
 namespace Urho3D {
 
 #ifndef CEGUI_SAMPLE_DATAPATH
-#define CEGUI_SAMPLE_DATAPATH "../datafiles"
+//#define CEGUI_SAMPLE_DATAPATH "../datafiles"
+#define CEGUI_SAMPLE_DATAPATH "D:/cegui/datafiles"
 #endif
 
 const char CEGui::DATAPATH_VAR_NAME[] = "CEGUI_SAMPLE_DATAPATH";
