@@ -120,6 +120,10 @@ namespace animation
 		}
 		bool is_controlling_instance() const { return is_controlling_instance_; }
 		
+		void PushPropertiesTo(KeyframeModel* other) const;
+
+		std::string ToString() const;
+
 		void SetIsImplOnly();
 		bool is_impl_only() const { return is_impl_only_; }
 

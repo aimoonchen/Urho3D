@@ -312,6 +312,25 @@ namespace animation
 // 			other->total_paused_duration_ = total_paused_duration_;
 // 		}
 // 	}
+	void KeyframeModel::PushPropertiesTo(KeyframeModel* other) const {
+// 		other->element_id_ = element_id_;
+// 		if (run_state_ == KeyframeModel::PAUSED ||
+// 			other->run_state_ == KeyframeModel::PAUSED) {
+// 			other->run_state_ = run_state_;
+// 			other->pause_time_ = pause_time_;
+// 			other->total_paused_duration_ = total_paused_duration_;
+// 		}
+	}
+
+	std::string KeyframeModel::ToString() const {
+// 		return base::StringPrintf(
+// 			"KeyframeModel{id=%d, group=%d, target_property_id=%d, "
+// 			"run_state=%s}",
+// 			id_, group_, target_property_id_,
+// 			KeyframeModel::ToString(run_state_).c_str());
+		return "";
+	}
+
 	void KeyframeModel::SetIsImplOnly() {
 		is_impl_only_ = true;
 		// Impl only animations have a single instance which by definition is the

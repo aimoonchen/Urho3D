@@ -64,6 +64,17 @@ namespace animation
 		void NotifyKeyframeModelTakeover(const AnimationEvent& event);
 		bool NotifyKeyframeModelAborted(const AnimationEvent& event);
 
+		KeyframeModel* GetKeyframeModel(TargetProperty::Type target_property) const;
+		KeyframeModel* GetKeyframeModelById(int keyframe_model_id) const;
+
+		void MarkAbortedKeyframeModelsForDeletion(
+			KeyframeEffect* element_keyframe_effect_impl);
+		void PurgeKeyframeModelsMarkedForDeletion(bool impl_only);
+		void PushNewKeyframeModelsToImplThread(
+			KeyframeEffect* element_keyframe_effect_impl) const;
+		void RemoveKeyframeModelsCompletedOnMainThread(
+			KeyframeEffect* element_keyframe_effect_impl) const;
+
 		void PushPropertiesTo(KeyframeEffect* keyframe_effect_impl);
 
 		void SetAnimation(Animation* animation);
