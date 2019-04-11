@@ -16,6 +16,8 @@
 #define FLOATS_PER_TEXTURED     9
 #define FLOATS_PER_COLOURED     7
 
+static const unsigned UI_VERTEX_SIZE = 6;
+
 namespace CEGUI
 {
 	Urho3DGeometryBuffer::Urho3DGeometryBuffer(Urho3DRenderer& owner, Urho3D::Graphics& rs, CEGUI::RefCounted<RenderMaterial> renderMaterial)
@@ -118,6 +120,7 @@ namespace CEGUI
 	void Urho3DGeometryBuffer::appendGeometry(const float* vertex_data, std::size_t array_size)
 	{
 		GeometryBuffer::appendGeometry(vertex_data, array_size);
+		d_dataAppended = true;
 	}
 
 	void Urho3DGeometryBuffer::reset()
@@ -143,6 +146,22 @@ namespace CEGUI
 	{
 		if (!d_dataAppended)
 			return;
+
+		if (d_vertexBuffer.Null())
+		{
+			d_vertexBuffer = new Urho3D::VertexBuffer(d_graphics.GetContext());
+		}
+
+		if (d_vertexData.empty())
+			return;
+
+		// Update quad geometry into the vertex buffer
+		// Resize the vertex buffer first if too small or much too large
+		unsigned numVertices = d_vertexData.size() / UI_VERTEX_SIZE;
+		if (d_vertexBuffer->GetVertexCount() < numVertices || d_vertexBuffer->GetVertexCount() > numVertices * 2)
+			d_vertexBuffer->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+
+		d_vertexBuffer->SetData(&d_vertexData[0]);
 
 		d_dataAppended = false;
 	}

@@ -202,10 +202,10 @@ bool CEGui::sampleBrowserOverlayHandler(const CEGUI::EventArgs& args)
 	}
 
 	// draw FPS value
-	d_renderer->uploadBuffers(d_FPSGeometry);
-	const size_t fps_buffer_count = d_FPSGeometry.size();
-	for (size_t i = 0; i < fps_buffer_count; ++i)
-		d_FPSGeometry.at(i)->draw();
+// 	d_renderer->uploadBuffers(d_FPSGeometry);
+// 	const size_t fps_buffer_count = d_FPSGeometry.size();
+// 	for (size_t i = 0; i < fps_buffer_count; ++i)
+// 		d_FPSGeometry.at(i)->draw();
 
 	return true;
 }
@@ -326,6 +326,12 @@ void CEGui::Update(float timeStep)
 {
 	CEGUI::System& gui_system(CEGUI::System::getSingleton());
 	gui_system.injectTimePulse(timeStep);
+
+	// TODO: current context inject time pulse;
+	CEGUI::GUIContext& defaultGUIContext(CEGUI::System::getSingleton().getDefaultGUIContext());
+	defaultGUIContext.injectTimePulse(timeStep);
+
+	updateLogo(timeStep);
 }
 
 void CEGui::Render()
@@ -335,7 +341,7 @@ void CEGui::Render()
 	// 		d_sampleApp->update(static_cast<float>(elapsed));
 	// 
 	// 		updateFPS(elapsed);
-	// 		updateLogo(elapsed);
+	//		updateLogo(elapsed);
 	// 
 	// 		beginRendering(elapsed);
 

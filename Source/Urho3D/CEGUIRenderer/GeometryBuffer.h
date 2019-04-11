@@ -40,12 +40,13 @@ namespace CEGUI
 		//
 		void updateMatrix() const;
 		void syncVertexData() const;
+
 		Urho3DRenderer& d_owner;
 		Urho3D::Graphics& d_graphics;
 		//! model matrix cache
 		mutable glm::mat4 d_matrix;
 
-		Urho3D::SharedPtr<Urho3D::VertexBuffer> d_vertexBuffer{ nullptr };
+		mutable Urho3D::SharedPtr<Urho3D::VertexBuffer> d_vertexBuffer{ nullptr };
 
 		mutable bool d_dataAppended{ false };
 	};
