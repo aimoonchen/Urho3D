@@ -39,7 +39,12 @@ HelloWorld::HelloWorld(Context* context) :
     Sample(context)
 {
 }
-
+void HelloWorld::Setup()
+{
+	engineParameters_[EP_WINDOW_WIDTH] = 1280;
+	engineParameters_[EP_WINDOW_HEIGHT] = 720;
+	Sample::Setup();
+}
 void HelloWorld::Start()
 {
     // Execute base class startup

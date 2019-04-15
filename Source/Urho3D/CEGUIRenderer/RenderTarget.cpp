@@ -42,10 +42,16 @@ namespace CEGUI
 // 					d_ogreViewportDimensions.getWidth() / rt->getWidth(),
 // 					d_ogreViewportDimensions.getHeight() / rt->getHeight());
 // 		}
-		d_graphics.SetViewport({static_cast<int>(d_urho3DViewportDimensions.left()),
-			static_cast<int>(d_urho3DViewportDimensions.top()),
-			static_cast<int>(d_urho3DViewportDimensions.right()),
-			static_cast<int>(d_urho3DViewportDimensions.bottom())});
+
+// 		d_graphics.SetViewport({static_cast<int>(d_urho3DViewportDimensions.left() / 1280.0f),
+// 			static_cast<int>(d_urho3DViewportDimensions.top() / 720.0f),
+// 			static_cast<int>(d_urho3DViewportDimensions.right() / 1280.0f),
+// 			static_cast<int>(d_urho3DViewportDimensions.bottom() / 720.0f)});
+
+		d_graphics.SetViewport({ static_cast<int>(RenderTarget::d_area.left()),
+			   static_cast<int>(RenderTarget::d_area.top()),
+			   static_cast<int>(RenderTarget::d_area.getWidth()),
+			   static_cast<int>(RenderTarget::d_area.getHeight()) });
 	}
 
 
@@ -66,6 +72,8 @@ namespace CEGUI
 // 		d_owner.initialiseRenderStateSettings();
 // #endif
 // 
+		d_owner.setViewProjectionMatrix(RenderTarget::d_matrix);
+
  		RenderTarget::activate();
 	}
 
@@ -144,6 +152,42 @@ namespace CEGUI
 // 			RenderTarget::updateMatrix(RenderTarget::createViewProjMatrixForDirect3D());
 // 		else
 // 			throw RendererException("An unsupported RenderSystem is being used by Ogre. Please contact the CEGUI team.");
+
+
+		//
+		Urho3D::RenderSurface* surface = d_graphics.GetRenderTarget(0);
+		Urho3D::IntVector2 viewSize = d_graphics.GetViewport().Size();
+		Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
+		Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
+		Urho3D::Vector2 offset(-1.0f, 1.0f);
+		float uiScale_ = 1.0f;
+		if (surface) {
+#ifdef URHO3D_OPENGL
+			// On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the
+			// same way as a render texture produced on Direct3D.
+			offset.y_ = -offset.y_;
+			scale.y_ = -scale.y_;
+#endif
+		}
+
+// 		Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
+// 		projection.m00_ = scale.x_ * uiScale_;
+// 		projection.m03_ = offset.x_;
+// 		projection.m11_ = scale.y_ * uiScale_;
+// 		projection.m13_ = offset.y_;
+// 		projection.m22_ = 1.0f;
+// 		projection.m23_ = 0.0f;
+// 		projection.m33_ = 1.0f;
+
+		glm::mat4 adjustMat{
+			glm::vec4{scale.x_ * uiScale_, 0.0f, 0.0f, offset.x_},
+			glm::vec4{0.0f, scale.y_ * uiScale_, 0.0f, offset.y_},
+			glm::vec4{0.0f, 0.0f, 1.0f, 0.0f},
+			glm::vec4{0.0f, 0.0f, 0.0f, 1.0f} };
+
+		auto vpm = RenderTarget::createViewProjMatrixForOpenGL();
+		
+		RenderTarget::updateMatrix(adjustMat * vpm);
 	}
 
 
@@ -179,4 +223,6 @@ namespace CEGUI
 
 		RenderTarget::setArea(area);
 	}
+
+
 }

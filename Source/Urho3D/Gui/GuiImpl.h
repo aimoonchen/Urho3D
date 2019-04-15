@@ -66,13 +66,13 @@ private:
 	//CEGUI::String d_dataPathPrefix;
 	String d_dataPathPrefix;
 	//! Fraction of second elapsed (used for counting frames per second).
-	float d_FPSElapsed;
+	float d_FPSElapsed{ 1.0f };
 	//! Number of frames drawn so far.
-	int d_FPSFrames;
+	int d_FPSFrames{ 0 };
 	//! Last changed FPS value.
-	int d_FPSValue;
+	int d_FPSValue{ 0 };
 	//! whether to spin the logo
-	bool d_spinLogo;
+	bool d_spinLogo{ false };
 	CEGUI::InputAggregator*         d_systemInputAggregator{ nullptr };
 };
 

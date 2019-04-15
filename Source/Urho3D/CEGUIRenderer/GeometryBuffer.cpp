@@ -44,6 +44,10 @@ namespace CEGUI
 		if (d_vertexBuffer.Null())
 			return;
 		
+
+		d_graphics.ClearParameterSources();
+		d_graphics.SetColorWrite(true);
+
 //		CEGUI::Rectf viewPort = d_owner.getActiveViewPort();
 		if (d_clippingActive) {
 // 			d_glStateChanger->scissor(static_cast<GLint>(d_preparedClippingRegion.left()),
@@ -74,6 +78,20 @@ namespace CEGUI
 
 		d_owner.setupRenderingBlendMode(d_blendMode);
 
+		Urho3D::RenderSurface* surface = d_graphics.GetRenderTarget(0);
+#ifdef URHO3D_OPENGL
+		// Reverse winding if rendering to texture on OpenGL
+		if (surface)
+			d_graphics.SetCullMode(Urho3D::CULL_CW);
+		else
+#endif
+		d_graphics.SetCullMode(Urho3D::CULL_CCW);
+		d_graphics.SetDepthTest(Urho3D::CMP_ALWAYS);
+		d_graphics.SetDepthWrite(false);
+		d_graphics.SetFillMode(Urho3D::FILL_SOLID);
+		d_graphics.SetStencilTest(false);
+		d_graphics.SetVertexBuffer(d_vertexBuffer);
+
 		auto shaderWrapper = static_cast<Urho3DShaderWrapper*>(const_cast<ShaderWrapper*>(d_renderMaterial->getShaderWrapper()));
 
 		const int pass_count = d_effect ? d_effect->getPassCount() : 1;
@@ -92,7 +110,7 @@ namespace CEGUI
 
 			//shaderWrapper->setRenderOperation(d_renderOp);
 			d_renderMaterial->prepareForRendering();
-
+			d_graphics.Draw(Urho3D::TRIANGLE_LIST, d_verticesVBOPosition, d_vertexCount);
 			// draw the geometry
 			//d_renderSystem._render(d_renderOp);
 		}
@@ -119,8 +137,55 @@ namespace CEGUI
 
 	void Urho3DGeometryBuffer::appendGeometry(const float* vertex_data, std::size_t array_size)
 	{
-		GeometryBuffer::appendGeometry(vertex_data, array_size);
+		auto cegui_vert_size = GeometryBuffer::getVertexAttributeElementCount();
+		auto vertcount = array_size / cegui_vert_size;
+		const float *psrc = vertex_data;
+		std::vector<float> temp_data;
+		auto urho3d_vert_size = getVertexAttributeElementCount();
+		temp_data.resize(vertcount * urho3d_vert_size);
+		float *pdst = &temp_data[0];
+		for (size_t i = 0; i < vertcount; i++) {
+			pdst[0] = psrc[0];
+			pdst[1] = psrc[1];
+			pdst[2] = psrc[2];
+			//
+			((unsigned&)pdst[3]) = Urho3D::Color{ psrc[3], psrc[4], psrc[5], psrc[6]}.ToUInt();
+			//
+			if (d_vertexAttributes.size() == 3) {
+				pdst[4] = psrc[7];
+				pdst[5] = psrc[8];
+			}
+			pdst += urho3d_vert_size;
+			psrc += cegui_vert_size;
+		}
+		GeometryBuffer::appendGeometry(&temp_data[0], temp_data.size());
 		d_dataAppended = true;
+	}
+	
+	int Urho3DGeometryBuffer::getVertexAttributeElementCount() const
+	{
+		int count = 0;
+
+		const unsigned int attribute_count = d_vertexAttributes.size();
+		for (unsigned int i = 0; i < attribute_count; ++i)
+		{
+			switch (d_vertexAttributes.at(i))
+			{
+			case VertexAttributeType::Position0:
+				count += 3;
+				break;
+			case VertexAttributeType::Colour0:
+				count += 1;
+				break;
+			case VertexAttributeType::TexCoord0:
+				count += 2;
+				break;
+			default:
+				break;
+			}
+		}
+
+		return count;
 	}
 
 	void Urho3DGeometryBuffer::reset()
@@ -147,8 +212,7 @@ namespace CEGUI
 		if (!d_dataAppended)
 			return;
 
-		if (d_vertexBuffer.Null())
-		{
+		if (d_vertexBuffer.Null()) {
 			d_vertexBuffer = new Urho3D::VertexBuffer(d_graphics.GetContext());
 		}
 

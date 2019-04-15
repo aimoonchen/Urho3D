@@ -33,7 +33,12 @@ namespace CEGUI
 		void appendGeometry(const float* vertex_data, std::size_t array_size) override;
 		void reset() override;
 
+		int getVertexAttributeElementCount() const override;
+
 		void finaliseVertexAttributes(MANUALOBJECT_TYPE type);
+
+		std::size_t d_verticesVBOPosition{ 0 };
+
 	protected:
 		void initialiseVertexBuffers();
 		void deinitialiseOpenGLBuffers();

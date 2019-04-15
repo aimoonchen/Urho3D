@@ -7,6 +7,8 @@
 #include "Graphics/Texture2D.h"
 #include "Texture.h"
 
+#include <glm/gtc/type_ptr.hpp>
+
 namespace CEGUI
 {
 	Urho3DShaderWrapper::Urho3DShaderWrapper(Urho3DRenderer& owner, Urho3D::Graphics& rs,
@@ -28,6 +30,8 @@ namespace CEGUI
 		const auto& shader_parameter_bindings = shaderParameterBindings->getShaderParameterBindings();
 		auto iter = shader_parameter_bindings.begin();
 		auto end = shader_parameter_bindings.end();
+
+		d_graphics.SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
 
 		while (iter != end) {
 			const CEGUI::ShaderParameter* parameter = iter->second;
@@ -64,11 +68,13 @@ namespace CEGUI
 			case ShaderParamType::Float: {
 				auto parameterFloat = static_cast<const CEGUI::ShaderParameterFloat*>(parameter);
 				//glUniform1f(location, parameterFloat->d_parameterValue);
+				d_graphics.SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
 			}
 			break;
 			case ShaderParamType::Matrix4X4: {
 				auto parameterMatrix = static_cast<const CEGUI::ShaderParameterMatrix*>(parameter);
 				//glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(parameterMatrix->d_parameterValue));
+				d_graphics.SetShaderParameter(Urho3D::VSP_VIEWPROJ, glm::value_ptr(parameterMatrix->d_parameterValue), 16);
 			}
 			break;
 			case ShaderParamType::Texture: {

@@ -44,7 +44,7 @@ public:
 
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
-
+	void Setup() override;
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
     String GetScreenJoystickPatchString() const override { return

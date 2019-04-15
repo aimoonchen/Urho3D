@@ -161,6 +161,7 @@ namespace CEGUI
 		auto utf8_str = String::convertUtf32ToUtf8(final_filename.c_str());
 
 		auto tex_ptr = cache->GetResource<Urho3D::Texture2D>(utf8_str.c_str());
+		tex_ptr->SetNumLevels(1);
 		setUrho3DTexture(Urho3D::SharedPtr<Urho3D::Texture2D>{ tex_ptr }, true);
 
 // 		// load file to memory via resource provider
