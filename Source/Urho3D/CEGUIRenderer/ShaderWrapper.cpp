@@ -74,7 +74,10 @@ namespace CEGUI
 			case ShaderParamType::Matrix4X4: {
 				auto parameterMatrix = static_cast<const CEGUI::ShaderParameterMatrix*>(parameter);
 				//glUniformMatrix4fv(location, 1, GL_FALSE, glm::value_ptr(parameterMatrix->d_parameterValue));
-				d_graphics.SetShaderParameter(Urho3D::VSP_VIEWPROJ, glm::value_ptr(parameterMatrix->d_parameterValue), 16);
+				//d_graphics.SetShaderParameter(Urho3D::VSP_VIEWPROJ, glm::value_ptr(parameterMatrix->d_parameterValue), 16);
+				Urho3D::Matrix4 mat{ glm::value_ptr(parameterMatrix->d_parameterValue) };
+				auto tran_mat = mat.Transpose();
+				d_graphics.SetShaderParameter(Urho3D::VSP_VIEWPROJ, tran_mat);
 			}
 			break;
 			case ShaderParamType::Texture: {

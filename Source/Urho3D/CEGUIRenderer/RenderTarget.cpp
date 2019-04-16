@@ -179,15 +179,15 @@ namespace CEGUI
 // 		projection.m23_ = 0.0f;
 // 		projection.m33_ = 1.0f;
 
-		glm::mat4 adjustMat{
-			glm::vec4{scale.x_ * uiScale_, 0.0f, 0.0f, offset.x_},
-			glm::vec4{0.0f, scale.y_ * uiScale_, 0.0f, offset.y_},
-			glm::vec4{0.0f, 0.0f, 1.0f, 0.0f},
-			glm::vec4{0.0f, 0.0f, 0.0f, 1.0f} };
-
-		auto vpm = RenderTarget::createViewProjMatrixForOpenGL();
+// 		glm::mat4 adjustMat{
+// 			glm::vec4{scale.x_ * uiScale_, 0.0f, 0.0f, offset.x_},
+// 			glm::vec4{0.0f, scale.y_ * uiScale_, 0.0f, offset.y_},
+// 			glm::vec4{0.0f, 0.0f, 1.0f, 0.0f},
+// 			glm::vec4{0.0f, 0.0f, 0.0f, 1.0f} };
+// 
+// 		auto vpm = RenderTarget::createViewProjMatrixForOpenGL();
 		
-		RenderTarget::updateMatrix(adjustMat * vpm);
+		RenderTarget::updateMatrix(/*adjustMat * vpm*/RenderTarget::createViewProjMatrixForOpenGL());
 	}
 
 

@@ -85,7 +85,8 @@ namespace CEGUI
 			d_graphics.SetCullMode(Urho3D::CULL_CW);
 		else
 #endif
-		d_graphics.SetCullMode(Urho3D::CULL_CCW);
+		//d_graphics.SetCullMode(Urho3D::CULL_CCW);
+		d_graphics.SetCullMode(Urho3D::CULL_CW);
 		d_graphics.SetDepthTest(Urho3D::CMP_ALWAYS);
 		d_graphics.SetDepthWrite(false);
 		d_graphics.SetFillMode(Urho3D::FILL_SOLID);
@@ -97,25 +98,12 @@ namespace CEGUI
 		const int pass_count = d_effect ? d_effect->getPassCount() : 1;
 		for (int pass = 0; pass < pass_count; ++pass)
 		{
-			// set up RenderEffect
 			if (d_effect)
 				d_effect->performPreRenderFunctions(pass);
-
-			//Prepare for the rendering process according to the used render material
-
-			// Starting with Ogre 2.1 this also activates the PSO
-			// which contains all the blend settings etc
-			// This is required because the material cannot set shader parameters before
-			// the PSO is bound
-
-			//shaderWrapper->setRenderOperation(d_renderOp);
 			d_renderMaterial->prepareForRendering();
 			d_graphics.Draw(Urho3D::TRIANGLE_LIST, d_verticesVBOPosition, d_vertexCount);
-			// draw the geometry
-			//d_renderSystem._render(d_renderOp);
 		}
 
-		// clean up RenderEffect
 		if (d_effect)
 			d_effect->performPostRenderFunctions();
 
