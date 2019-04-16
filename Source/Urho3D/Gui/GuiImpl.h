@@ -74,6 +74,10 @@ private:
 	//! whether to spin the logo
 	bool d_spinLogo{ false };
 	CEGUI::InputAggregator*         d_systemInputAggregator{ nullptr };
+
+	// test
+	CEGUI::InputAggregator*         d_inputAggregator{ nullptr };
+	CEGUI::GUIContext*				d_guiContext{ nullptr };
 };
 
 }

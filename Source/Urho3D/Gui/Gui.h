@@ -266,6 +266,7 @@ class CEGui;
 		// Urho3D proxy
 		void OnMouseButtonDown(MouseButton mouseButtons);
 		void OnMouseButtonUp(MouseButton mouseButtons);
+		void OnMouseMove(float x, float y);
 		/// Initialize when screen mode initially set.
 		void Initialize();
 		/// Update Gui element logic recursively.

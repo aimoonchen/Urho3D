@@ -235,25 +235,29 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::blitFromMemory(const void* sourceData, const Rectf& area)
 	{
-// 		if (d_texture.isNull()) // TODO: exception?
-// 			return;
-// 
-// 		// Ogre doesn't like null data, so skip if the sourceData is null and
-// 		// area is zero size
-// 		if (sourceData == nullptr)
-// 		{
-// 			if (static_cast<int>(area.getWidth()) == 0 &&
-// 				static_cast<int>(area.getHeight()) == 0)
-// 			{
-// 				return;
-// 			}
-// 
-// 			// Here we are trying to write to a non-zero size area with null
-// 			// ptr for data
-// 			throw RendererException("blitFromMemory source is null");
-// 		}
-// 
-// 
+		if (d_texture.Null()) // TODO: exception?
+			return;
+
+		// Ogre doesn't like null data, so skip if the sourceData is null and
+		// area is zero size
+		if (sourceData == nullptr)
+		{
+			if (static_cast<int>(area.getWidth()) == 0 &&
+				static_cast<int>(area.getHeight()) == 0)
+			{
+				return;
+			}
+
+			// Here we are trying to write to a non-zero size area with null
+			// ptr for data
+			throw RendererException("blitFromMemory source is null");
+		}
+
+		d_texture->SetData(0, static_cast<int>(area.left()),
+			static_cast<int>(area.top()),
+			static_cast<int>(area.getWidth()),
+			static_cast<int>(area.getHeight()), sourceData);
+
 // 		// NOTE: const_cast because Ogre takes pointer to non-const here. Rather
 // 		// than allow that to dictate poor choices in our own APIs, we choose to
 // 		// address the issue as close to the source of the problem as possible.

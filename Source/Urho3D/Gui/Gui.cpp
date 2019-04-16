@@ -1356,6 +1356,7 @@ namespace Urho3D
 
 	void Gui::ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
+		OnMouseMove(windowCursorPos.x_, windowCursorPos.y_);
 	}
 
 	void Gui::HandleScreenMode(StringHash eventType, VariantMap& eventData)
@@ -1896,5 +1897,11 @@ namespace Urho3D
 			mb = CEGUI::MouseButton::Middle;
 		}
 		gui_impl_->injectMouseButtonUp(mb);
+	}
+
+	void Gui::OnMouseMove(float x, float y)
+	{
+
+		gui_impl_->injectMousePosition(x, y);
 	}
 }
