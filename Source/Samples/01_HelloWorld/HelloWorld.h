@@ -64,4 +64,5 @@ private:
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 private:
 	//std::unique_ptr<Gui> gui_;
+	void* m_renderdocdll;
 };
