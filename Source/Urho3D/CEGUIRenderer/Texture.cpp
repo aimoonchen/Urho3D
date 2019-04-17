@@ -96,6 +96,13 @@ namespace CEGUI
 // 				"Failed to create Texture object with spcecified size.");
 		static const auto& context = g_graphics->GetContext();
 		d_texture = new Urho3D::Texture2D(context);
+		// TODO£ºfor font texture
+		d_texture->SetMipsToSkip(Urho3D::QUALITY_LOW, 0); // No quality reduction
+		d_texture->SetNumLevels(1); // No mipmaps
+		d_texture->SetAddressMode(Urho3D::COORD_U, Urho3D::ADDRESS_BORDER);
+		d_texture->SetAddressMode(Urho3D::COORD_V, Urho3D::ADDRESS_BORDER);
+		d_texture->SetBorderColor(Urho3D::Color(0.0f, 0.0f, 0.0f, 0.0f));
+		//
 		d_texture->SetSize(sz.d_width, sz.d_height, Urho3D::Graphics::GetRGBAFormat());
 
 		d_size.d_width = static_cast<float>(d_texture->GetWidth());

@@ -2,7 +2,7 @@
 
 namespace bgfx
 {
-	void* loadRenderDoc();
+	URHO3D_API void* loadRenderDoc();
 	void unloadRenderDoc(void*);
 	void renderDocTriggerCapture();
 

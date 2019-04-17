@@ -110,5 +110,7 @@ namespace CEGUI
 		BlendMode d_activeBlendMode;
 		Urho3DShaderWrapper* d_texturedShaderWrapper;
 		Urho3DShaderWrapper* d_colouredShaderWrapper;
+		Urho3DShaderWrapper* d_maskShaderWrapper;
+		Urho3DShaderWrapper* d_alphaShaderWrapper;
 	};
 }

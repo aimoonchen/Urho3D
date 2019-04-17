@@ -838,11 +838,15 @@ namespace CEGUI
 
 		d_texturedShaderWrapper = new Urho3DShaderWrapper(*this, *d_graphics, diffTextureVS, diffTexturePS);
 		d_colouredShaderWrapper = new Urho3DShaderWrapper(*this, *d_graphics, noTextureVS, noTexturePS);
+		d_maskShaderWrapper		= new Urho3DShaderWrapper(*this, *d_graphics, diffTextureVS, diffMaskTexturePS);
+		d_alphaShaderWrapper	= new Urho3DShaderWrapper(*this, *d_graphics, diffTextureVS, alphaTexturePS);
 	}
 
 	void Urho3DRenderer::cleanupShaders()
 	{
 		delete d_texturedShaderWrapper;
 		delete d_colouredShaderWrapper;
+		delete d_maskShaderWrapper;
+		delete d_alphaShaderWrapper;
 	}
 }

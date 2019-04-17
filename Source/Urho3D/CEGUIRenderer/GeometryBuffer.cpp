@@ -88,6 +88,8 @@ namespace CEGUI
 		//d_graphics.SetCullMode(Urho3D::CULL_CCW);
 		d_graphics.SetCullMode(Urho3D::CULL_CW);
 
+		//d_graphics.SetCullMode(Urho3D::CULL_NONE);
+
 		d_graphics.SetDepthTest(Urho3D::CMP_ALWAYS);
 		d_graphics.SetDepthWrite(false);
 		d_graphics.SetFillMode(Urho3D::FILL_SOLID);

@@ -14,7 +14,12 @@
 #	if BX_PLATFORM_WINDOWS
 #		include <psapi.h>
 #	endif // BX_PLATFORM_WINDOWS
-#	include "renderdoc/renderdoc_app.h"
+
+#include "Urho3D.h"
+
+#include "debug_renderdoc.h"
+
+#include "renderdoc/renderdoc_app.h"
 
 namespace bgfx
 {
@@ -64,7 +69,7 @@ namespace bgfx
 	static RENDERDOC_API_1_1_2* s_renderDoc = NULL;
 	static void* s_renderDocDll = NULL;
 
-	void* loadRenderDoc()
+	URHO3D_API void* loadRenderDoc()
 	{
 		if (NULL != s_renderDoc)
 		{

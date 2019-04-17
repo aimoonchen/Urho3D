@@ -185,7 +185,7 @@ void CEGui::Initialize(Graphics* graphics)
 	// As a final step in the initialisation of our sample window, we set the window's
 	// text to "Hello World!", so that this text will appear as the caption in the
 	// FrameWindow's titlebar.
-	//wnd->setText("Hello World!");
+	wnd->setText("Hello World!");
 
 	//wnd->subscribeEvent(CEGUI::Window::EventCursorActivate, Event::Subscriber(&CEGuiBaseApplication::handleHelloWorldClicked, this));
 
@@ -455,8 +455,9 @@ void CEGui::Update(float timeStep)
 
 	// TODO: current context inject time pulse;
 	CEGUI::GUIContext& defaultGUIContext(CEGUI::System::getSingleton().getDefaultGUIContext());
-	defaultGUIContext.injectTimePulse(timeStep);
-//	d_guiContext->injectTimePulse(timeStep);
+	defaultGUIContext.injectTimePulse(timeStep);
+
+	d_guiContext->injectTimePulse(timeStep);
 
 	updateFPS(timeStep);
 	updateLogo(timeStep);
@@ -481,9 +482,9 @@ void CEGui::Render()
 
 	gui_system.getDefaultGUIContext().draw();
 
-	//d_guiContext->draw();
+	d_guiContext->draw();
 
-	gui_renderer->endRendering();
+	//gui_renderer->endRendering();
 
 	CEGUI::WindowManager::getSingleton().cleanDeadPool();
 
