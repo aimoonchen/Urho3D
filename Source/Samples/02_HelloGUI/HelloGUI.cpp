@@ -39,6 +39,8 @@
 
 #include <Urho3D/DebugNew.h>
 
+#include "Urho3D/CEGUIRenderer/debug_renderdoc.h"
+
 URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
 
 HelloGUI::HelloGUI(Context* context) :
@@ -46,6 +48,15 @@ HelloGUI::HelloGUI(Context* context) :
     uiRoot_(GetSubsystem<UI>()->GetRoot()),
     dragBeginPosition_(IntVector2::ZERO)
 {
+}
+
+void HelloGUI::Setup()
+{
+	m_renderdocdll = bgfx::loadRenderDoc();
+
+	engineParameters_[EP_WINDOW_WIDTH] = 1280;
+	engineParameters_[EP_WINDOW_HEIGHT] = 720;
+	Sample::Setup();
 }
 
 void HelloGUI::Start()
@@ -64,13 +75,13 @@ void HelloGUI::Start()
     uiRoot_->SetDefaultStyle(style);
 
     // Initialize Window
-    InitWindow();
+    //InitWindow();
 
     // Create and add some controls to the Window
-    InitControls();
+    //InitControls();
 
     // Create a draggable Fish
-    CreateDraggableFish();
+    //CreateDraggableFish();
 
     // Set the mouse mode to use in the sample
     Sample::InitMouseMode(MM_FREE);
@@ -144,7 +155,7 @@ void HelloGUI::InitWindow()
 
     // Subscribe to buttonClose release (following a 'press') events
     SubscribeToEvent(buttonClose, E_RELEASED, URHO3D_HANDLER(HelloGUI, HandleClosePressed));
-
+	
     // Subscribe also to all UI mouse clicks just to see where we have clicked
     SubscribeToEvent(E_UIMOUSECLICK, URHO3D_HANDLER(HelloGUI, HandleControlClicked));
 }
