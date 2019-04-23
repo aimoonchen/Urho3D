@@ -75,13 +75,13 @@ void HelloGUI::Start()
     uiRoot_->SetDefaultStyle(style);
 
     // Initialize Window
-    //InitWindow();
+    InitWindow();
 
     // Create and add some controls to the Window
-    //InitControls();
+    InitControls();
 
     // Create a draggable Fish
-    //CreateDraggableFish();
+    CreateDraggableFish();
 
     // Set the mouse mode to use in the sample
     Sample::InitMouseMode(MM_FREE);

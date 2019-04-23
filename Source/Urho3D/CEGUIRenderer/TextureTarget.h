@@ -20,6 +20,8 @@ namespace CEGUI
 		//! Destructor.
 		virtual ~Urho3DTextureTarget();
 
+		void activate() override;
+		void deactivate() override;
 		// implementation of RenderTarget interface
 		bool isImageryCache() const;
 		// implement CEGUI::TextureTarget interface.

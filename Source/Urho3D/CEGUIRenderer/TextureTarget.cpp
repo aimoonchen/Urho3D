@@ -2,6 +2,8 @@
 #include "Texture.h"
 #include "CEGUI/PropertyHelper.h"
 
+#include "Graphics/Graphics.h"
+
 namespace CEGUI
 {
 	const float Urho3DTextureTarget::DEFAULT_SIZE = 128.0f;
@@ -15,9 +17,12 @@ namespace CEGUI
 		TextureTarget(addStencilBuffer),
 		d_CEGUITexture(0)
 	{
-		d_CEGUITexture = static_cast<Urho3DTexture*>(
-			&d_owner.createTexture(generateTextureName()));
-
+		d_CEGUITexture = static_cast<Urho3DTexture*>(&d_owner.createTexture(generateTextureName()));
+		auto& urho3d_tex = d_CEGUITexture->getUrho3DTexture();
+		urho3d_tex->SetFilterMode(Urho3D::FILTER_BILINEAR);
+		urho3d_tex->SetAddressMode(Urho3D::COORD_U, Urho3D::ADDRESS_CLAMP);
+		urho3d_tex->SetAddressMode(Urho3D::COORD_V, Urho3D::ADDRESS_CLAMP);
+		urho3d_tex->SetNumLevels(1);
 		// setup area and cause the initial texture to be generated.
 		declareRenderSize(Sizef(DEFAULT_SIZE, DEFAULT_SIZE));
 	}
@@ -28,6 +33,25 @@ namespace CEGUI
 		d_owner.destroyTexture(*d_CEGUITexture);
 	}
 
+	void Urho3DTextureTarget::activate()
+	{
+		auto& urho3d_tex = d_CEGUITexture->getUrho3DTexture();
+		Urho3D::RenderSurface* surface = urho3d_tex->GetRenderSurface();
+		d_graphics.SetDepthStencil(surface->GetLinkedDepthStencil());
+		d_graphics.SetRenderTarget(0, surface);
+		// 		d_graphics.SetViewport(IntRect(0, 0, surface->GetWidth(), surface->GetHeight()));
+		// 		d_graphics.Clear(Urho3D::CLEAR_COLOR);
+		Urho3DRenderTarget::activate();
+// 		d_graphics.SetViewport(Urho3D::IntRect(0, 0, surface->GetWidth(), surface->GetHeight()));
+ 		d_graphics.Clear(Urho3D::CLEAR_COLOR);
+	}
+
+	void Urho3DTextureTarget::deactivate()
+	{
+		Urho3DRenderTarget::deactivate();
+
+		d_graphics.ResetRenderTargets();
+	}
 	//----------------------------------------------------------------------------//
 	bool Urho3DTextureTarget::isImageryCache() const
 	{
@@ -52,6 +76,12 @@ namespace CEGUI
 // #else
 // 		d_renderSystem._setViewport(saved_vp);
 // #endif
+		auto& urho3d_tex = d_CEGUITexture->getUrho3DTexture();
+		Urho3D::RenderSurface* surface = urho3d_tex->GetRenderSurface();
+		d_graphics.SetDepthStencil(surface->GetLinkedDepthStencil());
+		d_graphics.SetRenderTarget(0, surface);
+		d_graphics.SetViewport(Urho3D::IntRect(0, 0, surface->GetWidth(), surface->GetHeight()));
+		d_graphics.Clear(Urho3D::CLEAR_COLOR);
 	}
 
 	//----------------------------------------------------------------------------//
@@ -63,6 +93,13 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTextureTarget::declareRenderSize(const Sizef& sz)
 	{
+		auto& urho3d_tex = d_CEGUITexture->getUrho3DTexture();
+		if (urho3d_tex->SetSize(static_cast<int>(sz.d_width),
+			static_cast<int>(sz.d_height),
+			Urho3D::Graphics::GetRGBAFormat(), Urho3D::TEXTURE_RENDERTARGET)) {
+			urho3d_tex->GetRenderSurface()->SetUpdateMode(Urho3D::SURFACE_MANUALUPDATE);
+		}
+
 // 		// exit if current size is enough
 // 		if ((d_area.getWidth() >= sz.d_width) && (d_area.getHeight() >= sz.d_height))
 // 			return;
@@ -86,8 +123,8 @@ namespace CEGUI
 // 				static_cast<float>(d_renderTarget->getHeight())
 // 			)
 // 		);
-// 
-// 		setArea(init_area);
+ 
+ 		setArea(Rectf(d_area.getPosition(), Sizef(sz)));
 // 
 // 		// delete viewport and reset ptr so a new one is generated.  This is
 // 		// required because we have changed d_renderTarget so need a new VP also.

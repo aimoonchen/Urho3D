@@ -457,8 +457,11 @@ namespace CEGUI
 // 
 // 		d_openGLStateChanger->enable(GL_SCISSOR_TEST);
 // 		d_openGLStateChanger->enable(GL_BLEND);
+		d_graphics->SetScissorTest(true);
 // 
 // 		// force set blending ops to get to a known state.
+		
+
  		setupRenderingBlendMode(BlendMode::Normal, true);
 	}
 
@@ -534,6 +537,20 @@ namespace CEGUI
 // #endif // CEGUI_USE_OGRE_COMPOSITOR2
 
 		initialiseShaders();
+
+// 		// init opengl state.
+// 		d_openGLStateChanger->reset();
+// 
+// 		// if enabled, restores a subset of the GL state back to default values.
+// 		//if (d_isStateResettingEnabled)
+// 		restoreChangedStatesToDefaults(false);
+// 
+// 		d_openGLStateChanger->enable(GL_SCISSOR_TEST);
+// 		d_openGLStateChanger->enable(GL_BLEND);
+// 
+// 		// force set blending ops to get to a known state.
+// 		setupRenderingBlendMode(BlendMode::Normal, true);
+
 	}
 
 	void Urho3DRenderer::clearVertexBufferPool()

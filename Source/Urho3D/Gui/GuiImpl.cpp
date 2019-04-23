@@ -66,6 +66,14 @@ void CEGui::Initialize(Graphics* graphics)
 	initialiseResourceGroupDirectories();
 	initialiseDefaultResourceGroups();
 
+	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
+	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
+	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
+	wnd->setUsingAutoRenderingSurface(true);
+	wnd->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.25f)));
+	wnd->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.5f)));
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(wnd);
+	/*
 	// create logo imageset and draw the image (we only ever draw this once)
 	CEGUI::ImageManager::getSingleton().addBitmapImageFromFile("cegui_logo", "logo.png");
 
@@ -106,6 +114,7 @@ void CEGui::Initialize(Graphics* graphics)
 
 	//
 	d_guiContext = &CEGUI::System::getSingleton().createGUIContext(d_renderer->getDefaultRenderTarget());
+
 	auto guiContext = d_guiContext;
 
 	// 	auto d_textureTarget = d_renderer->createTextureTarget(false);
@@ -193,7 +202,7 @@ void CEGui::Initialize(Graphics* graphics)
 
 	d_inputAggregator = new CEGUI::InputAggregator(d_guiContext);
 	d_inputAggregator->initialise();
-
+	*/
 }
 
 void CEGui::initialiseResourceGroupDirectories()
@@ -454,13 +463,12 @@ void CEGui::Update(float timeStep)
 	gui_system.injectTimePulse(timeStep);
 
 	// TODO: current context inject time pulse;
-	CEGUI::GUIContext& defaultGUIContext(CEGUI::System::getSingleton().getDefaultGUIContext());
-	defaultGUIContext.injectTimePulse(timeStep);
+	gui_system.getDefaultGUIContext().injectTimePulse(timeStep);
 
-	d_guiContext->injectTimePulse(timeStep);
-
-	updateFPS(timeStep);
-	updateLogo(timeStep);
+// 	d_guiContext->injectTimePulse(timeStep);
+// 
+// 	updateFPS(timeStep);
+// 	updateLogo(timeStep);
 }
 
 void CEGui::Render()
@@ -472,7 +480,7 @@ void CEGui::Render()
 	// 		updateFPS(elapsed);
 	//		updateLogo(elapsed);
 	// 
-	// 		beginRendering(elapsed);
+	//beginRendering(elapsed);
 
 	CEGUI::Renderer* gui_renderer(gui_system.getRenderer());
 	gui_renderer->beginRendering();
@@ -482,13 +490,13 @@ void CEGui::Render()
 
 	gui_system.getDefaultGUIContext().draw();
 
-	d_guiContext->draw();
+	//d_guiContext->draw();
 
-	//gui_renderer->endRendering();
+	gui_renderer->endRendering();
 
 	CEGUI::WindowManager::getSingleton().cleanDeadPool();
 
-	//		endRendering();
+	//endRendering();
 }
 
 void CEGui::Clear()

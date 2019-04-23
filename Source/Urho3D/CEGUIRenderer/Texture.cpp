@@ -408,7 +408,7 @@ namespace CEGUI
 	{
 		static const auto& context = g_graphics->GetContext();
 		d_texture = new Urho3D::Texture2D(context);
-		d_texture->SetSize(1, 1, toUrho3DPixelFormat(pixel_format));
+		//d_texture->SetSize(1, 1, toUrho3DPixelFormat(pixel_format));
 
 		// try to create a Ogre::Texture with given dimensions
 // 		d_texture = Ogre::TextureManager::getSingleton().createManual(
