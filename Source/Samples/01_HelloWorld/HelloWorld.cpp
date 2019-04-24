@@ -28,6 +28,12 @@
 #include <Urho3D/UI/UI.h>
 //#include <Urho3D/Gui/Gui.h>
 
+#include <Urho3D/Graphics/Model.h>
+#include <Urho3D/Graphics/Octree.h>
+#include <Urho3D/Graphics/Renderer.h>
+#include <Urho3D/Graphics/RenderSurface.h>
+#include <Urho3D/Graphics/StaticModel.h>
+
 #include "HelloWorld.h"
 #include "Urho3D/CEGUIRenderer/debug_renderdoc.h"
 
@@ -66,6 +72,9 @@ void HelloWorld::Start()
 
 	//gui_ = std::make_unique<Gui>(context_);
 	//gui_->init(nullptr, "CEGUI.log", CEGUI::String());
+
+
+
 }
 
 void HelloWorld::CreateText()

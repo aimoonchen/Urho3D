@@ -21,51 +21,31 @@ namespace CEGUI
 		//! Destructor
 		virtual ~Urho3DRenderTarget();
 
-		/*!
-		\brief
-			Set the underlying viewport area directly - bypassing what the
-			RenderTarget considers to be it's area - thus allowing the view port
-			area used for rendering to be different to the area set for the target.
-
-		\param area
-			Rect object describing the area to use in pixels.
-
-		\deprecated
-			This function is deprecated and will be removed or changed considerably
-			in future releases.
-		*/
-		void setUrho3DViewportDimensions(const Rectf& area);
-
-		// implement parts of CEGUI::RenderTarget interface
-		virtual void activate();
-		virtual void unprojectPoint(const GeometryBuffer& buff, const glm::vec2& p_in, glm::vec2& p_out) const;
-		virtual void setArea(const Rectf& area);
-		// implementing the virtual function with a covariant return type
-		virtual Urho3DRenderer& getOwner();
-
+		void activate() override;
+		void unprojectPoint(const GeometryBuffer& buff, const glm::vec2& p_in, glm::vec2& p_out) const override;
 	protected:
 		//! helper that initialises the cached matrix
-		void updateMatrix() const;
+		virtual void updateMatrix() const;
 		//! helper that initialises the viewport
-		void updateViewport();
+		//void updateViewport();
 		//! helper to update the actual Ogre viewport dimensions
-		void updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt);
+		//void updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt);
 
 		//! Urho3DRenderer object that owns this RenderTarget
 		Urho3DRenderer& d_owner;
 		//! Urho3D RendererSystem used to affect the rendering process
 		Urho3D::Graphics& d_graphics;
 		//! Urho3D render target that we are effectively wrapping
-		Urho3D::RenderSurface* d_renderTarget{ nullptr };
+		//Urho3D::RenderSurface* d_renderTarget{ nullptr };
 
 		//! Urho3D viewport used for this target.
-		Urho3D::Viewport* d_viewport{ nullptr };
+		//Urho3D::Viewport* d_viewport{ nullptr };
 		//! holds set Ogre viewport dimensions
-		Rectf d_urho3DViewportDimensions{ 0, 0, 0, 0 };
+		//Rectf d_urho3DViewportDimensions{ 0, 0, 0, 0 };
 
 		//! true when d_viewport is up to date and valid.
 		//! \version Beginning from Ogre 2.0 this indicates whether the workspace is
 		//! up to date
-		bool d_viewportValid{ false };
+		//bool d_viewportValid{ false };
 	};
 }

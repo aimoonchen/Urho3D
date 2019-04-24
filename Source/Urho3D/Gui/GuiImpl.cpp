@@ -203,6 +203,8 @@ void CEGui::Initialize(Graphics* graphics)
 	d_inputAggregator = new CEGUI::InputAggregator(d_guiContext);
 	d_inputAggregator->initialise();
 	*/
+	d_systemInputAggregator = new CEGUI::InputAggregator(&CEGUI::System::getSingletonPtr()->getDefaultGUIContext());
+	d_systemInputAggregator->initialise();
 }
 
 void CEGui::initialiseResourceGroupDirectories()
@@ -453,8 +455,8 @@ CEGUI::InputAggregator* CEGui::getCurrentInputAggregator()
 	// 		if (d_selectedSampleData != nullptr)
 	// 			return d_selectedSampleData->getInputAggregator();
 
-	//return d_systemInputAggregator;
-	return d_inputAggregator;
+	return d_systemInputAggregator;
+	//return d_inputAggregator;
 }
 
 void CEGui::Update(float timeStep)
@@ -464,7 +466,7 @@ void CEGui::Update(float timeStep)
 
 	// TODO: current context inject time pulse;
 	gui_system.getDefaultGUIContext().injectTimePulse(timeStep);
-
+	gui_system.getDefaultGUIContext().getRootWindow()->invalidate(true);
 // 	d_guiContext->injectTimePulse(timeStep);
 // 
 // 	updateFPS(timeStep);

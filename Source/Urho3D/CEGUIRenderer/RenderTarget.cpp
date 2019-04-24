@@ -17,51 +17,56 @@ namespace CEGUI
 
 	Urho3DRenderTarget::~Urho3DRenderTarget()
 	{
-		delete d_viewport;
+
 	}
 
-	void Urho3DRenderTarget::setUrho3DViewportDimensions(const Rectf& area)
-	{
-		d_urho3DViewportDimensions = area;
-
-		if (true/*d_viewport*/)
-			updateUrho3DViewportDimensions(nullptr/*d_viewport->getTarget()*/);
-
-		d_viewportValid = false;
-	}
-
-
-	void Urho3DRenderTarget::updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt)
-	{
-// 		if (rt)
-// 		{
-// 			if (d_viewport)
-// 				d_viewport->setDimensions(
-// 					d_ogreViewportDimensions.left() / rt->getWidth(),
-// 					d_ogreViewportDimensions.top() / rt->getHeight(),
-// 					d_ogreViewportDimensions.getWidth() / rt->getWidth(),
-// 					d_ogreViewportDimensions.getHeight() / rt->getHeight());
-// 		}
-
-// 		d_graphics.SetViewport({static_cast<int>(d_urho3DViewportDimensions.left() / 1280.0f),
-// 			static_cast<int>(d_urho3DViewportDimensions.top() / 720.0f),
-// 			static_cast<int>(d_urho3DViewportDimensions.right() / 1280.0f),
-// 			static_cast<int>(d_urho3DViewportDimensions.bottom() / 720.0f)});
-
-		d_graphics.SetViewport({ static_cast<int>(RenderTarget::d_area.left()),
-			   static_cast<int>(RenderTarget::d_area.top()),
-			   static_cast<int>(RenderTarget::d_area.getWidth()),
-			   static_cast<int>(RenderTarget::d_area.getHeight()) });
-	}
+// 	void Urho3DRenderTarget::setUrho3DViewportDimensions(const Rectf& area)
+// 	{
+// 		d_urho3DViewportDimensions = area;
+// 
+// 		if (true/*d_viewport*/)
+// 			updateUrho3DViewportDimensions(nullptr/*d_viewport->getTarget()*/);
+// 
+// 		d_viewportValid = false;
+// 	}
+// 
+// 
+// 	void Urho3DRenderTarget::updateUrho3DViewportDimensions(const Urho3D::RenderSurface* const rt)
+// 	{
+// // 		if (rt)
+// // 		{
+// // 			if (d_viewport)
+// // 				d_viewport->setDimensions(
+// // 					d_ogreViewportDimensions.left() / rt->getWidth(),
+// // 					d_ogreViewportDimensions.top() / rt->getHeight(),
+// // 					d_ogreViewportDimensions.getWidth() / rt->getWidth(),
+// // 					d_ogreViewportDimensions.getHeight() / rt->getHeight());
+// // 		}
+// 
+// // 		d_graphics.SetViewport({static_cast<int>(d_urho3DViewportDimensions.left() / 1280.0f),
+// // 			static_cast<int>(d_urho3DViewportDimensions.top() / 720.0f),
+// // 			static_cast<int>(d_urho3DViewportDimensions.right() / 1280.0f),
+// // 			static_cast<int>(d_urho3DViewportDimensions.bottom() / 720.0f)});
+// 
+// 		d_graphics.SetViewport({ static_cast<int>(RenderTarget::d_area.left()),
+// 			   static_cast<int>(RenderTarget::d_area.top()),
+// 			   static_cast<int>(RenderTarget::d_area.getWidth()),
+// 			   static_cast<int>(RenderTarget::d_area.getHeight()) });
+// 	}
 
 
 	void Urho3DRenderTarget::activate()
 	{
+		d_graphics.SetViewport({ static_cast<int>(RenderTarget::d_area.left()),
+								static_cast<int>(RenderTarget::d_area.top()),
+								static_cast<int>(RenderTarget::d_area.getWidth()),
+								static_cast<int>(RenderTarget::d_area.getHeight()) });
+
 		if (!RenderTarget::d_matrixValid)
 			updateMatrix();
 
-		if (!d_viewportValid)
-			updateViewport();
+// 		if (!d_viewportValid)
+// 			updateViewport();
 // 
 // 		d_renderSystem._setViewport(d_viewport);
 // 
@@ -80,67 +85,69 @@ namespace CEGUI
 
 	void Urho3DRenderTarget::unprojectPoint(const GeometryBuffer& buff, const glm::vec2& p_in, glm::vec2& p_out) const
 	{
-// 		if (!RenderTarget::d_matrixValid)
-// 			updateMatrix();
-// 
-// 		const Urho3DGeometryBuffer& gb = static_cast<const Urho3DGeometryBuffer&>(buff);
-// 
-// 		const Ogre::Real midx = RenderTarget::d_area.getWidth() * 0.5f;
-// 		const Ogre::Real midy = RenderTarget::d_area.getHeight() * 0.5f;
-// 
-// 		// viewport matrix
-// 		const Ogre::Matrix4 vpmat(
-// 			midx, 0, 0, RenderTarget::d_area.left() + midx,
-// 			0, -midy, 0, RenderTarget::d_area.top() + midy,
-// 			0, 0, 1, 0,
-// 			0, 0, 0, 1
-// 		);
-// 
-// 		// matrices used for projecting and unprojecting points
-// 
-// 		const Ogre::Matrix4 proj(Urho3DRenderer::glmToOgreMatrix(gb.getModelMatrix() * RenderTarget::d_matrix) * vpmat);
-// 		const Ogre::Matrix4 unproj(proj.inverse());
-// 
-// 		Ogre::Vector3 in;
-// 
-// 		// unproject the ends of the ray
-// 		in.x = midx;
-// 		in.y = midy;
-// 		in.z = -RenderTarget::d_viewDistance;
-// 		const Ogre::Vector3 r1(unproj * in);
-// 		in.x = p_in.x;
-// 		in.y = p_in.y;
-// 		in.z = 0;
-// 		// calculate vector of picking ray
-// 		const Ogre::Vector3 rv(r1 - unproj * in);
-// 
-// 		// project points to orientate them with GeometryBuffer plane
-// 		in.x = 0.0;
-// 		in.y = 0.0;
-// 		const Ogre::Vector3 p1(proj * in);
-// 		in.x = 1.0;
-// 		in.y = 0.0;
-// 		const Ogre::Vector3 p2(proj * in);
-// 		in.x = 0.0;
-// 		in.y = 1.0;
-// 		const Ogre::Vector3 p3(proj * in);
-// 
-// 		// calculate the plane normal
-// 		const Ogre::Vector3 pn((p2 - p1).crossProduct(p3 - p1));
-// 		// calculate distance from origin
-// 		const Ogre::Real plen = pn.length();
-// 		const Ogre::Real dist = -(p1.x * (pn.x / plen) +
-// 			p1.y * (pn.y / plen) +
-// 			p1.z * (pn.z / plen));
-// 
-// 		// calculate intersection of ray and plane
-// 		const Ogre::Real pn_dot_rv = pn.dotProduct(rv);
-// 		const Ogre::Real tmp = pn_dot_rv != 0.0 ?
-// 			(pn.dotProduct(r1) + dist) / pn_dot_rv :
-// 			0.0f;
-// 
-// 		p_out.x = static_cast<float>(r1.x - rv.x * tmp);
-// 		p_out.y = static_cast<float>(r1.y - rv.y * tmp);
+		if (!RenderTarget::d_matrixValid)
+			updateMatrix();
+
+		const Urho3DGeometryBuffer& gb = static_cast<const Urho3DGeometryBuffer&>(buff);
+
+		const int vp[4] = {
+			static_cast<int>(RenderTarget::d_area.left()),
+			static_cast<int>(RenderTarget::d_area.top()),
+			static_cast<int>(RenderTarget::d_area.getWidth()),
+			static_cast<int>(RenderTarget::d_area.getHeight())
+		};
+
+		float in_x, in_y = 0.0f, in_z = 0.0f;
+
+		glm::ivec4 viewPort = glm::ivec4(vp[0], vp[1], vp[2], vp[3]);
+		const glm::mat4& projMatrix = RenderTarget::d_matrix;
+		const glm::mat4& modelMatrix = gb.getModelMatrix();
+
+		// unproject the ends of the ray
+		glm::vec3 unprojected1;
+		glm::vec3 unprojected2;
+		in_x = vp[2] * 0.5f;
+		in_y = vp[3] * 0.5f;
+		in_z = -RenderTarget::d_viewDistance;
+		unprojected1 = glm::unProject(glm::vec3(in_x, in_y, in_z), modelMatrix, projMatrix, viewPort);
+		in_x = p_in.x;
+		in_y = vp[3] - p_in.y;
+		in_z = 0.0;
+		unprojected2 = glm::unProject(glm::vec3(in_x, in_y, in_z), modelMatrix, projMatrix, viewPort);
+
+		// project points to orientate them with GeometryBuffer plane
+		glm::vec3 projected1;
+		glm::vec3 projected2;
+		glm::vec3 projected3;
+		in_x = 0.0;
+		in_y = 0.0;
+		projected1 = glm::project(glm::vec3(in_x, in_y, in_z), modelMatrix, projMatrix, viewPort);
+		in_x = 1.0;
+		in_y = 0.0;
+		projected2 = glm::project(glm::vec3(in_x, in_y, in_z), modelMatrix, projMatrix, viewPort);
+		in_x = 0.0;
+		in_y = 1.0;
+		projected3 = glm::project(glm::vec3(in_x, in_y, in_z), modelMatrix, projMatrix, viewPort);
+
+		// calculate vectors for generating the plane
+		const glm::vec3 pv1 = projected2 - projected1;
+		const glm::vec3 pv2 = projected3 - projected1;
+		// given the vectors, calculate the plane normal
+		const glm::vec3 planeNormal = glm::cross(pv1, pv2);
+		// calculate plane
+		const glm::vec3 planeNormalNormalized = glm::normalize(planeNormal);
+		const double pl_d = -glm::dot(projected1, planeNormalNormalized);
+		// calculate vector of picking ray
+		const glm::vec3 rv = unprojected1 - unprojected2;
+		// calculate intersection of ray and plane
+		const double pn_dot_r1 = glm::dot(unprojected1, planeNormal);
+		const double pn_dot_rv = glm::dot(rv, planeNormal);
+		const double tmp1 = pn_dot_rv != 0.0 ? (pn_dot_r1 + pl_d) / pn_dot_rv : 0.0;
+		const double is_x = unprojected1.x - rv.x * tmp1;
+		const double is_y = unprojected1.y - rv.y * tmp1;
+
+		p_out.x = static_cast<float>(is_x);
+		p_out.y = static_cast<float>(is_y);
 	}
 
 
@@ -191,38 +198,38 @@ namespace CEGUI
 	}
 
 
-	void Urho3DRenderTarget::updateViewport()
-	{
-// 		if (!d_viewport)
-// 		{
-// #ifdef CEGUI_USE_OGRE_COMPOSITOR2
+// 	void Urho3DRenderTarget::updateViewport()
+// 	{
+// // 		if (!d_viewport)
+// // 		{
+// // #ifdef CEGUI_USE_OGRE_COMPOSITOR2
+// // 
+// // 			d_viewport = OGRE_NEW Ogre::Viewport(d_renderTarget, 0, 0, 1, 1);
+// // #else
+// // 			d_viewport = OGRE_NEW Ogre::Viewport(0, d_renderTarget, 0, 0, 1, 1, 0);
+// // #endif // CEGUI_USE_OGRE_COMPOSITOR2
+// // 
+//  			updateUrho3DViewportDimensions(d_renderTarget);
+// // 		}
+// // 
+// // 		d_viewport->_updateDimensions();
+// // 
+//  		d_viewportValid = true;
+// 	}
 // 
-// 			d_viewport = OGRE_NEW Ogre::Viewport(d_renderTarget, 0, 0, 1, 1);
-// #else
-// 			d_viewport = OGRE_NEW Ogre::Viewport(0, d_renderTarget, 0, 0, 1, 1, 0);
-// #endif // CEGUI_USE_OGRE_COMPOSITOR2
 // 
- 			updateUrho3DViewportDimensions(d_renderTarget);
-// 		}
+// 	Urho3DRenderer& Urho3DRenderTarget::getOwner()
+// 	{
+// 		return d_owner;
+// 	}
 // 
-// 		d_viewport->_updateDimensions();
 // 
- 		d_viewportValid = true;
-	}
-
-
-	Urho3DRenderer& Urho3DRenderTarget::getOwner()
-	{
-		return d_owner;
-	}
-
-
-	void Urho3DRenderTarget::setArea(const Rectf& area)
-	{
-		setUrho3DViewportDimensions(area);
-
-		RenderTarget::setArea(area);
-	}
+// 	void Urho3DRenderTarget::setArea(const Rectf& area)
+// 	{
+// 		setUrho3DViewportDimensions(area);
+// 
+// 		RenderTarget::setArea(area);
+// 	}
 
 
 }

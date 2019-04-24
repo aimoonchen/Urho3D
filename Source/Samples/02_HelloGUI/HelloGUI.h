@@ -83,10 +83,16 @@ private:
     SharedPtr<Window> window_;
     /// The UI's root UIElement.
     SharedPtr<UIElement> uiRoot_;
+	SharedPtr<UIComponent> uiCom_;
     /// Remembered drag begin position.
     IntVector2 dragBeginPosition_;
 
 	void* m_renderdocdll;
+
+
+	SharedPtr<Scene> scene_;
+	/// Camera scene node.
+	SharedPtr<Node> cameraNode_;
 };
 
 
