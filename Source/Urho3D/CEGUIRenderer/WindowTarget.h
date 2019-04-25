@@ -11,7 +11,7 @@ namespace CEGUI
 		Urho3DWindowTarget(Urho3DRenderer& owner, Urho3D::Graphics& rs, const Rectf& area);
 		virtual ~Urho3DWindowTarget();
 		//void setUrho3DRenderTarget(Urho3D::RenderSurface& target);
-		bool isImageryCache() const;
+		bool isImageryCache() const override { return false; }
 	//protected:
 	//	void initRenderTarget(/*Urho3D::RenderSurface& target*/);
 	};

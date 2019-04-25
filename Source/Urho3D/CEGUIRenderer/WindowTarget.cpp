@@ -21,9 +21,4 @@ namespace CEGUI
 	Urho3DWindowTarget::~Urho3DWindowTarget()
 	{
 	}
-
-	bool Urho3DWindowTarget::isImageryCache() const
-	{
-		return false;
-	}
 }

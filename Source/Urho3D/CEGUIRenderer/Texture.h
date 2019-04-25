@@ -40,6 +40,7 @@ namespace CEGUI
 		//! convert CEGUI::Texture::PixelFormat to equivalent Ogre::PixelFormat
 		static unsigned toUrho3DPixelFormat(const Texture::PixelFormat fmt);
 
+		void updateSize();
 	protected:
 		// we all need a little help from out friends ;)
 		friend Texture& Urho3DRenderer::createTexture(const String&);

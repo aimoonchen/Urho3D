@@ -308,29 +308,32 @@ namespace CEGUI
 	//----------------------------------------------------------------------------//
 	void Urho3DTexture::updateCachedScaleValues()
 	{
-		//
-		// calculate what to use for x scale
-		//
-		const float orgW = d_dataSize.d_width;
-		const float texW = d_size.d_width;
+// 		//
+// 		// calculate what to use for x scale
+// 		//
+// 		const float orgW = d_dataSize.d_width;
+// 		const float texW = d_size.d_width;
+// 
+// 		// if texture and original data width are the same, scale is based
+// 		// on the original size.
+// 		// if texture is wider (and source data was not stretched), scale
+// 		// is based on the size of the resulting texture.
+// 		d_texelScaling.x = 1.0f / ((orgW == texW) ? orgW : texW);
+// 
+// 		//
+// 		// calculate what to use for y scale
+// 		//
+// 		const float orgH = d_dataSize.d_height;
+// 		const float texH = d_size.d_height;
+// 
+// 		// if texture and original data height are the same, scale is based
+// 		// on the original size.
+// 		// if texture is taller (and source data was not stretched), scale
+// 		// is based on the size of the resulting texture.
+// 		d_texelScaling.y = 1.0f / ((orgH == texH) ? orgH : texH);
 
-		// if texture and original data width are the same, scale is based
-		// on the original size.
-		// if texture is wider (and source data was not stretched), scale
-		// is based on the size of the resulting texture.
-		d_texelScaling.x = 1.0f / ((orgW == texW) ? orgW : texW);
-
-		//
-		// calculate what to use for y scale
-		//
-		const float orgH = d_dataSize.d_height;
-		const float texH = d_size.d_height;
-
-		// if texture and original data height are the same, scale is based
-		// on the original size.
-		// if texture is taller (and source data was not stretched), scale
-		// is based on the size of the resulting texture.
-		d_texelScaling.y = 1.0f / ((orgH == texH) ? orgH : texH);
+		d_texelScaling.x = (d_size.d_width != 0.0f) ? (1.0f / d_size.d_width) : 0.0f;
+		d_texelScaling.y = (d_size.d_height != 0.0f) ? (1.0f / d_size.d_height) : 0.0f;
 	}
 
 	//----------------------------------------------------------------------------//
@@ -415,5 +418,13 @@ namespace CEGUI
 // 			getUniqueName(), "General", Ogre::TEX_TYPE_2D,
 // 			1, 1, 0,
 // 			toOgrePixelFormat(pixel_format));
+	}
+
+	void Urho3DTexture::updateSize()
+	{
+		d_size.d_width = static_cast<float>(d_texture->GetWidth());
+		d_size.d_height = static_cast<float>(d_texture->GetHeight());
+		d_dataSize = d_size;
+		updateCachedScaleValues();
 	}
 }

@@ -23,6 +23,8 @@ namespace CEGUI
 
 		void activate() override;
 		void unprojectPoint(const GeometryBuffer& buff, const glm::vec2& p_in, glm::vec2& p_out) const override;
+
+		Urho3DRenderer& getOwner() override;
 	protected:
 		//! helper that initialises the cached matrix
 		virtual void updateMatrix() const;

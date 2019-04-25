@@ -149,7 +149,10 @@ namespace CEGUI
 		p_out.x = static_cast<float>(is_x);
 		p_out.y = static_cast<float>(is_y);
 	}
-
+	Urho3DRenderer& Urho3DRenderTarget::getOwner()
+	{
+		return d_owner;
+	}
 
 	void Urho3DRenderTarget::updateMatrix() const
 	{

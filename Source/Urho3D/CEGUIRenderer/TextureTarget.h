@@ -23,12 +23,12 @@ namespace CEGUI
 		void activate() override;
 		void deactivate() override;
 		// implementation of RenderTarget interface
-		bool isImageryCache() const;
+		//bool isImageryCache() const;
 		// implement CEGUI::TextureTarget interface.
 		void clear();
-		Texture& getTexture() const;
+		Texture& getTexture() const override;
+		bool isImageryCache() const override { return false; }
 		void declareRenderSize(const Sizef& sz);
-
 	protected:
 		//! default / initial size for the underlying texture.
 		static const float DEFAULT_SIZE;
