@@ -54,7 +54,7 @@ namespace CEGUI
 // 				static_cast<GLint>(viewPort.getHeight() - d_preparedClippingRegion.bottom()),
 // 				static_cast<GLint>(d_preparedClippingRegion.getWidth()),
 // 				static_cast<GLint>(d_preparedClippingRegion.getHeight()));
-// 
+// /
 // 			d_glStateChanger->enable(GL_SCISSOR_TEST);
 
 			Urho3D::IntRect scissor{static_cast<int>(d_preparedClippingRegion.left()),
@@ -181,7 +181,7 @@ namespace CEGUI
 
 	void Urho3DGeometryBuffer::reset()
 	{
-
+		GeometryBuffer::reset();
 	}
 
 	void Urho3DGeometryBuffer::finaliseVertexAttributes(MANUALOBJECT_TYPE type)
