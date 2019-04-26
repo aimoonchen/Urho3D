@@ -69,9 +69,12 @@ void CEGui::Initialize(Graphics* graphics)
 	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
 	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
-	wnd->setUsingAutoRenderingSurface(true);
+	//wnd->setUsingAutoRenderingSurface(true);
 	wnd->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.25f)));
 	wnd->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.5f)));
+	wnd->setMaxSize(CEGUI::USize(cegui_reldim(1.0f), cegui_reldim(1.0f)));
+	wnd->setMinSize(CEGUI::USize(cegui_reldim(0.1f), cegui_reldim(0.1f)));
+	wnd->setText("Hello World!");
 	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(wnd);
 	/*
 	// create logo imageset and draw the image (we only ever draw this once)
@@ -466,7 +469,7 @@ void CEGui::Update(float timeStep)
 
 	// TODO: current context inject time pulse;
 	gui_system.getDefaultGUIContext().injectTimePulse(timeStep);
-	gui_system.getDefaultGUIContext().getRootWindow()->invalidate(true);
+	//gui_system.getDefaultGUIContext().getRootWindow()->invalidate(true);
 // 	d_guiContext->injectTimePulse(timeStep);
 // 
 // 	updateFPS(timeStep);
