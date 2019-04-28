@@ -22,6 +22,7 @@
 //test
 #include "CEGUI/widgets/DefaultWindow.h"
 #include "CEGUI/widgets/FrameWindow.h"
+#include "CEGUI/widgets/PushButton.h"
 
 #if defined(__WIN32__) || defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
@@ -66,16 +67,33 @@ void CEGui::Initialize(Graphics* graphics)
 	initialiseResourceGroupDirectories();
 	initialiseDefaultResourceGroups();
 
-	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
+	auto root = static_cast<CEGUI::DefaultWindow*>(winMgr.createWindow("DefaultWindow", "Root"));
+	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(root);
+
+	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
+	root->addChild(wnd);
 	//wnd->setUsingAutoRenderingSurface(true);
 	wnd->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.25f)));
 	wnd->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.5f)));
 	wnd->setMaxSize(CEGUI::USize(cegui_reldim(1.0f), cegui_reldim(1.0f)));
 	wnd->setMinSize(CEGUI::USize(cegui_reldim(0.1f), cegui_reldim(0.1f)));
 	wnd->setText("Hello World!");
-	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(wnd);
+
+	//auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/ImageButton", "TestButton"));
+	auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/Button", "TestButton"));
+	root->addChild(button);
+	button->setSize(CEGUI::USize(cegui_absdim(34.f), cegui_absdim(34.f)));
+	button->setPosition(CEGUI::UVector2(cegui_absdim(0.0f),	cegui_absdim(0.0f)));
+	button->setHorizontalAlignment(CEGUI::HorizontalAlignment::Right);
+	button->setVerticalAlignment(CEGUI::VerticalAlignment::Top);
+	button->setProperty("NormalImage", "TaharezLook/ButtonLeftNormal");
+	button->setProperty("HoverImage", "TaharezLook/ButtonLeftHighlight");
+	button->setProperty("PushedImage", "TaharezLook/ButtonLeftPushed");
+// 	button->subscribeEvent(
+// 		CEGUI::PushButton::EventClicked,
+// 		CEGUI::Event::Subscriber(&SampleBrowser::handleSampleExitButtonClicked, this));
 	/*
 	// create logo imageset and draw the image (we only ever draw this once)
 	CEGUI::ImageManager::getSingleton().addBitmapImageFromFile("cegui_logo", "logo.png");
