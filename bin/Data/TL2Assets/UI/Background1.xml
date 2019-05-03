@@ -1,0 +1,43 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<!-- Created with TexturePacker https://www.codeandweb.com/texturepacker -->
+<!-- $TexturePacker:SmartUpdate:f1d5f4448ade6f9fd999d9dcea6e20c3:568e4a14d0743e738e7458d39182b691:7bc83618f59ee761e91ad135b2ea82db$ -->
+<!--Format:
+n  => name of the sprite
+x  => sprite x pos in texture
+y  => sprite y pos in texture
+w  => sprite width (may be trimmed)
+h  => sprite height (may be trimmed)
+pX => x pos of the pivot point (relative to sprite width)
+pY => y pos of the pivot point (relative to sprite height)
+oX => sprite's x-corner offset (only available if trimmed)
+oY => sprite's y-corner offset (only available if trimmed)
+oW => sprite's original width (only available if trimmed)
+oH => sprite's original height (only available if trimmed)
+r => 'y' only set if sprite is rotated
+with polygon mode enabled:
+vertices   => points in sprite coordinate system (x0,y0,x1,y1,x2,y2, ...)
+verticesUV => points in sheet coordinate system (x0,y0,x1,y1,x2,y2, ...)
+triangles  => sprite triangulation, 3 vertex indices per triangle
+-->
+<TextureAtlas imagePath="Background1.png" width="2048" height="2048">
+    <sprite n="Background1/characterbackground.png" x="621" y="1582" w="349" h="463"/>
+    <sprite n="Background1/enchanterbackground.png" x="312" y="1679" w="307" h="338"/>
+    <sprite n="Background1/gemrecoverbackground.png" x="877" y="718" w="307" h="338"/>
+    <sprite n="Background1/IG_enchanter_background.png" x="1495" y="718" w="481" h="385"/>
+    <sprite n="Background1/IG_gemextracter_background.png" x="972" y="1523" w="481" h="385"/>
+    <sprite n="Background1/IG_generic_menu_base.png" x="890" y="1" w="510" h="715"/>
+    <sprite n="Background1/IG_inventory_arms_insert.png" x="1" y="368" w="482" h="265"/>
+    <sprite n="Background1/IG_inventory_consumables_insert.png" x="1" y="635" w="482" h="265"/>
+    <sprite n="Background1/IG_inventory_menu_base.png" x="1402" y="1" w="510" h="715"/>
+    <sprite n="Background1/IG_inventory_spells_insert.png" x="1" y="902" w="482" h="265"/>
+    <sprite n="Background1/IG_modelmenu.png" x="1" y="1679" w="309" h="342"/>
+    <sprite n="Background1/IG_questgiver_base.png" x="1" y="1" w="887" h="365"/>
+    <sprite n="Background1/IG_trade_window.png" x="1279" y="1105" w="481" h="385"/>
+    <sprite n="Background1/IG_transmuter_background.png" x="1455" y="1492" w="481" h="385"/>
+    <sprite n="Background1/journalbackground.png" x="1" y="1169" w="307" h="508"/>
+    <sprite n="Background1/menubackground1.png" x="310" y="1169" w="307" h="508"/>
+    <sprite n="Background1/petbackground.png" x="928" y="1058" w="349" h="463"/>
+    <sprite n="Background1/questsbackground.png" x="619" y="1072" w="307" h="508"/>
+    <sprite n="Background1/statsbackground.png" x="485" y="368" w="390" h="702"/>
+    <sprite n="Background1/transmuterbackground.png" x="1186" y="718" w="307" h="338"/>
+</TextureAtlas>
