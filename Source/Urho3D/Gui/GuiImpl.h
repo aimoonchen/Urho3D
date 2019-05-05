@@ -33,6 +33,7 @@ public:
 	bool injectMouseButtonUp(const CEGUI::MouseButton& ceguiMouseButton);
 	bool injectMouseWheelChange(float position);
 	bool injectMousePosition(float x, float y);
+	CEGUI::GUIContext* getMainWindowGUIContext() const { return d_context; }
 private:
 	void updateFPS(const float elapsed);
 	void updateLogo(const float elapsed);
@@ -74,10 +75,10 @@ private:
 	//! whether to spin the logo
 	bool d_spinLogo{ false };
 	CEGUI::InputAggregator*         d_systemInputAggregator{ nullptr };
-
+	CEGUI::GUIContext*				d_context{ nullptr };
 	// test
-	CEGUI::InputAggregator*         d_inputAggregator{ nullptr };
-	CEGUI::GUIContext*				d_guiContext{ nullptr };
+	//CEGUI::InputAggregator*         d_inputAggregator{ nullptr };
+	//CEGUI::GUIContext*				d_guiContext{ nullptr };
 };
 
 }

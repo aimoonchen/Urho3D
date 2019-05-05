@@ -716,7 +716,7 @@ void Engine::Render()
         return;
 
     GetSubsystem<Renderer>()->Render();
-    //GetSubsystem<UI>()->Render();
+    GetSubsystem<UI>()->Render();
 	GetSubsystem<Gui>()->Render();
     graphics->EndFrame();
 }

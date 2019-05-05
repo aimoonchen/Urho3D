@@ -23,6 +23,7 @@
 #include "CEGUI/widgets/DefaultWindow.h"
 #include "CEGUI/widgets/FrameWindow.h"
 #include "CEGUI/widgets/PushButton.h"
+#include "CEGUI/widgets/ProgressBar.h"
 
 #if defined(__WIN32__) || defined(_WIN32)
 #ifndef WIN32_LEAN_AND_MEAN
@@ -61,15 +62,18 @@ void CEGui::Initialize(Graphics* graphics)
 	// start up CEGUI system using objects created in subclass constructor.
 	CEGUI::System::create(*d_renderer, d_resourceProvider, nullptr, d_imageCodec, nullptr, "", logFile);
 
+	// create viewport-based CEGUI context for the main window
+	d_context = &CEGUI::System::getSingleton().createGUIContext(d_renderer->getDefaultRenderTarget());
+
 	auto& cegui_system = CEGUI::System::getSingleton();
 	// initialise resource system
 	initDataPathPrefix(dataPathPrefixOverride);
 	initialiseResourceGroupDirectories();
 	initialiseDefaultResourceGroups();
-
+	
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
 	auto root = static_cast<CEGUI::DefaultWindow*>(winMgr.createWindow("DefaultWindow", "Root"));
-	CEGUI::System::getSingleton().getDefaultGUIContext().setRootWindow(root);
+	d_context->setRootWindow(root);
 
 	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
@@ -93,8 +97,26 @@ void CEGui::Initialize(Graphics* graphics)
 	button->setProperty("PushedImage", "TaharezLook/ButtonLeftPushed");
 // 	button->subscribeEvent(
 // 		CEGUI::PushButton::EventClicked,
-// 		CEGUI::Event::Subscriber(&SampleBrowser::handleSampleExitButtonClicked, this));
-	/*
+// 		CEGUI::Event::Subscriber(&SampleBrowser::handleSampleExitButtonClicked, this));	
+	auto bar = static_cast<CEGUI::ProgressBar*>(winMgr.createWindow("TaharezLook/AlternateProgressBar", "TestProgressBar0"));
+	root->addChild(bar);
+	bar->setSize(CEGUI::USize(cegui_absdim(100.f), cegui_absdim(32.f)));
+	bar->setPosition(CEGUI::UVector2(cegui_absdim(50.0f), cegui_absdim(50.0f)));
+	bar->setProgress(0.5f);
+
+	bar = static_cast<CEGUI::ProgressBar*>(winMgr.createWindow("TaharezLook/ProgressBar", "TestProgressBar1"));
+	root->addChild(bar);
+	bar->setSize(CEGUI::USize(cegui_absdim(100.f), cegui_absdim(32.f)));
+	bar->setPosition(CEGUI::UVector2(cegui_absdim(50.0f), cegui_absdim(100.0f)));
+	bar->setProgress(0.5f);
+
+	bar = static_cast<CEGUI::ProgressBar*>(winMgr.createWindow("TaharezLook/VUMeter", "TestProgressBar2"));
+	root->addChild(bar);
+	bar->setSize(CEGUI::USize(cegui_absdim(100.f), cegui_absdim(32.f)));
+	bar->setPosition(CEGUI::UVector2(cegui_absdim(50.0f), cegui_absdim(150.0f)));
+	bar->setProgress(0.5f);
+	
+	
 	// create logo imageset and draw the image (we only ever draw this once)
 	CEGUI::ImageManager::getSingleton().addBitmapImageFromFile("cegui_logo", "logo.png");
 
@@ -112,120 +134,22 @@ void CEGui::Initialize(Graphics* graphics)
 	updateLogoGeometryRotation();
 
 	// clearing this queue actually makes sure it's created(!)
-	cegui_system.getDefaultGUIContext().clearGeometry(CEGUI::RenderQueueID::Overlay);
+	d_context->clearGeometry(CEGUI::RenderQueueID::Overlay);
 
 	// subscribe handler to render overlay items
-	cegui_system.getDefaultGUIContext().subscribeEvent(CEGUI::RenderingSurface::EventRenderQueueStarted, CEGUI::Event::Subscriber(&CEGui::sampleBrowserOverlayHandler, this));
+	d_context->subscribeEvent(CEGUI::RenderingSurface::EventRenderQueueStarted, CEGUI::Event::Subscriber(&CEGui::sampleBrowserOverlayHandler, this));
 
 	// subscribe handler to reposition logo when window is sized.
 	cegui_system.subscribeEvent(CEGUI::System::EventDisplaySizeChanged, CEGUI::Event::Subscriber(&CEGui::resizeHandler, this));
 
-	const CEGUI::Rectf& area(cegui_system.getRenderer()->getDefaultRenderTarget().getArea());
-	//d_sampleApp->setApplicationWindowSize(static_cast<int>(area.getWidth()), static_cast<int>(area.getHeight()));
-
-
-	d_systemInputAggregator = new CEGUI::InputAggregator(&cegui_system.getDefaultGUIContext());
-	d_systemInputAggregator->initialise();
-
-
-// 	CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
-// 	CEGUI::Font* defaultFont = loadedFonts.empty() ? 0 : loadedFonts.front();
-// 
-// 	CEGUI::System::getSingleton().getDefaultGUIContext().setDefaultFont(defaultFont);
-
-	//
-	d_guiContext = &CEGUI::System::getSingleton().createGUIContext(d_renderer->getDefaultRenderTarget());
-
-	auto guiContext = d_guiContext;
-
-	// 	auto d_textureTarget = d_renderer->createTextureTarget(false);
-	// 	test_context_ = &CEGUI::System::getSingleton().createGUIContext(static_cast<RenderTarget&>(*d_textureTarget));
-	// 	auto guiContext = test_context_;
-	// 	d_textureTarget->declareRenderSize({1280, 720});
-
-
-	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
-
-	// The next thing we do is to set a default cursor image.  This is
-	// not strictly essential, although it is nice to always have a visible
-	// indicator if a window or widget does not explicitly set one of its own.
-	//
-	// The TaharezLook Imageset contains an Image named "MouseArrow" which is
-	// the ideal thing to have as a defult cursor image.
-	guiContext->getCursor().setDefaultImage("TaharezLook/MouseArrow");
-
-	// Now the system is initialised, we can actually create some UI elements, for
-	// this first example, a full-screen 'root' window is set as the active GUI
-	// sheet, and then a simple frame window will be created and attached to it.
-
-	// All windows and widgets are created via the WindowManager singleton.
-	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
-
-	// Here we create a "DefaultWindow".  This is a native type, that is, it does
-	// not have to be loaded via a scheme, it is always available.  One common use
-	// for the DefaultWindow is as a generic container for other windows.  Its
-	// size defaults to 1.0f x 1.0f using the Relative metrics mode, which means
-	// when it is set as the root GUI sheet window, it will cover the entire display.
-	// The DefaultWindow does not perform any rendering of its own, so is invisible.
-	//
-	// Create a DefaultWindow called 'Root'.
-	auto d_root = static_cast<CEGUI::DefaultWindow*>(winMgr.createWindow("DefaultWindow", "Root"));
-
-	// load font and setup default if not loaded via scheme
-	CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
-	CEGUI::Font* defaultFont = loadedFonts.empty() ? 0 : loadedFonts.front();
-	// Set default font for the gui context
-	guiContext->setDefaultFont(defaultFont);
-
-	// Set the root window as root of our GUI Context
-	guiContext->setRootWindow(d_root);
-
-	// A FrameWindow is a window with a frame and a titlebar which may be moved around
-	// and resized.
-	//
-	// Create a FrameWindow in the TaharezLook style, and name it 'Sample Window'
-	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
-
-	// Here we attach the newly created FrameWindow to the previously created
-	// DefaultWindow which we will be using as the root of the displayed gui.
-	d_root->addChild(wnd);
-
-	// Windows are in Relative metrics mode by default.  This means that we can
-	// specify sizes and positions without having to know the exact pixel size
-	// of the elements in advance.  The relative metrics mode co-ordinates are
-	// relative to the parent of the window where the co-ordinates are being set.
-	// This means that if 0.5f is specified as the width for a window, that window
-	// will be half as its parent window.
-	//
-	// Here we set the FrameWindow so that it is half the size of the display,
-	// and centered within the display.
-	wnd->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.25f)));
-	wnd->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.5f)));
-
-	// now we set the maximum and minum sizes for the new window.  These are
-	// specified using relative co-ordinates, but the important thing to note
-	// is that these settings are aways relative to the display rather than the
-	// parent window.
-	//
-	// here we set a maximum size for the FrameWindow which is equal to the size
-	// of the display, and a minimum size of one tenth of the display.
-	wnd->setMaxSize(CEGUI::USize(cegui_reldim(1.0f), cegui_reldim(1.0f)));
-	wnd->setMinSize(CEGUI::USize(cegui_reldim(0.1f), cegui_reldim(0.1f)));
-
-	// As a final step in the initialisation of our sample window, we set the window's
-	// text to "Hello World!", so that this text will appear as the caption in the
-	// FrameWindow's titlebar.
-	wnd->setText("Hello World!");
-
-	//wnd->subscribeEvent(CEGUI::Window::EventCursorActivate, Event::Subscriber(&CEGuiBaseApplication::handleHelloWorldClicked, this));
-
-	wnd->setUsingAutoRenderingSurface(false);
-
-	d_inputAggregator = new CEGUI::InputAggregator(d_guiContext);
-	d_inputAggregator->initialise();
+	/*
+	const Sizef& targetSize = d_context->getSurfaceSize();
+	const int width = static_cast<int>(targetSize.d_width);
+	const int height = static_cast<int>(targetSize.d_height);
+	d_sampleApp->setApplicationWindowSize(width, height);
 	*/
-	d_systemInputAggregator = new CEGUI::InputAggregator(&CEGUI::System::getSingletonPtr()->getDefaultGUIContext());
-	d_systemInputAggregator->initialise();
+	d_systemInputAggregator = new CEGUI::InputAggregator(d_context);
+	d_systemInputAggregator->initialise();
 }
 
 void CEGui::initialiseResourceGroupDirectories()
@@ -312,8 +236,13 @@ bool CEGui::resizeHandler(const CEGUI::EventArgs& /*args*/)
 
 	d_FPSValue = 0;
 
-	// 		const CEGUI::Rectf& area(CEGUI::System::getSingleton().getRenderer()->getDefaultRenderTarget().getArea());
-	// 		d_sampleApp->handleNewWindowSize(area.getWidth(), area.getHeight());
+	if (!d_context)
+		return true;
+
+// 	const Sizef& rtSize = d_context->getSurfaceSize();
+// 	const int width = static_cast<int>(rtSize.d_width);
+// 	const int height = static_cast<int>(rtSize.d_height);
+// 	d_sampleApp->handleNewWindowSize(width, height);
 
 	updateLogoGeometry();
 	updateFPSGeometry();
@@ -328,11 +257,12 @@ bool CEGui::sampleBrowserOverlayHandler(const CEGUI::EventArgs& args)
 		return false;
 
 	// draw the logo
-// 	d_renderer->uploadBuffers(d_logoGeometry);
-// 	const size_t logo_buffer_count = d_logoGeometry.size();
-// 	for (size_t i = 0; i < logo_buffer_count; ++i) {
-// 		d_logoGeometry[i]->draw();
-// 	}
+	d_renderer->uploadBuffers(d_logoGeometry);
+	const size_t logo_buffer_count = d_logoGeometry.size();
+	for (size_t i = 0; i < logo_buffer_count; ++i)
+	{
+		d_logoGeometry[i]->draw();
+	}
 
 	// draw FPS value
 	d_renderer->uploadBuffers(d_FPSGeometry);
@@ -361,12 +291,13 @@ bool CEGui::sampleOverlayHandler(const CEGUI::EventArgs& args)
 //----------------------------------------------------------------------------//
 void CEGui::updateFPS(const float elapsed)
 {
-	/*
 	// another frame
 	++d_FPSFrames;
 
-	if ((d_FPSElapsed += elapsed) >= 1.0f) {
-		if (d_FPSFrames != d_FPSValue) {
+	if ((d_FPSElapsed += elapsed) >= 1.0f)
+	{
+		if (d_FPSFrames != d_FPSValue)
+		{
 			d_FPSValue = d_FPSFrames;
 
 			CEGUI::Font* fnt = &CEGUI::FontManager::getSingleton().get("DejaVuSans-12");
@@ -398,29 +329,6 @@ void CEGui::updateFPS(const float elapsed)
 		float modValue = 1.0f;
 		d_FPSElapsed = std::modf(d_FPSElapsed, &modValue);
 	}
-	*/
-
-	CEGUI::Font* fnt = &CEGUI::FontManager::getSingleton().get("DejaVuSans-12");
-	if (!fnt)
-		return;
-
-	// update FPS imagery
-	std::stringstream sstream;
-	sstream << "FPS: ";// << d_FPSValue;
-
-	const size_t bufferCount = d_FPSGeometry.size();
-	for (size_t i = 0; i < bufferCount; ++i)
-		d_renderer->destroyGeometryBuffer(*d_FPSGeometry.at(i));
-	d_FPSGeometry.clear();
-
-	auto textGeomBuffers = fnt->createTextRenderGeometry(
-		sstream.str(), glm::vec2(0, 0), nullptr, false,
-		CEGUI::Colour(0xFFFFFFFF), CEGUI::DefaultParagraphDirection::LeftToRight);
-
-	d_FPSGeometry.insert(d_FPSGeometry.end(), textGeomBuffers.begin(),
-		textGeomBuffers.end());
-
-	updateFPSGeometry();
 }
 
 //----------------------------------------------------------------------------//
@@ -441,11 +349,15 @@ void CEGui::updateLogo(const float elapsed)
 
 void CEGui::updateLogoGeometry()
 {
-	const CEGUI::Rectf scrn(d_renderer->getDefaultRenderTarget().getArea());
+	if (!d_context)
+		return;
+
+	const CEGUI::Rectf scrn(d_context->getRenderTarget().getArea());
 	const glm::vec3 position(10.0f, scrn.getSize().d_height - 89.0f, 0.0f);
 
 	const size_t bufferCount = d_logoGeometry.size();
-	for (size_t i = 0; i < bufferCount; ++i) {
+	for (size_t i = 0; i < bufferCount; ++i)
+	{
 		d_logoGeometry[i]->setClippingRegion(scrn);
 		d_logoGeometry[i]->setTranslation(position);
 	}
@@ -454,11 +366,15 @@ void CEGui::updateLogoGeometry()
 //----------------------------------------------------------------------------//
 void CEGui::updateFPSGeometry()
 {
-	const CEGUI::Rectf scrn(d_renderer->getDefaultRenderTarget().getArea());
+	if (!d_context)
+		return;
+
+	const CEGUI::Rectf scrn(d_context->getRenderTarget().getArea());
 	const glm::vec3 position(scrn.getSize().d_width - 120.0f, 0.0f, 0.0f);
 
 	const size_t bufferCount = d_FPSGeometry.size();
-	for (size_t i = 0; i < bufferCount; ++i) {
+	for (size_t i = 0; i < bufferCount; ++i)
+	{
 		d_FPSGeometry[i]->setClippingRegion(scrn);
 		d_FPSGeometry[i]->setTranslation(position);
 	}
@@ -486,7 +402,7 @@ void CEGui::Update(float timeStep)
 	gui_system.injectTimePulse(timeStep);
 
 	// TODO: current context inject time pulse;
-	gui_system.getDefaultGUIContext().injectTimePulse(timeStep);
+	d_context->injectTimePulse(timeStep);
 	//gui_system.getDefaultGUIContext().getRootWindow()->invalidate(true);
 // 	d_guiContext->injectTimePulse(timeStep);
 // 
@@ -511,7 +427,7 @@ void CEGui::Render()
 	//d_sampleApp->renderGUIContexts();
 	//CEGUI::System& gui_system(CEGUI::System::getSingleton());
 
-	gui_system.getDefaultGUIContext().draw();
+	d_context->draw();
 
 	//d_guiContext->draw();
 
