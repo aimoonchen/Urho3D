@@ -398,20 +398,20 @@ CEGUI::InputAggregator* CEGui::getCurrentInputAggregator()
 
 void CEGui::Update(float timeStep)
 {
+	return;
 	CEGUI::System& gui_system(CEGUI::System::getSingleton());
 	gui_system.injectTimePulse(timeStep);
 
-	// TODO: current context inject time pulse;
 	d_context->injectTimePulse(timeStep);
-	//gui_system.getDefaultGUIContext().getRootWindow()->invalidate(true);
 // 	d_guiContext->injectTimePulse(timeStep);
 // 
-// 	updateFPS(timeStep);
-// 	updateLogo(timeStep);
+ 	updateFPS(timeStep);
+ 	updateLogo(timeStep);
 }
 
 void CEGui::Render()
 {
+	return;
 	CEGUI::System& gui_system(CEGUI::System::getSingleton());
 	//		gui_system.injectTimePulse(elapsed);
 	// 		d_sampleApp->update(static_cast<float>(elapsed));
