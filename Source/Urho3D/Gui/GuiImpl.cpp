@@ -70,7 +70,27 @@ void CEGui::Initialize(Graphics* graphics)
 	initDataPathPrefix(dataPathPrefixOverride);
 	initialiseResourceGroupDirectories();
 	initialiseDefaultResourceGroups();
-	
+
+#ifdef DISABLE_CEGUI
+	return;
+#endif
+
+	// Create a custom font which we use to draw the list items. This custom
+	// font won't get effected by the scaler and such.
+	CEGUI::FontManager& fontManager(CEGUI::FontManager::getSingleton());
+	//CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
+	CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("msyh-14.font");
+	//CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("FZZYJ-14.font");
+	CEGUI::Font* defaultFont = loadedFonts.empty() ? 0 : loadedFonts.front();
+	// Set it as the default
+	d_context->setDefaultFont(defaultFont);
+
+	// load all the fonts (if they are not loaded yet)
+	//fontManager.createAll("*.font", "fonts");
+
+	auto FZZYJFonts = CEGUI::FontManager::getSingleton().createFromFile("FZZYJ-14.font");
+	auto FZZYJFont = loadedFonts.empty() ? 0 : loadedFonts.front();
+
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
 	auto root = static_cast<CEGUI::DefaultWindow*>(winMgr.createWindow("DefaultWindow", "Root"));
 	d_context->setRootWindow(root);
@@ -83,7 +103,22 @@ void CEGui::Initialize(Graphics* graphics)
 	wnd->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.5f)));
 	wnd->setMaxSize(CEGUI::USize(cegui_reldim(1.0f), cegui_reldim(1.0f)));
 	wnd->setMinSize(CEGUI::USize(cegui_reldim(0.1f), cegui_reldim(0.1f)));
-	wnd->setText("Hello World!");
+	//wnd->setFont(FZZYJFont);
+	wnd->setText(CEGUI::String(U"Hello World!【标题栏】"));
+
+	auto label0 = winMgr.createWindow("TaharezLook/StaticText", "testLabel0");
+	root->addChild(label0);
+	label0->setFont("msyh-14");
+	label0->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.75f)));
+	label0->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.1f)));
+	label0->setText(U"惟草木之零落兮，恐美人之迟暮。则为你如花美眷，似水流年。");
+
+	auto label1 = winMgr.createWindow("TaharezLook/StaticText", "testLabel1");
+	root->addChild(label1);
+	label1->setFont("FZZYJ-14");
+	label1->setPosition(CEGUI::UVector2(cegui_reldim(0.25f), cegui_reldim(0.85f)));
+	label1->setSize(CEGUI::USize(cegui_reldim(0.5f), cegui_reldim(0.1f)));
+	label1->setText(U"惟草木之零落兮，恐美人之迟暮。则为你如花美眷，似水流年。");
 
 	//auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/ImageButton", "TestButton"));
 	auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/Button", "TestButton"));
@@ -115,8 +150,7 @@ void CEGui::Initialize(Graphics* graphics)
 	bar->setSize(CEGUI::USize(cegui_absdim(100.f), cegui_absdim(32.f)));
 	bar->setPosition(CEGUI::UVector2(cegui_absdim(50.0f), cegui_absdim(150.0f)));
 	bar->setProgress(0.5f);
-	
-	
+
 	// create logo imageset and draw the image (we only ever draw this once)
 	CEGUI::ImageManager::getSingleton().addBitmapImageFromFile("cegui_logo", "logo.png");
 
@@ -398,7 +432,9 @@ CEGUI::InputAggregator* CEGui::getCurrentInputAggregator()
 
 void CEGui::Update(float timeStep)
 {
+#ifdef DISABLE_CEGUI
 	return;
+#endif
 	CEGUI::System& gui_system(CEGUI::System::getSingleton());
 	gui_system.injectTimePulse(timeStep);
 
@@ -411,7 +447,9 @@ void CEGui::Update(float timeStep)
 
 void CEGui::Render()
 {
+#ifdef DISABLE_CEGUI
 	return;
+#endif
 	CEGUI::System& gui_system(CEGUI::System::getSingleton());
 	//		gui_system.injectTimePulse(elapsed);
 	// 		d_sampleApp->update(static_cast<float>(elapsed));

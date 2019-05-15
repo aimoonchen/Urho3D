@@ -1580,7 +1580,9 @@ namespace Urho3D
 
 			return;
 		}
-
+#ifdef DISABLE_CEGUI
+		return;
+#endif
 		gui_impl_->injectKeyDown(urho3DKeyToCeguiKey(key));
 
 // 		// Dismiss modal element if any when ESC key is pressed
@@ -1644,6 +1646,9 @@ namespace Urho3D
 	
 	void Gui::HandleKeyUp(StringHash eventType, VariantMap& eventData)
 	{
+#ifdef DISABLE_CEGUI
+		return;
+#endif
 		using namespace KeyUp;
 
 		mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
@@ -1871,6 +1876,9 @@ namespace Urho3D
 
 	void Gui::OnMouseButtonDown(MouseButton mouseButtons)
 	{
+#ifdef DISABLE_CEGUI
+		return;
+#endif
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
 		if (mouseButtons == MOUSEB_LEFT) {
 			mb = CEGUI::MouseButton::Left;
@@ -1886,6 +1894,9 @@ namespace Urho3D
 
 	void Gui::OnMouseButtonUp(MouseButton mouseButtons)
 	{
+#ifdef DISABLE_CEGUI
+		return;
+#endif
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
 		if (mouseButtons == MOUSEB_LEFT) {
 			mb = CEGUI::MouseButton::Left;
@@ -1901,7 +1912,9 @@ namespace Urho3D
 
 	void Gui::OnMouseMove(float x, float y)
 	{
-
+#ifdef DISABLE_CEGUI
+		return;
+#endif
 		gui_impl_->injectMousePosition(x, y);
 	}
 }

@@ -3,6 +3,8 @@
 #include "Container/Str.h"
 #include "CEGUI/InputEvent.h"
 
+#define DISABLE_CEGUI 1
+
 namespace CEGUI {
 class Renderer;
 class ImageCodec;

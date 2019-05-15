@@ -153,7 +153,7 @@ void Water::CreateScene()
     water->SetMaterial(cache->GetResource<Material>("Materials/Water.xml"));
     // Set a different viewmask on the water plane to be able to hide it from the reflection camera
     water->SetViewMask(0x80000000);
-
+	
     // Create the camera. Set far clip to match the fog. Note: now we actually create the camera node outside
     // the scene, because we want it to be unaffected by scene load / save
     cameraNode_ = new Node(context_);

@@ -51,15 +51,33 @@
 
 URHO3D_DEFINE_APPLICATION_MAIN(CharacterDemo)
 
+constexpr int WINDOW_WIDTH = 1280;
+constexpr int WINDOW_HEIGHT = 720;
+
 CharacterDemo::CharacterDemo(Context* context) :
     Sample(context),
     firstPerson_(false)
 {
     // Register factory and attributes for the Character component so it can be created via CreateComponent, and loaded / saved
     Character::RegisterObject(context);
+
+	FILE* new_file;
+	AllocConsole();
+	freopen_s(&new_file, "CONIN$", "r", stdin);
+	freopen_s(&new_file, "CONOUT$", "w", stdout);
+	freopen_s(&new_file, "CONOUT$", "w", stderr);
+	SetConsoleOutputCP(CP_UTF8);
 }
 
 CharacterDemo::~CharacterDemo() = default;
+
+void CharacterDemo::Setup()
+{
+	Sample::Setup();
+	engineParameters_[EP_WINDOW_WIDTH] = WINDOW_WIDTH;
+	engineParameters_[EP_WINDOW_HEIGHT] = WINDOW_HEIGHT;
+	//engineParameters_[EP_TOUCH_EMULATION] = true;
+}
 
 void CharacterDemo::Start()
 {
@@ -81,7 +99,15 @@ void CharacterDemo::Start()
     SubscribeToEvents();
 
     // Set the mouse mode to use in the sample
-    Sample::InitMouseMode(MM_RELATIVE);
+    Sample::InitMouseMode(MM_ABSOLUTE/*MM_RELATIVE*/);
+	auto* input = GetSubsystem<Input>();
+	input->SetMouseVisible(true);
+}
+
+void CharacterDemo::Stop()
+{
+	FreeConsole();
+	Sample::Stop();
 }
 
 void CharacterDemo::CreateScene()
@@ -253,12 +279,17 @@ void CharacterDemo::SubscribeToEvents()
 
     // Unsubscribe the SceneUpdate event from base class as the camera node is being controlled in HandlePostUpdate() in this sample
     UnsubscribeFromEvent(E_SCENEUPDATE);
+
+	SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(CharacterDemo, HandleMouseButtonDown));
+	SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(CharacterDemo, HandleMouseButtonUp));
+	//SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(CharacterDemo, HandleMouseMove));
+	SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(CharacterDemo, HandleMouseWheel));
 }
 
 void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-    using namespace Update;
-
+	using namespace Update;
+	
     auto* input = GetSubsystem<Input>();
 
     if (character_)
@@ -307,10 +338,14 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
                 character_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
             }
             // Limit pitch
-            character_->controls_.pitch_ = Clamp(character_->controls_.pitch_, -80.0f, 80.0f);
+            //character_->controls_.pitch_ = Clamp(character_->controls_.pitch_, -80.0f, 80.0f);
             // Set rotation already here so that it's updated every rendering frame instead of every physics frame
-            character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
-
+            //character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
+			if (target_pos_.Equals(character_->GetNode()->GetWorldPosition()))
+			{
+				character_->controls_.Set(CTRL_FORWARD, false);
+			}
+			
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
                 firstPerson_ = !firstPerson_;
@@ -347,37 +382,192 @@ void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData
     Node* characterNode = character_->GetNode();
 
     // Get camera lookat dir from character yaw + pitch
-    const Quaternion& rot = characterNode->GetRotation();
-    Quaternion dir = rot * Quaternion(character_->controls_.pitch_, Vector3::RIGHT);
+//     const Quaternion& rot = characterNode->GetRotation();
+//     Quaternion dir = rot * Quaternion(character_->controls_.pitch_, Vector3::RIGHT);
+// 
+//     // Turn head to camera pitch, but limit to avoid unnatural animation
+//     Node* headNode = characterNode->GetChild("Mutant:Head", true);
+//     float limitPitch = Clamp(character_->controls_.pitch_, -45.0f, 45.0f);
+//     Quaternion headDir = rot * Quaternion(limitPitch, Vector3(1.0f, 0.0f, 0.0f));
+//     // This could be expanded to look at an arbitrary target, now just look at a point in front
+//     Vector3 headWorldTarget = headNode->GetWorldPosition() + headDir * Vector3(0.0f, 0.0f, -1.0f);
+//     headNode->LookAt(headWorldTarget, Vector3(0.0f, 1.0f, 0.0f));
 
-    // Turn head to camera pitch, but limit to avoid unnatural animation
-    Node* headNode = characterNode->GetChild("Mutant:Head", true);
-    float limitPitch = Clamp(character_->controls_.pitch_, -45.0f, 45.0f);
-    Quaternion headDir = rot * Quaternion(limitPitch, Vector3(1.0f, 0.0f, 0.0f));
-    // This could be expanded to look at an arbitrary target, now just look at a point in front
-    Vector3 headWorldTarget = headNode->GetWorldPosition() + headDir * Vector3(0.0f, 0.0f, -1.0f);
-    headNode->LookAt(headWorldTarget, Vector3(0.0f, 1.0f, 0.0f));
-
-    if (firstPerson_)
-    {
-        cameraNode_->SetPosition(headNode->GetWorldPosition() + rot * Vector3(0.0f, 0.15f, 0.2f));
-        cameraNode_->SetRotation(dir);
-    }
-    else
-    {
-        // Third person camera: position behind the character
-        Vector3 aimPoint = characterNode->GetPosition() + rot * Vector3(0.0f, 1.7f, 0.0f);
-
-        // Collide camera ray with static physics objects (layer bitmask 2) to ensure we see the character properly
-        Vector3 rayDir = dir * Vector3::BACK;
-        float rayDistance = touch_ ? touch_->cameraDistance_ : CAMERA_INITIAL_DIST;
-        PhysicsRaycastResult result;
-        scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, Ray(aimPoint, rayDir), rayDistance, 2);
-        if (result.body_)
-            rayDistance = Min(rayDistance, result.distance_);
-        rayDistance = Clamp(rayDistance, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
-
-        cameraNode_->SetPosition(aimPoint + rayDir * rayDistance);
-        cameraNode_->SetRotation(dir);
-    }
+	cameraNode_->SetPosition(characterNode->GetWorldPosition() + Vector3(0.0f, 10.0f, -10.0f));
+	cameraNode_->LookAt(characterNode->GetWorldPosition());
+	return;
+//     if (firstPerson_)
+//     {
+//         cameraNode_->SetPosition(headNode->GetWorldPosition() + rot * Vector3(0.0f, 0.15f, 0.2f));
+//         cameraNode_->SetRotation(dir);
+//     }
+//     else
+//     {
+//         // Third person camera: position behind the character
+//         Vector3 aimPoint = characterNode->GetPosition() + rot * Vector3(0.0f, 1.7f, 0.0f);
+// 
+//         // Collide camera ray with static physics objects (layer bitmask 2) to ensure we see the character properly
+//         Vector3 rayDir = dir * Vector3::BACK;
+//         float rayDistance = touch_ ? touch_->cameraDistance_ : CAMERA_INITIAL_DIST;
+//         PhysicsRaycastResult result;
+//         scene_->GetComponent<PhysicsWorld>()->RaycastSingle(result, Ray(aimPoint, rayDir), rayDistance, 2);
+//         if (result.body_)
+//             rayDistance = Min(rayDistance, result.distance_);
+//         rayDistance = Clamp(rayDistance, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+// 
+//         cameraNode_->SetPosition(aimPoint + rayDir * rayDistance);
+//         cameraNode_->SetRotation(dir);
+//     }
 }
+
+void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
+{
+	using namespace MouseButtonDown;
+
+// 	mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
+// 	qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetUInt());
+// 	usingTouchInput_ = false;
+
+	IntVector2 cursorPos;
+	//bool cursorVisible;
+	//GetCursorPositionAndVisible(cursorPos, cursorVisible);
+	auto* input = GetSubsystem<Input>();
+	cursorPos = input->GetMousePosition();
+	auto button = MouseButton(eventData[P_BUTTON].GetUInt());
+	if (button == MOUSEB_LEFT)
+	{
+// 		auto* camera = cameraNode_->GetComponent<Camera>();
+// 		auto clickRay = camera->GetScreenRay(cursorPos.x_ / WINDOW_WIDTH, cursorPos.x_ / WINDOW_HEIGHT);
+// 		static Plane groundPlane{ Vector3{ 0.0f, 1.0f, 0.0f }, Vector3{ 0.0f, 0.0f, 0.0f } };
+// 		clickRay.HitDistance(groundPlane);
+// 		RayOctreeQuery query{ clickRay , };
+// 		scene_->GetComponent<Octree>()->Raycast(query, clickRay);
+
+		auto* graphics = GetSubsystem<Graphics>();
+		auto* camera = cameraNode_->GetComponent<Camera>();
+		Ray cameraRay = camera->GetScreenRay((float)cursorPos.x_ / graphics->GetWidth(), (float)cursorPos.y_ / graphics->GetHeight());
+		// Pick only geometry objects, not eg. zones or lights, only get the first (closest) hit
+		PODVector<RayQueryResult> results;
+		RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 250.0f, DRAWABLE_GEOMETRY);
+		scene_->GetComponent<Octree>()->RaycastSingle(query);
+
+		if (!results.Empty())
+		{
+			target_pos_ = results[0].position_;
+			character_->GetNode()->LookAt(target_pos_, Vector3::UP);
+			character_->controls_.Set(CTRL_FORWARD, true);
+		}
+		
+	}
+	// Handle drag cancelling
+// 	ProcessDragCancel();
+// 
+// 	auto* input = GetSubsystem<Input>();
+// 
+// 	if (!input->IsMouseGrabbed())
+// 		ProcessClickBegin(cursorPos, MouseButton(eventData[P_BUTTON].GetUInt()), mouseButtons_, qualifiers_, cursor_, cursorVisible);
+}
+
+void CharacterDemo::HandleMouseButtonUp(StringHash eventType, VariantMap& eventData)
+{
+// 	using namespace MouseButtonUp;
+// 
+// 	mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
+// 	qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetUInt());
+// 
+// 	IntVector2 cursorPos;
+// 	bool cursorVisible;
+// 	GetCursorPositionAndVisible(cursorPos, cursorVisible);
+// 
+// 	ProcessClickEnd(cursorPos, (MouseButton)eventData[P_BUTTON].GetUInt(), mouseButtons_, qualifiers_, cursor_, cursorVisible);
+}
+
+// void CharacterDemo::HandleMouseMove(StringHash eventType, VariantMap& eventData)
+// {
+// 	using namespace MouseMove;
+// 
+// 	mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
+// 	qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetUInt());
+// 	usingTouchInput_ = false;
+// 
+// 	auto* input = GetSubsystem<Input>();
+// 	const IntVector2& rootSize = rootElement_->GetSize();
+// 	const IntVector2& rootPos = rootElement_->GetPosition();
+// 
+// 	IntVector2 DeltaP = IntVector2(eventData[P_DX].GetInt(), eventData[P_DY].GetInt());
+// 
+// 	if (cursor_)
+// 	{
+// 		if (!input->IsMouseVisible())
+// 		{
+// 			if (!input->IsMouseLocked())
+// 				cursor_->SetPosition(IntVector2(eventData[P_X].GetInt(), eventData[P_Y].GetInt()));
+// 			else if (cursor_->IsVisible())
+// 			{
+// 				// Relative mouse motion: move cursor only when visible
+// 				IntVector2 pos = cursor_->GetPosition();
+// 				pos.x_ += eventData[P_DX].GetInt();
+// 				pos.y_ += eventData[P_DY].GetInt();
+// 				pos.x_ = Clamp(pos.x_, rootPos.x_, rootPos.x_ + rootSize.x_ - 1);
+// 				pos.y_ = Clamp(pos.y_, rootPos.y_, rootPos.y_ + rootSize.y_ - 1);
+// 				cursor_->SetPosition(pos);
+// 			}
+// 		}
+// 		else
+// 		{
+// 			// Absolute mouse motion: move always
+// 			cursor_->SetPosition(IntVector2(eventData[P_X].GetInt(), eventData[P_Y].GetInt()));
+// 		}
+// 	}
+// 
+// 	IntVector2 cursorPos;
+// 	bool cursorVisible;
+// 	GetCursorPositionAndVisible(cursorPos, cursorVisible);
+// 
+// 	ProcessMove(cursorPos, DeltaP, mouseButtons_, qualifiers_, cursor_, cursorVisible);
+// }
+
+void CharacterDemo::HandleMouseWheel(StringHash eventType, VariantMap& eventData)
+{
+// 	auto* input = GetSubsystem<Input>();
+// 	if (input->IsMouseGrabbed())
+// 		return;
+// 
+// 	using namespace MouseWheel;
+// 
+// 	mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetInt());
+// 	qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetInt());
+// 	int delta = eventData[P_WHEEL].GetInt();
+// 	usingTouchInput_ = false;
+// 
+// 	IntVector2 cursorPos;
+// 	bool cursorVisible;
+// 	GetCursorPositionAndVisible(cursorPos, cursorVisible);
+// 
+// 	if (!nonFocusedMouseWheel_ && focusElement_)
+// 		focusElement_->OnWheel(delta, mouseButtons_, qualifiers_);
+// 	else
+// 	{
+// 		// If no element has actual focus or in non-focused mode, get the element at cursor
+// 		if (cursorVisible)
+// 		{
+// 			UIElement* element = GetElementAt(cursorPos);
+// 			if (nonFocusedMouseWheel_)
+// 			{
+// 				// Going up the hierarchy chain to find element that could handle mouse wheel
+// 				while (element && !element->IsWheelHandler())
+// 				{
+// 					element = element->GetParent();
+// 				}
+// 			}
+// 			else
+// 				// If the element itself is not focusable, search for a focusable parent,
+// 				// although the focusable element may not actually handle mouse wheel
+// 				element = GetFocusableElement(element);
+// 
+// 			if (element && (nonFocusedMouseWheel_ || element->GetFocusMode() >= FM_FOCUSABLE))
+// 				element->OnWheel(delta, mouseButtons_, qualifiers_);
+// 		}
+// 	}
+}
+

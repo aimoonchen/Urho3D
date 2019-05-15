@@ -53,9 +53,11 @@ public:
     /// Destruct.
     ~CharacterDemo() override;
 
+	void Setup() override;
+
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
-
+	void Stop() override;
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
     String GetScreenJoystickPatchString() const override { return
@@ -117,10 +119,19 @@ private:
     /// Handle application post-update. Update camera position after character has moved.
     void HandlePostUpdate(StringHash eventType, VariantMap& eventData);
 
+	void HandleMouseButtonDown(StringHash eventType, VariantMap& eventData);
+	/// Handle mouse button up event.
+	void HandleMouseButtonUp(StringHash eventType, VariantMap& eventData);
+	/// Handle mouse move event.
+	//void HandleMouseMove(StringHash eventType, VariantMap& eventData);
+	/// Handle mouse wheel event.
+	void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
+
     /// Touch utility object.
     SharedPtr<Touch> touch_;
     /// The controllable character component.
     WeakPtr<Character> character_;
+	Vector3 target_pos_{ 0.0f, 0.0f, 0.0f };
     /// First person camera flag.
     bool firstPerson_;
 };
