@@ -295,7 +295,7 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     if (character_)
     {
         // Clear previous controls
-        character_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP, false);
+        //character_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP, false);
 
         // Update controls using touch utility class
         if (touch_)
@@ -307,10 +307,10 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
         {
             if (!touch_ || !touch_->useGyroscope_)
             {
-                character_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-                character_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-                character_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-                character_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+//                 character_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+//                 character_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+//                 character_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+//                 character_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             }
             character_->controls_.Set(CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
 
@@ -341,7 +341,9 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             //character_->controls_.pitch_ = Clamp(character_->controls_.pitch_, -80.0f, 80.0f);
             // Set rotation already here so that it's updated every rendering frame instead of every physics frame
             //character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
-			if (target_pos_.Equals(character_->GetNode()->GetWorldPosition()))
+			
+			auto dist = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
+			if (dist < 0.1f)
 			{
 				character_->controls_.Set(CTRL_FORWARD, false);
 			}
