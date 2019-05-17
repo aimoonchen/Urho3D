@@ -334,8 +334,8 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             }
             else
             {
-                character_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
-                character_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
+//                 character_->controls_.yaw_ += (float)input->GetMouseMoveX() * YAW_SENSITIVITY;
+//                 character_->controls_.pitch_ += (float)input->GetMouseMoveY() * YAW_SENSITIVITY;
             }
             // Limit pitch
             //character_->controls_.pitch_ = Clamp(character_->controls_.pitch_, -80.0f, 80.0f);
@@ -343,10 +343,19 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             //character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
 			
 			auto dist = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
-			if (dist < 0.1f)
+			if (last_dist_ + 0.01f < dist)
 			{
+				last_dist_ = 0.0f;
 				character_->controls_.Set(CTRL_FORWARD, false);
 			}
+			else
+			{
+				last_dist_ = dist;
+			}
+// 			if (dist < 0.2f)
+// 			{
+// 				character_->controls_.Set(CTRL_FORWARD, false);
+// 			}
 			
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
@@ -455,9 +464,21 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 
 		if (!results.Empty())
 		{
-			target_pos_ = results[0].position_;
-			character_->GetNode()->LookAt(target_pos_, Vector3::UP);
-			character_->controls_.Set(CTRL_FORWARD, true);
+			if (true/*results[0].node_ == scene_->GetChild("Floor")*/)
+			{
+				target_pos_ = results[0].position_;
+				target_pos_ = target_pos_.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
+				//character_->GetNode()->LookAt(target_pos_, Vector3::UP);
+				character_->controls_.Set(CTRL_FORWARD, true);
+				last_dist_ = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
+
+				auto ch_pos = character_->GetNode()->GetWorldPosition();
+				ch_pos = ch_pos.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
+				target_dir_ = target_pos_ - ch_pos;
+				end_rot_.FromRotationTo(Vector3::FORWARD, target_dir_);
+
+				start_rot_ = character_->GetNode()->GetWorldRotation();
+			}
 		}
 		
 	}

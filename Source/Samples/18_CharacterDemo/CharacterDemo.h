@@ -132,6 +132,11 @@ private:
     /// The controllable character component.
     WeakPtr<Character> character_;
 	Vector3 target_pos_{ 0.0f, 0.0f, 0.0f };
+	Vector3 target_dir_{ 0.0f, 0.0f, 0.0f };
+	float target_angel_;
+	float last_dist_{ 0.0f };
+	Quaternion start_rot_;
+	Quaternion end_rot_;
     /// First person camera flag.
     bool firstPerson_;
 };
