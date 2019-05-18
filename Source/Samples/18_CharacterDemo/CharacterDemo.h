@@ -35,6 +35,43 @@ class Scene;
 class Character;
 class Touch;
 
+struct TweenOneTime
+{
+	void Init(const Quaternion& start, const Quaternion& end, float start_time, float duration)
+	{
+		finished_ = false;
+		quat_start_ = start;
+		quat_end_ = end;
+		start_time_ = start_time;
+		end_time_ = start_time + duration;
+		duration_ = duration;
+	}
+	bool IsFinished() const { return finished_; }
+	Quaternion GetValue(float elapsedTime)
+	{
+		if (finished_)
+		{
+			return quat_end_;
+		}
+		if (elapsedTime >= end_time_)
+		{
+			finished_ = true;
+			return quat_end_;
+		}
+		printf("elapsedTime %f\n", elapsedTime);
+		auto factor = (elapsedTime - start_time_) / (end_time_ - start_time_);
+		
+		auto ret = quat_start_.Slerp(quat_end_, factor);
+		printf("factor : %f angle : %f\n", factor, ret.Angle());
+		return ret;
+	}
+	bool finished_{ false };
+	float duration_;
+	float start_time_;
+	float end_time_;
+	Quaternion quat_start_;
+	Quaternion quat_end_;
+};
 /// Moving character example.
 /// This sample demonstrates:
 ///     - Controlling a humanoid character through physics
@@ -137,6 +174,7 @@ private:
 	float last_dist_{ 0.0f };
 	Quaternion start_rot_;
 	Quaternion end_rot_;
+	TweenOneTime rot_one_time_;
     /// First person camera flag.
     bool firstPerson_;
 };

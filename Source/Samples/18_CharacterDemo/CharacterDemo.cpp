@@ -343,20 +343,27 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             //character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
 			
 			auto dist = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
-			if (last_dist_ + 0.01f < dist)
-			{
-				last_dist_ = 0.0f;
-				character_->controls_.Set(CTRL_FORWARD, false);
-			}
-			else
-			{
-				last_dist_ = dist;
-			}
-// 			if (dist < 0.2f)
+// 			if (last_dist_ + 0.1f < dist)
 // 			{
+// 				printf("last_dist_ %f, dist %f\n", last_dist_, dist);
+// 				last_dist_ = 0.0f;
 // 				character_->controls_.Set(CTRL_FORWARD, false);
 // 			}
-			
+// 			else
+// 			{
+// 				last_dist_ = dist;
+// 			}
+
+			if (dist < 0.2f)
+			{
+				character_->controls_.Set(CTRL_FORWARD, false);
+			}
+			printf("	dist %f\n", dist);
+			if (!rot_one_time_.IsFinished())
+			{
+				auto* time = GetSubsystem<Time>();
+				character_->GetNode()->SetWorldRotation(rot_one_time_.GetValue(time->GetElapsedTime()));
+			}
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
                 firstPerson_ = !firstPerson_;
@@ -478,6 +485,11 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 				end_rot_.FromRotationTo(Vector3::FORWARD, target_dir_);
 
 				start_rot_ = character_->GetNode()->GetWorldRotation();
+				auto* time = GetSubsystem<Time>();
+				//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
+				rot_one_time_.Init(start_rot_, end_rot_, time->GetElapsedTime(), 0.5f);
+
+				//printf("target_pos_ : %f,%f,%f\n", target_pos_.x_, target_pos_.y_, target_pos_.z_);
 			}
 		}
 		
