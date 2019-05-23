@@ -46,6 +46,7 @@ struct TweenOneTime
 		end_time_ = start_time + duration;
 		duration_ = duration;
 	}
+	float GetDuration() const { return duration_; }
 	bool IsFinished() const { return finished_; }
 	Quaternion GetValue(float elapsedTime)
 	{
@@ -164,6 +165,7 @@ private:
 	/// Handle mouse wheel event.
 	void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
 
+	Quaternion GetEndRotate();
     /// Touch utility object.
     SharedPtr<Touch> touch_;
     /// The controllable character component.
@@ -172,6 +174,8 @@ private:
 	Vector3 target_dir_{ 0.0f, 0.0f, 0.0f };
 	float target_angel_;
 	float last_dist_{ 0.0f };
+	bool touch_target_pos_{ true };
+
 	Quaternion start_rot_;
 	Quaternion end_rot_;
 	TweenOneTime rot_one_time_;

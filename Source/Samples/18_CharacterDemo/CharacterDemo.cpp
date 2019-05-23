@@ -24,6 +24,7 @@
 #include <Urho3D/Core/ProcessUtils.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Light.h>
@@ -43,6 +44,7 @@
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
 
+#include "Mover.h"
 #include "Character.h"
 #include "CharacterDemo.h"
 #include "Touch.h"
@@ -60,6 +62,7 @@ CharacterDemo::CharacterDemo(Context* context) :
 {
     // Register factory and attributes for the Character component so it can be created via CreateComponent, and loaded / saved
     Character::RegisterObject(context);
+	context->RegisterFactory<Mover>();
 
 	FILE* new_file;
 	AllocConsole();
@@ -192,7 +195,9 @@ void CharacterDemo::CreateScene()
         objectNode->SetScale(scale);
         auto* object = objectNode->CreateComponent<StaticModel>();
         object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-        object->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+		//object->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+		object->SetMaterial(cache->GetResource<Material>("Materials/GreenTransparent.xml"));
+		object->GetMaterial()->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.55f});
         object->SetCastShadows(true);
 
         auto* body = objectNode->CreateComponent<RigidBody>();
@@ -245,6 +250,43 @@ void CharacterDemo::CreateCharacter()
     // Remember it so that we can set the controls. Use a WeakPtr because the scene hierarchy already owns it
     // and keeps it alive as long as it's not removed from the hierarchy
     character_ = objectNode->CreateComponent<Character>();
+
+	const unsigned NUM_MODELS = 5;
+	const float MODEL_MOVE_SPEED = 2.0f;
+	const float MODEL_ROTATE_SPEED = 100.0f;
+	const BoundingBox bounds(Vector3(-20.0f, 0.0f, -20.0f), Vector3(20.0f, 0.0f, 20.0f));
+
+	for (unsigned i = 0; i < NUM_MODELS; ++i)
+	{
+		Node* modelNode = scene_->CreateChild("Jill");
+		modelNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 0.0f, Random(40.0f) - 20.0f));
+		modelNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+
+		auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
+		modelObject->SetModel(cache->GetResource<Model>("Models/Kachujin/Kachujin.mdl"));
+		modelObject->SetMaterial(cache->GetResource<Material>("Models/Kachujin/Materials/Kachujin.xml"));
+		modelObject->SetCastShadows(true);
+
+		// Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance the
+		// animation, The alternative would be to use an AnimationController component which updates the animation automatically,
+		// but we need to update the model's position manually in any case
+		auto* walkAnimation = cache->GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
+
+		AnimationState* state = modelObject->AddAnimationState(walkAnimation);
+		// The state would fail to create (return null) if the animation was not found
+		if (state)
+		{
+			// Enable full blending weight and looping
+			state->SetWeight(1.0f);
+			state->SetLooped(true);
+			state->SetTime(Random(walkAnimation->GetLength()));
+		}
+
+		// Create our custom Mover component that will move & animate the model during each frame's update
+		auto* mover = modelNode->CreateComponent<Mover>();
+		mover->SetParameters(MODEL_MOVE_SPEED, MODEL_ROTATE_SPEED, bounds);
+	}
+
 }
 
 void CharacterDemo::CreateInstructions()
@@ -362,7 +404,20 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			if (!rot_one_time_.IsFinished())
 			{
 				auto* time = GetSubsystem<Time>();
-				character_->GetNode()->SetWorldRotation(rot_one_time_.GetValue(time->GetElapsedTime()));
+				auto elapsedTime = time->GetElapsedTime();
+				auto rot = rot_one_time_.GetValue(elapsedTime);
+				printf("	Angle %f\n", rot.Angle());
+				character_->GetNode()->SetWorldRotation(rot);
+				//
+				if (touch_target_pos_)
+				{
+					end_rot_ = GetEndRotate();
+					start_rot_ = character_->GetNode()->GetWorldRotation();
+					//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
+					auto old_finished = rot_one_time_.finished_;
+					rot_one_time_.Init(start_rot_, end_rot_, elapsedTime, rot_one_time_.end_time_ - elapsedTime);
+					rot_one_time_.finished_ = old_finished;
+				}
 			}
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
@@ -437,7 +492,14 @@ void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData
 //         cameraNode_->SetRotation(dir);
 //     }
 }
-
+Quaternion CharacterDemo::GetEndRotate()
+{
+	auto ch_pos = character_->GetNode()->GetWorldPosition();
+	ch_pos = ch_pos.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
+	Quaternion end;
+	end.FromRotationTo(Vector3::FORWARD, target_pos_ - ch_pos);
+	return end;
+}
 void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
 {
 	using namespace MouseButtonDown;
@@ -479,12 +541,13 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 				character_->controls_.Set(CTRL_FORWARD, true);
 				last_dist_ = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
 
-				auto ch_pos = character_->GetNode()->GetWorldPosition();
-				ch_pos = ch_pos.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
-				target_dir_ = target_pos_ - ch_pos;
-				end_rot_.FromRotationTo(Vector3::FORWARD, target_dir_);
-
-				start_rot_ = character_->GetNode()->GetWorldRotation();
+// 				auto ch_pos = character_->GetNode()->GetWorldPosition();
+// 				ch_pos = ch_pos.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
+// 				target_dir_ = target_pos_ - ch_pos;
+// 				end_rot_.FromRotationTo(Vector3::FORWARD, target_dir_);
+// 
+				end_rot_ = GetEndRotate();
+ 				start_rot_ = character_->GetNode()->GetWorldRotation();
 				auto* time = GetSubsystem<Time>();
 				//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
 				rot_one_time_.Init(start_rot_, end_rot_, time->GetElapsedTime(), 0.5f);

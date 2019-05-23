@@ -56,7 +56,7 @@ void StaticScene::Start()
     CreateScene();
 
     // Create the UI content
-    CreateInstructions();
+    //CreateInstructions();
 
     // Setup the viewport for displaying the scene
     SetupViewport();
@@ -88,7 +88,6 @@ void StaticScene::CreateScene()
     auto* planeObject = planeNode->CreateComponent<StaticModel>();
     planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
     planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
-
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
     // The light will use default settings (white light, no shadows)
@@ -103,17 +102,17 @@ void StaticScene::CreateScene()
     // see the model get simpler as it moves further away). Finally, rendering a large number of the same object with the
     // same material allows instancing to be used, if the GPU supports it. This reduces the amount of CPU work in rendering the
     // scene.
-    const unsigned NUM_OBJECTS = 200;
-    for (unsigned i = 0; i < NUM_OBJECTS; ++i)
-    {
-        Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-        mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-        mushroomNode->SetScale(0.5f + Random(2.0f));
-        auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-    }
+//     const unsigned NUM_OBJECTS = 200;
+//     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
+//     {
+//         Node* mushroomNode = scene_->CreateChild("Mushroom");
+//         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+//         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+//         mushroomNode->SetScale(0.5f + Random(2.0f));
+//         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
+//         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+//         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+//     }
 
     // Create a scene node for the camera, which we will move around
     // The camera will use default settings (1000 far clip distance, 45 degrees FOV, set aspect ratio automatically)
