@@ -59,11 +59,9 @@ struct TweenOneTime
 			finished_ = true;
 			return quat_end_;
 		}
-		printf("elapsedTime %f\n", elapsedTime);
 		auto factor = (elapsedTime - start_time_) / (end_time_ - start_time_);
 		
 		auto ret = quat_start_.Slerp(quat_end_, factor);
-		printf("factor : %f angle : %f\n", factor, ret.Angle());
 		return ret;
 	}
 	bool finished_{ false };
@@ -144,6 +142,8 @@ protected:
     }
 
 private:
+	void ThirdPersonCamera();
+	void FreeCamera(float timeStep);
     /// Create static scene content.
     void CreateScene();
     /// Create controllable character.
@@ -181,4 +181,9 @@ private:
 	TweenOneTime rot_one_time_;
     /// First person camera flag.
     bool firstPerson_;
+
+	void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
+
+	/// Flag for drawing debug geometry.
+	bool drawDebug_;
 };

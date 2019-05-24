@@ -165,7 +165,7 @@ void CharacterDemo::CreateScene()
     shape->SetBox(Vector3::ONE);
 
     // Create mushrooms of varying sizes
-    const unsigned NUM_MUSHROOMS = 60;
+    const unsigned NUM_MUSHROOMS = 10;
     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
     {
         Node* objectNode = scene_->CreateChild("Mushroom");
@@ -184,7 +184,7 @@ void CharacterDemo::CreateScene()
     }
 
     // Create movable boxes. Let them fall from the sky at first
-    const unsigned NUM_BOXES = 100;
+    const unsigned NUM_BOXES = 10;
     for (unsigned i = 0; i < NUM_BOXES; ++i)
     {
         float scale = Random(2.0f) + 0.5f;
@@ -251,11 +251,22 @@ void CharacterDemo::CreateCharacter()
     // and keeps it alive as long as it's not removed from the hierarchy
     character_ = objectNode->CreateComponent<Character>();
 
-	const unsigned NUM_MODELS = 5;
+	const unsigned NUM_MODELS = 9;
 	const float MODEL_MOVE_SPEED = 2.0f;
 	const float MODEL_ROTATE_SPEED = 100.0f;
 	const BoundingBox bounds(Vector3(-20.0f, 0.0f, -20.0f), Vector3(20.0f, 0.0f, 20.0f));
 
+	struct ModelRes 
+	{
+		std::string model;
+		std::string mtl;
+		std::string ani;
+	};
+	ModelRes mr[3] = {
+		{"Models/Kachujin/Kachujin.mdl", "Models/Kachujin/Materials/Kachujin.xml", "Models/Kachujin/Kachujin_Walk.ani"},
+		{"Models/NinjaSnowWar/Ninja.mdl", "Materials/NinjaSnowWar/Ninja.xml", "Models/NinjaSnowWar/Ninja_Walk.ani"},
+		{"Models/Jack.mdl", "Models/Jack.xml", "Models/Jack_Walk.ani"},
+	};
 	for (unsigned i = 0; i < NUM_MODELS; ++i)
 	{
 		Node* modelNode = scene_->CreateChild("Jill");
@@ -263,14 +274,15 @@ void CharacterDemo::CreateCharacter()
 		modelNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
 
 		auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
-		modelObject->SetModel(cache->GetResource<Model>("Models/Kachujin/Kachujin.mdl"));
-		modelObject->SetMaterial(cache->GetResource<Material>("Models/Kachujin/Materials/Kachujin.xml"));
+		auto index = i % 3;
+		modelObject->SetModel(cache->GetResource<Model>(mr[index].model.c_str()));
+		modelObject->SetMaterial(cache->GetResource<Material>(mr[index].mtl.c_str()));
 		modelObject->SetCastShadows(true);
 
 		// Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance the
 		// animation, The alternative would be to use an AnimationController component which updates the animation automatically,
 		// but we need to update the model's position manually in any case
-		auto* walkAnimation = cache->GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
+		auto* walkAnimation = cache->GetResource<Animation>(mr[index].ani.c_str());
 
 		AnimationState* state = modelObject->AddAnimationState(walkAnimation);
 		// The state would fail to create (return null) if the animation was not found
@@ -326,6 +338,11 @@ void CharacterDemo::SubscribeToEvents()
 	SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(CharacterDemo, HandleMouseButtonUp));
 	//SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(CharacterDemo, HandleMouseMove));
 	SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(CharacterDemo, HandleMouseWheel));
+
+	// Subscribe HandlePostRenderUpdate() function for processing the post-render update event, sent after Renderer subsystem is
+	// done with defining the draw calls for the viewports (but before actually executing them.) We will request debug geometry
+	// rendering during that event
+	SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(CharacterDemo, HandlePostRenderUpdate));
 }
 
 void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
@@ -400,13 +417,11 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
 			{
 				character_->controls_.Set(CTRL_FORWARD, false);
 			}
-			printf("	dist %f\n", dist);
 			if (!rot_one_time_.IsFinished())
 			{
 				auto* time = GetSubsystem<Time>();
 				auto elapsedTime = time->GetElapsedTime();
 				auto rot = rot_one_time_.GetValue(elapsedTime);
-				printf("	Angle %f\n", rot.Angle());
 				character_->GetNode()->SetWorldRotation(rot);
 				//
 				if (touch_target_pos_)
@@ -447,14 +462,62 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     }
 }
 
+void CharacterDemo::ThirdPersonCamera()
+{
+	Node* characterNode = character_->GetNode();
+	cameraNode_->SetPosition(characterNode->GetWorldPosition() + Vector3(0.0f, 10.0f, -10.0f));
+	cameraNode_->LookAt(characterNode->GetWorldPosition());
+}
+
+void CharacterDemo::FreeCamera(float timeStep)
+{
+	// Do not move if the UI has a focused element (the console)
+	if (GetSubsystem<UI>()->GetFocusElement())
+		return;
+
+	auto* input = GetSubsystem<Input>();
+
+	// Movement speed as world units per second
+	const float MOVE_SPEED = 20.0f;
+	// Mouse sensitivity as degrees per pixel
+	const float MOUSE_SENSITIVITY = 0.15f;
+
+	// Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
+	IntVector2 mouseMove = input->GetMouseMove();
+	yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+	pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+	pitch_ = Clamp(pitch_, -90.0f, 90.0f);
+
+	// Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+	cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+
+	// Read WASD keys and move the camera scene node to the corresponding direction if they are pressed
+	if (input->GetKeyDown(KEY_W))
+		cameraNode_->Translate(Vector3::FORWARD * MOVE_SPEED * timeStep);
+	if (input->GetKeyDown(KEY_S))
+		cameraNode_->Translate(Vector3::BACK * MOVE_SPEED * timeStep);
+	if (input->GetKeyDown(KEY_A))
+		cameraNode_->Translate(Vector3::LEFT * MOVE_SPEED * timeStep);
+	if (input->GetKeyDown(KEY_D))
+		cameraNode_->Translate(Vector3::RIGHT * MOVE_SPEED * timeStep);
+
+	// Toggle debug geometry with space
+	if (input->GetKeyPress(KEY_SPACE))
+		drawDebug_ = !drawDebug_;
+}
 void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 {
+	using namespace Update;
     if (!character_)
         return;
-
-    Node* characterNode = character_->GetNode();
-
-    // Get camera lookat dir from character yaw + pitch
+	//ThirdPersonCamera();
+	// Take the frame time step, which is stored as a float
+	float timeStep = eventData[P_TIMESTEP].GetFloat();
+	FreeCamera(timeStep);
+	return;
+//     Node* characterNode = character_->GetNode();
+// 
+//     // Get camera lookat dir from character yaw + pitch
 //     const Quaternion& rot = characterNode->GetRotation();
 //     Quaternion dir = rot * Quaternion(character_->controls_.pitch_, Vector3::RIGHT);
 // 
@@ -465,10 +528,6 @@ void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData
 //     // This could be expanded to look at an arbitrary target, now just look at a point in front
 //     Vector3 headWorldTarget = headNode->GetWorldPosition() + headDir * Vector3(0.0f, 0.0f, -1.0f);
 //     headNode->LookAt(headWorldTarget, Vector3(0.0f, 1.0f, 0.0f));
-
-	cameraNode_->SetPosition(characterNode->GetWorldPosition() + Vector3(0.0f, 10.0f, -10.0f));
-	cameraNode_->LookAt(characterNode->GetWorldPosition());
-	return;
 //     if (firstPerson_)
 //     {
 //         cameraNode_->SetPosition(headNode->GetWorldPosition() + rot * Vector3(0.0f, 0.15f, 0.2f));
@@ -492,6 +551,16 @@ void CharacterDemo::HandlePostUpdate(StringHash eventType, VariantMap& eventData
 //         cameraNode_->SetRotation(dir);
 //     }
 }
+
+void CharacterDemo::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
+{
+	// If draw debug mode is enabled, draw viewport debug geometry, which will show eg. drawable bounding boxes and skeleton
+	// bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
+	// bones properly
+	if (drawDebug_)
+		GetSubsystem<Renderer>()->DrawDebugGeometry(false);
+}
+
 Quaternion CharacterDemo::GetEndRotate()
 {
 	auto ch_pos = character_->GetNode()->GetWorldPosition();
