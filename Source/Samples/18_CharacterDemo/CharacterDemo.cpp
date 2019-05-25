@@ -27,6 +27,7 @@
 #include <Urho3D/Graphics/Animation.h>
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/Camera.h>
+#include <Urho3D/Graphics/DebugRenderer.h>
 #include <Urho3D/Graphics/Light.h>
 #include <Urho3D/Graphics/Material.h>
 #include <Urho3D/Graphics/Octree.h>
@@ -122,6 +123,7 @@ void CharacterDemo::CreateScene()
     // Create scene subsystem components
     scene_->CreateComponent<Octree>();
     scene_->CreateComponent<PhysicsWorld>();
+	scene_->CreateComponent<DebugRenderer>();
 
     // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
     // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
@@ -129,6 +131,13 @@ void CharacterDemo::CreateScene()
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(300.0f);
     GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
+	Vector3 camera_dir{0.0f, -1.0f, 1.0f};
+	camera_dir.Normalize();
+	float camera_dist = 40.0f;
+	Vector3 target_pos{ 0.0f, 0.0f, 15.0f };
+	Vector3 camera_pos = -camera_dist * camera_dir + target_pos;
+	cameraNode_->SetPosition(camera_pos);
+	cameraNode_->LookAt(target_pos);
 
     // Create static scene content. First create a zone for ambient lighting and fog control
     Node* zoneNode = scene_->CreateChild("Zone");
@@ -207,6 +216,9 @@ void CharacterDemo::CreateScene()
         auto* shape = objectNode->CreateComponent<CollisionShape>();
         shape->SetBox(Vector3::ONE);
     }
+	//CreateRacetrack(5);
+	auto* debug = scene_->GetComponent<DebugRenderer>();
+	debug->SetLineAntiAlias(true);
 }
 
 void CharacterDemo::CreateCharacter()
@@ -299,6 +311,62 @@ void CharacterDemo::CreateCharacter()
 		mover->SetParameters(MODEL_MOVE_SPEED, MODEL_ROTATE_SPEED, bounds);
 	}
 
+}
+
+void CharacterDemo::CreateRacetrack(int count)
+{
+	constexpr float racetrack_width = 10.0f;
+	constexpr float racetrack_length = 50.0f;
+	constexpr int racetrack_count = 5;// odd number
+	constexpr int grid_count = 3;
+	constexpr float grid_width = racetrack_width * 1.0f / (float)grid_count;
+	// racetrack
+	auto* debug = scene_->GetComponent<DebugRenderer>();
+	Vector3 bias(0.0f, 0.05f, 0.0f);
+	Vector3 left_start_point{ 0.0f, bias.y_, 0.0f };
+	Vector3 left_end_point{ 0.0f, bias.y_, racetrack_length };
+	Vector3 right_start_point{ 0.0f, bias.y_, 0.0f };
+	Vector3 right_end_point{ 0.0f, bias.y_, racetrack_length };
+	left_start_point.x_ -= 0.5f * racetrack_width;
+	left_end_point.x_ -= 0.5f * racetrack_width;
+	right_start_point.x_ += 0.5f * racetrack_width;
+	right_end_point.x_ += 0.5f * racetrack_width;
+	Color outside_color{ 1.0f, 0.0f, 0.0f };
+	debug->AddLine(left_start_point, left_end_point, outside_color);
+	debug->AddLine(right_start_point, right_end_point, outside_color);
+	auto loop_count = (racetrack_count - 1) / 2;
+	for (int i = 0; i < loop_count; i++)
+	{
+		left_start_point.x_ -= racetrack_width;
+		left_end_point.x_ -= racetrack_width;
+		right_start_point.x_ += racetrack_width;
+		right_end_point.x_ += racetrack_width;
+		debug->AddLine(left_start_point, left_end_point, outside_color);
+		debug->AddLine(right_start_point, right_end_point, outside_color);
+	}
+	//
+	debug->AddLine(left_start_point, right_start_point, outside_color);
+	debug->AddLine(left_end_point, right_end_point, outside_color);
+	//
+	auto old_left_start_point = left_start_point;
+	Color inside_color{ 0.5f, 1.0f, 0.5f };
+	auto inside_line_count = (int)(racetrack_length / grid_width);
+	for (int i = 1; i < inside_line_count; i++)
+	{
+		left_start_point.z_ += grid_width; right_start_point.z_ += grid_width;
+		debug->AddLine(left_start_point, right_start_point, inside_color);
+	}
+
+	left_start_point = old_left_start_point;
+	inside_line_count = grid_count * racetrack_count;
+	for (int i = 0; i < inside_line_count; i++)
+	{
+		if (i % grid_count != 0)
+		{
+			debug->AddLine(left_start_point, left_end_point, inside_color);
+		}
+		left_start_point.x_ += grid_width; left_end_point.x_ += grid_width;
+	}
 }
 
 void CharacterDemo::CreateInstructions()
@@ -489,7 +557,7 @@ void CharacterDemo::FreeCamera(float timeStep)
 	pitch_ = Clamp(pitch_, -90.0f, 90.0f);
 
 	// Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-	cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+	//cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 
 	// Read WASD keys and move the camera scene node to the corresponding direction if they are pressed
 	if (input->GetKeyDown(KEY_W))
@@ -559,6 +627,7 @@ void CharacterDemo::HandlePostRenderUpdate(StringHash eventType, VariantMap& eve
 	// bones properly
 	if (drawDebug_)
 		GetSubsystem<Renderer>()->DrawDebugGeometry(false);
+	CreateRacetrack(5);
 }
 
 Quaternion CharacterDemo::GetEndRotate()

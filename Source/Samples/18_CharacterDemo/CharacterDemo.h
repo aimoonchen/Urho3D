@@ -185,5 +185,6 @@ private:
 	void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 
 	/// Flag for drawing debug geometry.
-	bool drawDebug_;
+	bool drawDebug_{ false };
+	void CreateRacetrack(int count);
 };
