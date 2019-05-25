@@ -23,7 +23,8 @@
 #pragma once
 
 #include "Sample.h"
-
+#include <memory>
+#include <vector>
 namespace Urho3D
 {
 
@@ -34,6 +35,25 @@ class Scene;
 
 class Character;
 class Touch;
+
+struct Racetrack
+{
+	float	width_{ 10.0f };
+	float	length_{ 50.0f };
+	int		count_{ 5 };// odd number
+	int		grid_count_{ 3 };
+	float	grid_width_{ 0.0f };
+	Scene*	scene_{ nullptr };
+	struct Cell
+	{
+		Node* block_node{ nullptr };
+	};
+	std::vector<std::vector<Cell>> cells_;
+	Racetrack(Scene* scene);
+	void CreateBlock(const Vector3& worldPos);
+	void DestoryBlock(const Vector3& worldPos);
+	void UpdateRacetrack();
+};
 
 struct TweenOneTime
 {
@@ -186,5 +206,5 @@ private:
 
 	/// Flag for drawing debug geometry.
 	bool drawDebug_{ false };
-	void CreateRacetrack(int count);
+	std::unique_ptr<Racetrack> racetrack_;
 };

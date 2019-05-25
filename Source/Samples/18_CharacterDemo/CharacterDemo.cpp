@@ -56,6 +56,129 @@ URHO3D_DEFINE_APPLICATION_MAIN(CharacterDemo)
 
 constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 720;
+constexpr unsigned int VIEW_MASK_FLOOR = 0;
+Racetrack::Racetrack(Scene* scene)
+	: scene_{ scene }
+{
+	grid_width_ = width_ * 1.0f / (float)grid_count_;
+	int loop_count = length_ / grid_width_;
+	cells_.resize(loop_count);
+	for (int i = 0; i < loop_count; i++)
+	{
+		cells_[i].resize(count_ * grid_count_);
+	}
+}
+void Racetrack::CreateBlock(const Vector3& worldPos)
+{
+	Vector3 out_pos = worldPos;
+	float min_x = -count_ * 0.5 * width_;
+	float max_x = count_ * 0.5 * width_;
+	out_pos.x_ -= fmod(worldPos.x_ - min_x, grid_width_);
+	out_pos.z_ -= fmod(worldPos.z_, grid_width_);
+	out_pos += Vector3{ 0.5f * grid_width_, 0.0f, 0.5f * grid_width_ };
+	if (worldPos.x_ < min_x || worldPos.x_ > max_x
+		|| worldPos.z_ < 0.0f || worldPos.z_ > length_)
+	{
+		return;
+	}
+	int x_index = (worldPos.x_ - min_x) / grid_width_;
+	int z_index = worldPos.z_ / grid_width_;
+	auto& cell = cells_[z_index][x_index];
+	if (cell.block_node)
+	{
+		return;
+	}
+
+	float scale = grid_width_ * 0.95f;
+	auto* cache = scene_->GetSubsystem<ResourceCache>();
+	Node* objectNode = scene_->CreateChild("Box");
+	objectNode->SetPosition({ out_pos.x_, grid_width_ + 0.2f, out_pos.z_ });
+	objectNode->SetScale(scale);
+	auto* object = objectNode->CreateComponent<StaticModel>();
+	object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+	object->SetMaterial(cache->GetResource<Material>("Materials/GreenTransparent.xml"));
+	object->GetMaterial()->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.55f });
+	//object->SetCastShadows(true);
+
+	auto* body = objectNode->CreateComponent<RigidBody>();
+	body->SetCollisionLayer(2);
+	// Bigger boxes will be heavier and harder to move
+	body->SetMass(scale * 2.0f);
+	auto* shape = objectNode->CreateComponent<CollisionShape>();
+	shape->SetBox(Vector3::ONE);
+	cell.block_node = objectNode;
+}
+
+void Racetrack::DestoryBlock(const Vector3& worldPos)
+{
+	float min_x = -count_ * 0.5 * width_;
+	float max_x = count_ * 0.5 * width_;
+	if (worldPos.x_ < min_x || worldPos.x_ > max_x
+		|| worldPos.z_ < 0.0f || worldPos.z_ > length_)
+	{
+		return;
+	}
+	int x_index = (worldPos.x_ - min_x) / grid_width_;
+	int z_index = worldPos.z_ / grid_width_;
+	auto& cell = cells_[z_index][x_index];
+	if (cell.block_node)
+	{
+		scene_->RemoveChild(cell.block_node);
+		cell.block_node = nullptr;
+	}
+}
+
+void Racetrack::UpdateRacetrack()
+{
+	static DebugRenderer* debug_ = scene_->GetComponent<DebugRenderer>();
+	// racetrack
+	Vector3 bias(0.0f, 0.05f, 0.0f);
+	Vector3 left_start_point{ 0.0f, bias.y_, 0.0f };
+	Vector3 left_end_point{ 0.0f, bias.y_, length_ };
+	Vector3 right_start_point{ 0.0f, bias.y_, 0.0f };
+	Vector3 right_end_point{ 0.0f, bias.y_, length_ };
+	auto half_width = 0.5f * width_;
+	left_start_point.x_ -= half_width;
+	left_end_point.x_ -= half_width;
+	right_start_point.x_ += half_width;
+	right_end_point.x_ += half_width;
+	Color outside_color{ 1.0f, 0.0f, 0.0f };
+	debug_->AddLine(left_start_point, left_end_point, outside_color);
+	debug_->AddLine(right_start_point, right_end_point, outside_color);
+	auto loop_count = (count_ - 1) / 2;
+	for (int i = 0; i < loop_count; i++)
+	{
+		left_start_point.x_ -= width_;
+		left_end_point.x_ -= width_;
+		right_start_point.x_ += width_;
+		right_end_point.x_ += width_;
+		debug_->AddLine(left_start_point, left_end_point, outside_color);
+		debug_->AddLine(right_start_point, right_end_point, outside_color);
+	}
+	//
+	debug_->AddLine(left_start_point, right_start_point, outside_color);
+	debug_->AddLine(left_end_point, right_end_point, outside_color);
+	//
+	auto old_left_start_point = left_start_point;
+	Color inside_color{ 0.5f, 1.0f, 0.5f };
+	auto inside_line_count = (int)(length_ / grid_width_);
+	for (int i = 1; i < inside_line_count; i++)
+	{
+		left_start_point.z_ += grid_width_; right_start_point.z_ += grid_width_;
+		debug_->AddLine(left_start_point, right_start_point, inside_color);
+	}
+
+	left_start_point = old_left_start_point;
+	inside_line_count = grid_count_ * count_;
+	for (int i = 0; i < inside_line_count; i++)
+	{
+		if (i % grid_count_ != 0)
+		{
+			debug_->AddLine(left_start_point, left_end_point, inside_color);
+		}
+		left_start_point.x_ += grid_width_; left_end_point.x_ += grid_width_;
+	}
+}
 
 CharacterDemo::CharacterDemo(Context* context) :
     Sample(context),
@@ -123,7 +246,9 @@ void CharacterDemo::CreateScene()
     // Create scene subsystem components
     scene_->CreateComponent<Octree>();
     scene_->CreateComponent<PhysicsWorld>();
-	scene_->CreateComponent<DebugRenderer>();
+	auto debug = scene_->CreateComponent<DebugRenderer>();
+	debug->SetLineAntiAlias(true);
+	racetrack_ = std::make_unique<Racetrack>(scene_);
 
     // Create camera and define viewport. We will be doing load / save, so it's convenient to create the camera outside the scene,
     // so that it won't be destroyed and recreated, and we don't have to redefine the viewport on load
@@ -162,19 +287,21 @@ void CharacterDemo::CreateScene()
     Node* floorNode = scene_->CreateChild("Floor");
     floorNode->SetPosition(Vector3(0.0f, -0.5f, 0.0f));
     floorNode->SetScale(Vector3(200.0f, 1.0f, 200.0f));
-    auto* object = floorNode->CreateComponent<StaticModel>();
-    object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-    object->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+	floor_ = floorNode->CreateComponent<StaticModel>();
+	floor_->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+	floor_->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
+	//object->SetViewMask(VIEW_MASK_FLOOR);
 
     auto* body = floorNode->CreateComponent<RigidBody>();
     // Use collision layer bit 2 to mark world scenery. This is what we will raycast against to prevent camera from going
     // inside geometry
     body->SetCollisionLayer(2);
+	//body->SetCollisionMask(VIEW_MASK_FLOOR);
     auto* shape = floorNode->CreateComponent<CollisionShape>();
     shape->SetBox(Vector3::ONE);
 
     // Create mushrooms of varying sizes
-    const unsigned NUM_MUSHROOMS = 10;
+    const unsigned NUM_MUSHROOMS = 0;
     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
     {
         Node* objectNode = scene_->CreateChild("Mushroom");
@@ -193,7 +320,7 @@ void CharacterDemo::CreateScene()
     }
 
     // Create movable boxes. Let them fall from the sky at first
-    const unsigned NUM_BOXES = 10;
+    const unsigned NUM_BOXES = 0;
     for (unsigned i = 0; i < NUM_BOXES; ++i)
     {
         float scale = Random(2.0f) + 0.5f;
@@ -216,9 +343,6 @@ void CharacterDemo::CreateScene()
         auto* shape = objectNode->CreateComponent<CollisionShape>();
         shape->SetBox(Vector3::ONE);
     }
-	//CreateRacetrack(5);
-	auto* debug = scene_->GetComponent<DebugRenderer>();
-	debug->SetLineAntiAlias(true);
 }
 
 void CharacterDemo::CreateCharacter()
@@ -313,62 +437,6 @@ void CharacterDemo::CreateCharacter()
 
 }
 
-void CharacterDemo::CreateRacetrack(int count)
-{
-	constexpr float racetrack_width = 10.0f;
-	constexpr float racetrack_length = 50.0f;
-	constexpr int racetrack_count = 5;// odd number
-	constexpr int grid_count = 3;
-	constexpr float grid_width = racetrack_width * 1.0f / (float)grid_count;
-	// racetrack
-	auto* debug = scene_->GetComponent<DebugRenderer>();
-	Vector3 bias(0.0f, 0.05f, 0.0f);
-	Vector3 left_start_point{ 0.0f, bias.y_, 0.0f };
-	Vector3 left_end_point{ 0.0f, bias.y_, racetrack_length };
-	Vector3 right_start_point{ 0.0f, bias.y_, 0.0f };
-	Vector3 right_end_point{ 0.0f, bias.y_, racetrack_length };
-	left_start_point.x_ -= 0.5f * racetrack_width;
-	left_end_point.x_ -= 0.5f * racetrack_width;
-	right_start_point.x_ += 0.5f * racetrack_width;
-	right_end_point.x_ += 0.5f * racetrack_width;
-	Color outside_color{ 1.0f, 0.0f, 0.0f };
-	debug->AddLine(left_start_point, left_end_point, outside_color);
-	debug->AddLine(right_start_point, right_end_point, outside_color);
-	auto loop_count = (racetrack_count - 1) / 2;
-	for (int i = 0; i < loop_count; i++)
-	{
-		left_start_point.x_ -= racetrack_width;
-		left_end_point.x_ -= racetrack_width;
-		right_start_point.x_ += racetrack_width;
-		right_end_point.x_ += racetrack_width;
-		debug->AddLine(left_start_point, left_end_point, outside_color);
-		debug->AddLine(right_start_point, right_end_point, outside_color);
-	}
-	//
-	debug->AddLine(left_start_point, right_start_point, outside_color);
-	debug->AddLine(left_end_point, right_end_point, outside_color);
-	//
-	auto old_left_start_point = left_start_point;
-	Color inside_color{ 0.5f, 1.0f, 0.5f };
-	auto inside_line_count = (int)(racetrack_length / grid_width);
-	for (int i = 1; i < inside_line_count; i++)
-	{
-		left_start_point.z_ += grid_width; right_start_point.z_ += grid_width;
-		debug->AddLine(left_start_point, right_start_point, inside_color);
-	}
-
-	left_start_point = old_left_start_point;
-	inside_line_count = grid_count * racetrack_count;
-	for (int i = 0; i < inside_line_count; i++)
-	{
-		if (i % grid_count != 0)
-		{
-			debug->AddLine(left_start_point, left_end_point, inside_color);
-		}
-		left_start_point.x_ += grid_width; left_end_point.x_ += grid_width;
-	}
-}
-
 void CharacterDemo::CreateInstructions()
 {
     auto* cache = GetSubsystem<ResourceCache>();
@@ -422,7 +490,7 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     if (character_)
     {
         // Clear previous controls
-        //character_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP, false);
+        character_->controls_.Set(CTRL_FORWARD | CTRL_BACK | CTRL_LEFT | CTRL_RIGHT | CTRL_JUMP, false);
 
         // Update controls using touch utility class
         if (touch_)
@@ -434,10 +502,10 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
         {
             if (!touch_ || !touch_->useGyroscope_)
             {
-//                 character_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-//                 character_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-//                 character_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-//                 character_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+                character_->controls_.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
+                character_->controls_.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
+                character_->controls_.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
+                character_->controls_.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
             }
             character_->controls_.Set(CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
 
@@ -469,39 +537,28 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             // Set rotation already here so that it's updated every rendering frame instead of every physics frame
             //character_->GetNode()->SetRotation(Quaternion(character_->controls_.yaw_, Vector3::UP));
 			
-			auto dist = target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition());
-// 			if (last_dist_ + 0.1f < dist)
+// 			if (target_pos_.DistanceToPoint(character_->GetNode()->GetWorldPosition()) < 0.2f)
 // 			{
-// 				printf("last_dist_ %f, dist %f\n", last_dist_, dist);
-// 				last_dist_ = 0.0f;
 // 				character_->controls_.Set(CTRL_FORWARD, false);
 // 			}
-// 			else
+// 			if (!rot_one_time_.IsFinished())
 // 			{
-// 				last_dist_ = dist;
+// 				auto* time = GetSubsystem<Time>();
+// 				auto elapsedTime = time->GetElapsedTime();
+// 				auto rot = rot_one_time_.GetValue(elapsedTime);
+// 				character_->GetNode()->SetWorldRotation(rot);
+// 				//
+// 				if (touch_target_pos_)
+// 				{
+// 					end_rot_ = GetEndRotate();
+// 					start_rot_ = character_->GetNode()->GetWorldRotation();
+// 					//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
+// 					auto old_finished = rot_one_time_.finished_;
+// 					rot_one_time_.Init(start_rot_, end_rot_, elapsedTime, rot_one_time_.end_time_ - elapsedTime);
+// 					rot_one_time_.finished_ = old_finished;
+// 				}
 // 			}
 
-			if (dist < 0.2f)
-			{
-				character_->controls_.Set(CTRL_FORWARD, false);
-			}
-			if (!rot_one_time_.IsFinished())
-			{
-				auto* time = GetSubsystem<Time>();
-				auto elapsedTime = time->GetElapsedTime();
-				auto rot = rot_one_time_.GetValue(elapsedTime);
-				character_->GetNode()->SetWorldRotation(rot);
-				//
-				if (touch_target_pos_)
-				{
-					end_rot_ = GetEndRotate();
-					start_rot_ = character_->GetNode()->GetWorldRotation();
-					//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
-					auto old_finished = rot_one_time_.finished_;
-					rot_one_time_.Init(start_rot_, end_rot_, elapsedTime, rot_one_time_.end_time_ - elapsedTime);
-					rot_one_time_.finished_ = old_finished;
-				}
-			}
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
                 firstPerson_ = !firstPerson_;
@@ -539,6 +596,7 @@ void CharacterDemo::ThirdPersonCamera()
 
 void CharacterDemo::FreeCamera(float timeStep)
 {
+	return;
 	// Do not move if the UI has a focused element (the console)
 	if (GetSubsystem<UI>()->GetFocusElement())
 		return;
@@ -627,7 +685,7 @@ void CharacterDemo::HandlePostRenderUpdate(StringHash eventType, VariantMap& eve
 	// bones properly
 	if (drawDebug_)
 		GetSubsystem<Renderer>()->DrawDebugGeometry(false);
-	CreateRacetrack(5);
+	racetrack_->UpdateRacetrack();
 }
 
 Quaternion CharacterDemo::GetEndRotate()
@@ -652,7 +710,7 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 	auto* input = GetSubsystem<Input>();
 	cursorPos = input->GetMousePosition();
 	auto button = MouseButton(eventData[P_BUTTON].GetUInt());
-	if (button == MOUSEB_LEFT)
+	if (button == MOUSEB_LEFT || button == MOUSEB_RIGHT)
 	{
 // 		auto* camera = cameraNode_->GetComponent<Camera>();
 // 		auto clickRay = camera->GetScreenRay(cursorPos.x_ / WINDOW_WIDTH, cursorPos.x_ / WINDOW_HEIGHT);
@@ -667,13 +725,18 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 		// Pick only geometry objects, not eg. zones or lights, only get the first (closest) hit
 		PODVector<RayQueryResult> results;
 		RayOctreeQuery query(results, cameraRay, RAY_TRIANGLE, 250.0f, DRAWABLE_GEOMETRY);
-		scene_->GetComponent<Octree>()->RaycastSingle(query);
-
+		//scene_->GetComponent<Octree>()->RaycastSingle(query);
+		floor_->ProcessRayQuery(query, results);
+// 		PhysicsRaycastResult result;
+// 		auto physics_world = scene_->CreateComponent<PhysicsWorld>();
+// 		physics_world->RaycastSingle(result, cameraRay, );
 		if (!results.Empty())
 		{
-			if (true/*results[0].node_ == scene_->GetChild("Floor")*/)
+			target_pos_ = results[0].position_;
+
+			/*
+			if (true)//results[0].node_ == scene_->GetChild("Floor")
 			{
-				target_pos_ = results[0].position_;
 				target_pos_ = target_pos_.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
 				//character_->GetNode()->LookAt(target_pos_, Vector3::UP);
 				character_->controls_.Set(CTRL_FORWARD, true);
@@ -687,10 +750,16 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 				end_rot_ = GetEndRotate();
  				start_rot_ = character_->GetNode()->GetWorldRotation();
 				auto* time = GetSubsystem<Time>();
-				//printf("	start_rot_ : %f end_rot_ : %f\n", start_rot_.Angle(), end_rot_.Angle());
 				rot_one_time_.Init(start_rot_, end_rot_, time->GetElapsedTime(), 0.5f);
-
-				//printf("target_pos_ : %f,%f,%f\n", target_pos_.x_, target_pos_.y_, target_pos_.z_);
+			}
+			*/
+			if (button == MOUSEB_LEFT)
+			{
+				racetrack_->CreateBlock(target_pos_);
+			}
+			else if (button == MOUSEB_RIGHT)
+			{
+				racetrack_->DestoryBlock(target_pos_);
 			}
 		}
 		
