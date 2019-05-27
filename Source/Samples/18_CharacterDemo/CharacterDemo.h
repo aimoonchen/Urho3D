@@ -36,6 +36,24 @@ class Scene;
 class Character;
 class Touch;
 
+struct Barrier
+{
+	Barrier(Scene* scene, const Vector3& pos, float size, float duration);
+	~Barrier();
+	void Destory();
+	void Update(float elapsedTime);
+	
+	Vector3 pos_;
+	float size_{ 1.0f };
+	float duration_{ 0.0f };
+	float born_time_{ 0.0f };
+	bool active_{ false };
+	//
+	Scene* scene_{ nullptr };
+	Node* node_{ nullptr };
+	Material* mtl_{ nullptr };
+};
+
 struct Racetrack
 {
 	float	width_{ 10.0f };
@@ -46,13 +64,19 @@ struct Racetrack
 	Scene*	scene_{ nullptr };
 	struct Cell
 	{
-		Node* block_node{ nullptr };
+		void CreateBarrier(Scene* scene, const Vector3& pos, float size, float duration);
+		void DestoryBarrier();
+		void Update(float elapsedTime);
+		std::unique_ptr<Barrier> barrier_{ nullptr };
 	};
 	std::vector<std::vector<Cell>> cells_;
 	Racetrack(Scene* scene);
-	void CreateBlock(const Vector3& worldPos);
-	void DestoryBlock(const Vector3& worldPos);
+	void Update(float elapsedTime);
+	void CreateBarrier(const Vector3& worldPos);
+	void DestoryBarrier(const Vector3& worldPos);
 	void UpdateRacetrack();
+private:
+	Cell* LocateCell(const Vector3& worldPos);
 };
 
 struct TweenOneTime
@@ -204,6 +228,7 @@ private:
 
 	void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 
+	StaticModel* floor_;
 	/// Flag for drawing debug geometry.
 	bool drawDebug_{ false };
 	std::unique_ptr<Racetrack> racetrack_;

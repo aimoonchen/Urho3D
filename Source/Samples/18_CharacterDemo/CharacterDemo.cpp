@@ -57,6 +57,62 @@ URHO3D_DEFINE_APPLICATION_MAIN(CharacterDemo)
 constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 720;
 constexpr unsigned int VIEW_MASK_FLOOR = 0;
+
+Barrier::Barrier(Scene* scene, const Vector3& pos, float size, float duration)
+	: scene_{ scene }, pos_{ pos }, size_{ size }, duration_{ duration }
+{
+	Node* objectNode = scene->CreateChild("Box");
+	objectNode->SetPosition(pos);
+	objectNode->SetScale(size);
+	auto* object = objectNode->CreateComponent<StaticModel>();
+	auto* cache = scene->GetSubsystem<ResourceCache>();
+	object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+	object->SetMaterial(cache->GetResource<Material>("Materials/GreenTransparent.xml"));
+	mtl_ = object->GetMaterial();
+	mtl_->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.55f });
+	//object->SetCastShadows(true);
+
+	auto* body = objectNode->CreateComponent<RigidBody>();
+	body->SetCollisionLayer(2);
+	// Bigger boxes will be heavier and harder to move
+	//body->SetMass(scale * 2.0f);
+	auto* shape = objectNode->CreateComponent<CollisionShape>();
+	shape->SetBox(Vector3::ONE);
+
+	born_time_ = scene->GetSubsystem<Time>()->GetElapsedTime();
+	node_ = objectNode;
+	active_ = true;
+}
+
+Barrier::~Barrier()
+{
+	Destory();
+}
+
+void Barrier::Destory()
+{
+	active_ = false;
+	if (node_) {
+		scene_->RemoveChild(node_);
+		node_ = nullptr;
+		mtl_ = nullptr;
+	}
+}
+
+void Barrier::Update(float elapsedTime)
+{
+	auto current_time = elapsedTime - born_time_;
+	
+	if (current_time > duration_) {
+		Destory();
+	} else {
+		float fade_factor = current_time / duration_;
+		if (mtl_) {
+			mtl_->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.6f * (1.0f - fade_factor) });
+		}
+	}
+}
+
 Racetrack::Racetrack(Scene* scene)
 	: scene_{ scene }
 {
@@ -68,64 +124,63 @@ Racetrack::Racetrack(Scene* scene)
 		cells_[i].resize(count_ * grid_count_);
 	}
 }
-void Racetrack::CreateBlock(const Vector3& worldPos)
+
+void Racetrack::Cell::CreateBarrier(Scene* scene, const Vector3& pos, float size, float duration)
 {
-	Vector3 out_pos = worldPos;
-	float min_x = -count_ * 0.5 * width_;
-	float max_x = count_ * 0.5 * width_;
-	out_pos.x_ -= fmod(worldPos.x_ - min_x, grid_width_);
-	out_pos.z_ -= fmod(worldPos.z_, grid_width_);
-	out_pos += Vector3{ 0.5f * grid_width_, 0.0f, 0.5f * grid_width_ };
-	if (worldPos.x_ < min_x || worldPos.x_ > max_x
-		|| worldPos.z_ < 0.0f || worldPos.z_ > length_)
-	{
-		return;
-	}
-	int x_index = (worldPos.x_ - min_x) / grid_width_;
-	int z_index = worldPos.z_ / grid_width_;
-	auto& cell = cells_[z_index][x_index];
-	if (cell.block_node)
-	{
-		return;
-	}
-
-	float scale = grid_width_ * 0.95f;
-	auto* cache = scene_->GetSubsystem<ResourceCache>();
-	Node* objectNode = scene_->CreateChild("Box");
-	objectNode->SetPosition({ out_pos.x_, grid_width_ + 0.2f, out_pos.z_ });
-	objectNode->SetScale(scale);
-	auto* object = objectNode->CreateComponent<StaticModel>();
-	object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-	object->SetMaterial(cache->GetResource<Material>("Materials/GreenTransparent.xml"));
-	object->GetMaterial()->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.55f });
-	//object->SetCastShadows(true);
-
-	auto* body = objectNode->CreateComponent<RigidBody>();
-	body->SetCollisionLayer(2);
-	// Bigger boxes will be heavier and harder to move
-	body->SetMass(scale * 2.0f);
-	auto* shape = objectNode->CreateComponent<CollisionShape>();
-	shape->SetBox(Vector3::ONE);
-	cell.block_node = objectNode;
+	barrier_ = std::make_unique<Barrier>(scene, pos, size, duration);
 }
 
-void Racetrack::DestoryBlock(const Vector3& worldPos)
+void Racetrack::Cell::DestoryBarrier()
+{
+	barrier_ = nullptr;
+}
+
+Racetrack::Cell* Racetrack::LocateCell(const Vector3& worldPos)
 {
 	float min_x = -count_ * 0.5 * width_;
 	float max_x = count_ * 0.5 * width_;
 	if (worldPos.x_ < min_x || worldPos.x_ > max_x
-		|| worldPos.z_ < 0.0f || worldPos.z_ > length_)
-	{
-		return;
+		|| worldPos.z_ < 0.0f || worldPos.z_ > length_) {
+		return nullptr;
 	}
 	int x_index = (worldPos.x_ - min_x) / grid_width_;
 	int z_index = worldPos.z_ / grid_width_;
-	auto& cell = cells_[z_index][x_index];
-	if (cell.block_node)
-	{
-		scene_->RemoveChild(cell.block_node);
-		cell.block_node = nullptr;
+	return &cells_[z_index][x_index];
+}
+
+void Racetrack::Cell::Update(float elapsedTime)
+{
+	if (barrier_) {
+		barrier_->Update(elapsedTime);
 	}
+}
+
+void Racetrack::Update(float elapsedTime)
+{
+	for (auto& rowcell: cells_) {
+		for (auto& cell : rowcell) {
+			cell.Update(elapsedTime);
+		}
+	}
+}
+
+void Racetrack::CreateBarrier(const Vector3& worldPos)
+{
+	Vector3 pos = worldPos;
+	float min_x = -count_ * 0.5 * width_;
+	float max_x = count_ * 0.5 * width_;
+	pos.x_ -= fmod(worldPos.x_ - min_x, grid_width_);
+	pos.z_ -= fmod(worldPos.z_, grid_width_);
+	pos += Vector3{ 0.5f * grid_width_, 0.0f, 0.5f * grid_width_ };
+	pos.y_ = grid_width_ * 0.5f;
+	auto cell = LocateCell(worldPos);
+	cell->CreateBarrier(scene_, pos, grid_width_ * 0.95f, 4.0f);
+}
+
+void Racetrack::DestoryBarrier(const Vector3& worldPos)
+{
+	auto cell = LocateCell(worldPos);
+	cell->DestoryBarrier();
 }
 
 void Racetrack::UpdateRacetrack()
@@ -558,7 +613,7 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
 // 					rot_one_time_.finished_ = old_finished;
 // 				}
 // 			}
-
+			
             // Switch between 1st and 3rd person
             if (input->GetKeyPress(KEY_F))
                 firstPerson_ = !firstPerson_;
@@ -585,6 +640,8 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
             }
         }
     }
+	auto* time = GetSubsystem<Time>();
+	racetrack_->Update(time->GetElapsedTime());
 }
 
 void CharacterDemo::ThirdPersonCamera()
@@ -753,13 +810,10 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 				rot_one_time_.Init(start_rot_, end_rot_, time->GetElapsedTime(), 0.5f);
 			}
 			*/
-			if (button == MOUSEB_LEFT)
-			{
-				racetrack_->CreateBlock(target_pos_);
-			}
-			else if (button == MOUSEB_RIGHT)
-			{
-				racetrack_->DestoryBlock(target_pos_);
+			if (button == MOUSEB_LEFT) {
+				racetrack_->CreateBarrier(target_pos_);
+			} else if (button == MOUSEB_RIGHT) {
+				racetrack_->DestoryBarrier(target_pos_);
 			}
 		}
 		
