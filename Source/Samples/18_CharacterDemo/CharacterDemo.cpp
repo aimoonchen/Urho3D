@@ -67,7 +67,8 @@ Barrier::Barrier(Scene* scene, const Vector3& pos, float size, float duration)
 	auto* object = objectNode->CreateComponent<StaticModel>();
 	auto* cache = scene->GetSubsystem<ResourceCache>();
 	object->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-	object->SetMaterial(cache->GetResource<Material>("Materials/GreenTransparent.xml"));
+	auto mtl = cache->GetResource<Material>("Materials/GreenTransparent.xml");
+	object->SetMaterial(mtl->Clone());
 	mtl_ = object->GetMaterial();
 	mtl_->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.55f });
 	//object->SetCastShadows(true);
@@ -108,7 +109,7 @@ void Barrier::Update(float elapsedTime)
 	} else {
 		float fade_factor = current_time / duration_;
 		if (mtl_) {
-			mtl_->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.6f * (1.0f - fade_factor) });
+			mtl_->SetShaderParameter("MatDiffColor", Color{ 1.0f, 1.0f, 1.0f, 0.15f + 0.6f * (1.0f - fade_factor) });
 		}
 	}
 }

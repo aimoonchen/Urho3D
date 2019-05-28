@@ -59,7 +59,12 @@ public:
 
     /// Movement controls. Assigned by the main program each frame.
     Controls controls_;
-
+	void SetSpeed(float s) { speed_ = s; }
+	float GetForce() const
+	{
+		return speed_ * MOVE_FORCE;
+	}
+	float speed_{ 1.0f };
 private:
     /// Handle physics collision event.
     void HandleNodeCollision(StringHash eventType, VariantMap& eventData);

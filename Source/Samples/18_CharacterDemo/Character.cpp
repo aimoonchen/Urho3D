@@ -95,7 +95,7 @@ void Character::FixedUpdate(float timeStep)
         moveDir.Normalize();
 
     // If in air, allow control, but slower than when on ground
-    body->ApplyImpulse(rot * moveDir * (softGrounded ? MOVE_FORCE : INAIR_MOVE_FORCE));
+	body->ApplyImpulse(rot * moveDir * (softGrounded ? GetForce()/*MOVE_FORCE*/ : INAIR_MOVE_FORCE));
 
     if (softGrounded)
     {
