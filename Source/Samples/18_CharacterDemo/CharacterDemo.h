@@ -138,6 +138,8 @@ public:
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
 	void Stop() override;
+	void ConnectServer();
+	void SendCommand();
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
     String GetScreenJoystickPatchString() const override { return
@@ -208,7 +210,8 @@ private:
 	//void HandleMouseMove(StringHash eventType, VariantMap& eventData);
 	/// Handle mouse wheel event.
 	void HandleMouseWheel(StringHash eventType, VariantMap& eventData);
-
+	/// Handle an incoming network message.
+	void HandleNetworkMessage(StringHash eventType, VariantMap& eventData);
 	Quaternion GetEndRotate();
     /// Touch utility object.
     SharedPtr<Touch> touch_;

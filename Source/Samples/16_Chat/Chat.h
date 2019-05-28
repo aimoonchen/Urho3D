@@ -24,6 +24,10 @@
 
 #include "Sample.h"
 
+#include "RaceRoom.h"
+#include <vector>
+#include <memory>
+
 namespace Urho3D
 {
 
@@ -103,4 +107,5 @@ private:
     SharedPtr<Button> disconnectButton_;
     /// Start server button.
     SharedPtr<Button> startServerButton_;
+	std::vector<std::unique_ptr<server::Player>> players_;
 };

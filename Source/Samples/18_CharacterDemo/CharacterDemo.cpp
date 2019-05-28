@@ -41,6 +41,8 @@
 #include <Urho3D/Physics/RigidBody.h>
 #include <Urho3D/Resource/ResourceCache.h>
 #include <Urho3D/Scene/Scene.h>
+#include <Urho3D/Network/Network.h>
+#include <Urho3D/Network/NetworkEvents.h>
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
@@ -57,6 +59,7 @@ URHO3D_DEFINE_APPLICATION_MAIN(CharacterDemo)
 constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 720;
 constexpr unsigned int VIEW_MASK_FLOOR = 0;
+const unsigned short SERVER_PORT = 2345;
 
 Barrier::Barrier(Scene* scene, const Vector3& pos, float size, float duration)
 	: scene_{ scene }, pos_{ pos }, size_{ size }, duration_{ duration }
@@ -293,6 +296,70 @@ void CharacterDemo::Stop()
 	Sample::Stop();
 }
 
+void CharacterDemo::ConnectServer()
+{
+	auto* network = GetSubsystem<Network>();
+	String address = "";// textEdit_->GetText().Trimmed();
+	if (address.Empty())
+		address = "localhost"; // Use localhost to connect if nothing else specified
+	// Empty the text edit after reading the address to connect to
+	//textEdit_->SetText(String::EMPTY);
+
+	// Connect to server, do not specify a client scene as we are not using scene replication, just messages.
+	// At connect time we could also send identity parameters (such as username) in a VariantMap, but in this
+	// case we skip it for simplicity
+	network->Connect(address, SERVER_PORT, nullptr);
+}
+
+void CharacterDemo::SendCommand()
+{
+	String text = textEdit_->GetText();
+	if (text.Empty())
+		return; // Do not send an empty message
+
+	auto* network = GetSubsystem<Network>();
+	Connection* serverConnection = network->GetServerConnection();
+
+	if (serverConnection)
+	{
+		// A VectorBuffer object is convenient for constructing a message to send
+		VectorBuffer msg;
+		msg.WriteString(text);
+		// Send the chat message as in-order and reliable
+		serverConnection->SendMessage(MSG_CHAT, true, true, msg);
+		// Empty the text edit after sending
+		textEdit_->SetText(String::EMPTY);
+	}
+}
+void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
+{
+	auto* network = GetSubsystem<Network>();
+
+	using namespace NetworkMessage;
+
+	int msgID = eventData[P_MESSAGEID].GetInt();
+	if (msgID == MSG_CHAT)
+	{
+		const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
+		// Use a MemoryBuffer to read the message data so that there is no unnecessary copying
+		MemoryBuffer msg(data);
+		String text = msg.ReadString();
+
+		// If we are the server, prepend the sender's IP address and port and echo to everyone
+		// If we are a client, just display the message
+		if (network->IsServerRunning())
+		{
+			auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+
+			text = sender->ToString() + " " + text;
+
+			VectorBuffer sendMsg;
+			sendMsg.WriteString(text);
+			// Broadcast as in-order and reliable
+			network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+		}
+	}
+}
 void CharacterDemo::CreateScene()
 {
     auto* cache = GetSubsystem<ResourceCache>();
@@ -535,6 +602,8 @@ void CharacterDemo::SubscribeToEvents()
 	// done with defining the draw calls for the viewports (but before actually executing them.) We will request debug geometry
 	// rendering during that event
 	SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(CharacterDemo, HandlePostRenderUpdate));
+
+	SubscribeToEvent(E_NETWORKMESSAGE, URHO3D_HANDLER(CharacterDemo, HandleNetworkMessage));
 }
 
 void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)

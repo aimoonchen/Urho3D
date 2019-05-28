@@ -23,9 +23,12 @@ namespace server
 	class Player
 	{
 	public:
+		Player(int uid) : uid_{ uid } {}
 		void EnterRoom() {}
 		void LeaveRoon() {}
+		int GetId() const { return uid_; }
 	private:
+		int			uid_;
 		std::string name_;
 		RaceRoom* race_room_;
 	};

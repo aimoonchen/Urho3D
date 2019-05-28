@@ -42,7 +42,7 @@
 #include <Urho3D/UI/UIEvents.h>
 
 #include "Chat.h"
-
+#include "../18_CharacterDemo/NetMessage.h"
 #include <Urho3D/DebugNew.h>
 
 // Undefine Windows macro, as our Connection class has a function called SendMessage
@@ -50,8 +50,6 @@
 #undef SendMessage
 #endif
 
-// Identifier for the chat network messages
-const int MSG_CHAT = 153;
 // UDP port we will use
 const unsigned short CHAT_SERVER_PORT = 2345;
 
@@ -247,7 +245,8 @@ void Chat::HandleStartServer(StringHash /*eventType*/, VariantMap& eventData)
 {
     auto* network = GetSubsystem<Network>();
     network->StartServer(CHAT_SERVER_PORT);
-
+	server::TrackInfo ti;
+	server::RaceRoomManager::GetInstancePtr()->CreateRoom(ti);
     UpdateButtons();
 }
 
@@ -263,24 +262,60 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
         const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
         // Use a MemoryBuffer to read the message data so that there is no unnecessary copying
         MemoryBuffer msg(data);
-        String text = msg.ReadString();
+        //String text = msg.ReadString();
 
         // If we are the server, prepend the sender's IP address and port and echo to everyone
         // If we are a client, just display the message
         if (network->IsServerRunning())
         {
-            auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+            //auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
 
-            text = sender->ToString() + " " + text;
+            //text = sender->ToString() + " " + text;
 
-            VectorBuffer sendMsg;
-            sendMsg.WriteString(text);
+            //VectorBuffer sendMsg;
+            //sendMsg.WriteString(text);
             // Broadcast as in-order and reliable
-            network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+            //network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+			network->BroadcastMessage(MSG_CHAT, true, true, msg.GetData(), msg.GetSize());
         }
-
-        ShowChatText(text);
+		
+		auto pdata = (message::MessageHead*)msg.GetData();
+		auto src_id = pdata->src;
+		auto dst_id = pdata->dst;
+		switch (pdata->id)
+		{
+		case message::MessageId::kEnterRoom :
+			{
+				auto realmsg =(message::Enter*)pdata;
+				auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
+				players_.push_back(std::make_unique<server::Player>(players_.size()));
+				room->AddPlayer(players_.back().get());
+				auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+				message::PlayerId pid;
+				pid.head.id = message::MessageId::kPlayerId;
+				pid.head.src = pid.head.dst = (int)players_.size();
+				sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(message::PlayerId));
+			}
+			break;
+		case message::MessageId::kLeaveRoom :
+			break;
+		case message::MessageId::kFastPlayer :
+			break;
+		case message::MessageId::kSlowPlayer :
+			break;
+		case message::MessageId::kBarrier :
+			break;
+		case message::MessageId::kFreeze :
+			break;
+		case message::MessageId::kBlink :
+			break;
+		case message::MessageId::kUpdateLocation :
+			break;
+		default:
+			break;
+		}
     }
+	
 }
 
 void Chat::HandleConnectionStatus(StringHash /*eventType*/, VariantMap& eventData)
