@@ -1816,6 +1816,11 @@ namespace Urho3D
 
 		return IntVector2(1024, 768);
 	}
+	
+	CEGUI::Window* Gui::GetRootWindow()
+	{
+		return gui_impl_->getRootWindow();
+	}
 
 // 	void Gui::SetElementRenderTexture(UIElement* element, Texture2D* texture)
 // 	{

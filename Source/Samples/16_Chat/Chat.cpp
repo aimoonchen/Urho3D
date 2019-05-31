@@ -266,22 +266,23 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 
         // If we are the server, prepend the sender's IP address and port and echo to everyone
         // If we are a client, just display the message
-        if (network->IsServerRunning())
-        {
-            //auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-
-            //text = sender->ToString() + " " + text;
-
-            //VectorBuffer sendMsg;
-            //sendMsg.WriteString(text);
-            // Broadcast as in-order and reliable
-            //network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
-			network->BroadcastMessage(MSG_CHAT, true, true, msg.GetData(), msg.GetSize());
-        }
+//         if (network->IsServerRunning())
+//         {
+//             //auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+// 
+//             //text = sender->ToString() + " " + text;
+// 
+//             //VectorBuffer sendMsg;
+//             //sendMsg.WriteString(text);
+//             // Broadcast as in-order and reliable
+//             //network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+// 			network->BroadcastMessage(MSG_CHAT, true, true, msg.GetData(), msg.GetSize());
+//         }
 		
 		auto pdata = (message::MessageHead*)msg.GetData();
 		auto src_id = pdata->src;
 		auto dst_id = pdata->dst;
+		printf(" receive a packet %d\n", pdata->id);
 		switch (pdata->id)
 		{
 		case message::MessageId::kEnterRoom :

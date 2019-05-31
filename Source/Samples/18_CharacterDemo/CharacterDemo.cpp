@@ -46,13 +46,24 @@
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
+#include <Urho3D/IO/MemoryBuffer.h>
+#include "CEGUI/SchemeManager.h"
+#include "CEGUI/WindowManager.h"
+#include "CEGUI/widgets/PushButton.h"
+#include "CEGUI/Event.h"
+#include <Urho3D/Gui/Gui.h>
 
 #include "Mover.h"
 #include "Character.h"
 #include "CharacterDemo.h"
 #include "Touch.h"
+#include "NetMessage.h"
 
 #include <Urho3D/DebugNew.h>
+
+#ifdef SendMessage
+#undef SendMessage
+#endif
 
 URHO3D_DEFINE_APPLICATION_MAIN(CharacterDemo)
 
@@ -178,13 +189,17 @@ void Racetrack::CreateBarrier(const Vector3& worldPos)
 	pos += Vector3{ 0.5f * grid_width_, 0.0f, 0.5f * grid_width_ };
 	pos.y_ = grid_width_ * 0.5f;
 	auto cell = LocateCell(worldPos);
-	cell->CreateBarrier(scene_, pos, grid_width_ * 0.95f, 4.0f);
+	if (cell) {
+		cell->CreateBarrier(scene_, pos, grid_width_ * 0.95f, 4.0f);
+	}
 }
 
 void Racetrack::DestoryBarrier(const Vector3& worldPos)
 {
 	auto cell = LocateCell(worldPos);
-	cell->DestoryBarrier();
+	if (cell) {
+		cell->DestoryBarrier();
+	}
 }
 
 void Racetrack::UpdateRacetrack()
@@ -288,6 +303,11 @@ void CharacterDemo::Start()
     Sample::InitMouseMode(MM_ABSOLUTE/*MM_RELATIVE*/);
 	auto* input = GetSubsystem<Input>();
 	input->SetMouseVisible(true);
+	if (ConnectServer()) {
+		message::Enter enter;
+		enter.room_id = 0;
+		SendCommand((const unsigned char*)&enter, sizeof(message::Enter));
+	}
 }
 
 void CharacterDemo::Stop()
@@ -296,7 +316,7 @@ void CharacterDemo::Stop()
 	Sample::Stop();
 }
 
-void CharacterDemo::ConnectServer()
+bool CharacterDemo::ConnectServer()
 {
 	auto* network = GetSubsystem<Network>();
 	String address = "";// textEdit_->GetText().Trimmed();
@@ -308,14 +328,14 @@ void CharacterDemo::ConnectServer()
 	// Connect to server, do not specify a client scene as we are not using scene replication, just messages.
 	// At connect time we could also send identity parameters (such as username) in a VariantMap, but in this
 	// case we skip it for simplicity
-	network->Connect(address, SERVER_PORT, nullptr);
+	return network->Connect(address, SERVER_PORT, nullptr);
 }
 
-void CharacterDemo::SendCommand()
+void CharacterDemo::SendCommand(const unsigned char* data, unsigned int len)
 {
-	String text = textEdit_->GetText();
-	if (text.Empty())
-		return; // Do not send an empty message
+// 	String text = textEdit_->GetText();
+// 	if (text.Empty())
+// 		return; // Do not send an empty message
 
 	auto* network = GetSubsystem<Network>();
 	Connection* serverConnection = network->GetServerConnection();
@@ -323,12 +343,12 @@ void CharacterDemo::SendCommand()
 	if (serverConnection)
 	{
 		// A VectorBuffer object is convenient for constructing a message to send
-		VectorBuffer msg;
-		msg.WriteString(text);
+// 		VectorBuffer msg;
+// 		msg.WriteString(text);
 		// Send the chat message as in-order and reliable
-		serverConnection->SendMessage(MSG_CHAT, true, true, msg);
+		serverConnection->SendMessage(MSG_CHAT, true, true, data, len);
 		// Empty the text edit after sending
-		textEdit_->SetText(String::EMPTY);
+//		textEdit_->SetText(String::EMPTY);
 	}
 }
 void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
@@ -343,21 +363,64 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 		const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
 		// Use a MemoryBuffer to read the message data so that there is no unnecessary copying
 		MemoryBuffer msg(data);
-		String text = msg.ReadString();
+// 		String text = msg.ReadString();
+// 
+// 		// If we are the server, prepend the sender's IP address and port and echo to everyone
+// 		// If we are a client, just display the message
+// 		if (network->IsServerRunning())
+// 		{
+// 			auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+// 
+// 			text = sender->ToString() + " " + text;
+// 
+// 			VectorBuffer sendMsg;
+// 			sendMsg.WriteString(text);
+// 			// Broadcast as in-order and reliable
+// 			network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+// 		}
 
-		// If we are the server, prepend the sender's IP address and port and echo to everyone
-		// If we are a client, just display the message
-		if (network->IsServerRunning())
+		auto pdata = (message::MessageHead*)msg.GetData();
+		auto src_id = pdata->src;
+		auto dst_id = pdata->dst;
+		switch (pdata->id)
 		{
-			auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-
-			text = sender->ToString() + " " + text;
-
-			VectorBuffer sendMsg;
-			sendMsg.WriteString(text);
-			// Broadcast as in-order and reliable
-			network->BroadcastMessage(MSG_CHAT, true, true, sendMsg);
+		case message::MessageId::kPlayerId:
+			{
+			auto realmsg = (message::PlayerId*)pdata;
+			player_id_ = realmsg->head.src;
+			}
+			break;
+		case message::MessageId::kEnterRoom:
+		{
+// 			auto realmsg = (message::Enter*)pdata;
+// 			auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
+// 			players_.push_back(std::make_unique<server::Player>(players_.size()));
+// 			room->AddPlayer(players_.back().get());
+// 			auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+// 			message::PlayerId pid;
+// 			pid.head.id = message::MessageId::kPlayerId;
+// 			pid.head.src = pid.head.dst = (int)players_.size();
+// 			sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(message::PlayerId));
 		}
+		break;
+		case message::MessageId::kLeaveRoom:
+			break;
+		case message::MessageId::kFastPlayer:
+			break;
+		case message::MessageId::kSlowPlayer:
+			break;
+		case message::MessageId::kBarrier:
+			break;
+		case message::MessageId::kFreeze:
+			break;
+		case message::MessageId::kBlink:
+			break;
+		case message::MessageId::kUpdateLocation:
+			break;
+		default:
+			break;
+		}
+
 	}
 }
 void CharacterDemo::CreateScene()
@@ -562,24 +625,78 @@ void CharacterDemo::CreateCharacter()
 
 void CharacterDemo::CreateInstructions()
 {
-    auto* cache = GetSubsystem<ResourceCache>();
-    auto* ui = GetSubsystem<UI>();
-
-    // Construct new Text object, set string to display and font to use
-    auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys and mouse/touch to move\n"
-        "Space to jump, F to toggle 1st/3rd person\n"
-        "F5 to save scene, F7 to load"
-    );
-    instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
-    // The text has multiple rows. Center them in relation to each other
-    instructionText->SetTextAlignment(HA_CENTER);
-
-    // Position the text relative to the screen center
-    instructionText->SetHorizontalAlignment(HA_CENTER);
-    instructionText->SetVerticalAlignment(VA_CENTER);
-    instructionText->SetPosition(0, ui->GetRoot()->GetHeight() / 4);
+	auto gui = GetSubsystem<Gui>();
+	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
+	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
+	auto creat_button = [&winMgr, gui](const CEGUI::UVector2 pos, const CEGUI::String& name) {
+		auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/Button", name));
+		auto root = gui->GetRootWindow();
+		root->addChild(button);
+		button->setSize(CEGUI::USize(cegui_absdim(88.f), cegui_absdim(34.f)));
+		button->setPosition(CEGUI::UVector2(cegui_absdim(200.0f), cegui_absdim(680.0f)));
+		button->setProperty("NormalImage", "TaharezLook/ButtonLeftNormal");
+		button->setProperty("HoverImage", "TaharezLook/ButtonLeftHighlight");
+		button->setProperty("PushedImage", "TaharezLook/ButtonLeftPushed");
+		return button;
+	};
+	float posx = 200.0f; float posy = 680.0f;
+	float step = 90.0f;
+	auto button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "enter_room");
+	button->setText(CEGUI::String(U"进入房间"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnEnterRoom, this));
+	posx += step;
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "skill_fast");
+	button->setText(CEGUI::String(U"加速"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnFast, this));
+	posx += step;
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "skill_blink");
+	button->setText(CEGUI::String(U"闪现"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnBlink, this));
+	posx += step;
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "skill_barrier");
+	button->setText(CEGUI::String(U"放置障碍"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnBarrier, this));
+	posx += step;
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "skill_slow");
+	button->setText(CEGUI::String(U"减速"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnSlow, this));
+	posx += step;
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "skill_freeze");
+	button->setText(CEGUI::String(U"冰冻"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnFreeze, this));
+	button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "leave_room");
+	posx += step;
+	button->setText(CEGUI::String(U"离开房间"));
+	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnLeaveRoom, this));
+	
+}
+bool CharacterDemo::OnEnterRoom(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnLeaveRoom(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnFreeze(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnBarrier(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnFast(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnSlow(const CEGUI::EventArgs& args)
+{
+	return true;
+}
+bool CharacterDemo::OnBlink(const CEGUI::EventArgs& args)
+{
+	return true;
 }
 
 void CharacterDemo::SubscribeToEvents()
@@ -825,6 +942,11 @@ Quaternion CharacterDemo::GetEndRotate()
 }
 void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
 {
+// 	message::Enter enter;
+// 	enter.room_id = 0;
+// 	SendCommand((const unsigned char*)&enter, sizeof(message::Enter));
+	
+
 	using namespace MouseButtonDown;
 
 // 	mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());

@@ -138,8 +138,8 @@ public:
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
 	void Stop() override;
-	void ConnectServer();
-	void SendCommand();
+	bool ConnectServer();
+	void SendCommand(const unsigned char* data, unsigned int len);
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
     String GetScreenJoystickPatchString() const override { return
@@ -235,4 +235,12 @@ private:
 	/// Flag for drawing debug geometry.
 	bool drawDebug_{ false };
 	std::unique_ptr<Racetrack> racetrack_;
+	int player_id_{ -1 };
+	bool OnEnterRoom(const CEGUI::EventArgs& args);
+	bool OnLeaveRoom(const CEGUI::EventArgs& args);
+	bool OnFreeze(const CEGUI::EventArgs& args);
+	bool OnBarrier(const CEGUI::EventArgs& args);
+	bool OnFast(const CEGUI::EventArgs& args);
+	bool OnSlow(const CEGUI::EventArgs& args);
+	bool OnBlink(const CEGUI::EventArgs& args);
 };

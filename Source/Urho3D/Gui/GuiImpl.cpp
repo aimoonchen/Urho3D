@@ -78,23 +78,23 @@ void CEGui::Initialize(Graphics* graphics)
 	// Create a custom font which we use to draw the list items. This custom
 	// font won't get effected by the scaler and such.
 	CEGUI::FontManager& fontManager(CEGUI::FontManager::getSingleton());
-	//CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
+	CEGUI::FontManager::getSingleton().createFromFile("DejaVuSans-12.font");
 	CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("msyh-14.font");
 	//CEGUI::FontManager::FontList loadedFonts = CEGUI::FontManager::getSingleton().createFromFile("FZZYJ-14.font");
 	CEGUI::Font* defaultFont = loadedFonts.empty() ? 0 : loadedFonts.front();
 	// Set it as the default
-	d_context->setDefaultFont(defaultFont);
+	//d_context->setDefaultFont(defaultFont);
 
 	// load all the fonts (if they are not loaded yet)
 	//fontManager.createAll("*.font", "fonts");
 
 	auto FZZYJFonts = CEGUI::FontManager::getSingleton().createFromFile("FZZYJ-14.font");
-	auto FZZYJFont = loadedFonts.empty() ? 0 : loadedFonts.front();
+	auto FZZYJFont = loadedFonts.empty() ? 0 : loadedFonts.front();	d_context->setDefaultFont(FZZYJFont);
 
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
 	auto root = static_cast<CEGUI::DefaultWindow*>(winMgr.createWindow("DefaultWindow", "Root"));
 	d_context->setRootWindow(root);
-
+	/*
 	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::FrameWindow* wnd = static_cast<CEGUI::FrameWindow*>(winMgr.createWindow("TaharezLook/FrameWindow", "Sample Window"));
 	root->addChild(wnd);
@@ -150,7 +150,7 @@ void CEGui::Initialize(Graphics* graphics)
 	bar->setSize(CEGUI::USize(cegui_absdim(100.f), cegui_absdim(32.f)));
 	bar->setPosition(CEGUI::UVector2(cegui_absdim(50.0f), cegui_absdim(150.0f)));
 	bar->setProgress(0.5f);
-
+	*/
 	// create logo imageset and draw the image (we only ever draw this once)
 	CEGUI::ImageManager::getSingleton().addBitmapImageFromFile("cegui_logo", "logo.png");
 
@@ -172,16 +172,11 @@ void CEGui::Initialize(Graphics* graphics)
 
 	// subscribe handler to render overlay items
 	d_context->subscribeEvent(CEGUI::RenderingSurface::EventRenderQueueStarted, CEGUI::Event::Subscriber(&CEGui::sampleBrowserOverlayHandler, this));
-
+	
 	// subscribe handler to reposition logo when window is sized.
 	cegui_system.subscribeEvent(CEGUI::System::EventDisplaySizeChanged, CEGUI::Event::Subscriber(&CEGui::resizeHandler, this));
-
-	/*
-	const Sizef& targetSize = d_context->getSurfaceSize();
-	const int width = static_cast<int>(targetSize.d_width);
-	const int height = static_cast<int>(targetSize.d_height);
-	d_sampleApp->setApplicationWindowSize(width, height);
-	*/
+	
+	
 	d_systemInputAggregator = new CEGUI::InputAggregator(d_context);
 	d_systemInputAggregator->initialise();
 }
@@ -282,6 +277,14 @@ bool CEGui::resizeHandler(const CEGUI::EventArgs& /*args*/)
 	updateFPSGeometry();
 
 	return true;
+}
+
+CEGUI::Window* CEGui::getRootWindow() const
+{
+	if (d_context) {
+		return d_context->getRootWindow();
+	}
+	return nullptr;
 }
 
 //----------------------------------------------------------------------------//

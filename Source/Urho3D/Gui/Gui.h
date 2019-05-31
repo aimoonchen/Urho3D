@@ -28,7 +28,10 @@
 
 // #include "../Gui/Cursor.h"
 // #include "../Gui/UIBatch.h"
-
+namespace CEGUI
+{
+	class Window;
+}
 
 namespace Urho3D
 {
@@ -221,6 +224,7 @@ class CEGui;
 		/// Return root element custom size. Returns 0,0 when custom size is not being used and automatic resizing according to window size is in use instead (default.)
 		const IntVector2& GetCustomSize() const { return customSize_; }
 
+		CEGUI::Window* GetRootWindow();
 		/// Set texture to which element will be rendered.
 		//void SetElementRenderTexture(UIElement* element, Texture2D* texture);
 
@@ -343,7 +347,6 @@ class CEGui;
 		void ResizeRootElement();
 		/// Return effective size of the root element, according to Gui scale and resolution / custom size.
 		IntVector2 GetEffectiveRootElementSize(bool applyScale = true) const;
-
 // 		/// Graphics subsystem.
 // 		WeakPtr<Graphics> graphics_;
 // 		/// Gui root element.

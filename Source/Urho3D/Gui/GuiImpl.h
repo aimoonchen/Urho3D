@@ -3,7 +3,7 @@
 #include "Container/Str.h"
 #include "CEGUI/InputEvent.h"
 
-#define DISABLE_CEGUI 1
+//#define DISABLE_CEGUI 1
 
 namespace CEGUI {
 class Renderer;
@@ -36,6 +36,7 @@ public:
 	bool injectMouseWheelChange(float position);
 	bool injectMousePosition(float x, float y);
 	CEGUI::GUIContext* getMainWindowGUIContext() const { return d_context; }
+	CEGUI::Window* getRootWindow() const;
 private:
 	void updateFPS(const float elapsed);
 	void updateLogo(const float elapsed);
