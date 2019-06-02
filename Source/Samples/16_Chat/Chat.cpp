@@ -250,8 +250,15 @@ void Chat::HandleStartServer(StringHash /*eventType*/, VariantMap& eventData)
     UpdateButtons();
 }
 
+int GetRoleId()
+{
+	static constexpr int max_role_id = 4;
+	static int current_id = 0;
+	return current_id++ % max_role_id;
+}
 void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 {
+	
     auto* network = GetSubsystem<Network>();
 
     using namespace NetworkMessage;
@@ -282,20 +289,32 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 		auto pdata = (message::MessageHead*)msg.GetData();
 		auto src_id = pdata->src;
 		auto dst_id = pdata->dst;
-		printf(" receive a packet %d\n", pdata->id);
+		URHO3D_LOGINFOF(" receive a packet player[%d]->player[%d] %s", src_id, dst_id, message::id_to_str[static_cast<int>(pdata->id)]);
 		switch (pdata->id)
 		{
 		case message::MessageId::kEnterRoom :
 			{
 				auto realmsg =(message::Enter*)pdata;
 				auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
+				auto new_id = (int)players_.size();
 				players_.push_back(std::make_unique<server::Player>(players_.size()));
 				room->AddPlayer(players_.back().get());
 				auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+				auto track = players_.back()->GetTrack();
+				auto role_id = GetRoleId();
 				message::PlayerId pid;
 				pid.head.id = message::MessageId::kPlayerId;
-				pid.head.src = pid.head.dst = (int)players_.size();
-				sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(message::PlayerId));
+				pid.head.src = pid.head.dst = new_id;
+				pid.head.src_role_id = role_id;
+				sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(pid));
+				URHO3D_LOGINFOF("pid.head.src : %d - %d", new_id, role_id);
+				// notify other player
+				message::Enter enter;
+				enter.head.id = message::MessageId::kEnterRoom;
+				enter.head.src = enter.head.dst = new_id;
+				enter.head.src_role_id = role_id;
+				enter.track_id = track->GetId();
+				network->BroadcastMessage(MSG_CHAT, true, true, (const unsigned char*)&enter, sizeof(enter));
 			}
 			break;
 		case message::MessageId::kLeaveRoom :

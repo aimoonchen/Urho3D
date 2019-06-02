@@ -57,8 +57,7 @@
 #include "Character.h"
 #include "CharacterDemo.h"
 #include "Touch.h"
-#include "NetMessage.h"
-
+#include "Player.h"
 #include <Urho3D/DebugNew.h>
 
 #ifdef SendMessage
@@ -71,6 +70,40 @@ constexpr int WINDOW_WIDTH = 1280;
 constexpr int WINDOW_HEIGHT = 720;
 constexpr unsigned int VIEW_MASK_FLOOR = 0;
 const unsigned short SERVER_PORT = 2345;
+
+SkillTip::SkillTip(Scene* scene, CEGUI::Window* tip)
+	: scene_{ scene }, tip_{ tip }
+{
+}
+
+SkillTip::~SkillTip()
+{
+}
+
+void SkillTip::Init(const CEGUI::String& content, float duration)
+{
+	tip_->setText(content);
+	tip_->setVisible(true);
+	tip_->setAlpha(1.0f);
+	start_time_ = scene_->GetSubsystem<Time>()->GetElapsedTime();
+	duration_ = duration;
+	active_ = true;
+}
+
+void SkillTip::Update(float elapsedTime)
+{
+	if (!active_) {
+		return;
+	}
+	float delta_time = elapsedTime - start_time_;
+	if (delta_time >= duration_) {
+		tip_->setVisible(false);
+		active_ = false;
+	}
+	else {
+		tip_->setAlpha((1.0f - delta_time / duration_));
+	}
+}
 
 Barrier::Barrier(Scene* scene, const Vector3& pos, float size, float duration)
 	: scene_{ scene }, pos_{ pos }, size_{ size }, duration_{ duration }
@@ -303,10 +336,8 @@ void CharacterDemo::Start()
     Sample::InitMouseMode(MM_ABSOLUTE/*MM_RELATIVE*/);
 	auto* input = GetSubsystem<Input>();
 	input->SetMouseVisible(true);
-	if (ConnectServer()) {
-		message::Enter enter;
-		enter.room_id = 0;
-		SendCommand((const unsigned char*)&enter, sizeof(message::Enter));
+	if (!ConnectServer()) {
+		printf("connect server failed.\n");
 	}
 }
 
@@ -346,6 +377,7 @@ void CharacterDemo::SendCommand(const unsigned char* data, unsigned int len)
 // 		VectorBuffer msg;
 // 		msg.WriteString(text);
 		// Send the chat message as in-order and reliable
+		URHO3D_LOGINFOF("	SendCommand %d byte data to server.");
 		serverConnection->SendMessage(MSG_CHAT, true, true, data, len);
 		// Empty the text edit after sending
 //		textEdit_->SetText(String::EMPTY);
@@ -385,38 +417,114 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 		switch (pdata->id)
 		{
 		case message::MessageId::kPlayerId:
-			{
+		{
 			auto realmsg = (message::PlayerId*)pdata;
 			player_id_ = realmsg->head.src;
-			}
-			break;
+			race::TrackInfo ti;
+			race_room_ = std::make_unique<race::Room>(ti);
+			race_room_->Init(5);
+			std::string nick_name = "Player_";
+			nick_name += std::to_string(player_id_);
+			auto new_player = race_room_->AddPlayer(player_id_, nick_name);
+			new_player->SetScene(scene_);
+			new_player->SetRoleId(realmsg->head.src_role_id);
+			my_player_ = new_player;
+		}
+		break;
 		case message::MessageId::kEnterRoom:
 		{
-// 			auto realmsg = (message::Enter*)pdata;
-// 			auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
-// 			players_.push_back(std::make_unique<server::Player>(players_.size()));
-// 			room->AddPlayer(players_.back().get());
-// 			auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-// 			message::PlayerId pid;
-// 			pid.head.id = message::MessageId::kPlayerId;
-// 			pid.head.src = pid.head.dst = (int)players_.size();
-// 			sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(message::PlayerId));
+			auto realmsg = (message::Enter*)pdata;
+			auto player_id = realmsg->head.src;
+			URHO3D_LOGINFOF("player[%d] join the game", player_id);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(player_id);
+			tips += U"]进入游戏";
+			skill_tip_->Init(tips);
+			if (player_id_ != player_id) {
+				std::string nick_name = "Player_";
+				nick_name += std::to_string(player_id);
+				auto new_player = race_room_->AddPlayer(player_id, nick_name);
+				new_player->SetScene(scene_);
+				auto remote_track_id = realmsg->track_id;
+
+				new_player->SetRoleId(realmsg->head.src_role_id);
+			}
 		}
 		break;
 		case message::MessageId::kLeaveRoom:
-			break;
+		{
+			auto realmsg = (message::Leave*)pdata;
+			URHO3D_LOGINFOF("player[%d] leave the game", realmsg->head.src);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]离开游戏";
+			skill_tip_->Init(tips);
+			if (player_id_ != realmsg->head.src) {
+				race_room_->DelPlayer(realmsg->head.src);
+			}
+		}
+		break;
 		case message::MessageId::kFastPlayer:
-			break;
+		{
+			auto realmsg = (message::Fast*)pdata;
+			URHO3D_LOGINFOF("player[%d] cast fast", realmsg->head.src);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]开启加速";
+			skill_tip_->Init(tips);
+		}
+		break;
 		case message::MessageId::kSlowPlayer:
-			break;
+		{
+			auto realmsg = (message::Fast*)pdata;
+			URHO3D_LOGINFOF("player[%d] cast slow to player[%d]", realmsg->head.src, realmsg->head.dst);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]对玩家[";
+			tips += std::to_string(realmsg->head.dst);
+			tips += U"]使用减速";
+			skill_tip_->Init(tips);
+		}
+		break;
 		case message::MessageId::kBarrier:
-			break;
+		{
+			auto realmsg = (message::Barrier*)pdata;
+			URHO3D_LOGINFOF("player[%d] cast barrier to player[%d]", realmsg->head.src, realmsg->head.dst);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]对玩家[";
+			tips += std::to_string(realmsg->head.dst);
+			tips += U"]使用障碍";
+			skill_tip_->Init(tips);
+		}
+		break;
 		case message::MessageId::kFreeze:
-			break;
+		{
+			auto realmsg = (message::Freeze*)pdata;
+			URHO3D_LOGINFOF("player[%d] cast freeze to player[%d]", realmsg->head.src, realmsg->head.dst);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]对玩家[";
+			tips += std::to_string(realmsg->head.dst);
+			tips += U"]使用冰冻";
+			skill_tip_->Init(tips);
+		}
+		break;
 		case message::MessageId::kBlink:
-			break;
+		{
+			auto realmsg = (message::Freeze*)pdata;
+			URHO3D_LOGINFOF("player[%d] cast blink", realmsg->head.src);
+			CEGUI::String tips = U"玩家[";
+			tips += std::to_string(realmsg->head.src);
+			tips += U"]开启闪现";
+			skill_tip_->Init(tips);
+		}
+		break;
 		case message::MessageId::kUpdateLocation:
-			break;
+		{
+
+		}
+		break;
 		default:
 			break;
 		}
@@ -572,7 +680,7 @@ void CharacterDemo::CreateCharacter()
     // Remember it so that we can set the controls. Use a WeakPtr because the scene hierarchy already owns it
     // and keeps it alive as long as it's not removed from the hierarchy
     character_ = objectNode->CreateComponent<Character>();
-
+	/*
 	const unsigned NUM_MODELS = 9;
 	const float MODEL_MOVE_SPEED = 2.0f;
 	const float MODEL_ROTATE_SPEED = 100.0f;
@@ -620,7 +728,7 @@ void CharacterDemo::CreateCharacter()
 		auto* mover = modelNode->CreateComponent<Mover>();
 		mover->SetParameters(MODEL_MOVE_SPEED, MODEL_ROTATE_SPEED, bounds);
 	}
-
+	*/
 }
 
 void CharacterDemo::CreateInstructions()
@@ -628,19 +736,19 @@ void CharacterDemo::CreateInstructions()
 	auto gui = GetSubsystem<Gui>();
 	CEGUI::SchemeManager::getSingleton().createFromFile("TaharezLook.scheme");
 	CEGUI::WindowManager& winMgr = CEGUI::WindowManager::getSingleton();
-	auto creat_button = [&winMgr, gui](const CEGUI::UVector2 pos, const CEGUI::String& name) {
+	auto creat_button = [&winMgr, gui](const CEGUI::UVector2& pos, const CEGUI::String& name) {
 		auto button = static_cast<CEGUI::PushButton*>(winMgr.createWindow("TaharezLook/Button", name));
 		auto root = gui->GetRootWindow();
 		root->addChild(button);
 		button->setSize(CEGUI::USize(cegui_absdim(88.f), cegui_absdim(34.f)));
-		button->setPosition(CEGUI::UVector2(cegui_absdim(200.0f), cegui_absdim(680.0f)));
+		button->setPosition(pos);
 		button->setProperty("NormalImage", "TaharezLook/ButtonLeftNormal");
 		button->setProperty("HoverImage", "TaharezLook/ButtonLeftHighlight");
 		button->setProperty("PushedImage", "TaharezLook/ButtonLeftPushed");
 		return button;
 	};
-	float posx = 200.0f; float posy = 680.0f;
-	float step = 90.0f;
+	float posx = 300.0f; float posy = 680.0f;
+	float step = 120.0f;
 	auto button = creat_button(CEGUI::UVector2(cegui_absdim(posx), cegui_absdim(posy)), "enter_room");
 	button->setText(CEGUI::String(U"进入房间"));
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnEnterRoom, this));
@@ -668,34 +776,66 @@ void CharacterDemo::CreateInstructions()
 	posx += step;
 	button->setText(CEGUI::String(U"离开房间"));
 	button->subscribeEvent(CEGUI::PushButton::EventClicked, CEGUI::Event::Subscriber(&CharacterDemo::OnLeaveRoom, this));
+
+	auto root = gui->GetRootWindow();
+	auto text = winMgr.createWindow("TaharezLook/StaticText", "skill_tip");
+	root->addChild(text);
+	text->setFont("FZZYJ-14");
+	text->setPosition(CEGUI::UVector2(cegui_reldim(0.5f), cegui_reldim(0.5f)));
+	text->setSize(CEGUI::USize(cegui_reldim(0.25f), cegui_absdim(34.0f)));
+	text->setText(U"惟草木之零落兮，恐美人之迟暮。则为你如花美眷，似水流年。");
+	skill_tip_ = std::make_unique<SkillTip>(scene_, text);
 	
 }
+
 bool CharacterDemo::OnEnterRoom(const CEGUI::EventArgs& args)
 {
+	message::Enter enter;
+	enter.head.src = enter.head.dst = player_id_;
+	enter.room_id = 0;
+	URHO3D_LOGINFOF("EnterRoom %d.", enter.room_id);
+	SendCommand((const unsigned char*)&enter, sizeof(message::Enter));
 	return true;
 }
 bool CharacterDemo::OnLeaveRoom(const CEGUI::EventArgs& args)
 {
+	message::Enter leave;
+	leave.head.src = leave.head.dst = player_id_;
+	leave.room_id = 0;
+	URHO3D_LOGINFOF("LeaveRoom %d.", leave.room_id);
 	return true;
 }
 bool CharacterDemo::OnFreeze(const CEGUI::EventArgs& args)
 {
+	current_message_ = message::MessageId::kFreeze;
 	return true;
 }
 bool CharacterDemo::OnBarrier(const CEGUI::EventArgs& args)
 {
+	current_message_ = message::MessageId::kBarrier;
 	return true;
 }
 bool CharacterDemo::OnFast(const CEGUI::EventArgs& args)
 {
+	cast_fast_;
+	cast_fast_.head.src = cast_fast_.head.dst = player_id_;
+	cast_fast_.ratio = 1.5f;
+	cast_fast_.duration = 2.0f;
+	URHO3D_LOGINFOF("cast fast %f, %f.", cast_fast_.ratio, cast_fast_.duration);
+	SendCommand((const unsigned char*)&cast_fast_, sizeof(cast_fast_));
 	return true;
 }
 bool CharacterDemo::OnSlow(const CEGUI::EventArgs& args)
 {
+	current_message_ = message::MessageId::kSlowPlayer;
 	return true;
 }
 bool CharacterDemo::OnBlink(const CEGUI::EventArgs& args)
 {
+	cast_blink_.head.src = cast_blink_.head.dst = player_id_;
+	cast_blink_.distance = 2.0f;
+	URHO3D_LOGINFOF("cast blink %f.", cast_blink_.distance);
+	SendCommand((const unsigned char*)&cast_blink_, sizeof(cast_blink_));
 	return true;
 }
 
@@ -829,6 +969,9 @@ void CharacterDemo::HandleUpdate(StringHash eventType, VariantMap& eventData)
     }
 	auto* time = GetSubsystem<Time>();
 	racetrack_->Update(time->GetElapsedTime());
+	if (skill_tip_) {
+		skill_tip_->Update(time->GetElapsedTime());
+	}
 }
 
 void CharacterDemo::ThirdPersonCamera()
@@ -1002,11 +1145,15 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 				rot_one_time_.Init(start_rot_, end_rot_, time->GetElapsedTime(), 0.5f);
 			}
 			*/
-			if (button == MOUSEB_LEFT) {
-				racetrack_->CreateBarrier(target_pos_);
-			} else if (button == MOUSEB_RIGHT) {
-				racetrack_->DestoryBarrier(target_pos_);
+			if (current_message_ != message::MessageId::kCommandCount) {
+
 			}
+			
+// 			if (button == MOUSEB_LEFT) {
+// 				racetrack_->CreateBarrier(target_pos_);
+// 			} else if (button == MOUSEB_RIGHT) {
+// 				racetrack_->DestoryBarrier(target_pos_);
+// 			}
 		}
 		
 	}

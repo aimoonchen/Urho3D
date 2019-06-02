@@ -32,38 +32,38 @@ namespace server
 		}
 	}
 
-	Racetrack::Racetrack(RaceRoom* raceRoom, const Urho3D::Vector3& bornPos, int id)
+	Track::Track(Room* raceRoom, const Urho3D::Vector3& bornPos, int id)
 		: race_room_{ raceRoom }, born_pos_{ bornPos }, id_{ id }
 	{
 
 	}
 	
-	Racetrack::~Racetrack()
+	Track::~Track()
 	{
 
 	}
 
-	RaceRoom::RaceRoom(const TrackInfo& ti, int id, std::string name)
+	Room::Room(const TrackInfo& ti, int id, std::string name)
 		: track_info_{ ti }, id_{ id }, name_{ std::move(name) }
 	{
 
 	}
 	
-	RaceRoom::~RaceRoom()
+	Room::~Room()
 	{
 		Clean();
 	}
 	
-	void RaceRoom::Init(int playerCount)
+	void Room::Init(int playerCount)
 	{
 		// player count must be odd number
 		player_count_ = playerCount;
 		auto start_x = -(track_info_.width_ * playerCount) * 0.5f;
 		for (int i = 0; i < playerCount; i++) {
-			racetracks_.push_back(std::make_unique<Racetrack>(this, Urho3D::Vector3{ start_x + i * track_info_.width_, 0, 0 }, i));
+			racetracks_.push_back(std::make_unique<Track>(this, Urho3D::Vector3{ start_x + i * track_info_.width_, 0, 0 }, i));
 		}
 	}
-	int RaceRoom::GetFreeTack()
+	int Room::GetFreeTack()
 	{
 		for (auto& track : racetracks_) {
 			if (track->IsFree()) {
@@ -72,17 +72,18 @@ namespace server
 		}
 		return -1;
 	}
-	bool RaceRoom::AddPlayer(Player* player)
+	bool Room::AddPlayer(Player* player)
 	{
 		auto tid = GetFreeTack();
 		if (tid < 0) {
 			return false;
 		}
 		racetracks_[tid]->SetPlayer(player);
+		player->SetTrack(racetracks_[tid].get());
 		return true;
 	}
 
-	void RaceRoom::DelPlayer(Player* player)
+	void Room::DelPlayer(Player* player)
 	{
 		for (auto& track : racetracks_) {
 			if (track->GetPlayer() == player) {
@@ -92,22 +93,22 @@ namespace server
 		}
 	}
 	
-	void RaceRoom::AddObserver(Player* observer)
+	void Room::AddObserver(Player* observer)
 	{
 
 	}
 
-	void RaceRoom::DelObserver(Player* observer)
+	void Room::DelObserver(Player* observer)
 	{
 
 	}
 
-	void RaceRoom::Clean()
+	void Room::Clean()
 	{
 
 	}
 
-	void RaceRoom::Update(float elapsedTime)
+	void Room::Update(float elapsedTime)
 	{
 
 	}
@@ -122,16 +123,17 @@ namespace server
 
 	}
 
-	RaceRoom* RaceRoomManager::CreateRoom(const TrackInfo& ti)
+	Room* RaceRoomManager::CreateRoom(const TrackInfo& ti, int playerCount)
 	{
 		static int s_room_id = { 0 };
-		auto race_room = std::make_unique<RaceRoom>(ti);
+		auto race_room = std::make_unique<Room>(ti);
 		auto race_room_ptr = race_room.get();
+		race_room->Init(playerCount);
 		race_room_map_.insert({ s_room_id,  std::move(race_room) });
 		return race_room_ptr;
 	}
 	
-	RaceRoom* RaceRoomManager::FindRoom(int room_id)
+	Room* RaceRoomManager::FindRoom(int room_id)
 	{
 		auto itor = race_room_map_.find(room_id);
 		if (itor != race_room_map_.end()) {

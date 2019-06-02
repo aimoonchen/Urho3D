@@ -19,7 +19,8 @@ namespace server
 		float born_time_{ 0.0f };
 		bool active_{ false };
 	};
-	class RaceRoom;
+	class Track;
+	class Room;
 	class Player
 	{
 	public:
@@ -27,10 +28,13 @@ namespace server
 		void EnterRoom() {}
 		void LeaveRoon() {}
 		int GetId() const { return uid_; }
+		void SetTrack(Track* track) { track_ = track; }
+		Track* GetTrack() const { return track_; }
 	private:
 		int			uid_;
 		std::string name_;
-		RaceRoom* race_room_;
+		Room*		race_room_;
+		Track*		track_{ nullptr };
 	};
 	
 	struct TrackInfo
@@ -41,11 +45,11 @@ namespace server
 		float	cell_dimension_{ 0.0f };
 	};
 
-	class Racetrack
+	class Track
 	{
 	public:
-		Racetrack(RaceRoom* raceRoom, const Urho3D::Vector3& bornPos, int id);
-		~Racetrack();
+		Track(Room* raceRoom, const Urho3D::Vector3& bornPos, int id);
+		~Track();
 		void SetPlayer(Player* player) { player_ = player; }
 		Player* GetPlayer() const { return player_; }
 		int GetId() const { return id_; }
@@ -60,16 +64,16 @@ namespace server
 		};
 
 		int				id_;
-		RaceRoom*		race_room_{ nullptr };
+		Room*		race_room_{ nullptr };
 		Player*			player_{ nullptr };
 		Urho3D::Vector3 born_pos_;
 	};
 	
-	class RaceRoom
+	class Room
 	{
 	public:
-		RaceRoom(const TrackInfo& ti, int id = 0, std::string name = "");
-		~RaceRoom();
+		Room(const TrackInfo& ti, int id = 0, std::string name = "");
+		~Room();
 		bool AddPlayer(Player* player);
 		void DelPlayer(Player* player);
 		void AddObserver(Player* observer);
@@ -85,7 +89,7 @@ namespace server
 		int										player_count_;
 		std::vector<Player*>					observers_;
 		TrackInfo								track_info_;
-		std::vector<std::unique_ptr<Racetrack>> racetracks_;
+		std::vector<std::unique_ptr<Track>> racetracks_;
 	};
 
 	class RaceRoomManager
@@ -93,11 +97,11 @@ namespace server
 	public:
 		static RaceRoomManager* GetInstancePtr();
 		void Clean();
-		RaceRoom* CreateRoom(const TrackInfo& ti);
-		RaceRoom* FindRoom(int room_id);
+		Room* CreateRoom(const TrackInfo& ti, int playerCount = 5);
+		Room* FindRoom(int room_id);
 	private:
 		RaceRoomManager();
 		~RaceRoomManager();
-		std::map<int, std::unique_ptr<RaceRoom>> race_room_map_;
+		std::map<int, std::unique_ptr<Room>> race_room_map_;
 	};
 }

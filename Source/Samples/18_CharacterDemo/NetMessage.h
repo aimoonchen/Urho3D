@@ -4,6 +4,7 @@ constexpr int MSG_CHAT = 153;
 
 namespace message
 {
+
 enum class MessageId : int
 {
 	kEnterRoom = 0,
@@ -18,13 +19,30 @@ enum class MessageId : int
 	kCommandCount
 };
 
+constexpr char* id_to_str[static_cast<int>(MessageId::kCommandCount)] =
+{
+	"kEnterRoom",
+	"kLeaveRoom",
+	"kFastPlayer",
+	"kSlowPlayer",
+	"kBarrier",
+	"kFreeze",
+	"kBlink",
+	"kUpdateLocation",
+	"kPlayerId",
+};
+
 #pragma pack(push, 1)
 
 struct MessageHead
 {
 	MessageId		id;
 	int				src;
+	int				src_role_id;
+	char			src_nick_name[16];
 	int				dst;
+	int				dst_role_id;
+	char			dst_nick_name[16];
 };
 
 struct PlayerId
@@ -51,6 +69,7 @@ struct Enter
 	Enter() { head.id = MessageId::kEnterRoom; }
 	MessageHead head;
 	int room_id;
+	int track_id;
 };
 
 struct Leave
@@ -65,6 +84,7 @@ struct Fast
 	Fast() { head.id = MessageId::kFastPlayer; }
 	MessageHead head;
 	float ratio;
+	float duration;
 };
 
 struct Slow
@@ -72,6 +92,7 @@ struct Slow
 	Slow() { head.id = MessageId::kSlowPlayer; }
 	MessageHead head;
 	float ratio;
+	float duration;
 };
 
 struct Barrier

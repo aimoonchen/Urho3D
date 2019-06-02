@@ -25,6 +25,14 @@
 #include "Sample.h"
 #include <memory>
 #include <vector>
+#include "NetMessage.h"
+#include "Race.h"
+
+namespace race
+{
+	class Player;
+}
+
 namespace Urho3D
 {
 
@@ -35,6 +43,19 @@ class Scene;
 
 class Character;
 class Touch;
+
+struct SkillTip
+{
+	SkillTip(Scene* scene, CEGUI::Window* tip);
+	~SkillTip();
+	void Init(const CEGUI::String& content, float duration = 2.0f);
+	void Update(float elapsedTime);
+	bool active_{ false };
+	CEGUI::Window* tip_;
+	float start_time_;
+	float duration_{ 2.0f };
+	Scene* scene_{ nullptr };
+};
 
 struct Barrier
 {
@@ -243,4 +264,13 @@ private:
 	bool OnFast(const CEGUI::EventArgs& args);
 	bool OnSlow(const CEGUI::EventArgs& args);
 	bool OnBlink(const CEGUI::EventArgs& args);
+	message::MessageId	current_message_{ message::MessageId::kCommandCount };
+	message::Barrier	cast_barrier_;
+	message::Blink		cast_blink_;
+	message::Fast		cast_fast_;
+	message::Freeze		cast_freeze_;
+	message::Slow		cast_slow_;
+	std::unique_ptr<SkillTip>	skill_tip_;
+	race::Player*				my_player_;
+	std::unique_ptr<race::Room>	race_room_;
 };
