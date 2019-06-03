@@ -37,6 +37,7 @@ namespace race
 		for (int i = 0; i < playerCount; i++) {
 			racetracks_.push_back(std::make_unique<Track>(this, Urho3D::Vector3{ start_x + i * track_info_.width_, 0, 0 }, i));
 		}
+		players_.resize(playerCount);
 	}
 	int Room::GetFreeTack()
 	{
@@ -50,16 +51,12 @@ namespace race
 
 	Player* Room::AddPlayer(int player_id, std::string name)
 	{
-		auto tid = GetFreeTack();
-		if (tid < 0) {
+		if (!players_[player_id]) {
 			return nullptr;
 		}
-
-		players_.push_back(std::make_unique<Player>(player_id, name));
-		auto new_player = players_.back().get();
+		players_[player_id] = std::make_unique<Player>(player_id, name);
+		auto new_player = players_[player_id].get();
 		new_player->SetRoom(this);
-		racetracks_[tid]->SetPlayer(new_player);
-		new_player->SetTrack(racetracks_[tid].get());
 		return new_player;
 	}
 
@@ -94,5 +91,10 @@ namespace race
 	void Room::Update(float elapsedTime)
 	{
 
+	}
+
+	Track* Room::GetTrack(int trackId) const
+	{
+		return racetracks_[trackId].get();
 	}
 }

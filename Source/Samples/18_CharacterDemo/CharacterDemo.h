@@ -251,7 +251,7 @@ private:
     bool firstPerson_;
 
 	void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
-
+	int GetLocalTrackId(int remoteTrackId, int maxTrack = 5);
 	StaticModel* floor_;
 	/// Flag for drawing debug geometry.
 	bool drawDebug_{ false };

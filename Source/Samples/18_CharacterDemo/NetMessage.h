@@ -1,7 +1,7 @@
 #pragma once
 // Identifier for the chat network messages
 constexpr int MSG_CHAT = 153;
-
+constexpr int kTrackCount = 5;
 namespace message
 {
 
@@ -43,12 +43,16 @@ struct MessageHead
 	int				dst;
 	int				dst_role_id;
 	char			dst_nick_name[16];
+	int				track_id;
 };
 
 struct PlayerId
 {
 	PlayerId() { head.id = MessageId::kPlayerId; }
 	MessageHead head;
+	int	other_player_id[kTrackCount];
+	int	other_role_id[kTrackCount];
+	int	other_track_id[kTrackCount];
 };
 
 struct UpdateLocation

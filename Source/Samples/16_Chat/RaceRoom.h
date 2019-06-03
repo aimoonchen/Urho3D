@@ -28,12 +28,22 @@ namespace server
 		void EnterRoom() {}
 		void LeaveRoon() {}
 		int GetId() const { return uid_; }
+		int GetRoleId() const { return role_id_; }
+		void SetRoleId(int roleId) { role_id_ = roleId; }
+		int GetTrackId() const
+		{
+			if (track_) {
+				return track_->GetId();
+			}
+			return -1;
+		}
 		void SetTrack(Track* track) { track_ = track; }
 		Track* GetTrack() const { return track_; }
 	private:
-		int			uid_;
+		int			uid_{ -1 };
+		int			role_id_{ -1 };
 		std::string name_;
-		Room*		race_room_;
+		Room*		race_room_{ nullptr };
 		Track*		track_{ nullptr };
 	};
 	
@@ -81,15 +91,17 @@ namespace server
 		void Init(int playerCount);
 		void Clean();
 		void Update(float elapsedTime);
+		int GetFreeTack();
+		int GetPlayerId(int trackId) const;
+		Player* GetPlayer(int trackId) const;
 	protected:
 	private:
-		int GetFreeTack();
 		int										id_;
 		std::string								name_;
 		int										player_count_;
 		std::vector<Player*>					observers_;
 		TrackInfo								track_info_;
-		std::vector<std::unique_ptr<Track>> racetracks_;
+		std::vector<std::unique_ptr<Track>>		racetracks_;
 	};
 
 	class RaceRoomManager

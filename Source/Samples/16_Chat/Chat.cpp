@@ -248,6 +248,7 @@ void Chat::HandleStartServer(StringHash /*eventType*/, VariantMap& eventData)
 	server::TrackInfo ti;
 	server::RaceRoomManager::GetInstancePtr()->CreateRoom(ti);
     UpdateButtons();
+	players_.reserve(kTrackCount);
 }
 
 int GetRoleId()
@@ -293,32 +294,54 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 		switch (pdata->id)
 		{
 		case message::MessageId::kEnterRoom :
-			{
-				auto realmsg =(message::Enter*)pdata;
-				auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
-				auto new_id = (int)players_.size();
-				players_.push_back(std::make_unique<server::Player>(players_.size()));
-				room->AddPlayer(players_.back().get());
-				auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-				auto track = players_.back()->GetTrack();
-				auto role_id = GetRoleId();
+		{
+			auto realmsg =(message::Enter*)pdata;
+			auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
+			
+			server::Player* new_player = nullptr;
+			auto track_id = room->GetFreeTack();
+			if (track_id) {
+				players_.push_back(std::make_unique<server::Player>(current_player_id_++));
+				new_player = players_.back().get();
+				room->AddPlayer(new_player);
+
 				message::PlayerId pid;
-				pid.head.id = message::MessageId::kPlayerId;
-				pid.head.src = pid.head.dst = new_id;
-				pid.head.src_role_id = role_id;
+				pid.head.src = pid.head.dst = new_player->GetId();
+				pid.head.src_role_id = new_player->GetRoleId();
+				pid.head.track_id = new_player->GetTrackId();
+				for (int i = 0; i < kTrackCount; i++) {
+					int player_id = -1;
+					int role_id = -1;
+					int track_id = -1;
+					auto player = room->GetPlayer(i);
+					if (player) {
+						player_id = player->GetId();
+						role_id = player->GetRoleId();
+						track_id = player->GetTrackId();
+					}
+					pid.other_player_id[i] = player_id;
+					pid.other_role_id[i] = role_id;
+					pid.other_track_id[i] = track_id;
+				}
+				auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
 				sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(pid));
-				URHO3D_LOGINFOF("pid.head.src : %d - %d", new_id, role_id);
+				URHO3D_LOGINFOF("pid.head.src : %d - %d", player_id, role_id);
+
 				// notify other player
 				message::Enter enter;
 				enter.head.id = message::MessageId::kEnterRoom;
-				enter.head.src = enter.head.dst = new_id;
-				enter.head.src_role_id = role_id;
-				enter.track_id = track->GetId();
+				enter.head.src = enter.head.dst = pid.head.src;
+				enter.head.src_role_id = pid.head.src_role_id;
+				enter.track_id = enter.head.track_id = pid.head.track_id;;
 				network->BroadcastMessage(MSG_CHAT, true, true, (const unsigned char*)&enter, sizeof(enter));
 			}
-			break;
-		case message::MessageId::kLeaveRoom :
-			break;
+		}
+		break;
+		case message::MessageId::kLeaveRoom:
+		{
+
+		}
+		break;
 		case message::MessageId::kFastPlayer :
 			break;
 		case message::MessageId::kSlowPlayer :

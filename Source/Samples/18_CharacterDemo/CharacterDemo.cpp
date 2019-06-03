@@ -429,6 +429,23 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 			new_player->SetScene(scene_);
 			new_player->SetRoleId(realmsg->head.src_role_id);
 			my_player_ = new_player;
+			for (int i = 0; i < kTrackCount; i++) {
+				auto player_id = realmsg->other_player_id[i];
+				auto role_id = realmsg->other_role_id[i];
+				auto track_id = realmsg->other_track_id[i];
+				if (realmsg->other_player_id[i] != -1
+					&& realmsg->other_player_id[i] != player_id_) {
+					std::string nick_name = "Player_";
+					nick_name += std::to_string(player_id);
+					auto new_player = race_room_->AddPlayer(player_id, nick_name);
+					new_player->SetScene(scene_);
+					auto localTrackId = GetLocalTrackId(track_id, kTrackCount);
+					auto track = race_room_->GetTrack(localTrackId);
+					track->SetPlayer(new_player);
+					new_player->SetTrack(track);
+					new_player->SetRoleId(role_id);
+				}
+			}
 		}
 		break;
 		case message::MessageId::kEnterRoom:
@@ -838,7 +855,16 @@ bool CharacterDemo::OnBlink(const CEGUI::EventArgs& args)
 	SendCommand((const unsigned char*)&cast_blink_, sizeof(cast_blink_));
 	return true;
 }
-
+int CharacterDemo::GetLocalTrackId(int remoteTrackId, int maxTrack)
+{
+	assert(remoteTrackId >= 0 && remoteTrackId < maxTrack);
+	auto trackId = remoteTrackId - (player_id_ - (int)(maxTrack / 2));
+	if (trackId < 0) {
+		trackId += maxTrack;
+	}
+	trackId %= maxTrack;
+	return trackId;
+}
 void CharacterDemo::SubscribeToEvents()
 {
     // Subscribe to Update event for setting the character controls before physics simulation

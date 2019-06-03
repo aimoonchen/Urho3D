@@ -63,6 +63,7 @@ namespace server
 			racetracks_.push_back(std::make_unique<Track>(this, Urho3D::Vector3{ start_x + i * track_info_.width_, 0, 0 }, i));
 		}
 	}
+
 	int Room::GetFreeTack()
 	{
 		for (auto& track : racetracks_) {
@@ -72,6 +73,20 @@ namespace server
 		}
 		return -1;
 	}
+
+	int Room::GetPlayerId(int trackId) const {
+		auto player = racetracks_[trackId]->GetPlayer();
+		if (player) {
+			return player->GetId();
+		}
+		return -1;
+	}
+	
+	Player* Room::GetPlayer(int trackId) const
+	{
+		return racetracks_[trackId]->GetPlayer();
+	}
+
 	bool Room::AddPlayer(Player* player)
 	{
 		auto tid = GetFreeTack();

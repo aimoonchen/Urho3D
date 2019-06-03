@@ -108,4 +108,5 @@ private:
     /// Start server button.
     SharedPtr<Button> startServerButton_;
 	std::vector<std::unique_ptr<server::Player>> players_;
+	int	current_player_id_{ 0 };
 };

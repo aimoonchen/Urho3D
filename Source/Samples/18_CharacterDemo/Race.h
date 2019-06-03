@@ -53,6 +53,7 @@ namespace race
 		void Init(int playerCount);
 		void Clean();
 		void Update(float elapsedTime);
+		Track* GetTrack(int trackId) const;
 	protected:
 	private:
 		int GetFreeTack();
