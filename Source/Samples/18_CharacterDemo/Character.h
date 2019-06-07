@@ -25,6 +25,7 @@
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Scene/LogicComponent.h>
 
+#include "Player.h"
 using namespace Urho3D;
 
 const unsigned CTRL_FORWARD = 1;
@@ -56,7 +57,7 @@ public:
     void Start() override;
     /// Handle physics world update. Called by LogicComponent base class.
     void FixedUpdate(float timeStep) override;
-
+	void SetRoleId(race::RoleId rid) { role_id_ = rid; }
     /// Movement controls. Assigned by the main program each frame.
     Controls controls_;
 	void SetSpeed(float s) { speed_ = s; }
@@ -75,4 +76,6 @@ private:
     bool okToJump_;
     /// In air timer. Due to possible physics inaccuracy, character can be off ground for max. 1/10 second and still be allowed to move.
     float inAirTimer_;
+
+	race::RoleId role_id_;
 };

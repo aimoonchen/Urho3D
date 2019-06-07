@@ -4,6 +4,11 @@
 #include <map>
 #include "Urho3D/Math/Vector3.h"
 
+namespace Urho3D
+{
+	class Connection;
+}
+
 namespace server
 {
 	struct Barrier
@@ -30,21 +35,18 @@ namespace server
 		int GetId() const { return uid_; }
 		int GetRoleId() const { return role_id_; }
 		void SetRoleId(int roleId) { role_id_ = roleId; }
-		int GetTrackId() const
-		{
-			if (track_) {
-				return track_->GetId();
-			}
-			return -1;
-		}
+		int GetTrackId() const;
 		void SetTrack(Track* track) { track_ = track; }
 		Track* GetTrack() const { return track_; }
+		void SetConnection(Urho3D::Connection* con) { connection_ = con; }
+		Urho3D::Connection* GetConnection() const { return connection_; }
 	private:
 		int			uid_{ -1 };
 		int			role_id_{ -1 };
 		std::string name_;
 		Room*		race_room_{ nullptr };
 		Track*		track_{ nullptr };
+		Urho3D::Connection* connection_{ nullptr };
 	};
 	
 	struct TrackInfo
@@ -74,7 +76,7 @@ namespace server
 		};
 
 		int				id_;
-		Room*		race_room_{ nullptr };
+		Room*			race_room_{ nullptr };
 		Player*			player_{ nullptr };
 		Urho3D::Vector3 born_pos_;
 	};

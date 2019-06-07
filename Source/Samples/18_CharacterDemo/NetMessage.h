@@ -43,7 +43,6 @@ struct MessageHead
 	int				dst;
 	int				dst_role_id;
 	char			dst_nick_name[16];
-	int				track_id;
 };
 
 struct PlayerId
@@ -72,8 +71,10 @@ struct Enter
 {
 	Enter() { head.id = MessageId::kEnterRoom; }
 	MessageHead head;
+	int				dst_role_id;
 	int room_id;
 	int track_id;
+	char			dst_nick_name[16];
 };
 
 struct Leave

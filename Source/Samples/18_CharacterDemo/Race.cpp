@@ -15,6 +15,9 @@ namespace race
 
 	int Track::GetPlayerId() const
 	{
+		if (!player_) {
+			return -1;
+		}
 		return player_->GetId();
 	}
 
@@ -37,13 +40,12 @@ namespace race
 		for (int i = 0; i < playerCount; i++) {
 			racetracks_.push_back(std::make_unique<Track>(this, Urho3D::Vector3{ start_x + i * track_info_.width_, 0, 0 }, i));
 		}
-		players_.resize(playerCount);
 	}
 	int Room::GetFreeTack()
 	{
 		for (auto& track : racetracks_) {
 			if (track->IsFree()) {
-				return track->GetTrackId();
+				return track->GetId();
 			}
 		}
 		return -1;
@@ -51,23 +53,40 @@ namespace race
 
 	Player* Room::AddPlayer(int player_id, std::string name)
 	{
-		if (!players_[player_id]) {
-			return nullptr;
+		Player* new_player = FindPlayer(player_id);
+		if (new_player) {
+			return new_player;
 		}
-		players_[player_id] = std::make_unique<Player>(player_id, name);
-		auto new_player = players_[player_id].get();
+		players_.push_back(std::make_unique<Player>(player_id, name));
+		new_player = players_.back().get();
 		new_player->SetRoom(this);
 		return new_player;
 	}
+	
+	Player* Room::FindPlayer(int playerId)
+	{
+		for (auto& player : players_) {
+			if (player->GetId() == playerId) {
+				return player.get();
+			}
+		}
+		return nullptr;
+	}
 
-	void Room::DelPlayer(int player_id)
+	void Room::DelPlayer(int playerId)
 	{
 		for (auto& track : racetracks_) {
-			if (track->GetPlayerId() == player_id) {
+			if (track->GetPlayerId() == playerId) {
 				auto player = track->GetPlayer();
 				player->SetRoom(nullptr);
 				player->SetTrack(nullptr);
 				track->SetPlayer(nullptr);
+				for (auto itor = players_.begin(); itor != players_.end(); itor++) {
+					if ((*itor)->GetId() == playerId) {
+						players_.erase(itor);
+						break;
+					}
+				}
 				break;
 			}
 		}
@@ -96,5 +115,17 @@ namespace race
 	Track* Room::GetTrack(int trackId) const
 	{
 		return racetracks_[trackId].get();
+	}
+
+	Track* Room::GetTrackByPosition(const Urho3D::Vector3& pos) const
+	{
+		auto end_x = (track_info_.width_ * player_count_) * 0.5f;
+		auto start_x = -end_x;
+		if (pos.x_ < start_x || pos.x_ > end_x
+			|| pos.y_ > track_info_.length_ || pos.y_ < 0.0f) {
+			return nullptr;
+		}
+		int trackIdx = (pos.x_ - start_x) / track_info_.width_;
+		return racetracks_[trackIdx].get();
 	}
 }

@@ -99,8 +99,7 @@ void SkillTip::Update(float elapsedTime)
 	if (delta_time >= duration_) {
 		tip_->setVisible(false);
 		active_ = false;
-	}
-	else {
+	} else {
 		tip_->setAlpha((1.0f - delta_time / duration_));
 	}
 }
@@ -383,6 +382,34 @@ void CharacterDemo::SendCommand(const unsigned char* data, unsigned int len)
 //		textEdit_->SetText(String::EMPTY);
 	}
 }
+
+race::Player* CharacterDemo::AddPlayer(int playerId, const std::string& nickName, int roleId, int trackId)
+{
+	auto new_player = race_room_->AddPlayer(playerId, nickName);
+	new_player->SetScene(scene_);
+	new_player->SetRemoteTrackId(trackId);
+	int localTrackId;
+	if (my_player_ == nullptr) {
+		localTrackId = kTrackCount / 2;
+	} else {
+		localTrackId = GetLocalTrackId(trackId, kTrackCount);
+	}
+	auto track = race_room_->GetTrack(localTrackId);
+	track->SetPlayer(new_player);
+	new_player->SetTrack(track);
+	new_player->SetRoleId(roleId);
+	return new_player;
+}
+
+void CharacterDemo::DelPlayer(int playerId)
+{
+	auto player = race_room_->FindPlayer(playerId);
+	if (player) {
+		player->LeaveScene();
+		race_room_->DelPlayer(playerId);
+	}
+}
+
 void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 {
 	auto* network = GetSubsystem<Network>();
@@ -423,27 +450,26 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 			race::TrackInfo ti;
 			race_room_ = std::make_unique<race::Room>(ti);
 			race_room_->Init(5);
-			std::string nick_name = "Player_";
-			nick_name += std::to_string(player_id_);
-			auto new_player = race_room_->AddPlayer(player_id_, nick_name);
-			new_player->SetScene(scene_);
-			new_player->SetRoleId(realmsg->head.src_role_id);
-			my_player_ = new_player;
+			// my player
+			for (int i = 0; i < kTrackCount; i++) {
+				auto player_id = realmsg->other_player_id[i];
+				if (player_id == player_id_) {
+					std::string nick_name = "Player_";
+					nick_name += std::to_string(player_id);
+					my_player_ = AddPlayer(player_id, nick_name, realmsg->other_role_id[i], realmsg->other_track_id[i]);
+					character_ = my_player_->GetCharacter();
+					break;
+				}
+			}
+			// other player
 			for (int i = 0; i < kTrackCount; i++) {
 				auto player_id = realmsg->other_player_id[i];
 				auto role_id = realmsg->other_role_id[i];
 				auto track_id = realmsg->other_track_id[i];
-				if (realmsg->other_player_id[i] != -1
-					&& realmsg->other_player_id[i] != player_id_) {
+				if (player_id != -1 && player_id != player_id_) {
 					std::string nick_name = "Player_";
 					nick_name += std::to_string(player_id);
-					auto new_player = race_room_->AddPlayer(player_id, nick_name);
-					new_player->SetScene(scene_);
-					auto localTrackId = GetLocalTrackId(track_id, kTrackCount);
-					auto track = race_room_->GetTrack(localTrackId);
-					track->SetPlayer(new_player);
-					new_player->SetTrack(track);
-					new_player->SetRoleId(role_id);
+					AddPlayer(player_id, nick_name, role_id, track_id);
 				}
 			}
 		}
@@ -452,19 +478,24 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 		{
 			auto realmsg = (message::Enter*)pdata;
 			auto player_id = realmsg->head.src;
-			URHO3D_LOGINFOF("player[%d] join the game", player_id);
-			CEGUI::String tips = U"玩家[";
-			tips += std::to_string(player_id);
-			tips += U"]进入游戏";
-			skill_tip_->Init(tips);
 			if (player_id_ != player_id) {
+// 				std::string nick_name = "Player_";
+// 				nick_name += std::to_string(player_id);
+
+				URHO3D_LOGINFOF("player[%d] join the game", player_id);
+				CEGUI::String tips = U"玩家";
+				tips += U"[";
+// 				std::string nick_name;
+// 				nick_name.assign(realmsg->head.src_nick_name, 0, 16);
+// 				tips += CEGUI::String::convertUtf8ToUtf32(nick_name);
+				tips += U"]<";
+				tips += std::to_string(player_id);
+				tips += U">进入游戏";
+				skill_tip_->Init(tips);
+
 				std::string nick_name = "Player_";
 				nick_name += std::to_string(player_id);
-				auto new_player = race_room_->AddPlayer(player_id, nick_name);
-				new_player->SetScene(scene_);
-				auto remote_track_id = realmsg->track_id;
-
-				new_player->SetRoleId(realmsg->head.src_role_id);
+				AddPlayer(player_id, nick_name, realmsg->head.src_role_id, realmsg->track_id);
 			}
 		}
 		break;
@@ -477,7 +508,7 @@ void CharacterDemo::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& e
 			tips += U"]离开游戏";
 			skill_tip_->Init(tips);
 			if (player_id_ != realmsg->head.src) {
-				race_room_->DelPlayer(realmsg->head.src);
+				DelPlayer(realmsg->head.src);
 			}
 		}
 		break;
@@ -658,6 +689,7 @@ void CharacterDemo::CreateScene()
 
 void CharacterDemo::CreateCharacter()
 {
+	return;
     auto* cache = GetSubsystem<ResourceCache>();
 
     Node* objectNode = scene_->CreateChild("Jack");
@@ -798,9 +830,12 @@ void CharacterDemo::CreateInstructions()
 	auto text = winMgr.createWindow("TaharezLook/StaticText", "skill_tip");
 	root->addChild(text);
 	text->setFont("FZZYJ-14");
-	text->setPosition(CEGUI::UVector2(cegui_reldim(0.5f), cegui_reldim(0.5f)));
-	text->setSize(CEGUI::USize(cegui_reldim(0.25f), cegui_absdim(34.0f)));
+	text->setSize(CEGUI::USize(cegui_absdim(300.0f), cegui_absdim(34.0f)));
+// 	text->setAdjustWidthToContent(true);
+// 	text->setAdjustHeightToContent(true);
 	text->setText(U"惟草木之零落兮，恐美人之迟暮。则为你如花美眷，似水流年。");
+	auto width = text->getWidth();
+	text->setPosition(CEGUI::UVector2(cegui_reldim(0.5f) - cegui_absdim(150.0f), cegui_reldim(0.5f)));
 	skill_tip_ = std::make_unique<SkillTip>(scene_, text);
 	
 }
@@ -811,15 +846,16 @@ bool CharacterDemo::OnEnterRoom(const CEGUI::EventArgs& args)
 	enter.head.src = enter.head.dst = player_id_;
 	enter.room_id = 0;
 	URHO3D_LOGINFOF("EnterRoom %d.", enter.room_id);
-	SendCommand((const unsigned char*)&enter, sizeof(message::Enter));
+	SendCommand((const unsigned char*)&enter, sizeof(enter));
 	return true;
 }
 bool CharacterDemo::OnLeaveRoom(const CEGUI::EventArgs& args)
 {
-	message::Enter leave;
+	message::Leave leave;
 	leave.head.src = leave.head.dst = player_id_;
 	leave.room_id = 0;
 	URHO3D_LOGINFOF("LeaveRoom %d.", leave.room_id);
+	SendCommand((const unsigned char*)&leave, sizeof(leave));
 	return true;
 }
 bool CharacterDemo::OnFreeze(const CEGUI::EventArgs& args)
@@ -834,7 +870,6 @@ bool CharacterDemo::OnBarrier(const CEGUI::EventArgs& args)
 }
 bool CharacterDemo::OnFast(const CEGUI::EventArgs& args)
 {
-	cast_fast_;
 	cast_fast_.head.src = cast_fast_.head.dst = player_id_;
 	cast_fast_.ratio = 1.5f;
 	cast_fast_.duration = 2.0f;
@@ -858,7 +893,7 @@ bool CharacterDemo::OnBlink(const CEGUI::EventArgs& args)
 int CharacterDemo::GetLocalTrackId(int remoteTrackId, int maxTrack)
 {
 	assert(remoteTrackId >= 0 && remoteTrackId < maxTrack);
-	auto trackId = remoteTrackId - (player_id_ - (int)(maxTrack / 2));
+	auto trackId = (int)(maxTrack / 2) + (remoteTrackId - my_player_->GetRemoteTrackId());
 	if (trackId < 0) {
 		trackId += maxTrack;
 	}
@@ -1172,7 +1207,39 @@ void CharacterDemo::HandleMouseButtonDown(StringHash eventType, VariantMap& even
 			}
 			*/
 			if (current_message_ != message::MessageId::kCommandCount) {
-
+				target_pos_ = target_pos_.ProjectOntoPlane(Vector3{ 0.0f, 0.0f, 0.0f }, Vector3{ 0.0f, 1.0f, 0.0f });
+				auto track = race_room_->GetTrackByPosition(target_pos_);
+				if (track) {
+					auto player = track->GetPlayer();
+					auto src_id = my_player_->GetId();
+					auto dst_id = player->GetId();
+					if (current_message_ == message::MessageId::kSlowPlayer) {
+						message::Slow slow;
+						slow.head.src = src_id;
+						slow.head.dst = dst_id;
+						slow.ratio = 0.8f;
+						URHO3D_LOGINFOF("Slow %d -> %d", src_id, dst_id);
+						SendCommand((const unsigned char*)&slow, sizeof(slow));
+					} else if (current_message_ == message::MessageId::kBarrier) {
+						message::Barrier barrier;
+						barrier.head.src = src_id;
+						barrier.head.dst = dst_id;
+						barrier.x_pos = target_pos_.x_;
+						barrier.z_pos = target_pos_.z_;
+						barrier.duration = 5.0f;
+						barrier.width = 2.0f;
+						URHO3D_LOGINFOF("Barrier %d -> %d", src_id, dst_id);
+						SendCommand((const unsigned char*)&barrier, sizeof(barrier));
+					} else if (current_message_ == message::MessageId::kFreeze) {
+						message::Freeze freeze;
+						freeze.head.src = src_id;
+						freeze.head.dst = dst_id;
+						freeze.duration = 4.0f;
+						URHO3D_LOGINFOF("Freeze %d -> %d", src_id, dst_id);
+						SendCommand((const unsigned char*)&freeze, sizeof(freeze));
+					}
+					current_message_ = message::MessageId::kCommandCount;
+				}
 			}
 			
 // 			if (button == MOUSEB_LEFT) {

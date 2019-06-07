@@ -16,8 +16,9 @@ namespace race
 		void SetPlayer(Player* player) { player_ = player; }
 		Player* GetPlayer() const { return player_; }
 		int GetPlayerId() const;
-		int GetTrackId() const { return id_; }
+		int GetId() const { return id_; }
 		bool IsFree() const { return player_ == nullptr; }
+		const Urho3D::Vector3& GetPos() const { return born_pos_; }
 	private:
 		struct Cell
 		{
@@ -46,14 +47,17 @@ namespace race
 	public:
 		Room(const TrackInfo& ti, int id = 0, std::string name = "");
 		~Room();
-		Player* AddPlayer(int player_id, std::string name);
-		void DelPlayer(int player_id);
+		Player* AddPlayer(int playerId, std::string name);
+		void DelPlayer(int playerId);
+		Player* FindPlayer(int playerId);
 		void AddObserver(Player* observer);
 		void DelObserver(Player* observer);
 		void Init(int playerCount);
 		void Clean();
 		void Update(float elapsedTime);
 		Track* GetTrack(int trackId) const;
+		Track* GetTrackByPosition(const Urho3D::Vector3& pos) const;
+		const TrackInfo& GetTrackInfo() const { return track_info_; }
 	protected:
 	private:
 		int GetFreeTack();

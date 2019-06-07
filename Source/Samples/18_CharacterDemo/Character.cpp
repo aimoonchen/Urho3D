@@ -110,7 +110,12 @@ void Character::FixedUpdate(float timeStep)
             {
                 body->ApplyImpulse(Vector3::UP * JUMP_FORCE);
                 okToJump_ = false;
-                animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
+				auto& ani = race::g_ani_state[role_id_][race::kJump];
+				if (!ani.empty())
+				{
+					animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
+				}
+                //animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
             }
         }
         else
@@ -119,18 +124,42 @@ void Character::FixedUpdate(float timeStep)
 
     if ( !onGround_ )
     {
-        animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
+		auto& ani = race::g_ani_state[role_id_][race::kJump];
+		if (!ani.empty())
+		{
+			animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
+		}
+        //animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
     }
     else
     {
         // Play walk animation if moving on ground, otherwise fade it out
-        if (softGrounded && !moveDir.Equals(Vector3::ZERO))
-            animCtrl->PlayExclusive("Models/Mutant/Mutant_Run.ani", 0, true, 0.2f);
-        else
-            animCtrl->PlayExclusive("Models/Mutant/Mutant_Idle0.ani", 0, true, 0.2f);
+		if (softGrounded && !moveDir.Equals(Vector3::ZERO))
+		{
+			auto& ani = race::g_ani_state[role_id_][race::kRun];
+			if (!ani.empty())
+			{
+				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
+			}
+		}
+           // animCtrl->PlayExclusive("Models/Mutant/Mutant_Run.ani", 0, true, 0.2f);
+		else
+		{
+			auto& ani = race::g_ani_state[role_id_][race::kIdle];
+			if (!ani.empty())
+			{
+				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
+			}
+		}
+            //animCtrl->PlayExclusive("Models/Mutant/Mutant_Idle0.ani", 0, true, 0.2f);
 
+		auto& ani = race::g_ani_state[role_id_][race::kRun];
+		if (!ani.empty())
+		{
+			animCtrl->SetSpeed(ani.c_str(), planeVelocity.Length() * 0.3f);
+		}
         // Set walk animation speed proportional to velocity
-        animCtrl->SetSpeed("Models/Mutant/Mutant_Run.ani", planeVelocity.Length() * 0.3f);
+        //animCtrl->SetSpeed("Models/Mutant/Mutant_Run.ani", planeVelocity.Length() * 0.3f);
     }
 
     // Reset grounded flag for next frame

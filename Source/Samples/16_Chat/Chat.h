@@ -91,6 +91,7 @@ private:
     void HandleNetworkMessage(StringHash eventType, VariantMap& eventData);
     /// Handle connection status change (just update the buttons that should be shown.)
     void HandleConnectionStatus(StringHash eventType, VariantMap& eventData);
+	void HandleClientDisconnect(StringHash eventType, VariantMap& eventData);
     /// Strings printed so far.
     Vector<String> chatHistory_;
     /// Chat text element.
@@ -109,4 +110,6 @@ private:
     SharedPtr<Button> startServerButton_;
 	std::vector<std::unique_ptr<server::Player>> players_;
 	int	current_player_id_{ 0 };
+	void RemovePlayer(server::Player* player);
+	server::Player* FindPlayer(Connection* connection);
 };

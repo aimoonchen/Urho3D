@@ -44,6 +44,7 @@
 #include "Chat.h"
 #include "../18_CharacterDemo/NetMessage.h"
 #include <Urho3D/DebugNew.h>
+#include <SLikeNet/MessageIdentifiers.h>
 
 // Undefine Windows macro, as our Connection class has a function called SendMessage
 #ifdef SendMessage
@@ -137,6 +138,8 @@ void Chat::SubscribeToEvents()
     SubscribeToEvent(E_SERVERCONNECTED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
     SubscribeToEvent(E_SERVERDISCONNECTED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
     SubscribeToEvent(E_CONNECTFAILED, URHO3D_HANDLER(Chat, HandleConnectionStatus));
+
+	SubscribeToEvent(E_CLIENTDISCONNECTED, URHO3D_HANDLER(Chat, HandleClientDisconnect));
 }
 
 Button* Chat::CreateButton(const String& text, int width)
@@ -253,7 +256,7 @@ void Chat::HandleStartServer(StringHash /*eventType*/, VariantMap& eventData)
 
 int GetRoleId()
 {
-	static constexpr int max_role_id = 4;
+	static constexpr int max_role_id = 5;
 	static int current_id = 0;
 	return current_id++ % max_role_id;
 }
@@ -265,6 +268,7 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
     using namespace NetworkMessage;
 
     int msgID = eventData[P_MESSAGEID].GetInt();
+	
     if (msgID == MSG_CHAT)
     {
         const PODVector<unsigned char>& data = eventData[P_DATA].GetBuffer();
@@ -298,17 +302,18 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 			auto realmsg =(message::Enter*)pdata;
 			auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(realmsg->room_id);
 			
-			server::Player* new_player = nullptr;
 			auto track_id = room->GetFreeTack();
-			if (track_id) {
+			if (track_id != -1) {
 				players_.push_back(std::make_unique<server::Player>(current_player_id_++));
-				new_player = players_.back().get();
+				auto new_player = players_.back().get();
+				new_player->SetRoleId(GetRoleId());
+				auto* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+				new_player->SetConnection(connection);
 				room->AddPlayer(new_player);
-
+				
 				message::PlayerId pid;
 				pid.head.src = pid.head.dst = new_player->GetId();
 				pid.head.src_role_id = new_player->GetRoleId();
-				pid.head.track_id = new_player->GetTrackId();
 				for (int i = 0; i < kTrackCount; i++) {
 					int player_id = -1;
 					int role_id = -1;
@@ -323,23 +328,35 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 					pid.other_role_id[i] = role_id;
 					pid.other_track_id[i] = track_id;
 				}
-				auto* sender = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-				sender->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(pid));
-				URHO3D_LOGINFOF("pid.head.src : %d - %d", player_id, role_id);
+				
+				connection->SendMessage(MSG_CHAT, true, true, (const unsigned char*)&pid, sizeof(pid));
+				URHO3D_LOGINFOF("Send kPlayerId : %d role[%d] track[%d]", pid.head.src, pid.head.src_role_id, new_player->GetTrackId());
 
 				// notify other player
 				message::Enter enter;
-				enter.head.id = message::MessageId::kEnterRoom;
 				enter.head.src = enter.head.dst = pid.head.src;
 				enter.head.src_role_id = pid.head.src_role_id;
-				enter.track_id = enter.head.track_id = pid.head.track_id;;
+				memcpy(enter.head.src_nick_name, realmsg->head.src_nick_name, 16);
+				enter.track_id = new_player->GetTrackId();
 				network->BroadcastMessage(MSG_CHAT, true, true, (const unsigned char*)&enter, sizeof(enter));
+				URHO3D_LOGINFOF("Broadcast kEnterRoom : %d role[%d] track[%d]", pid.head.src, pid.head.src_role_id, enter.track_id);
 			}
 		}
 		break;
 		case message::MessageId::kLeaveRoom:
 		{
-
+			message::Enter enter;
+			auto* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+			server::Player* ptr = FindPlayer(connection);
+			if (ptr != nullptr) {
+				message::Leave leave;
+				leave.head.src = leave.head.dst = ptr->GetId();
+				network->BroadcastMessage(MSG_CHAT, true, true, (const unsigned char*)&leave, sizeof(leave));
+				RemovePlayer(ptr);
+				URHO3D_LOGINFOF("player[%d] leave room.", ptr->GetId());
+			} else {
+				URHO3D_LOGINFOF("can't find player, leave room.");
+			}
 		}
 		break;
 		case message::MessageId::kFastPlayer :
@@ -361,7 +378,56 @@ void Chat::HandleNetworkMessage(StringHash /*eventType*/, VariantMap& eventData)
 	
 }
 
+void Chat::RemovePlayer(server::Player* player)
+{
+	auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(0);
+	if (!room) {
+		return;
+	}
+	server::Player* p = nullptr;
+	int idx = 0;
+	bool find = false;
+	for (; idx < players_.size(); idx++) {
+		if (players_[idx].get() == player) {
+			find = true;
+			break;
+		}
+	}
+	if (find) {
+		URHO3D_LOGINFOF("DelPlayer %d[%d]", player->GetId(), player->GetTrackId());
+		room->DelPlayer(player);
+		players_.erase(players_.begin() + idx);
+	}
+	
+}
+
+server::Player* Chat::FindPlayer(Connection* connection)
+{
+	for (auto& player : players_) {
+		if (player->GetConnection() == connection) {
+			return player.get();
+		}
+	}
+	return nullptr;
+}
+
 void Chat::HandleConnectionStatus(StringHash /*eventType*/, VariantMap& eventData)
 {
     UpdateButtons();
+}
+
+void Chat::HandleClientDisconnect(StringHash eventType, VariantMap& eventData)
+{
+	auto* network = GetSubsystem<Network>();
+	using namespace NetworkMessage;
+	auto* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
+	server::Player* ptr = FindPlayer(connection);
+	if (ptr != nullptr) {
+		URHO3D_LOGINFOF("player[%d] leave room.", ptr->GetId());
+
+		message::Leave leave;
+		leave.head.src = leave.head.dst = ptr->GetId();
+		network->BroadcastMessage(MSG_CHAT, true, true, (const unsigned char*)&leave, sizeof(leave));
+		RemovePlayer(ptr);
+	}
 }

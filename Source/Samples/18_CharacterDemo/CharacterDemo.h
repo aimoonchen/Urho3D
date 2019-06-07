@@ -48,7 +48,7 @@ struct SkillTip
 {
 	SkillTip(Scene* scene, CEGUI::Window* tip);
 	~SkillTip();
-	void Init(const CEGUI::String& content, float duration = 2.0f);
+	void Init(const CEGUI::String& content, float duration = 4.0f);
 	void Update(float elapsedTime);
 	bool active_{ false };
 	CEGUI::Window* tip_;
@@ -252,6 +252,8 @@ private:
 
 	void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
 	int GetLocalTrackId(int remoteTrackId, int maxTrack = 5);
+	race::Player* AddPlayer(int playerId, const std::string& nickName, int roleId, int trackId);
+	void DelPlayer(int playerId);
 	StaticModel* floor_;
 	/// Flag for drawing debug geometry.
 	bool drawDebug_{ false };
@@ -271,6 +273,6 @@ private:
 	message::Freeze		cast_freeze_;
 	message::Slow		cast_slow_;
 	std::unique_ptr<SkillTip>	skill_tip_;
-	race::Player*				my_player_;
+	race::Player*				my_player_{ nullptr };
 	std::unique_ptr<race::Room>	race_room_;
 };

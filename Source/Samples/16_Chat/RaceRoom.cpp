@@ -32,6 +32,14 @@ namespace server
 		}
 	}
 
+	int Player::GetTrackId() const
+	{
+		if (track_) {
+			return track_->GetId();
+		}
+		return -1;
+	}
+
 	Track::Track(Room* raceRoom, const Urho3D::Vector3& bornPos, int id)
 		: race_room_{ raceRoom }, born_pos_{ bornPos }, id_{ id }
 	{
