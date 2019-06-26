@@ -30,6 +30,8 @@
 #include <Urho3D/Graphics/Octree.h>
 #include <Urho3D/Graphics/Renderer.h>
 #include <Urho3D/Graphics/StaticModel.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/Zone.h>
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Input/Input.h>
@@ -54,6 +56,9 @@
 
 #include <Urho3D/DebugNew.h>
 
+#include "Race.h"
+#include "Character.h"
+
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
 // Identifier for our custom remote event we use to tell the client which object they control
@@ -62,16 +67,17 @@ static const StringHash E_CLIENTOBJECTID("ClientObjectID");
 static const StringHash P_ID("ID");
 
 // Control bits we define
-static const unsigned CTRL_FORWARD = 1;
-static const unsigned CTRL_BACK = 2;
-static const unsigned CTRL_LEFT = 4;
-static const unsigned CTRL_RIGHT = 8;
+// static const unsigned CTRL_FORWARD = 1;
+// static const unsigned CTRL_BACK = 2;
+// static const unsigned CTRL_LEFT = 4;
+// static const unsigned CTRL_RIGHT = 8;
 
 URHO3D_DEFINE_APPLICATION_MAIN(SceneReplication)
 
 SceneReplication::SceneReplication(Context* context) :
     Sample(context)
 {
+	Character::RegisterObject(context);
 }
 
 void SceneReplication::Start()
@@ -92,7 +98,9 @@ void SceneReplication::Start()
     SubscribeToEvents();
 
     // Set the mouse mode to use in the sample
-    Sample::InitMouseMode(MM_RELATIVE);
+	Sample::InitMouseMode(MM_ABSOLUTE/*MM_RELATIVE*/);
+	auto* input = GetSubsystem<Input>();
+	input->SetMouseVisible(true);
 }
 
 void SceneReplication::CreateScene()
@@ -266,36 +274,116 @@ void SceneReplication::UpdateButtons()
     startServerButton_->SetVisible(!serverConnection && !serverRunning);
     textEdit_->SetVisible(!serverConnection && !serverRunning);
 }
+namespace race
+{
+	struct ModelRes
+	{
+		std::string model;
+		std::string mtl;
+	};
+	ModelRes g_mr[kMaxRoleId] = {
+		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
+		{"Models/NinjaSnowWar/Ninja.mdl", "Models/NinjaSnowWar/Materials/Ninja.xml"},
+		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
+		{"Models/NinjaSnowWar/Ninja.mdl", "Models/NinjaSnowWar/Materials/Ninja.xml"},
+		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
+		// 	{"Models/Wow/Bloodelf/Female/Purple.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#18.xml"},
+		// 	{"Models/Wow/Human/Female/Red.mdl", "Models/Wow/Human/Female/Materials/JoinedMaterial_#13.xml"},
+		// 	{"Models/Wow/Orc/Male/Green.mdl", "Models/Wow/Orc/Male/Materials/JoinedMaterial_#12.xml"},
+		// 	{"Models/Wow/Pandaren/Male/BlackStand.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_1.xml"},
+	};
+
+	std::string g_ani_state[kMaxRoleId][kMaxAniState] = {
+		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
+		{{"Models/NinjaSnowWar/Ninja_Idle1.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Jump.ani"}},
+		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
+		{{"Models/NinjaSnowWar/Ninja_Idle1.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Jump.ani"}},
+		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
+		// 	{{"Models/Wow/Bloodelf/Female/Purple_Stand [3].ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk [154].ani"},{"Models/Wow/Bloodelf/Female/Purple_Run [22].ani"},{""}},
+		// 	{{"Models/Wow/Human/Female/Red_Stand [0].ani"},{"Models/Wow/Human/Female/Red_Walk [1].ani"},{"Models/Wow/Human/Female/Red_Run [2].ani"},{""}},
+		// 	{{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{""}},
+	};
+}
 
 Node* SceneReplication::CreateControllableObject()
 {
-    auto* cache = GetSubsystem<ResourceCache>();
+	auto* cache = GetSubsystem<ResourceCache>();
+	
+	static int player_id = 0;
+	int role_id = player_id % 2;
+	String name;
+	name.AppendWithFormat("Player_%d", player_id);
+	Node* objectNode = scene_->CreateChild(name);
+	objectNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
+	// spin node
+	Urho3D::Node* adjustNode = objectNode->CreateChild("AdjNode");
+	if (false) {
+		float scale = 0.1f;
+		adjustNode->SetRotation(Urho3D::Quaternion(-90, Urho3D::Vector3(0, 1, 0)));
+		adjustNode->SetScale(Urho3D::Vector3{ scale, scale, scale });
+	}
+	else {
+		adjustNode->SetRotation(Urho3D::Quaternion(180, Urho3D::Vector3(0, 1, 0)));
+	}
+	// Create the rendering component + animation controller
+	auto* object = adjustNode->CreateComponent<Urho3D::AnimatedModel>();
+	object->SetModel(cache->GetResource<Urho3D::Model>(race::g_mr[role_id].model.c_str()));
+	object->SetMaterial(cache->GetResource<Urho3D::Material>(race::g_mr[role_id].mtl.c_str()));
+	object->SetCastShadows(true);
+	auto animCtrl = adjustNode->CreateComponent<Urho3D::AnimationController>();
+	auto& ani = race::g_ani_state[0][race::kIdle];
+	animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
+	// Set the head bone for manual control
+	//object->GetSkeleton().GetBone("Mutant:Head")->animated_ = false;
 
-    // Create the scene node & visual representation. This will be a replicated object
-    Node* ballNode = scene_->CreateChild("Ball");
-    ballNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
-    ballNode->SetScale(0.5f);
-    auto* ballObject = ballNode->CreateComponent<StaticModel>();
-    ballObject->SetModel(cache->GetResource<Model>("Models/Sphere.mdl"));
-    ballObject->SetMaterial(cache->GetResource<Material>("Materials/StoneSmall.xml"));
+	// Create rigidbody, and set non-zero mass so that the body becomes dynamic
+	auto* body = objectNode->CreateComponent<Urho3D::RigidBody>();
+	body->SetMass(1.0f);
+	body->SetFriction(1.0f);
+	body->SetLinearDamping(0.5f);
+	body->SetAngularDamping(0.5f);
 
-    // Create the physics components
-    auto* body = ballNode->CreateComponent<RigidBody>();
-    body->SetMass(1.0f);
-    body->SetFriction(1.0f);
-    // In addition to friction, use motion damping so that the ball can not accelerate limitlessly
-    body->SetLinearDamping(0.5f);
-    body->SetAngularDamping(0.5f);
-    auto* shape = ballNode->CreateComponent<CollisionShape>();
-    shape->SetSphere(1.0f);
+	// Set zero angular factor so that physics doesn't turn the character on its own.
+	// Instead we will control the character yaw manually
+	body->SetAngularFactor(Urho3D::Vector3::ZERO);
 
-    // Create a random colored point light at the ball so that can see better where is going
-    auto* light = ballNode->CreateComponent<Light>();
-    light->SetRange(3.0f);
-    light->SetColor(
-        Color(0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f));
+	// Set the rigidbody to signal collision also when in rest, so that we get ground collisions properly
+	//body->SetCollisionEventMode(Urho3D::COLLISION_ALWAYS);
 
-    return ballNode;
+	// Set a capsule shape for collision
+	auto* shape = objectNode->CreateComponent<Urho3D::CollisionShape>();
+	shape->SetCapsule(0.7f, 1.8f, Urho3D::Vector3(0.0f, 0.9f, 0.0f));
+	auto* light = objectNode->CreateComponent<Light>();
+	light->SetRange(3.0f);
+	light->SetColor(Color(0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f));
+	//auto character = objectNode->CreateComponent<Character>();
+	//character->SetRoleId(race::RoleId(role_id));
+	return objectNode;
+	
+	
+//     // Create the scene node & visual representation. This will be a replicated object
+//     Node* ballNode = scene_->CreateChild("Ball");
+//     ballNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
+//     ballNode->SetScale(0.5f);
+//     auto* ballObject = ballNode->CreateComponent<StaticModel>();
+//     ballObject->SetModel(cache->GetResource<Model>("Models/Sphere.mdl"));
+//     ballObject->SetMaterial(cache->GetResource<Material>("Materials/StoneSmall.xml"));
+//     // Create the physics components
+//     auto* body = ballNode->CreateComponent<RigidBody>();
+//     body->SetMass(1.0f);
+//     body->SetFriction(1.0f);
+//     // In addition to friction, use motion damping so that the ball can not accelerate limitlessly
+//     body->SetLinearDamping(0.5f);
+//     body->SetAngularDamping(0.5f);
+//     auto* shape = ballNode->CreateComponent<CollisionShape>();
+//     shape->SetSphere(1.0f);
+// 
+//     // Create a random colored point light at the ball so that can see better where is going
+//     auto* light = ballNode->CreateComponent<Light>();
+//     light->SetRange(3.0f);
+//     light->SetColor(Color(0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f, 0.5f + ((unsigned)Rand() & 1u) * 0.5f));
+// 
+//     return ballNode;
 }
 
 void SceneReplication::MoveCamera()
@@ -345,6 +433,115 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
     MoveCamera();
 }
 
+void SceneReplication::ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id)
+{
+	bool onGround_ = true;
+	float inAirTimer_ = 0.0f;
+	bool okToJump_ = true;
+	/// \todo Could cache the components for faster access instead of finding them each frame
+	auto* body = node->GetComponent<RigidBody>();
+	auto* animCtrl = node->GetComponent<AnimationController>(true);
+
+	// Update the in air timer. Reset if grounded
+	if (!onGround_)
+		inAirTimer_ += 0;// timeStep;
+	else
+		inAirTimer_ = 0.0f;
+	// When character has been in air less than 1/10 second, it's still interpreted as being on ground
+	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
+
+	// Update movement & animation
+	const Quaternion& rot = node->GetRotation();
+	Vector3 moveDir = Vector3::ZERO;
+	const Vector3& velocity = body->GetLinearVelocity();
+	// Velocity on the XZ plane
+	Vector3 planeVelocity(velocity.x_, 0.0f, velocity.z_);
+
+	if (ctrl.IsDown(CTRL_FORWARD))
+		moveDir += Vector3::FORWARD;
+	if (ctrl.IsDown(CTRL_BACK))
+		moveDir += Vector3::BACK;
+	if (ctrl.IsDown(CTRL_LEFT))
+		moveDir += Vector3::LEFT;
+	if (ctrl.IsDown(CTRL_RIGHT))
+		moveDir += Vector3::RIGHT;
+
+	// Normalize move vector so that diagonal strafing is not faster
+	if (moveDir.LengthSquared() > 0.0f)
+		moveDir.Normalize();
+
+	// If in air, allow control, but slower than when on ground
+	body->ApplyImpulse(rot * moveDir * (softGrounded ? MOVE_FORCE : INAIR_MOVE_FORCE));
+
+	if (softGrounded)
+	{
+		// When on ground, apply a braking force to limit maximum ground velocity
+		Vector3 brakeForce = -planeVelocity * BRAKE_FORCE;
+		body->ApplyImpulse(brakeForce);
+
+		// Jump. Must release jump control between jumps
+		if (ctrl.IsDown(CTRL_JUMP))
+		{
+			if (okToJump_)
+			{
+				body->ApplyImpulse(Vector3::UP * JUMP_FORCE);
+				okToJump_ = false;
+				auto& ani = race::g_ani_state[role_id][race::kJump];
+				if (!ani.empty())
+				{
+					animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
+				}
+				//animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
+			}
+		}
+		else
+			okToJump_ = true;
+	}
+
+	if (!onGround_)
+	{
+		auto& ani = race::g_ani_state[role_id][race::kJump];
+		if (!ani.empty())
+		{
+			animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
+		}
+		//animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
+	}
+	else
+	{
+		// Play walk animation if moving on ground, otherwise fade it out
+		if (softGrounded && !moveDir.Equals(Vector3::ZERO))
+		{
+			auto& ani = race::g_ani_state[role_id][race::kRun];
+			if (!ani.empty())
+			{
+				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
+			}
+		}
+		// animCtrl->PlayExclusive("Models/Mutant/Mutant_Run.ani", 0, true, 0.2f);
+		else
+		{
+			auto& ani = race::g_ani_state[role_id][race::kIdle];
+			if (!ani.empty())
+			{
+				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
+			}
+		}
+		//animCtrl->PlayExclusive("Models/Mutant/Mutant_Idle0.ani", 0, true, 0.2f);
+
+		auto& ani = race::g_ani_state[role_id][race::kRun];
+		if (!ani.empty())
+		{
+			animCtrl->SetSpeed(ani.c_str(), planeVelocity.Length() * 0.3f);
+		}
+		// Set walk animation speed proportional to velocity
+		//animCtrl->SetSpeed("Models/Mutant/Mutant_Run.ani", planeVelocity.Length() * 0.3f);
+	}
+
+	// Reset grounded flag for next frame
+	onGround_ = false;
+}
+
 void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
 {
     // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
@@ -370,6 +567,7 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
             controls.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
             controls.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
             controls.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
+			controls.Set(CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
         }
 
         serverConnection->SetControls(controls);
@@ -394,22 +592,23 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
 
             // Get the last controls sent by the client
             const Controls& controls = connection->GetControls();
+			ApplyContrlToNode(ballNode, controls);
             // Torque is relative to the forward vector
-            Quaternion rotation(0.0f, controls.yaw_, 0.0f);
-
-            const float MOVE_TORQUE = 3.0f;
-
-            // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
-            // independent from rendering framerate. We could also apply forces (which would enable in-air control),
-            // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
-            if (controls.buttons_ & CTRL_FORWARD)
-                body->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
-            if (controls.buttons_ & CTRL_BACK)
-                body->ApplyTorque(rotation * Vector3::LEFT * MOVE_TORQUE);
-            if (controls.buttons_ & CTRL_LEFT)
-                body->ApplyTorque(rotation * Vector3::FORWARD * MOVE_TORQUE);
-            if (controls.buttons_ & CTRL_RIGHT)
-                body->ApplyTorque(rotation * Vector3::BACK * MOVE_TORQUE);
+//             Quaternion rotation(0.0f, controls.yaw_, 0.0f);
+// 
+//             const float MOVE_TORQUE = 3.0f;
+// 
+//             // Movement torque is applied before each simulation step, which happen at 60 FPS. This makes the simulation
+//             // independent from rendering framerate. We could also apply forces (which would enable in-air control),
+//             // but want to emphasize that it's a ball which should only control its motion by rolling along the ground
+//             if (controls.buttons_ & CTRL_FORWARD)
+//                 body->ApplyTorque(rotation * Vector3::RIGHT * MOVE_TORQUE);
+//             if (controls.buttons_ & CTRL_BACK)
+//                 body->ApplyTorque(rotation * Vector3::LEFT * MOVE_TORQUE);
+//             if (controls.buttons_ & CTRL_LEFT)
+//                 body->ApplyTorque(rotation * Vector3::FORWARD * MOVE_TORQUE);
+//             if (controls.buttons_ & CTRL_RIGHT)
+//                 body->ApplyTorque(rotation * Vector3::BACK * MOVE_TORQUE);
         }
     }
 }

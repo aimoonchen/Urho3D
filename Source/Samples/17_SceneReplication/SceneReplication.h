@@ -98,6 +98,7 @@ private:
     /// Handle remote event from server which tells our controlled object node ID.
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
 
+	void ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id = 0);
     /// Mapping from client connections to controllable objects.
     HashMap<Connection*, WeakPtr<Node> > serverObjects_;
     /// Button container element.
