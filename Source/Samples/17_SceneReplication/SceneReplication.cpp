@@ -58,6 +58,7 @@
 
 #include "Race.h"
 #include "Character.h"
+#include "RaceRoom.h"
 
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
@@ -282,43 +283,67 @@ namespace race
 		std::string mtl;
 	};
 	ModelRes g_mr[kMaxRoleId] = {
-		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
+		{"Models/Wow/Pandaren/Male/Black_Old.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_0.xml"},
+		//{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
 		{"Models/NinjaSnowWar/Ninja.mdl", "Models/NinjaSnowWar/Materials/Ninja.xml"},
-		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
-		{"Models/NinjaSnowWar/Ninja.mdl", "Models/NinjaSnowWar/Materials/Ninja.xml"},
-		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
-		// 	{"Models/Wow/Bloodelf/Female/Purple.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#18.xml"},
-		// 	{"Models/Wow/Human/Female/Red.mdl", "Models/Wow/Human/Female/Materials/JoinedMaterial_#13.xml"},
-		// 	{"Models/Wow/Orc/Male/Green.mdl", "Models/Wow/Orc/Male/Materials/JoinedMaterial_#12.xml"},
-		// 	{"Models/Wow/Pandaren/Male/BlackStand.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_1.xml"},
+		{"Models/Wow/Tauren/Male/Yellow_Old.mdl", "Models/Wow/Tauren/Male/Materials/JoinedMaterial_#12.xml"},
+		{"Models/Wow/Bloodelf/Female/Purple_Old.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#15.xml"},
+		{"Models/Wow/Pandaren/Male/Black_Old.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_0.xml"},
 	};
 
 	std::string g_ani_state[kMaxRoleId][kMaxAniState] = {
-		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
+		{{"Models/Wow/Pandaren/Male/Black_Stand_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Walk_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Run_Take 001"},{"Models/Wow/Pandaren/Male/Black_Jump_Take 001.ani"}},
+		//{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
 		{{"Models/NinjaSnowWar/Ninja_Idle1.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Jump.ani"}},
-		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
-		{{"Models/NinjaSnowWar/Ninja_Idle1.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Jump.ani"}},
-		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
-		// 	{{"Models/Wow/Bloodelf/Female/Purple_Stand [3].ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk [154].ani"},{"Models/Wow/Bloodelf/Female/Purple_Run [22].ani"},{""}},
-		// 	{{"Models/Wow/Human/Female/Red_Stand [0].ani"},{"Models/Wow/Human/Female/Red_Walk [1].ani"},{"Models/Wow/Human/Female/Red_Run [2].ani"},{""}},
-		// 	{{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{""}},
+		{{"Models/Wow/Tauren/Male/Yellow_Stand_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Walk_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Run_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Jump_Take 001.ani"}},
+		{{"Models/Wow/Bloodelf/Female/Purple_Stand_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Run_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Jump_Take 001.ani"}},
+		{{"Models/Wow/Pandaren/Male/Black_Stand_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Walk_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Run_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Jump_Take 001.ani"}},
 	};
 }
-
-Node* SceneReplication::CreateControllableObject()
+int GetRoleId()
 {
+	static constexpr int max_role_id = 5;
+	static int current_id = 0;
+	return current_id++ % max_role_id;
+}
+Node* SceneReplication::CreatePlayer(Connection* con)
+{
+	int room_id = 0;
+	auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(room_id);
+	if (!room)
+	{
+		server::TrackInfo ti;
+		room = server::RaceRoomManager::GetInstancePtr()->CreateRoom(ti);
+	}
+	Urho3D::Vector3 pos{ 0.0f, 1.0f, 0.0f };
+	int role_id = GetRoleId();
+	auto track_id = room->GetFreeTack();
+	String name;
+	if (track_id != -1) {
+		name.AppendWithFormat("Player_%d", current_player_id_);
+		players_.push_back(std::make_unique<server::Player>(current_player_id_++));
+		auto new_player = players_.back().get();
+		new_player->SetRoleId(role_id);
+		new_player->SetConnection(con);
+		room->AddPlayer(new_player);
+		
+		auto* cache = scene_->GetSubsystem<Urho3D::ResourceCache>();
+		auto trackPos = new_player->GetTrack()->GetPos();
+		auto ti = room->GetTrackInfo();
+		pos.x_ = trackPos.x_ + 0.5f * ti.width_;
+
+	}
 	auto* cache = GetSubsystem<ResourceCache>();
 	
-	static int player_id = 0;
-	int role_id = player_id % 2;
-	String name;
-	name.AppendWithFormat("Player_%d", player_id);
 	Node* objectNode = scene_->CreateChild(name);
-	objectNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
+
+	objectNode->SetPosition(pos);
+
+	//objectNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
 	// spin node
 	Urho3D::Node* adjustNode = objectNode->CreateChild("AdjNode");
-	if (false) {
-		float scale = 0.1f;
+	if (true) {
+		float scale = 0.02f;
 		adjustNode->SetRotation(Urho3D::Quaternion(-90, Urho3D::Vector3(0, 1, 0)));
 		adjustNode->SetScale(Urho3D::Vector3{ scale, scale, scale });
 	}
@@ -331,7 +356,7 @@ Node* SceneReplication::CreateControllableObject()
 	object->SetMaterial(cache->GetResource<Urho3D::Material>(race::g_mr[role_id].mtl.c_str()));
 	object->SetCastShadows(true);
 	auto animCtrl = adjustNode->CreateComponent<Urho3D::AnimationController>();
-	auto& ani = race::g_ani_state[0][race::kIdle];
+	auto& ani = race::g_ani_state[role_id][race::kIdle];
 	animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
 	// Set the head bone for manual control
 	//object->GetSkeleton().GetBone("Mutant:Head")->animated_ = false;
@@ -671,7 +696,7 @@ void SceneReplication::HandleClientConnected(StringHash eventType, VariantMap& e
     newConnection->SetScene(scene_);
 
     // Then create a controllable object for that client
-    Node* newObject = CreateControllableObject();
+    Node* newObject = CreatePlayer(newConnection);
     serverObjects_[newConnection] = newObject;
 
     // Finally send the object's node ID using a remote event

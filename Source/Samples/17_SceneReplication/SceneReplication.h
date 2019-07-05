@@ -22,6 +22,9 @@
 
 #pragma once
 
+#include <vector>
+#include <memory>
+
 #include "Sample.h"
 
 namespace Urho3D
@@ -35,6 +38,10 @@ class UIElement;
 
 }
 
+namespace server
+{
+	class Player;
+}
 /// Scene network replication example.
 /// This sample demonstrates:
 ///     - Creating a scene in which network clients can join
@@ -76,7 +83,7 @@ private:
     /// Update visibility of buttons according to connection and server status.
     void UpdateButtons();
     /// Create a controllable ball object and return its scene node.
-    Node* CreateControllableObject();
+    Node* CreatePlayer(Connection* con);
     /// Read input and move the camera.
     void MoveCamera();
     /// Handle the physics world pre-step event.
@@ -115,4 +122,7 @@ private:
     SharedPtr<Text> instructionsText_;
     /// ID of own controllable object (client only.)
     unsigned clientObjectID_{};
+	//
+	std::vector<std::unique_ptr<server::Player>> players_;
+	int current_player_id_{ 0 };
 };
