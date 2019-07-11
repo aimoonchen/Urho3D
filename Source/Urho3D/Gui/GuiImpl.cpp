@@ -18,7 +18,7 @@
 #include "CEGUI/InputAggregator.h"
 
 #include "CEGUIRenderer/Renderer.h"
-
+#include "CEGUIRenderer/ImageCodec.h"
 //test
 #include "CEGUI/widgets/DefaultWindow.h"
 #include "CEGUI/widgets/FrameWindow.h"
@@ -60,6 +60,7 @@ void CEGui::Initialize(Graphics* graphics)
 		throw CEGUI::InvalidRequestException("CEGuiBaseApplication::run: Base application subclass did not create Renderer!");
 
 	// start up CEGUI system using objects created in subclass constructor.
+	d_imageCodec = &((CEGUI::Urho3DRenderer*)d_renderer)->createUrho3DImageCodec();
 	CEGUI::System::create(*d_renderer, d_resourceProvider, nullptr, d_imageCodec, nullptr, "", logFile);
 
 	// create viewport-based CEGUI context for the main window
