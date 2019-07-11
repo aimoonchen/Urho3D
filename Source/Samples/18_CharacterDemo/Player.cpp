@@ -20,15 +20,16 @@ namespace race
 		{"Models/Wow/Bloodelf/Female/Purple.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#18.xml"},
 		{"Models/Wow/Human/Female/Red.mdl", "Models/Wow/Human/Female/Materials/JoinedMaterial_#13.xml"},
 		{"Models/Wow/Orc/Male/Green.mdl", "Models/Wow/Orc/Male/Materials/JoinedMaterial_#12.xml"},
-		{"Models/Wow/Pandaren/Male/Black.mdl", "Models/Wow/Pandaren/Male/Materials/JoinedMaterial_#9.xml"},
+		{"Models/Wow/Pandaren/Male/BlackStand.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_1.xml"},
+		//{"Models/Wow/Bear/WhiteStand.mdl", "Models/Wow/Bear/Materials/creaturebear2bear2_0.xml"},
 	};
 
 	std::string g_ani_state[kMaxRoleId][kMaxAniState] = {
 		{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
 		{{"Models/Wow/Bloodelf/Female/Purple_Stand [3].ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk [154].ani"},{"Models/Wow/Bloodelf/Female/Purple_Run [22].ani"},{""}},
 		{{"Models/Wow/Human/Female/Red_Stand [0].ani"},{"Models/Wow/Human/Female/Red_Walk [1].ani"},{"Models/Wow/Human/Female/Red_Run [2].ani"},{""}},
-		{{"Models/Wow/Orc/Male/Green_Stand [0].ani"},{"Models/Wow/Orc/Male/Green_Walk [1].ani"},{"Models/Wow/Orc/Male/Green_Run [2].ani"},{""}},
-		{{"Models/Wow/Pandaren/Male/Black_Stand [1].ani"},{"Models/Wow/Pandaren/Male/Black_Walk [83].ani"},{"Models/Wow/Pandaren/Male/Black_Run [62].ani"},{""}},
+		//{{"Models/Wow/Bear/WhiteStand_Stand [4].ani"},{"Models/Wow/Bear/WhiteStand_Stand [4].ani"},{"Models/Wow/Bear/WhiteStand_Stand [4].ani"},{""}},
+		{{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{"Models/Wow/Pandaren/Male/BlackStand_Stand [1].ani"},{""}},
 	};
 	void Player::SetScene(Urho3D::Scene* scene)
 	{
@@ -37,6 +38,7 @@ namespace race
 
 	void Player::SetRoleId(int role_id)
 	{
+		role_id = 4;
 		Urho3D::Vector3 pos{ 0.0f, 1.0f, 0.0f };
 		auto* cache = scene_->GetSubsystem<Urho3D::ResourceCache>();
 		auto trackPos = track_->GetPos();
@@ -47,8 +49,9 @@ namespace race
 		// spin node
 		Urho3D::Node* adjustNode = objectNode->CreateChild("AdjNode");
 		if (role_id != 0) {
+			float scale = 0.1f;
 			adjustNode->SetRotation(Urho3D::Quaternion(-90, Urho3D::Vector3(0, 1, 0)));
-			adjustNode->SetScale(Urho3D::Vector3{ 0.05f, 0.05f, 0.05f });
+			adjustNode->SetScale(Urho3D::Vector3{ scale, scale, scale });
 		} else {
 			adjustNode->SetRotation(Urho3D::Quaternion(180, Urho3D::Vector3(0, 1, 0)));
 		}
