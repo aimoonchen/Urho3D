@@ -1,4 +1,7 @@
 #pragma once
+
+#include <string>
+
 namespace race
 {
 	enum RoleId
@@ -7,6 +10,7 @@ namespace race
 		kBloodelf,
 		kHuman,
 		kOrc,
+		kTauren,
 		kPandaren,
 		kMaxRoleId
 	};
@@ -18,5 +22,13 @@ namespace race
 		kJump,
 		kMaxAniState
 	};
+
+	struct ModelRes
+	{
+		std::string model;
+		std::string mtl;
+	};
+
 	extern std::string g_ani_state[kMaxRoleId][kMaxAniState];
+	extern ModelRes g_model_res[kMaxRoleId];
 }

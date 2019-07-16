@@ -80,7 +80,7 @@ private:
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
     /// Handle the post-render update event.
     void HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData);
-
+	AnimatedModel* CreateCharactor(Node* modelNode, int roleId);
     /// Flag for drawing debug geometry.
     bool drawDebug_;
 };

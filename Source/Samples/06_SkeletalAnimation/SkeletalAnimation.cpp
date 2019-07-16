@@ -80,25 +80,57 @@ struct ModelRes
 	std::string model;
 	std::string mtl;
 };
-ModelRes g_mr[1] = {
-	//{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
-	//{"Models/NinjaSnowWar/Ninja.mdl", "Models/NinjaSnowWar/Materials/Ninja.xml"},
-	//{"Models/Wow/Tauren/Male/Yellow_Old.mdl", "Models/Wow/Tauren/Male/Materials/JoinedMaterial_#12.xml"},
-	//{"Models/Wow/Bloodelf/Female/Purple_Old.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#15.xml"},
-	//{"Models/Wow/Pandaren/Male/Black_Old.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_0.xml"},
-	{"Models/Wow/Orc/Male/Green_Old.mdl", "Models/Wow/Orc/Male/Materials/JoinedMaterial_#11.xml"},
-	//{"Models/Wow/Pandaren/Male/Black_Old.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_0.xml"},
+ModelRes g_model_res[6] = {
+		{"Models/Mutant/Mutant.mdl", "Models/Mutant/Materials/mutant_M.xml"},
+		{"Models/Wow/Bloodelf/Female/Purple_Old.mdl", "Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#15.xml"},
+		{"Models/Wow/Human/Female/Red_Old.mdl", "Models/Wow/Human/Female/Materials/JoinedMaterial_#13.xml"},
+		{"Models/Wow/Orc/Male/Green_Old.mdl", "Models/Wow/Orc/Male/Materials/JoinedMaterial_#11.xml"},
+		{"Models/Wow/Tauren/Male/Yellow_Old.mdl", "Models/Wow/Tauren/Male/Materials/JoinedMaterial_#12.xml"},
+		{"Models/Wow/Pandaren/Male/Black_Old.mdl", "Models/Wow/Pandaren/Male/Materials/characterpandarenmalepandarenmale_0.xml"}
 };
 
-std::string g_ani_state[1][4] = {
-	//{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
-	//{{"Models/NinjaSnowWar/Ninja_Idle1.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Walk.ani"},{"Models/NinjaSnowWar/Ninja_Jump.ani"}},
-	//{{"Models/Wow/Tauren/Male/Yellow_Stand_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Walk_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Run_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Jump_Take 001.ani"}},
-	//{{"Models/Wow/Bloodelf/Female/Purple_Stand_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Run_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Jump_Take 001.ani"}},
-	//{{"Models/Wow/Pandaren/Male/Black_Stand_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Walk_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Run_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Jump_Take 001.ani"}},
+std::string g_ani_state[6][4] = {
+	{{"Models/Mutant/Mutant_Idle0.ani"},{"Models/Mutant/Mutant_Walk.ani"},{"Models/Mutant/Mutant_Run.ani"},{"Models/Mutant/Mutant_Jump1.ani"}},
+	{{"Models/Wow/Bloodelf/Female/Purple_Stand_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Walk_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Run_Take 001.ani"},{"Models/Wow/Bloodelf/Female/Purple_Jump_Take 001.ani"}},
+	{{"Models/Wow/Human/Female/Red_Stand_Take 001.ani"},{"Models/Wow/Human/Female/Red_Walk_Take 001.ani"},{"Models/Wow/Human/Female/Red_Run_Take 001.ani"},{"Models/Wow/Human/Female/Red_Jump_Take 001.ani"}},
 	{{"Models/Wow/Orc/Male/Green_Stand_Take 001.ani"},{"Models/Wow/Orc/Male/Green_Walk_Take 001.ani"},{"Models/Wow/Orc/Male/Green_Run_Take 001.ani"},{"Models/Wow/Orc/Male/Green_Jump_Take 001.ani"}},
-	//{{"Models/Wow/Pandaren/Male/Black_Stand_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Walk_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Run_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Jump_Take 001.ani"}},
+	{{"Models/Wow/Tauren/Male/Yellow_Stand_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Walk_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Run_Take 001.ani"},{"Models/Wow/Tauren/Male/Yellow_Jump_Take 001.ani"}},
+	{{"Models/Wow/Pandaren/Male/Black_Stand_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Walk_Take 001.ani"},{"Models/Wow/Pandaren/Male/Black_Run_Take 001"},{"Models/Wow/Pandaren/Male/Black_Jump_Take 001.ani"}}
 };
+
+AnimatedModel* SkeletalAnimation::CreateCharactor(Node* modelNode, int roleId)
+{
+	auto* cache = GetSubsystem<ResourceCache>();
+	auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
+	modelObject->SetModel(cache->GetResource<Model>(g_model_res[roleId].model.c_str()));
+	modelObject->SetMaterial(cache->GetResource<Material>(g_model_res[roleId].mtl.c_str()));
+	if (roleId == 1) {
+		auto hairMtl = cache->GetResource<Material>("Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#6.xml");
+		auto eyeMtl = cache->GetResource<Material>("Models/Wow/Bloodelf/Female/Materials/JoinedMaterial_#17.xml");
+		modelObject->SetMaterial(1, hairMtl);
+		modelObject->SetMaterial(6, hairMtl);
+		modelObject->SetMaterial(16, eyeMtl);
+		modelObject->SetMaterial(17, eyeMtl);
+	} else if (roleId == 2) {
+		auto hairMtl = cache->GetResource<Material>("Models/Wow/Human/Female/Materials/JoinedMaterial_#6.xml");
+		modelObject->SetMaterial(0, hairMtl);
+		modelObject->SetMaterial(5, hairMtl);
+		modelObject->SetMaterial(6, hairMtl);
+	} else if (roleId == 3) {
+		auto hairMtl = cache->GetResource<Material>("Models/Wow/Orc/Male/Materials/characterorcmaleorcmale_hd_41.xml");
+		modelObject->SetMaterial(4, hairMtl);
+	} else if (roleId == 4) {
+		auto hairMtl = cache->GetResource<Material>("Models/Wow/Tauren/Male/Materials/JoinedMaterial_#6.xml");
+		auto hornMtl = cache->GetResource<Material>("Models/Wow/Tauren/Male/Materials/charactertaurenmaletaurenmale_hd_16.xml");
+		modelObject->SetMaterial(6, hairMtl);
+		modelObject->SetMaterial(7, hornMtl);
+	}
+	
+	modelNode->SetScale({ 0.03f,0.03f,0.03f });
+	modelObject->SetCastShadows(true);
+	return modelObject;
+}
+
 void SkeletalAnimation::CreateScene()
 {
     auto* cache = GetSubsystem<ResourceCache>();
@@ -138,7 +170,7 @@ void SkeletalAnimation::CreateScene()
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
 
     // Create animated models
-	const unsigned NUM_MODELS = 1;// 30;
+	const unsigned NUM_MODELS = 5;// 30;
 	const float MODEL_MOVE_SPEED = 0.0f;// 2.0f;
 	const float MODEL_ROTATE_SPEED = 0.0;// 100.0f;
     const BoundingBox bounds(Vector3(-20.0f, 0.0f, -20.0f), Vector3(20.0f, 0.0f, 20.0f));
@@ -147,26 +179,17 @@ void SkeletalAnimation::CreateScene()
     {
         Node* modelNode = scene_->CreateChild("Jill");
 		auto pos = Vector3(Random(40.0f) - 20.0f, 0.0f, Random(40.0f) - 20.0f);
-        modelNode->SetPosition(Vector3{0.0f, 0.0f, 0.0f});
+		//auto pos = Vector3{ 0.0f, 0.0f, 0.0f };
+        modelNode->SetPosition(pos);
         modelNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-
-        auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
-//         modelObject->SetModel(cache->GetResource<Model>("Models/Kachujin/Kachujin.mdl"));
-//         modelObject->SetMaterial(cache->GetResource<Material>("Models/Kachujin/Materials/Kachujin.xml"));
-		modelObject->SetModel(cache->GetResource<Model>(g_mr[i].model.c_str()));
-		modelObject->SetMaterial(cache->GetResource<Material>(g_mr[i].mtl.c_str()));
-		//if (i != 0) {
-			modelNode->SetScale({ 0.05f,0.05f,0.05f });
-		//}
-		
-
-        modelObject->SetCastShadows(true);
+		int roleid = i + 1;
+		auto* modelObject = CreateCharactor(modelNode, roleid);
 
         // Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance the
         // animation, The alternative would be to use an AnimationController component which updates the animation automatically,
         // but we need to update the model's position manually in any case
         //auto* walkAnimation = cache->GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
-		auto* walkAnimation = cache->GetResource<Animation>(g_ani_state[i][0].c_str());
+		auto* walkAnimation = cache->GetResource<Animation>(g_ani_state[roleid][0].c_str());
 
         AnimationState* state = modelObject->AddAnimationState(walkAnimation);
         // The state would fail to create (return null) if the animation was not found

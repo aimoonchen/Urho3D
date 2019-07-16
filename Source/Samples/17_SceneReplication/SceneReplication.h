@@ -26,7 +26,7 @@
 #include <memory>
 
 #include "Sample.h"
-
+#include "Race.h"
 namespace Urho3D
 {
 
@@ -84,6 +84,7 @@ private:
     void UpdateButtons();
     /// Create a controllable ball object and return its scene node.
     Node* CreatePlayer(Connection* con);
+	AnimatedModel* CreateCharactor(Node* modelNode, race::RoleId roleId);
     /// Read input and move the camera.
     void MoveCamera();
     /// Handle the physics world pre-step event.
