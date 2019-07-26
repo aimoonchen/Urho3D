@@ -57,8 +57,9 @@
 #include <Urho3D/DebugNew.h>
 
 #include "Race.h"
-#include "Character.h"
+//#include "Character.h"
 #include "RaceRoom.h"
+#include "Avatar.h"
 
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
@@ -67,18 +68,12 @@ static const StringHash E_CLIENTOBJECTID("ClientObjectID");
 // Identifier for the node ID parameter in the event data
 static const StringHash P_ID("ID");
 
-// Control bits we define
-// static const unsigned CTRL_FORWARD = 1;
-// static const unsigned CTRL_BACK = 2;
-// static const unsigned CTRL_LEFT = 4;
-// static const unsigned CTRL_RIGHT = 8;
-
 URHO3D_DEFINE_APPLICATION_MAIN(SceneReplication)
 
 SceneReplication::SceneReplication(Context* context) :
     Sample(context)
 {
-	Character::RegisterObject(context);
+	//Character::RegisterObject(context);
 }
 
 void SceneReplication::Start()
@@ -321,7 +316,7 @@ AnimatedModel* SceneReplication::CreateCharactor(Node* modelNode, race::RoleId r
 	return modelObject;
 }
 
-Node* SceneReplication::CreatePlayer(Connection* con)
+server::Player* SceneReplication::CreatePlayer(Connection* con)
 {
 	int room_id = 0;
 	auto room = server::RaceRoomManager::GetInstancePtr()->FindRoom(room_id);
@@ -331,23 +326,27 @@ Node* SceneReplication::CreatePlayer(Connection* con)
 		room = server::RaceRoomManager::GetInstancePtr()->CreateRoom(ti);
 	}
 	Urho3D::Vector3 pos{ 0.0f, 1.0f, 0.0f };
-	int role_id = 0;// GetRoleId();
+	int role_id = GetRoleId();
 	auto track_id = room->GetFreeTack();
 	String name;
+	server::Player* new_player = nullptr;
 	if (track_id != -1) {
 		name.AppendWithFormat("Player_%d", current_player_id_);
 		players_.push_back(std::make_unique<server::Player>(current_player_id_++));
-		auto new_player = players_.back().get();
-		new_player->SetRoleId(role_id);
+		new_player = players_.back().get();
 		new_player->SetConnection(con);
 		room->AddPlayer(new_player);
 		
-		auto* cache = scene_->GetSubsystem<Urho3D::ResourceCache>();
 		auto trackPos = new_player->GetTrack()->GetPos();
 		auto ti = room->GetTrackInfo();
 		pos.x_ = trackPos.x_ + 0.5f * ti.width_;
-
+		pos.z_ = 30.0f;
+		auto avatar = std::make_unique<race::Avatar>(context_, scene_);
+		avatar->Init(race::RoleId(role_id), name, pos);
+		new_player->SetAvatar(std::move(avatar));
 	}
+	return new_player;
+	/*
 	auto* cache = GetSubsystem<ResourceCache>();
 	
 	Node* objectNode = scene_->CreateChild(name);
@@ -357,12 +356,11 @@ Node* SceneReplication::CreatePlayer(Connection* con)
 	//objectNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 5.0f, Random(40.0f) - 20.0f));
 	// spin node
 	Urho3D::Node* adjustNode = objectNode->CreateChild("AdjNode");
-	if (true) {
+	if (role_id != race::kMutant) {
 		float scale = 0.02f;
 		adjustNode->SetRotation(Urho3D::Quaternion(-90, Urho3D::Vector3(0, 1, 0)));
 		adjustNode->SetScale(Urho3D::Vector3{ scale, scale, scale });
-	}
-	else {
+	} else {
 		adjustNode->SetRotation(Urho3D::Quaternion(180, Urho3D::Vector3(0, 1, 0)));
 	}
 	// Create the rendering component + animation controller
@@ -400,7 +398,7 @@ Node* SceneReplication::CreatePlayer(Connection* con)
 	//auto character = objectNode->CreateComponent<Character>();
 	//character->SetRoleId(race::RoleId(role_id));
 	return objectNode;
-	
+	*/
 	
 //     // Create the scene node & visual representation. This will be a replicated object
 //     Node* ballNode = scene_->CreateChild("Ball");
@@ -474,115 +472,6 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
     MoveCamera();
 }
 
-void SceneReplication::ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id)
-{
-	bool onGround_ = true;
-	float inAirTimer_ = 0.0f;
-	bool okToJump_ = true;
-	/// \todo Could cache the components for faster access instead of finding them each frame
-	auto* body = node->GetComponent<RigidBody>();
-	auto* animCtrl = node->GetComponent<AnimationController>(true);
-
-	// Update the in air timer. Reset if grounded
-	if (!onGround_)
-		inAirTimer_ += 0;// timeStep;
-	else
-		inAirTimer_ = 0.0f;
-	// When character has been in air less than 1/10 second, it's still interpreted as being on ground
-	bool softGrounded = inAirTimer_ < INAIR_THRESHOLD_TIME;
-
-	// Update movement & animation
-	const Quaternion& rot = node->GetRotation();
-	Vector3 moveDir = Vector3::ZERO;
-	const Vector3& velocity = body->GetLinearVelocity();
-	// Velocity on the XZ plane
-	Vector3 planeVelocity(velocity.x_, 0.0f, velocity.z_);
-
-	if (ctrl.IsDown(CTRL_FORWARD))
-		moveDir += Vector3::FORWARD;
-	if (ctrl.IsDown(CTRL_BACK))
-		moveDir += Vector3::BACK;
-	if (ctrl.IsDown(CTRL_LEFT))
-		moveDir += Vector3::LEFT;
-	if (ctrl.IsDown(CTRL_RIGHT))
-		moveDir += Vector3::RIGHT;
-
-	// Normalize move vector so that diagonal strafing is not faster
-	if (moveDir.LengthSquared() > 0.0f)
-		moveDir.Normalize();
-
-	// If in air, allow control, but slower than when on ground
-	body->ApplyImpulse(rot * moveDir * (softGrounded ? MOVE_FORCE : INAIR_MOVE_FORCE));
-
-	if (softGrounded)
-	{
-		// When on ground, apply a braking force to limit maximum ground velocity
-		Vector3 brakeForce = -planeVelocity * BRAKE_FORCE;
-		body->ApplyImpulse(brakeForce);
-
-		// Jump. Must release jump control between jumps
-		if (ctrl.IsDown(CTRL_JUMP))
-		{
-			if (okToJump_)
-			{
-				body->ApplyImpulse(Vector3::UP * JUMP_FORCE);
-				okToJump_ = false;
-				auto& ani = race::g_ani_state[role_id][race::kJump];
-				if (!ani.empty())
-				{
-					animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
-				}
-				//animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
-			}
-		}
-		else
-			okToJump_ = true;
-	}
-
-	if (!onGround_)
-	{
-		auto& ani = race::g_ani_state[role_id][race::kJump];
-		if (!ani.empty())
-		{
-			animCtrl->PlayExclusive(ani.c_str(), 0, false, 0.2f);
-		}
-		//animCtrl->PlayExclusive("Models/Mutant/Mutant_Jump1.ani", 0, false, 0.2f);
-	}
-	else
-	{
-		// Play walk animation if moving on ground, otherwise fade it out
-		if (softGrounded && !moveDir.Equals(Vector3::ZERO))
-		{
-			auto& ani = race::g_ani_state[role_id][race::kRun];
-			if (!ani.empty())
-			{
-				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
-			}
-		}
-		// animCtrl->PlayExclusive("Models/Mutant/Mutant_Run.ani", 0, true, 0.2f);
-		else
-		{
-			auto& ani = race::g_ani_state[role_id][race::kIdle];
-			if (!ani.empty())
-			{
-				animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
-			}
-		}
-		//animCtrl->PlayExclusive("Models/Mutant/Mutant_Idle0.ani", 0, true, 0.2f);
-
-		auto& ani = race::g_ani_state[role_id][race::kRun];
-		if (!ani.empty())
-		{
-			animCtrl->SetSpeed(ani.c_str(), planeVelocity.Length() * 0.3f);
-		}
-		// Set walk animation speed proportional to velocity
-		//animCtrl->SetSpeed("Models/Mutant/Mutant_Run.ani", planeVelocity.Length() * 0.3f);
-	}
-
-	// Reset grounded flag for next frame
-	onGround_ = false;
-}
-
 void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
 {
     // This function is different on the client and server. The client collects controls (WASD controls + yaw angle)
@@ -604,11 +493,11 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
         // Only apply WASD controls if there is no focused UI element
         if (!ui->GetFocusElement())
         {
-            controls.Set(CTRL_FORWARD, input->GetKeyDown(KEY_W));
-            controls.Set(CTRL_BACK, input->GetKeyDown(KEY_S));
-            controls.Set(CTRL_LEFT, input->GetKeyDown(KEY_A));
-            controls.Set(CTRL_RIGHT, input->GetKeyDown(KEY_D));
-			controls.Set(CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
+            controls.Set(race::CTRL_FORWARD, input->GetKeyDown(KEY_W));
+            controls.Set(race::CTRL_BACK, input->GetKeyDown(KEY_S));
+            controls.Set(race::CTRL_LEFT, input->GetKeyDown(KEY_A));
+            controls.Set(race::CTRL_RIGHT, input->GetKeyDown(KEY_D));
+			controls.Set(race::CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
         }
 
         serverConnection->SetControls(controls);
@@ -624,8 +513,9 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
         for (unsigned i = 0; i < connections.Size(); ++i)
         {
             Connection* connection = connections[i];
+			auto avatar = serverObjects_[connection]->GetAvatar();
             // Get the object this connection is controlling
-            Node* ballNode = serverObjects_[connection];
+            Node* ballNode = avatar->GetNode();
             if (!ballNode)
                 continue;
 
@@ -633,7 +523,8 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
 
             // Get the last controls sent by the client
             const Controls& controls = connection->GetControls();
-			ApplyContrlToNode(ballNode, controls);
+			//ApplyContrlToNode(ballNode, controls, avatar->GetRoleId());
+			avatar->ApplyContrlToNode(controls);
             // Torque is relative to the forward vector
 //             Quaternion rotation(0.0f, controls.yaw_, 0.0f);
 // 
@@ -712,12 +603,12 @@ void SceneReplication::HandleClientConnected(StringHash eventType, VariantMap& e
     newConnection->SetScene(scene_);
 
     // Then create a controllable object for that client
-    Node* newObject = CreatePlayer(newConnection);
+    auto* newObject = CreatePlayer(newConnection);
     serverObjects_[newConnection] = newObject;
 
     // Finally send the object's node ID using a remote event
     VariantMap remoteEventData;
-    remoteEventData[P_ID] = newObject->GetID();
+    remoteEventData[P_ID] = newObject->GetUrhoID();
     newConnection->SendRemoteEvent(E_CLIENTOBJECTID, true, remoteEventData);
 }
 
@@ -727,7 +618,8 @@ void SceneReplication::HandleClientDisconnected(StringHash eventType, VariantMap
 
     // When a client disconnects, remove the controlled object
     auto* connection = static_cast<Connection*>(eventData[P_CONNECTION].GetPtr());
-    Node* object = serverObjects_[connection];
+    auto player = serverObjects_[connection];
+	Node* object = player->GetAvatar()->GetNode();
     if (object)
         object->Remove();
 

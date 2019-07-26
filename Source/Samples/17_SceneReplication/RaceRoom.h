@@ -7,8 +7,12 @@
 namespace Urho3D
 {
 	class Connection;
+	class Node;
 }
-
+namespace race
+{
+	class Avatar;
+}
 namespace server
 {
 	struct Barrier
@@ -33,19 +37,23 @@ namespace server
 		void EnterRoom() {}
 		void LeaveRoon() {}
 		int GetId() const { return uid_; }
-		int GetRoleId() const { return role_id_; }
-		void SetRoleId(int roleId) { role_id_ = roleId; }
+		int GetRoleId() const;
+// 		void SetRoleId(int roleId) { role_id_ = roleId; }
+		void SetAvatar(std::unique_ptr<race::Avatar> avatar);
+		race::Avatar* GetAvatar() const { return avatar_.get(); }
+		unsigned int GetUrhoID() const;
 		int GetTrackId() const;
 		void SetTrack(Track* track) { track_ = track; }
 		Track* GetTrack() const { return track_; }
 		void SetConnection(Urho3D::Connection* con) { connection_ = con; }
 		Urho3D::Connection* GetConnection() const { return connection_; }
 	private:
+		//
 		int			uid_{ -1 };
-		int			role_id_{ -1 };
 		std::string name_;
 		Room*		race_room_{ nullptr };
 		Track*		track_{ nullptr };
+		std::unique_ptr<race::Avatar> avatar_;
 		Urho3D::Connection* connection_{ nullptr };
 	};
 	

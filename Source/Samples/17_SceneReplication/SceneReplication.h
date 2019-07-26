@@ -83,7 +83,7 @@ private:
     /// Update visibility of buttons according to connection and server status.
     void UpdateButtons();
     /// Create a controllable ball object and return its scene node.
-    Node* CreatePlayer(Connection* con);
+    server::Player* CreatePlayer(Connection* con);
 	AnimatedModel* CreateCharactor(Node* modelNode, race::RoleId roleId);
     /// Read input and move the camera.
     void MoveCamera();
@@ -106,9 +106,10 @@ private:
     /// Handle remote event from server which tells our controlled object node ID.
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
 
-	void ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id = 0);
+	//void ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id = 0);
     /// Mapping from client connections to controllable objects.
-    HashMap<Connection*, WeakPtr<Node> > serverObjects_;
+    //HashMap<Connection*, WeakPtr<Node> > serverObjects_;
+	HashMap<Connection*, server::Player* > serverObjects_;
     /// Button container element.
     SharedPtr<UIElement> buttonContainer_;
     /// Server address line editor element.

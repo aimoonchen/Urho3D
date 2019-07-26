@@ -1,4 +1,6 @@
 #include "RaceRoom.h"
+#include "Avatar.h"
+
 namespace server
 {
 	Barrier::Barrier(const Urho3D::Vector3& pos, float width, float duration)
@@ -31,6 +33,11 @@ namespace server
 // 			}
 		}
 	}
+	
+	unsigned int Player::GetUrhoID() const
+	{
+		return avatar_ ? avatar_->GetID() : 0;
+	}
 
 	int Player::GetTrackId() const
 	{
@@ -39,7 +46,17 @@ namespace server
 		}
 		return -1;
 	}
+	
+	int Player::GetRoleId() const
+	{
+		return avatar_ ? avatar_->GetRoleId() : -1;
+	}
 
+	void Player::SetAvatar(std::unique_ptr<race::Avatar> avatar)
+	{
+		avatar_ = std::move(avatar);
+	}
+	
 	Track::Track(Room* raceRoom, const Urho3D::Vector3& bornPos, int id)
 		: race_room_{ raceRoom }, born_pos_{ bornPos }, id_{ id }
 	{
