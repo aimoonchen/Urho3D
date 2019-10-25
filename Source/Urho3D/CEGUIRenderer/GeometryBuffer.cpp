@@ -33,8 +33,9 @@ namespace CEGUI
 		//cleanUpVertexAttributes();
 	}
 
-	void Urho3DGeometryBuffer::draw() const
+	void Urho3DGeometryBuffer::draw(std::uint32_t drawModeMask) const
 	{
+		CEGUI_UNUSED(drawModeMask);
 		if (d_vertexData.empty())
 			return;
 

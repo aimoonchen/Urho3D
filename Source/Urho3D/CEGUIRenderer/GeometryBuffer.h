@@ -29,7 +29,7 @@ namespace CEGUI
 		virtual ~Urho3DGeometryBuffer();
 
 		// Overrides of virtual and abstract methods from GeometryBuffer
-		void draw() const override;
+		void draw(std::uint32_t drawModeMask = DrawModeMaskAll) const override;
 		void appendGeometry(const float* vertex_data, std::size_t array_size) override;
 		void reset() override;
 

@@ -60,12 +60,16 @@ namespace race
 			modelObject->SetMaterial(6, hairMtl);
 			modelObject->SetMaterial(7, hornMtl);
 		}
+		modelObject->SetCastShadows(true);
+
+		auto animCtrl = modelNode->CreateComponent<Urho3D::AnimationController>();
+		auto& ani = race::g_ani_state[roleId][race::kIdle];
+		animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
 
 		if (roleId != race::kMutant) {
 			modelNode->SetScale({ 0.03f,0.03f,0.03f });
 		}
 
-		modelObject->SetCastShadows(true);
 		return modelObject;
 	}
 
@@ -85,10 +89,6 @@ namespace race
 			adjustNode->SetRotation(Urho3D::Quaternion(180, Urho3D::Vector3(0, 1, 0)));
 		}
 		create_model(adjustNode, roleId);
-
-		auto animCtrl = adjustNode->CreateComponent<Urho3D::AnimationController>();
-		auto& ani = race::g_ani_state[roleId][race::kIdle];
-		animCtrl->PlayExclusive(ani.c_str(), 0, true, 0.2f);
 
 		// Create rigidbody, and set non-zero mass so that the body becomes dynamic
 		auto* body = objectNode->CreateComponent<Urho3D::RigidBody>();
