@@ -28,14 +28,29 @@
     <Filter Include="src\cocos2d">
       <UniqueIdentifier>{08d82323-314b-49cb-9cf4-2c1ef4395232}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\cocos2d\base">
-      <UniqueIdentifier>{0564b343-e09e-44fa-8319-c3b73a839a22}</UniqueIdentifier>
+    <Filter Include="src\cocos2d\external">
+      <UniqueIdentifier>{dd57e035-195d-4b97-8b06-58f10a28094c}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\cocos2d\math">
+    <Filter Include="src\cocos2d\external\ConvertUTF">
+      <UniqueIdentifier>{347fc9b7-b9ef-4bec-89c6-c51a95510651}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\cocos2d\external\md5">
+      <UniqueIdentifier>{8132572b-6b4a-471e-be0b-af2b37fa4624}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\cocos2d\cocos">
+      <UniqueIdentifier>{cb3b24fc-e37d-4f0a-bd62-2979ff7dba79}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\cocos2d\cocos\platform">
+      <UniqueIdentifier>{8805f654-be2c-40db-ba1f-39c682a4cd7c}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\cocos2d\cocos\math">
       <UniqueIdentifier>{279876b3-3184-4ff5-b377-c59017efa1d2}</UniqueIdentifier>
     </Filter>
-    <Filter Include="src\cocos2d\platform">
-      <UniqueIdentifier>{8805f654-be2c-40db-ba1f-39c682a4cd7c}</UniqueIdentifier>
+    <Filter Include="src\cocos2d\cocos\base">
+      <UniqueIdentifier>{0564b343-e09e-44fa-8319-c3b73a839a22}</UniqueIdentifier>
+    </Filter>
+    <Filter Include="src\cocos2d\cocos\2d">
+      <UniqueIdentifier>{e37992d4-f312-4b68-9656-3a76bab638e6}</UniqueIdentifier>
     </Filter>
   </ItemGroup>
   <ItemGroup>
@@ -261,122 +276,188 @@
     <ClInclude Include="..\Classes\utils\ByteBuffer.h">
       <Filter>src\utils</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\CCAffineTransform.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\base64.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\CCGeometry.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCAutoreleasePool.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\CCMath.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccCArray.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\CCMathBase.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccConfig.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\CCVertex.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCConfiguration.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\Mat4.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCConsole.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\MathUtil.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCController.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\Quaternion.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCData.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\TransformUtils.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEvent.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\Vec2.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventAcceleration.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\Vec3.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventController.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\math\Vec4.h">
-      <Filter>src\cocos2d\math</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventCustom.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEvent.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventDispatcher.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventAcceleration.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventFocus.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventController.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventKeyboard.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventCustom.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListener.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventDispatcher.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerAcceleration.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventFocus.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerController.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventKeyboard.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerCustom.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListener.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerFocus.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerAcceleration.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerKeyboard.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerController.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerMouse.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerCustom.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventListenerTouch.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerFocus.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventMouse.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerKeyboard.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventTouch.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerMouse.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCEventType.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventListenerTouch.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccMacros.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventMouse.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccRandom.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventTouch.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCRef.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCEventType.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCRefPtr.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCRef.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCScheduler.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCRefPtr.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCTouch.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCScheduler.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccTypes.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCTouch.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccUTF8.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\ccTypes.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\ccUtils.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\ccMacros.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCValue.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\platform\CCPlatformMacros.h">
-      <Filter>src\cocos2d\platform</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\base\CCVector.h">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\CCConsole.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\CCAffineTransform.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </ClInclude>
-    <ClInclude Include="..\Classes\cocos2d\base\ccRandom.h">
-      <Filter>src\cocos2d\base</Filter>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\CCGeometry.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\CCMath.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\CCMathBase.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\CCVertex.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\Mat4.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\MathUtil.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\Quaternion.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\TransformUtils.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\Vec2.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\Vec3.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\math\Vec4.h">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\external\md5\md5.h">
+      <Filter>src\cocos2d\external\md5</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\external\ConvertUTF\ConvertUTF.h">
+      <Filter>src\cocos2d\external\ConvertUTF</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\cocos2d.h">
+      <Filter>src\cocos2d\cocos</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCAction.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionEase.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionInstant.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionInterval.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionManager.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionTween.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCActionCatmullRom.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCTweenFunction.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClInclude>
+    <ClInclude Include="..\Classes\cocos2d\cocos\2d\CCNode.h">
+      <Filter>src\cocos2d\cocos\2d</Filter>
     </ClInclude>
   </ItemGroup>
   <ItemGroup>
@@ -587,124 +668,199 @@
     <ClCompile Include="..\Classes\utils\ByteBuffer.cpp">
       <Filter>src\utils</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\CCAffineTransform.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\base64.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\CCGeometry.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCAutoreleasePool.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\CCVertex.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\ccCArray.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\Mat4.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCConfiguration.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\MathUtil.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCConsole.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\Quaternion.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCController.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\TransformUtils.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCData.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\Vec2.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEvent.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\Vec3.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventAcceleration.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\math\Vec4.cpp">
-      <Filter>src\cocos2d\math</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventController.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventAcceleration.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventCustom.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventController.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventDispatcher.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventCustom.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventFocus.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventDispatcher.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventKeyboard.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventFocus.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListener.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventKeyboard.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerAcceleration.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListener.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerController.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerAcceleration.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerCustom.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerController.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerFocus.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerCustom.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerKeyboard.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerFocus.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerMouse.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerKeyboard.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventListenerTouch.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerMouse.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventMouse.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventListenerTouch.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCEventTouch.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventMouse.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\ccRandom.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCEventTouch.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCRef.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCRef.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCScheduler.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCScheduler.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCTouch.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCTouch.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\ccTypes.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\ccTypes.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\ccUTF8.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\CCConsole.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\ccUtils.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
     </ClCompile>
-    <ClCompile Include="..\Classes\cocos2d\base\ccRandom.cpp">
-      <Filter>src\cocos2d\base</Filter>
+    <ClCompile Include="..\Classes\cocos2d\cocos\base\CCValue.cpp">
+      <Filter>src\cocos2d\cocos\base</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\CCAffineTransform.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\CCGeometry.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\CCVertex.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\Mat4.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\MathUtil.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\Quaternion.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\TransformUtils.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\Vec2.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\Vec3.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\math\Vec4.cpp">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\external\md5\md5.c">
+      <Filter>src\cocos2d\external\md5</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\external\ConvertUTF\ConvertUTF.c">
+      <Filter>src\cocos2d\external\ConvertUTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\external\ConvertUTF\ConvertUTFWrapper.cpp">
+      <Filter>src\cocos2d\external\ConvertUTF</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\cocos2d.cpp">
+      <Filter>src\cocos2d\cocos</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCAction.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionEase.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionInstant.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionInterval.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionManager.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionTween.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCActionCatmullRom.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCTweenFunction.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
+    </ClCompile>
+    <ClCompile Include="..\Classes\cocos2d\cocos\2d\CCNode.cpp">
+      <Filter>src\cocos2d\cocos\2d</Filter>
     </ClCompile>
   </ItemGroup>
   <ItemGroup>
-    <None Include="..\Classes\cocos2d\math\Mat4.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\Mat4.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\MathUtil.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\MathUtil.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\MathUtilNeon.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\MathUtilNeon.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\Quaternion.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\MathUtilNeon64.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\Vec2.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\MathUtilSSE.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\Vec3.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\Quaternion.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
-    <None Include="..\Classes\cocos2d\math\Vec4.inl">
-      <Filter>src\cocos2d\math</Filter>
+    <None Include="..\Classes\cocos2d\cocos\math\Vec2.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </None>
+    <None Include="..\Classes\cocos2d\cocos\math\Vec3.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
+    </None>
+    <None Include="..\Classes\cocos2d\cocos\math\Vec4.inl">
+      <Filter>src\cocos2d\cocos\math</Filter>
     </None>
   </ItemGroup>
 </Project>
