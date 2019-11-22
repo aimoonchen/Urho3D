@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
-#include "GL/glew.h"
+#include "GLEW/glew.h"
 
 #define CC_GL_DEPTH24_STENCIL8      GL_DEPTH24_STENCIL8
 

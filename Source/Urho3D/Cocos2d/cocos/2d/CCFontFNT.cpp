@@ -31,7 +31,7 @@
 #include "base/CCDirector.h"
 #include "base/CCMap.h"
 #include "base/ccUTF8.h"
-#include "renderer/CCTextureCache.h"
+//#include "renderer/CCTextureCache.h"
 
 #include <cmath>
 #include <set>
@@ -245,7 +245,7 @@ void BMFontConfiguration::purgeFontDefDictionary()
 
 std::set<unsigned int>* BMFontConfiguration::parseConfigFile(const std::string& controlFile)
 {
-    std::string data = FileUtils::getInstance()->getStringFromFile(controlFile);
+	std::string data;// = FileUtils::getInstance()->getStringFromFile(controlFile);
     if (data.empty())
     {
         return nullptr;
@@ -401,7 +401,7 @@ std::set<unsigned int>* BMFontConfiguration::parseBinaryConfigFile(unsigned char
             const char *value = (const char *)pData;
             CCASSERT(strlen(value) < blockSize, "Block size should be less then string");
 
-            _atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(value, controlFile);
+            //_atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(value, controlFile);
         }
 		else if (blockId == 4)
 		{
@@ -491,7 +491,7 @@ void BMFontConfiguration::parseImageFileName(const char* line, const std::string
     // file 
     char fileName[255];
     sscanf(strchr(line,'"') + 1, "%[^\"]", fileName);
-    _atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(fileName, fntFile);
+    //_atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(fileName, fntFile);
 }
 
 void BMFontConfiguration::parseInfoArguments(const char* line)
@@ -605,25 +605,26 @@ void BMFontConfiguration::parseKerningEntry(const char* line)
 
 FontFNT * FontFNT::create(const std::string& fntFilePath, const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-    BMFontConfiguration *newConf = FNTConfigLoadFile(fntFilePath);
-    if (!newConf)
-        return nullptr;
-    
-    // add the texture
-    Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(newConf->getAtlasName());
-    if (!tempTexture)
-    {
-        return nullptr;
-    }
-    
-    FontFNT *tempFont =  new FontFNT(newConf,imageOffset);
-    tempFont->setFontSize(newConf->_fontSize);
-    if (!tempFont)
-    {
-        return nullptr;
-    }
-    tempFont->autorelease();
-    return tempFont;
+//     BMFontConfiguration *newConf = FNTConfigLoadFile(fntFilePath);
+//     if (!newConf)
+//         return nullptr;
+//     
+//     // add the texture
+//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(newConf->getAtlasName());
+//     if (!tempTexture)
+//     {
+//         return nullptr;
+//     }
+//     
+//     FontFNT *tempFont =  new FontFNT(newConf,imageOffset);
+//     tempFont->setFontSize(newConf->_fontSize);
+//     if (!tempFont)
+//     {
+//         return nullptr;
+//     }
+//     tempFont->autorelease();
+//     return tempFont;
+	return {};
 }
 
 FontFNT::FontFNT(BMFontConfiguration *theContfig, const Vec2& imageOffset /* = Vec2::ZERO */)
@@ -758,17 +759,18 @@ FontAtlas * FontFNT::createFontAtlas()
     
     // add the texture (only one texture for now)
     
-    Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(_configuration->getAtlasName());
-    if (!tempTexture) {
-        CC_SAFE_RELEASE(tempAtlas);
-        return nullptr;
-    }
-    
-    // add the texture
-    tempAtlas->addTexture(tempTexture, 0);
-    
-    // done
-    return tempAtlas;
+//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(_configuration->getAtlasName());
+//     if (!tempTexture) {
+//         CC_SAFE_RELEASE(tempAtlas);
+//         return nullptr;
+//     }
+//     
+//     // add the texture
+//     tempAtlas->addTexture(tempTexture, 0);
+//     
+//     // done
+//     return tempAtlas;
+	return {};
 }
 
 void FontFNT::reloadBMFontResource(const std::string& fntFilePath)
@@ -784,12 +786,12 @@ void FontFNT::reloadBMFontResource(const std::string& fntFilePath)
         s_configurations->erase(fntFilePath);
     }
     ret = BMFontConfiguration::create(fntFilePath);
-    if (ret)
-    {
-        s_configurations->insert(fntFilePath, ret);
-        Director::getInstance()->getTextureCache()->reloadTexture(ret->getAtlasName());
-
-    }
+//     if (ret)
+//     {
+//         s_configurations->insert(fntFilePath, ret);
+//         Director::getInstance()->getTextureCache()->reloadTexture(ret->getAtlasName());
+// 
+//     }
 }
 
 NS_CC_END

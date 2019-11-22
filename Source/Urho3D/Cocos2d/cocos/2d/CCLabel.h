@@ -28,8 +28,8 @@
 #define _COCOS2D_CCLABEL_H_
 
 #include "2d/CCNode.h"
-#include "renderer/CCCustomCommand.h"
-#include "renderer/CCQuadCommand.h"
+// #include "renderer/CCCustomCommand.h"
+// #include "renderer/CCQuadCommand.h"
 #include "2d/CCFontAtlas.h"
 #include "base/ccTypes.h"
 
@@ -745,8 +745,8 @@ protected:
     Color4B _textColor;
     Color4F _textColorF;
 
-    QuadCommand _quadCommand;
-    CustomCommand _customCommand;
+//     QuadCommand _quadCommand;
+//     CustomCommand _customCommand;
     Mat4  _shadowTransform;
     GLint _uniformEffectColor;
     GLint _uniformEffectType; // 0: None, 1: Outline, 2: Shadow; Only used when outline is enabled.
