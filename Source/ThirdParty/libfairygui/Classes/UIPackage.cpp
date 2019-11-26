@@ -69,8 +69,8 @@ UIPackage * UIPackage::addPackage(const string& assetPath)
     {
         Image* emptyImage = new Image();
         emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
-        _emptyTexture = new Texture2D();
-        _emptyTexture->initWithImage(emptyImage);
+//         _emptyTexture = new Texture2D();
+//         _emptyTexture->initWithImage(emptyImage);
         delete emptyImage;
     }
 
@@ -496,7 +496,7 @@ void UIPackage::loadAtlas(PackageItem * item)
     if (!image->initWithImageFile(item->file))
     {
         item->texture = _emptyTexture;
-        _emptyTexture->retain();
+        //_emptyTexture->retain();
         delete image;
         Image::setPNGPremultipliedAlphaEnabled(true);
         CCLOGWARN("FairyGUI: texture '%s' not found in %s", item->file.c_str(), _name.c_str());
@@ -504,10 +504,10 @@ void UIPackage::loadAtlas(PackageItem * item)
     }
     Image::setPNGPremultipliedAlphaEnabled(true);
 
-    Texture2D* tex = new Texture2D();
-    tex->initWithImage(image);
-    item->texture = tex;
-    delete image;
+//     Texture2D* tex = new Texture2D();
+//     tex->initWithImage(image);
+//     item->texture = tex;
+//     delete image;
 
     string alphaFilePath;
     string ext = FileUtils::getInstance()->getFileExtension(item->file);
@@ -530,10 +530,10 @@ void UIPackage::loadAtlas(PackageItem * item)
             return;
         }
 
-        tex = new Texture2D();
-        tex->initWithImage(image);
-        item->texture->setAlphaTexture(tex);
-        tex->release();
+//         tex = new Texture2D();
+//         tex->initWithImage(image);
+//         item->texture->setAlphaTexture(tex);
+//        tex->release();
         delete image;
     }
 }
@@ -553,8 +553,8 @@ SpriteFrame* UIPackage::createSpriteTexture(AtlasSprite * sprite)
     getItemAsset(sprite->atlas);
 
     //not using createWithTexture for saving a autorelease call.
-    SpriteFrame* spriteFrame = new SpriteFrame();
-    spriteFrame->initWithTexture(sprite->atlas->texture, sprite->rect, sprite->rotated, Vec2(0, 0), sprite->rect.size);
+     SpriteFrame* spriteFrame = new SpriteFrame();
+     spriteFrame->initWithTexture(sprite->atlas->texture, sprite->rect, sprite->rotated, Vec2(0, 0), sprite->rect.size);
 
     return spriteFrame;
 }
@@ -566,13 +566,13 @@ void UIPackage::loadImage(PackageItem* item)
         item->spriteFrame = createSpriteTexture(sprite);
     else
     {
-        item->spriteFrame = new (std::nothrow) SpriteFrame();
-        item->spriteFrame->initWithTexture(_emptyTexture, Rect());
+       item->spriteFrame = new (std::nothrow) SpriteFrame();
+       item->spriteFrame->initWithTexture(_emptyTexture, Rect());
     }
     if (item->scaleByTile)
     {
-        Texture2D::TexParams tp = { GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT };
-        item->spriteFrame->getTexture()->setTexParameters(tp);
+//         Texture2D::TexParams tp = { GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT };
+//         item->spriteFrame->getTexture()->setTexParameters(tp);
     }
 }
 
@@ -623,7 +623,7 @@ void UIPackage::loadMovieClip(PackageItem * item)
         {
             //dont use createWithTexture
             spriteFrame = new (std::nothrow) SpriteFrame();
-            spriteFrame->initWithTexture(_emptyTexture, Rect());
+            spriteFrame->initWithTexture(_emptyTexture, Rect());
         }
 
         spriteFrame->setOffset(Vec2(rect.origin.x - (mcSize.width - rect.size.width) / 2, -(rect.origin.y - (mcSize.height - rect.size.height) / 2)));

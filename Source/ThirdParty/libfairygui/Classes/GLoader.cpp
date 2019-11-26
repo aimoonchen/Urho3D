@@ -290,11 +290,12 @@ void GLoader::loadFromPackage()
 
 void GLoader::loadExternal()
 {
-    auto tex = Director::getInstance()->getTextureCache()->addImage(_url);
+    //auto tex = Director::getInstance()->getTextureCache()->addImage(_url);
+	Texture2D* tex{ nullptr };
     if (tex)
     {
-        auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, tex->getContentSize()));
-        onExternalLoadSuccess(sf);
+//         auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, tex->getContentSize()));
+//         onExternalLoadSuccess(sf);
     }
     else
         onExternalLoadFailed();

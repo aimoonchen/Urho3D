@@ -45,8 +45,8 @@ THE SOFTWARE.
 #include "base/CCConsole.h"
 #include "base/CCData.h"
 #include "base/CCDirector.h"
-// #include "base/CCIMEDelegate.h"
-// #include "base/CCIMEDispatcher.h"
+#include "base/CCIMEDelegate.h"
+#include "base/CCIMEDispatcher.h"
 #include "base/CCMap.h"
 #include "base/CCNS.h"
 // #include "base/CCProfiling.h"
@@ -64,7 +64,7 @@ THE SOFTWARE.
 #include "base/ccTypes.h"
 #include "base/ccUTF8.h"
 #include "base/ccUtils.h"
-
+#include "base/CCTouch.h"
 // EventDispatcher
 #include "base/CCEventAcceleration.h"
 #include "base/CCEventCustom.h"
@@ -118,7 +118,7 @@ THE SOFTWARE.
 #include "2d/CCDrawNode.h"
 //#include "2d/CCDrawingPrimitives.h"
 #include "2d/CCFontFNT.h"
-// #include "2d/CCLabel.h"
+#include "2d/CCLabel.h"
 // #include "2d/CCLabelAtlas.h"
 // #include "2d/CCLabelBMFont.h"
 // #include "2d/CCLabelTTF.h"

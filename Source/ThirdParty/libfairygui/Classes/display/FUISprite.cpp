@@ -23,7 +23,7 @@ FUISprite::FUISprite() :
 FUISprite::~FUISprite()
 {
     CC_SAFE_FREE(_vertexData);
-    CC_SAFE_RELEASE(_fillGlProgramState);
+//    CC_SAFE_RELEASE(_fillGlProgramState);
 }
 
 void FUISprite::clearContent()
@@ -93,13 +93,13 @@ void FUISprite::setScale9Grid(Rect * value)
 
 void FUISprite::setGrayed(bool value)
 {
-    GLProgramState *glState = nullptr;
-    if (value)
-        glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
-    else
-        glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
+//     GLProgramState *glState = nullptr;
+//     if (value)
+//         glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
+//     else
+//         glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
 
-    setGLProgramState(glState);
+//    setGLProgramState(glState);
 }
 
 void FUISprite::setFillMethod(FillMethod value)
@@ -112,7 +112,7 @@ void FUISprite::setFillMethod(FillMethod value)
         else
         {
             CC_SAFE_FREE(_vertexData);
-            CC_SAFE_RELEASE_NULL(_fillGlProgramState);
+            //CC_SAFE_RELEASE_NULL(_fillGlProgramState);
         }
     }
 }
@@ -151,8 +151,8 @@ void FUISprite::setupFill()
 {
     if (!_fillGlProgramState)
     {
-        _fillGlProgramState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, getTexture());
-        CC_SAFE_RETAIN(_fillGlProgramState);
+//         _fillGlProgramState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, getTexture());
+//         CC_SAFE_RETAIN(_fillGlProgramState);
     }
     if (_fillMethod == FillMethod::Horizontal || _fillMethod == FillMethod::Vertical)
         updateBar();
@@ -409,30 +409,30 @@ Vec2 FUISprite::boundaryTexCoord(char index)
 
 void FUISprite::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 {
-    GLProgram* program = _fillGlProgramState->getGLProgram();
-    program->use();
-    program->setUniformsForBuiltins(transform);
-
-    GL::blendFunc(getBlendFunc().src, getBlendFunc().dst);
-
-    GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
-
-    GL::bindTexture2D(getTexture());
-
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].vertices);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].texCoords);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(_vertexData[0]), &_vertexData[0].colors);
-
-    if (_fillMethod == FillMethod::Horizontal || _fillMethod == FillMethod::Vertical)
-    {
-        glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount);
-        CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _vertexDataCount);
-    }
-    else
-    {
-        glDrawArrays(GL_TRIANGLE_FAN, 0, _vertexDataCount);
-        CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _vertexDataCount);
-    }
+//     GLProgram* program = _fillGlProgramState->getGLProgram();
+//     program->use();
+//     program->setUniformsForBuiltins(transform);
+// 
+//     GL::blendFunc(getBlendFunc().src, getBlendFunc().dst);
+// 
+//     GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
+// 
+//     GL::bindTexture2D(getTexture());
+// 
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].vertices);
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].texCoords);
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(_vertexData[0]), &_vertexData[0].colors);
+// 
+//     if (_fillMethod == FillMethod::Horizontal || _fillMethod == FillMethod::Vertical)
+//     {
+//         glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount);
+//         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _vertexDataCount);
+//     }
+//     else
+//     {
+//         glDrawArrays(GL_TRIANGLE_FAN, 0, _vertexDataCount);
+//         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _vertexDataCount);
+//     }
 }
 
 void FUISprite::draw(cocos2d::Renderer * renderer, const cocos2d::Mat4 & transform, uint32_t flags)
@@ -444,9 +444,9 @@ void FUISprite::draw(cocos2d::Renderer * renderer, const cocos2d::Mat4 & transfo
         Sprite::draw(renderer, transform, flags);
     else
     {
-        _customCommand.init(_globalZOrder, transform, flags);
-        _customCommand.func = CC_CALLBACK_0(FUISprite::onDraw, this, transform, flags);
-        renderer->addCommand(&_customCommand);
+//         _customCommand.init(_globalZOrder, transform, flags);
+//         _customCommand.func = CC_CALLBACK_0(FUISprite::onDraw, this, transform, flags);
+//         renderer->addCommand(&_customCommand);
     }
 }
 

@@ -49,7 +49,7 @@ private:
     FillOrigin _fillOrigin;
     float _fillAmount;
     bool _fillClockwise;
-    cocos2d::CustomCommand _customCommand;
+//    cocos2d::CustomCommand _customCommand;
     int _vertexDataCount;
     cocos2d::V2F_C4B_T2F *_vertexData;
     cocos2d::GLProgramState *_fillGlProgramState;

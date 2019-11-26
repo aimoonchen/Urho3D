@@ -20,8 +20,8 @@ public:
     cocos2d::Rect _clippingRect;
     bool _clippingRectDirty;
 
-    cocos2d::CustomCommand _beforeVisitCmdScissor;
-    cocos2d::CustomCommand _afterVisitCmdScissor;
+//     cocos2d::CustomCommand _beforeVisitCmdScissor;
+//     cocos2d::CustomCommand _afterVisitCmdScissor;
 };
 
 class StencilClippingSupport
@@ -31,11 +31,11 @@ public:
 
     cocos2d::Node* _stencil;
     cocos2d::GLProgram* _originStencilProgram;
-    cocos2d::StencilStateManager* _stencilStateManager;
-    cocos2d::GroupCommand _groupCommand;
-    cocos2d::CustomCommand _beforeVisitCmd;
-    cocos2d::CustomCommand _afterDrawStencilCmd;
-    cocos2d::CustomCommand _afterVisitCmd;
+//     cocos2d::StencilStateManager* _stencilStateManager;
+//     cocos2d::GroupCommand _groupCommand;
+//     cocos2d::CustomCommand _beforeVisitCmd;
+//     cocos2d::CustomCommand _afterDrawStencilCmd;
+//     cocos2d::CustomCommand _afterVisitCmd;
 };
 
 class FUIContainer : public cocos2d::Node

@@ -1,5 +1,5 @@
 #include "FUIContainer.h"
-#include "base/CCStencilStateManager.h"
+//#include "base/CCStencilStateManager.h"
 #include "utils/ToolSet.h"
 #include "GComponent.h"
 
@@ -33,8 +33,8 @@ RectClippingSupport::RectClippingSupport() :
 
 StencilClippingSupport::StencilClippingSupport() :
     _stencil(nullptr),
-    _originStencilProgram(nullptr),
-    _stencilStateManager(new StencilStateManager())
+    _originStencilProgram(nullptr)
+//    _stencilStateManager(new StencilStateManager())
 {
 }
 
@@ -55,7 +55,7 @@ FUIContainer::~FUIContainer()
             _stencilClippingSupport->_stencil->stopAllActions();
             _stencilClippingSupport->_stencil->release();
         }
-        CC_SAFE_DELETE(_stencilClippingSupport->_stencilStateManager);
+//        CC_SAFE_DELETE(_stencilClippingSupport->_stencilStateManager);
         delete _stencilClippingSupport;
     }
 }
@@ -156,9 +156,9 @@ void FUIContainer::setStencil(cocos2d::Node * stencil)
 
 GLfloat FUIContainer::getAlphaThreshold() const
 {
-    if (_stencilClippingSupport != nullptr)
-        return _stencilClippingSupport->_stencilStateManager->getAlphaThreshold();
-    else
+//     if (_stencilClippingSupport != nullptr)
+//         return _stencilClippingSupport->_stencilStateManager->getAlphaThreshold();
+//     else
         return 1;
 }
 
@@ -176,23 +176,23 @@ void FUIContainer::setAlphaThreshold(GLfloat alphaThreshold)
     }
 #endif
 
-    _stencilClippingSupport->_stencilStateManager->setAlphaThreshold(alphaThreshold);
+//    _stencilClippingSupport->_stencilStateManager->setAlphaThreshold(alphaThreshold);
 }
 
 bool FUIContainer::isInverted() const
 {
-    if (_stencilClippingSupport != nullptr)
-        return _stencilClippingSupport->_stencilStateManager->isInverted();
-    else
+//     if (_stencilClippingSupport != nullptr)
+//         return _stencilClippingSupport->_stencilStateManager->isInverted();
+//     else
         return false;
 }
 
 void FUIContainer::setInverted(bool inverted)
 {
-    if (_stencilClippingSupport == nullptr)
-        _stencilClippingSupport = new StencilClippingSupport();
-
-    _stencilClippingSupport->_stencilStateManager->setInverted(inverted);
+//     if (_stencilClippingSupport == nullptr)
+//         _stencilClippingSupport = new StencilClippingSupport();
+// 
+//     _stencilClippingSupport->_stencilStateManager->setInverted(inverted);
 }
 
 void FUIContainer::onEnter()
@@ -281,40 +281,40 @@ void FUIContainer::setContentSize(const Size & contentSize)
 
 void FUIContainer::onBeforeVisitScissor()
 {
-    auto glview = Director::getInstance()->getOpenGLView();
-    _rectClippingSupport->_scissorOldState = glview->isScissorEnabled();
-    Rect clippingRect = getClippingRect();
-    if (false == _rectClippingSupport->_scissorOldState)
-    {
-        glEnable(GL_SCISSOR_TEST);
-    }
-    else
-    {
-        _rectClippingSupport->_clippingOldRect = glview->getScissorRect();
-        clippingRect = ToolSet::intersection(clippingRect, _rectClippingSupport->_clippingOldRect);
-    }
-
-    glview->setScissorInPoints(clippingRect.origin.x,
-        clippingRect.origin.y,
-        clippingRect.size.width,
-        clippingRect.size.height);
+//     auto glview = Director::getInstance()->getOpenGLView();
+//     _rectClippingSupport->_scissorOldState = glview->isScissorEnabled();
+//     Rect clippingRect = getClippingRect();
+//     if (false == _rectClippingSupport->_scissorOldState)
+//     {
+//         glEnable(GL_SCISSOR_TEST);
+//     }
+//     else
+//     {
+//         _rectClippingSupport->_clippingOldRect = glview->getScissorRect();
+//         clippingRect = ToolSet::intersection(clippingRect, _rectClippingSupport->_clippingOldRect);
+//     }
+// 
+//     glview->setScissorInPoints(clippingRect.origin.x,
+//         clippingRect.origin.y,
+//         clippingRect.size.width,
+//         clippingRect.size.height);
 }
 
 void FUIContainer::onAfterVisitScissor()
 {
-    if (_rectClippingSupport->_scissorOldState)
-    {
-        auto glview = Director::getInstance()->getOpenGLView();
-        glview->setScissorInPoints(_rectClippingSupport->_clippingOldRect.origin.x,
-            _rectClippingSupport->_clippingOldRect.origin.y,
-            _rectClippingSupport->_clippingOldRect.size.width,
-            _rectClippingSupport->_clippingOldRect.size.height);
-    }
-    else
-    {
-        // revert scissor test
-        glDisable(GL_SCISSOR_TEST);
-    }
+//     if (_rectClippingSupport->_scissorOldState)
+//     {
+//         auto glview = Director::getInstance()->getOpenGLView();
+//         glview->setScissorInPoints(_rectClippingSupport->_clippingOldRect.origin.x,
+//             _rectClippingSupport->_clippingOldRect.origin.y,
+//             _rectClippingSupport->_clippingOldRect.size.width,
+//             _rectClippingSupport->_clippingOldRect.size.height);
+//     }
+//     else
+//     {
+//         // revert scissor test
+//         glDisable(GL_SCISSOR_TEST);
+//     }
 }
 
 const Rect& FUIContainer::getClippingRect()
@@ -350,14 +350,14 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
 
         //Add group command
 
-        _stencilClippingSupport->_groupCommand.init(_globalZOrder);
-        renderer->addCommand(&_stencilClippingSupport->_groupCommand);
-
-        renderer->pushGroup(_stencilClippingSupport->_groupCommand.getRenderQueueID());
-
-        _stencilClippingSupport->_beforeVisitCmd.init(_globalZOrder);
-        _stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
-        renderer->addCommand(&_stencilClippingSupport->_beforeVisitCmd);
+//         _stencilClippingSupport->_groupCommand.init(_globalZOrder);
+//         renderer->addCommand(&_stencilClippingSupport->_groupCommand);
+// 
+//         renderer->pushGroup(_stencilClippingSupport->_groupCommand.getRenderQueueID());
+// 
+//         _stencilClippingSupport->_beforeVisitCmd.init(_globalZOrder);
+//         _stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
+//         renderer->addCommand(&_stencilClippingSupport->_beforeVisitCmd);
 
         auto alphaThreshold = this->getAlphaThreshold();
         if (alphaThreshold < 1)
@@ -376,11 +376,11 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
 #endif
 
         }
-        _stencilClippingSupport->_stencil->visit(renderer, _modelViewTransform, flags);
-
-        _stencilClippingSupport->_afterDrawStencilCmd.init(_globalZOrder);
-        _stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
-        renderer->addCommand(&_stencilClippingSupport->_afterDrawStencilCmd);
+//         _stencilClippingSupport->_stencil->visit(renderer, _modelViewTransform, flags);
+// 
+//         _stencilClippingSupport->_afterDrawStencilCmd.init(_globalZOrder);
+//         _stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
+//         renderer->addCommand(&_stencilClippingSupport->_afterDrawStencilCmd);
 
         int i = 0;
         bool visibleByCamera = isVisitableByVisitingCamera();
@@ -410,11 +410,11 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
             this->draw(renderer, _modelViewTransform, flags);
         }
 
-        _stencilClippingSupport->_afterVisitCmd.init(_globalZOrder);
-        _stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
-        renderer->addCommand(&_stencilClippingSupport->_afterVisitCmd);
-
-        renderer->popGroup();
+//         _stencilClippingSupport->_afterVisitCmd.init(_globalZOrder);
+//         _stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
+//         renderer->addCommand(&_stencilClippingSupport->_afterVisitCmd);
+// 
+//         renderer->popGroup();
 
         director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
     }
@@ -424,15 +424,15 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
         {
             _rectClippingSupport->_clippingRectDirty = true;
         }
-        _rectClippingSupport->_beforeVisitCmdScissor.init(_globalZOrder);
-        _rectClippingSupport->_beforeVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onBeforeVisitScissor, this);
-        renderer->addCommand(&_rectClippingSupport->_beforeVisitCmdScissor);
+//         _rectClippingSupport->_beforeVisitCmdScissor.init(_globalZOrder);
+//         _rectClippingSupport->_beforeVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onBeforeVisitScissor, this);
+//         renderer->addCommand(&_rectClippingSupport->_beforeVisitCmdScissor);
 
         Node::visit(renderer, parentTransform, parentFlags);
 
-        _rectClippingSupport->_afterVisitCmdScissor.init(_globalZOrder);
-        _rectClippingSupport->_afterVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onAfterVisitScissor, this);
-        renderer->addCommand(&_rectClippingSupport->_afterVisitCmdScissor);
+//         _rectClippingSupport->_afterVisitCmdScissor.init(_globalZOrder);
+//         _rectClippingSupport->_afterVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onAfterVisitScissor, this);
+//         renderer->addCommand(&_rectClippingSupport->_afterVisitCmdScissor);
     }
     else
         Node::visit(renderer, parentTransform, parentFlags);

@@ -1,6 +1,6 @@
 #include "GRoot.h"
 #include "UIPackage.h"
-#include "AudioEngine.h"
+//#include "AudioEngine.h"
 #include "UIConfig.h"
 
 NS_FGUI_BEGIN
@@ -462,9 +462,9 @@ void GRoot::playSound(const std::string & url, float volumnScale)
     if (!_soundEnabled)
         return;
 
-    PackageItem* pi = UIPackage::getItemByURL(url);
-    if (pi)
-        experimental::AudioEngine::play2d(pi->file, false, _soundVolumeScale * volumnScale);
+//     PackageItem* pi = UIPackage::getItemByURL(url);
+//     if (pi)
+//         experimental::AudioEngine::play2d(pi->file, false, _soundVolumeScale * volumnScale);
 }
 
 void GRoot::setSoundEnabled(bool value)
@@ -516,19 +516,19 @@ bool GRoot::initWithScene(cocos2d::Scene * scene, int zOrder)
     _inputProcessor->setCaptureCallback(CC_CALLBACK_1(GRoot::onTouchEvent, this));
 
 #ifdef CC_PLATFORM_PC
-    _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
+   // _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
 #endif
     onWindowSizeChanged();
 
-    scene->addChild(_displayObject, zOrder);
+    //scene->addChild(_displayObject, zOrder);
 
     return true;
 }
 
 void GRoot::onWindowSizeChanged()
 {
-    const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-    setSize(rs.width, rs.height);
+//     const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+//     setSize(rs.width, rs.height);
 }
 
 NS_FGUI_END

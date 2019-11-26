@@ -2,7 +2,7 @@
 #define __GIMAGE_H__
 
 #include "cocos2d.h"
-//#include "ui/UIScale9Sprite.h"
+#include "ui/UIScale9Sprite.h"
 #include "FairyGUIMacros.h"
 #include "GObject.h"
 
