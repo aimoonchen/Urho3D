@@ -24,17 +24,18 @@ THE SOFTWARE.
 ****************************************************************************/
 
 #include "ui/UIWidget.h"
-#include "ui/UILayout.h"
-#include "ui/UIHelper.h"
+//#include "ui/UILayout.h"
+//#include "ui/UIHelper.h"
 #include "base/CCEventListenerTouch.h"
 #include "base/CCEventListenerKeyboard.h"
 #include "base/CCDirector.h"
 #include "base/CCEventFocus.h"
 #include "base/CCEventDispatcher.h"
-#include "ui/UILayoutComponent.h"
-#include "renderer/CCGLProgram.h"
-#include "renderer/CCGLProgramState.h"
-#include "renderer/ccShaders.h"
+#include "base/CCTouch.h"
+//#include "ui/UILayoutComponent.h"
+// #include "renderer/CCGLProgram.h"
+// #include "renderer/CCGLProgramState.h"
+// #include "renderer/ccShaders.h"
 #include "2d/CCCamera.h"
 #include "2d/CCSprite.h"
 #include "ui/UIScale9Sprite.h"
@@ -280,12 +281,12 @@ void Widget::initRenderer()
 LayoutComponent* Widget::getOrCreateLayoutComponent()
 {
     auto layoutComponent = this->getComponent(__LAYOUT_COMPONENT_NAME);
-    if (nullptr == layoutComponent)
-    {
-        LayoutComponent *component = LayoutComponent::create();
-        this->addComponent(component);
-        layoutComponent = component;
-    }
+//     if (nullptr == layoutComponent)
+//     {
+//         LayoutComponent *component = LayoutComponent::create();
+//         this->addComponent(component);
+//         layoutComponent = component;
+//     }
 
     return (LayoutComponent*)layoutComponent;
 }
@@ -344,10 +345,10 @@ void Widget::setSizePercent(const Vec2 &percent)
 {
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        component->setUsingPercentContentSize(true);
-        component->setPercentContentSize(percent);
-        component->refreshLayout();
+//         auto component = this->getOrCreateLayoutComponent();
+//         component->setUsingPercentContentSize(true);
+//         component->setPercentContentSize(percent);
+//         component->refreshLayout();
     }
     else
     {
@@ -464,14 +465,14 @@ void Widget::setSizeType(SizeType type)
     {
         auto component = this->getOrCreateLayoutComponent();
 
-        if (_sizeType == Widget::SizeType::PERCENT)
-        {
-            component->setUsingPercentContentSize(true);
-        }
-        else
-        {
-            component->setUsingPercentContentSize(false);
-        }
+//         if (_sizeType == Widget::SizeType::PERCENT)
+//         {
+//             component->setUsingPercentContentSize(true);
+//         }
+//         else
+//         {
+//             component->setUsingPercentContentSize(false);
+//         }
     }
 }
 Widget::SizeType Widget::getSizeType() const
@@ -521,8 +522,8 @@ const Vec2& Widget::getSizePercent()
 {
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        _sizePercent = component->getPercentContentSize();
+//         auto component = this->getOrCreateLayoutComponent();
+//         _sizePercent = component->getPercentContentSize();
     }
 
     return _sizePercent;
@@ -981,16 +982,16 @@ bool Widget::isClippingParentContainsPoint(const Vec2 &pt)
     Widget* clippingParent = nullptr;
     while (parent)
     {
-        Layout* layoutParent = dynamic_cast<Layout*>(parent);
-        if (layoutParent)
-        {
-            if (layoutParent->isClippingEnabled())
-            {
-                _affectByClipping = true;
-                clippingParent = layoutParent;
-                break;
-            }
-        }
+//         Layout* layoutParent = dynamic_cast<Layout*>(parent);
+//         if (layoutParent)
+//         {
+//             if (layoutParent->isClippingEnabled())
+//             {
+//                 _affectByClipping = true;
+//                 clippingParent = layoutParent;
+//                 break;
+//             }
+//         }
         parent = parent->getParent();
     }
 
@@ -1055,10 +1056,10 @@ void Widget::setPositionPercent(const Vec2 &percent)
 {
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        component->setPositionPercentX(percent.x);
-        component->setPositionPercentY(percent.y);
-        component->refreshLayout();
+//         auto component = this->getOrCreateLayoutComponent();
+//         component->setPositionPercentX(percent.x);
+//         component->setPositionPercentY(percent.y);
+//         component->refreshLayout();
     }
     else
     {
@@ -1080,11 +1081,11 @@ const Vec2& Widget::getPositionPercent(){
 
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        float percentX = component->getPositionPercentX();
-        float percentY = component->getPositionPercentY();
-
-        _positionPercent.set(percentX, percentY);
+//         auto component = this->getOrCreateLayoutComponent();
+//         float percentX = component->getPositionPercentX();
+//         float percentY = component->getPositionPercentY();
+// 
+//         _positionPercent.set(percentX, percentY);
     }
     return _positionPercent;
 }
@@ -1095,17 +1096,17 @@ void Widget::setPositionType(PositionType type)
 
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        if (type == Widget::PositionType::ABSOLUTE)
-        {
-            component->setPositionPercentXEnabled(false);
-            component->setPositionPercentYEnabled(false);
-        }
-        else
-        {
-            component->setPositionPercentXEnabled(true);
-            component->setPositionPercentYEnabled(true);
-        }
+//         auto component = this->getOrCreateLayoutComponent();
+//         if (type == Widget::PositionType::ABSOLUTE)
+//         {
+//             component->setPositionPercentXEnabled(false);
+//             component->setPositionPercentYEnabled(false);
+//         }
+//         else
+//         {
+//             component->setPositionPercentXEnabled(true);
+//             component->setPositionPercentYEnabled(true);
+//         }
     }
 }
 
@@ -1211,15 +1212,15 @@ void Widget::copyClonedWidgetChildren(Widget* model)
     }
 }
 
-GLProgramState* Widget::getNormalGLProgramState(Texture2D* texture)const
-{
-    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
-}
-
-GLProgramState* Widget::getGrayGLProgramState(Texture2D* texture)const
-{
-    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
-}
+// GLProgramState* Widget::getNormalGLProgramState(Texture2D* texture)const
+// {
+//     return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
+// }
+// 
+// GLProgramState* Widget::getGrayGLProgramState(Texture2D* texture)const
+// {
+//     return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
+// }
 
 void Widget::copySpecialProperties(Widget* /*model*/)
 {
@@ -1388,31 +1389,32 @@ bool Widget::isFocusEnabled()const
 
 Widget* Widget::findNextFocusedWidget(FocusDirection direction,  Widget* current)
 {
-    if (nullptr == onNextFocusedWidget || nullptr == onNextFocusedWidget(direction) ) {
-        if (this->isFocused() || dynamic_cast<Layout*>(current))
-        {
-            Node* parent = this->getParent();
-
-            Layout* layout = dynamic_cast<Layout*>(parent);
-            if (nullptr == layout)
-            {
-                //the outer layout's default behaviour is : loop focus
-                if (dynamic_cast<Layout*>(current))
-                {
-                    return current->findNextFocusedWidget(direction, current);
-                }
-                return current;
-            }
-            else
-            {
-                Widget *nextWidget = layout->findNextFocusedWidget(direction, current);
-                return nextWidget;
-            }
-        }
-        else
-        {
-            return current;
-        }
+    if (nullptr == onNextFocusedWidget || nullptr == onNextFocusedWidget(direction) )
+	{
+//         if (this->isFocused() || dynamic_cast<Layout*>(current))
+//         {
+//             Node* parent = this->getParent();
+// 
+//             Layout* layout = dynamic_cast<Layout*>(parent);
+//             if (nullptr == layout)
+//             {
+//                 //the outer layout's default behaviour is : loop focus
+//                 if (dynamic_cast<Layout*>(current))
+//                 {
+//                     return current->findNextFocusedWidget(direction, current);
+//                 }
+//                 return current;
+//             }
+//             else
+//             {
+//                 Widget *nextWidget = layout->findNextFocusedWidget(direction, current);
+//                 return nextWidget;
+//             }
+//         }
+//         else
+//         {
+//             return current;
+//         }
     }
     else
     {

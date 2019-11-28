@@ -703,7 +703,7 @@ void Director::purgeCachedData(void)
 //         // There should be no test textures left in the cache
 //         log("%s\n", _textureCache->getCachedTextureInfo().c_str());
 //     }
-//    FileUtils::getInstance()->purgeCachedEntries();
+    FileUtils::getInstance()->purgeCachedEntries();
 }
 
 float Director::getZEye(void) const
@@ -1330,7 +1330,7 @@ void Director::createStatsLabel()
         CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
         CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
         //_textureCache->removeTextureForKey("/cc_fps_images");
-        //FileUtils::getInstance()->purgeCachedEntries();
+		FileUtils::getInstance()->purgeCachedEntries();
     }
 
 //     Texture2D::PixelFormat currentFormat = Texture2D::getDefaultAlphaPixelFormat();

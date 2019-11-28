@@ -134,7 +134,7 @@ bool FontFreeType::createFontObject(const std::string &fontName, float fontSize)
     else
     {
         s_cacheFontData[fontName].referenceCount = 1;
-        //s_cacheFontData[fontName].data = FileUtils::getInstance()->getDataFromFile(fontName);    
+        s_cacheFontData[fontName].data = FileUtils::getInstance()->getDataFromFile(fontName);    
 
         if (s_cacheFontData[fontName].data.isNull())
         {

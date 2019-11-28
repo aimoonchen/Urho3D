@@ -350,7 +350,7 @@ void Configuration::setValue(const std::string& key, const Value& value)
 //
 void Configuration::loadConfigFile(const std::string& filename)
 {
-	ValueMap dict;// = FileUtils::getInstance()->getValueMapFromFile(filename);
+	ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(filename);
 	CCASSERT(!dict.empty(), "cannot create dictionary");
 
 	// search for metadata

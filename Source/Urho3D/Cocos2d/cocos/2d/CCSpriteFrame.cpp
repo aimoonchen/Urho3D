@@ -118,20 +118,20 @@ bool SpriteFrame::initWithTexture(Texture2D* texture, const Rect& rect, bool rot
 
 bool SpriteFrame::initWithTextureFilename(const std::string& filename, const Rect& rect, bool rotated, const Vec2& offset, const Size& originalSize)
 {
-//     if (FileUtils::getInstance()->isFileExist(filename)) {
-//         _texture = nullptr;
-//         _textureFilename = filename;
-//         _rectInPixels = rect;
-//         _rect = CC_RECT_PIXELS_TO_POINTS( rect );
-//         _offsetInPixels = offset;
-//         _offset = CC_POINT_PIXELS_TO_POINTS( _offsetInPixels );
-//         _originalSizeInPixels = originalSize;
-//         _originalSize = CC_SIZE_PIXELS_TO_POINTS( _originalSizeInPixels );
-//         _rotated = rotated;
-//         _anchorPoint = Vec2(NAN, NAN);
-//         _centerRect = Rect(NAN, NAN, NAN, NAN);
-//         return true;
-//     }
+    if (FileUtils::getInstance()->isFileExist(filename)) {
+        _texture = nullptr;
+        _textureFilename = filename;
+        _rectInPixels = rect;
+        _rect = CC_RECT_PIXELS_TO_POINTS( rect );
+        _offsetInPixels = offset;
+        _offset = CC_POINT_PIXELS_TO_POINTS( _offsetInPixels );
+        _originalSizeInPixels = originalSize;
+        _originalSize = CC_SIZE_PIXELS_TO_POINTS( _originalSizeInPixels );
+        _rotated = rotated;
+        _anchorPoint = Vec2(NAN, NAN);
+        _centerRect = Rect(NAN, NAN, NAN, NAN);
+        return true;
+    }
     return false;
 }
 

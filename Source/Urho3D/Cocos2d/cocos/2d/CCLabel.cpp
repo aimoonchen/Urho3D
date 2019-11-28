@@ -37,8 +37,8 @@
 #include "2d/CCCamera.h"
 #include "base/ccUTF8.h"
 #include "platform/CCFileUtils.h"
-#include "renderer/CCRenderer.h"
-#include "renderer/ccGLStateCache.h"
+// #include "renderer/CCRenderer.h"
+// #include "renderer/ccGLStateCache.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
@@ -112,10 +112,10 @@ public:
             _quad.tl.vertices.set(SPRITE_RENDER_IN_SUBPIXEL(dx), SPRITE_RENDER_IN_SUBPIXEL(dy), _positionZ);
             _quad.tr.vertices.set(SPRITE_RENDER_IN_SUBPIXEL(cx), SPRITE_RENDER_IN_SUBPIXEL(cy), _positionZ);
 
-            if (_textureAtlas)
-            {
-                _textureAtlas->updateQuad(&_quad, _atlasIndex);
-            }
+//             if (_textureAtlas)
+//             {
+//                 _textureAtlas->updateQuad(&_quad, _atlasIndex);
+//             }
 
             _recursiveDirty = false;
             setDirty(false);
@@ -149,7 +149,7 @@ public:
         _quad.tl.colors = color4;
         _quad.tr.colors = color4;
 
-        _textureAtlas->updateQuad(&_quad, _atlasIndex);
+        //_textureAtlas->updateQuad(&_quad, _atlasIndex);
     }
 
     void setVisible(bool visible) override
@@ -194,6 +194,7 @@ Label* Label::create(const std::string& text, const std::string& font, float fon
     {
         return createWithSystemFont(text,font,fontSize,dimensions,hAlignment,vAlignment);
     }
+	return {};
 }
 
 Label* Label::createWithSystemFont(const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
@@ -554,36 +555,36 @@ static Texture2D* _getTexture(Label* label)
 
 void Label::updateShaderProgram()
 {
-    switch (_currLabelEffect)
-    {
-    case cocos2d::LabelEffect::NORMAL:
-        if (_useDistanceField)
-            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_NORMAL));
-        else if (_useA8Shader)
-            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_NORMAL));
-        else if (_shadowEnabled)
-            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, _getTexture(this)));
-        else
-            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
-
-        break;
-    case cocos2d::LabelEffect::OUTLINE: 
-        setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
-        _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
-        _uniformEffectType = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectType");
-        break;
-    case cocos2d::LabelEffect::GLOW:
-        if (_useDistanceField)
-        {
-            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_GLOW));
-            _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
-        }
-        break;
-    default:
-        return;
-    }
-    
-    _uniformTextColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_textColor");
+//     switch (_currLabelEffect)
+//     {
+//     case cocos2d::LabelEffect::NORMAL:
+//         if (_useDistanceField)
+//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_NORMAL));
+//         else if (_useA8Shader)
+//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_NORMAL));
+//         else if (_shadowEnabled)
+//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, _getTexture(this)));
+//         else
+//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
+// 
+//         break;
+//     case cocos2d::LabelEffect::OUTLINE: 
+//         setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
+//         _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+//         _uniformEffectType = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectType");
+//         break;
+//     case cocos2d::LabelEffect::GLOW:
+//         if (_useDistanceField)
+//         {
+//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_GLOW));
+//             _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+//         }
+//         break;
+//     default:
+//         return;
+//     }
+//     
+//     _uniformTextColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_textColor");
 }
 
 void Label::setFontAtlas(FontAtlas* atlas,bool distanceFieldEnabled /* = false */, bool useA8Shader /* = false */)
@@ -827,15 +828,15 @@ bool Label::alignText()
         {
             for (auto index = static_cast<size_t>(_batchNodes.size()); index < size; ++index)
             {
-                auto batchNode = SpriteBatchNode::createWithTexture(textures.at(index));
-                if (batchNode)
-                {
-                    _isOpacityModifyRGB = batchNode->getTexture()->hasPremultipliedAlpha();
-                    _blendFunc = batchNode->getBlendFunc();
-                    batchNode->setAnchorPoint(Vec2::ANCHOR_TOP_LEFT);
-                    batchNode->setPosition(Vec2::ZERO);
-                    _batchNodes.pushBack(batchNode);
-                }
+//                 auto batchNode = SpriteBatchNode::createWithTexture(textures.at(index));
+//                 if (batchNode)
+//                 {
+//                     _isOpacityModifyRGB = batchNode->getTexture()->hasPremultipliedAlpha();
+//                     _blendFunc = batchNode->getBlendFunc();
+//                     batchNode->setAnchorPoint(Vec2::ANCHOR_TOP_LEFT);
+//                     batchNode->setPosition(Vec2::ZERO);
+//                     _batchNodes.pushBack(batchNode);
+//                 }
             }
         }
         if (_batchNodes.empty())
@@ -918,10 +919,10 @@ bool Label::isHorizontalClamped(float letterPositionX, int lineIndex)
 bool Label::updateQuads()
 {
     bool ret = true;
-    for (auto&& batchNode : _batchNodes)
-    {
-        batchNode->getTextureAtlas()->removeAllQuads();
-    }
+//     for (auto&& batchNode : _batchNodes)
+//     {
+//         batchNode->getTextureAtlas()->removeAllQuads();
+//     }
     
     for (int ctr = 0; ctr < _lengthOfString; ++ctr)
     {
@@ -974,12 +975,12 @@ bool Label::updateQuads()
                 _reusedLetter->setTextureRect(_reusedRect, false, _reusedRect.size);
                 float letterPositionX = _lettersInfo[ctr].positionX + _linesOffsetX[_lettersInfo[ctr].lineIndex];
                 _reusedLetter->setPosition(letterPositionX, py);
-                auto index = static_cast<int>(_batchNodes.at(letterDef.textureID)->getTextureAtlas()->getTotalQuads());
-                _lettersInfo[ctr].atlasIndex = index;
-
-                this->updateLetterSpriteScale(_reusedLetter);
-
-                _batchNodes.at(letterDef.textureID)->insertQuadFromSprite(_reusedLetter, index);
+//                 auto index = static_cast<int>(_batchNodes.at(letterDef.textureID)->getTextureAtlas()->getTotalQuads());
+//                 _lettersInfo[ctr].atlasIndex = index;
+// 
+//                 this->updateLetterSpriteScale(_reusedLetter);
+// 
+//                 _batchNodes.at(letterDef.textureID)->insertQuadFromSprite(_reusedLetter, index);
             }
         }     
     }
@@ -1157,7 +1158,7 @@ void Label::enableShadow(const Color4B& shadowColor /* = Color4B::BLACK */,
 
     if (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP)
     {
-        setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_shadowEnabled ? GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR : GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
+        //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_shadowEnabled ? GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR : GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
     }
 }
 
@@ -1277,16 +1278,16 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
 {
     _currentLabelType = LabelType::STRING_TEXTURE;
 
-    auto texture = new (std::nothrow) Texture2D;
-    texture->initWithString(_utf8Text.c_str(), fontDef);
-
-    _textSprite = Sprite::createWithTexture(texture);
-    //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
-    _textSprite->setCameraMask(getCameraMask());
-    _textSprite->setGlobalZOrder(getGlobalZOrder());
-    _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
-    this->setContentSize(_textSprite->getContentSize());
-    texture->release();
+//     auto texture = new (std::nothrow) Texture2D;
+//     texture->initWithString(_utf8Text.c_str(), fontDef);
+// 
+//     _textSprite = Sprite::createWithTexture(texture);
+//     //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
+//     _textSprite->setCameraMask(getCameraMask());
+//     _textSprite->setGlobalZOrder(getGlobalZOrder());
+//     _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
+//     this->setContentSize(_textSprite->getContentSize());
+//     texture->release();
     if (_blendFuncDirty)
     {
         _textSprite->setBlendFunc(_blendFunc);
@@ -1315,10 +1316,10 @@ void Label::createShadowSpriteForSystemFont(const FontDefinition& fontDef)
         shadowFontDefinition._stroke._strokeColor = shadowFontDefinition._fontFillColor;
         shadowFontDefinition._stroke._strokeAlpha = shadowFontDefinition._fontAlpha;
 
-        auto texture = new (std::nothrow) Texture2D;
-        texture->initWithString(_utf8Text.c_str(), shadowFontDefinition);
-        _shadowNode = Sprite::createWithTexture(texture);
-        texture->release();
+//         auto texture = new (std::nothrow) Texture2D;
+//         texture->initWithString(_utf8Text.c_str(), shadowFontDefinition);
+//         _shadowNode = Sprite::createWithTexture(texture);
+//         texture->release();
     }
 
     if (_shadowNode)
@@ -1496,29 +1497,29 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 {
     if (_currentLabelType == LabelType::TTF)
     {
-        if (_currLabelEffect == LabelEffect::OUTLINE)
-        {
-            glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
-            glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-        }
-        else
-        {
-            glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-            if (_currLabelEffect == LabelEffect::GLOW)
-            {
-                glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-            }
-        }
-
-        glProgram->setUniformsForBuiltins(_shadowTransform);
-        for (auto&& it : _letters)
-        {
-            it.second->updateTransform();
-        }
-        for (auto&& batchNode : _batchNodes)
-        {
-            batchNode->getTextureAtlas()->drawQuads();
-        }
+//         if (_currLabelEffect == LabelEffect::OUTLINE)
+//         {
+//             glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
+//             glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+//         }
+//         else
+//         {
+//             glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+//             if (_currLabelEffect == LabelEffect::GLOW)
+//             {
+//                 glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+//             }
+//         }
+// 
+//         glProgram->setUniformsForBuiltins(_shadowTransform);
+//         for (auto&& it : _letters)
+//         {
+//             it.second->updateTransform();
+//         }
+//         for (auto&& batchNode : _batchNodes)
+//         {
+//             batchNode->getTextureAtlas()->drawQuads();
+//         }
     }
     else
     {
@@ -1527,15 +1528,15 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
         _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
         setColor(Color3B(shadowColor));
 
-        glProgram->setUniformsForBuiltins(_shadowTransform);
-        for (auto&& it : _letters)
-        {
-            it.second->updateTransform();
-        }
-        for (auto&& batchNode : _batchNodes)
-        {
-            batchNode->getTextureAtlas()->drawQuads();
-        }
+//         glProgram->setUniformsForBuiltins(_shadowTransform);
+//         for (auto&& it : _letters)
+//         {
+//             it.second->updateTransform();
+//         }
+//         for (auto&& batchNode : _batchNodes)
+//         {
+//             batchNode->getTextureAtlas()->drawQuads();
+//         }
 
         _displayedOpacity = oldOPacity;
         setColor(oldColor);
@@ -1544,57 +1545,57 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 
 void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
 {
-    auto glprogram = getGLProgram();
-    glprogram->use();
-    GL::blendFunc(_blendFunc.src, _blendFunc.dst);
-
-    if (_shadowEnabled)
-    {
-        if (_boldEnabled)
-            onDrawShadow(glprogram, _textColorF);
-        else
-            onDrawShadow(glprogram, _shadowColor4F);
-    }
-
-    glprogram->setUniformsForBuiltins(transform);
-    for (auto&& it : _letters)
-    {
-        it.second->updateTransform();
-    }
-
-    if (_currentLabelType == LabelType::TTF)
-    {
-        switch (_currLabelEffect) {
-        case LabelEffect::OUTLINE:
-            // draw outline of text
-            glprogram->setUniformLocationWith1i(_uniformEffectType, 1); // 1: outline
-            glprogram->setUniformLocationWith4f(_uniformEffectColor,
-                _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
-            for (auto&& batchNode : _batchNodes)
-            {
-                batchNode->getTextureAtlas()->drawQuads();
-            }
-
-            // draw text without outline
-            glprogram->setUniformLocationWith1i(_uniformEffectType, 0); // 0: text
-            glprogram->setUniformLocationWith4f(_uniformTextColor, _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
-            break;
-        case LabelEffect::GLOW:
-            glprogram->setUniformLocationWith4f(_uniformEffectColor,
-                _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
-        case LabelEffect::NORMAL:
-            glprogram->setUniformLocationWith4f(_uniformTextColor,
-                _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
-            break;
-        default:
-            break;
-        }
-    }
-
-    for (auto&& batchNode : _batchNodes)
-    {
-        batchNode->getTextureAtlas()->drawQuads();
-    }
+//     auto glprogram = getGLProgram();
+//     glprogram->use();
+//     GL::blendFunc(_blendFunc.src, _blendFunc.dst);
+// 
+//     if (_shadowEnabled)
+//     {
+//         if (_boldEnabled)
+//             onDrawShadow(glprogram, _textColorF);
+//         else
+//             onDrawShadow(glprogram, _shadowColor4F);
+//     }
+// 
+//     glprogram->setUniformsForBuiltins(transform);
+//     for (auto&& it : _letters)
+//     {
+//         it.second->updateTransform();
+//     }
+// 
+//     if (_currentLabelType == LabelType::TTF)
+//     {
+//         switch (_currLabelEffect) {
+//         case LabelEffect::OUTLINE:
+//             // draw outline of text
+//             glprogram->setUniformLocationWith1i(_uniformEffectType, 1); // 1: outline
+//             glprogram->setUniformLocationWith4f(_uniformEffectColor,
+//                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
+//             for (auto&& batchNode : _batchNodes)
+//             {
+//                 batchNode->getTextureAtlas()->drawQuads();
+//             }
+// 
+//             // draw text without outline
+//             glprogram->setUniformLocationWith1i(_uniformEffectType, 0); // 0: text
+//             glprogram->setUniformLocationWith4f(_uniformTextColor, _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
+//             break;
+//         case LabelEffect::GLOW:
+//             glprogram->setUniformLocationWith4f(_uniformEffectColor,
+//                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
+//         case LabelEffect::NORMAL:
+//             glprogram->setUniformLocationWith4f(_uniformTextColor,
+//                 _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
+//             break;
+//         default:
+//             break;
+//         }
+//     }
+// 
+//     for (auto&& batchNode : _batchNodes)
+//     {
+//         batchNode->getTextureAtlas()->drawQuads();
+//     }
 }
 
 void Label::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
@@ -1619,26 +1620,26 @@ void Label::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
     if (_insideBounds)
 #endif
     {
-        if (!_shadowEnabled && (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP))
-        {
-            for (auto&& it : _letters)
-            {
-                it.second->updateTransform();
-            }
-            // ETC1 ALPHA supports for BMFONT & CHARMAP
-            auto textureAtlas = _batchNodes.at(0)->getTextureAtlas();
-            auto texture = textureAtlas->getTexture();
-            _quadCommand.init(_globalZOrder, texture, getGLProgramState(), 
-                _blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
-            renderer->addCommand(&_quadCommand);
-        }
-        else
-        {
-            _customCommand.init(_globalZOrder, transform, flags);
-            _customCommand.func = CC_CALLBACK_0(Label::onDraw, this, transform, transformUpdated);
-
-            renderer->addCommand(&_customCommand);
-        }
+//         if (!_shadowEnabled && (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP))
+//         {
+//             for (auto&& it : _letters)
+//             {
+//                 it.second->updateTransform();
+//             }
+//             // ETC1 ALPHA supports for BMFONT & CHARMAP
+//             auto textureAtlas = _batchNodes.at(0)->getTextureAtlas();
+//             auto texture = textureAtlas->getTexture();
+//             _quadCommand.init(_globalZOrder, texture, getGLProgramState(), 
+//                 _blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
+//             renderer->addCommand(&_quadCommand);
+//         }
+//         else
+//         {
+//             _customCommand.init(_globalZOrder, transform, flags);
+//             _customCommand.func = CC_CALLBACK_0(Label::onDraw, this, transform, transformUpdated);
+// 
+//             renderer->addCommand(&_customCommand);
+//         }
     }
 }
 
@@ -2010,23 +2011,23 @@ void Label::updateColor()
         color4.b *= _displayedOpacity/255.0f;
     }
 
-    cocos2d::TextureAtlas* textureAtlas;
-    V3F_C4B_T2F_Quad *quads;
-    for (auto&& batchNode:_batchNodes)
-    {
-        textureAtlas = batchNode->getTextureAtlas();
-        quads = textureAtlas->getQuads();
-        auto count = textureAtlas->getTotalQuads();
-
-        for (int index = 0; index < count; ++index)
-        {
-            quads[index].bl.colors = color4;
-            quads[index].br.colors = color4;
-            quads[index].tl.colors = color4;
-            quads[index].tr.colors = color4;
-            textureAtlas->updateQuad(&quads[index], index);
-        }
-    }
+//     cocos2d::TextureAtlas* textureAtlas;
+//     V3F_C4B_T2F_Quad *quads;
+//     for (auto&& batchNode:_batchNodes)
+//     {
+//         textureAtlas = batchNode->getTextureAtlas();
+//         quads = textureAtlas->getQuads();
+//         auto count = textureAtlas->getTotalQuads();
+// 
+//         for (int index = 0; index < count; ++index)
+//         {
+//             quads[index].bl.colors = color4;
+//             quads[index].br.colors = color4;
+//             quads[index].tl.colors = color4;
+//             quads[index].tr.colors = color4;
+//             textureAtlas->updateQuad(&quads[index], index);
+//         }
+//     }
 }
 
 std::string Label::getDescription() const

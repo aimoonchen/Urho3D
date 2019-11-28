@@ -417,7 +417,7 @@ Node* findChild(Node* levelRoot, int tag)
 std::string getFileMD5Hash(const std::string &filename)
 {
     Data data;
-    //FileUtils::getInstance()->getContents(filename, &data);
+    FileUtils::getInstance()->getContents(filename, &data);
 
     return getDataMD5Hash(data);
 }

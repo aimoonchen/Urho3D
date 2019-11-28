@@ -53,7 +53,7 @@ void FontAtlasCache::purgeCachedData()
 
 FontAtlas* FontAtlasCache::getFontAtlasTTF(const _ttfConfig* config)
 {
-	std::string realFontFilename;// = FileUtils::getInstance()->getNewFilename(config->fontFilePath);  // resolves real file path, to prevent storing multiple atlases for the same file.
+	std::string realFontFilename = FileUtils::getInstance()->getNewFilename(config->fontFilePath);  // resolves real file path, to prevent storing multiple atlases for the same file.
     bool useDistanceField = config->distanceFieldEnabled;
     if(config->outlineSize > 0)
     {
@@ -90,7 +90,7 @@ FontAtlas* FontAtlasCache::getFontAtlasTTF(const _ttfConfig* config)
 
 FontAtlas* FontAtlasCache::getFontAtlasFNT(const std::string& fontFileName, const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-	std::string realFontFilename;// = FileUtils::getInstance()->getNewFilename(fontFileName);  // resolves real file path, to prevent storing multiple atlases for the same file.
+	std::string realFontFilename = FileUtils::getInstance()->getNewFilename(fontFileName);  // resolves real file path, to prevent storing multiple atlases for the same file.
     char keyPrefix[ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE];
     snprintf(keyPrefix, ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE, "%.2f %.2f ", imageOffset.x, imageOffset.y);
     std::string atlasName(keyPrefix);

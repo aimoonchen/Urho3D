@@ -245,7 +245,7 @@ void BMFontConfiguration::purgeFontDefDictionary()
 
 std::set<unsigned int>* BMFontConfiguration::parseConfigFile(const std::string& controlFile)
 {
-	std::string data;// = FileUtils::getInstance()->getStringFromFile(controlFile);
+	std::string data = FileUtils::getInstance()->getStringFromFile(controlFile);
     if (data.empty())
     {
         return nullptr;
@@ -401,7 +401,7 @@ std::set<unsigned int>* BMFontConfiguration::parseBinaryConfigFile(unsigned char
             const char *value = (const char *)pData;
             CCASSERT(strlen(value) < blockSize, "Block size should be less then string");
 
-            //_atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(value, controlFile);
+            _atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(value, controlFile);
         }
 		else if (blockId == 4)
 		{
@@ -491,7 +491,7 @@ void BMFontConfiguration::parseImageFileName(const char* line, const std::string
     // file 
     char fileName[255];
     sscanf(strchr(line,'"') + 1, "%[^\"]", fileName);
-    //_atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(fileName, fntFile);
+    _atlasName = FileUtils::getInstance()->fullPathFromRelativeFile(fileName, fntFile);
 }
 
 void BMFontConfiguration::parseInfoArguments(const char* line)

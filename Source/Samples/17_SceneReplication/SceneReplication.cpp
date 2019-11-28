@@ -20,6 +20,10 @@
 // THE SOFTWARE.
 //
 
+// fairygui
+#include "UIPackage.h"
+#include "GComponent.h"
+
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/Camera.h>
@@ -60,6 +64,7 @@
 //#include "Character.h"
 #include "RaceRoom.h"
 #include "Avatar.h"
+
 
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
@@ -203,8 +208,19 @@ void SceneReplication::CreateUI()
     startServerButton_ = CreateButton("Start Server", 110);
 
     UpdateButtons();
-}
 
+	InitFairyGUI();
+}
+void SceneReplication::InitFairyGUI()
+{
+	fairygui::UIPackage::addPackage("UI/MainMenu");
+	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
+	_view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
+	{
+// 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
+// 		Director::getInstance()->replaceScene(scene);
+	});
+}
 void SceneReplication::SetupViewport()
 {
     auto* renderer = GetSubsystem<Renderer>();
