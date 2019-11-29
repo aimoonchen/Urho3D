@@ -67,11 +67,11 @@ UIPackage * UIPackage::addPackage(const string& assetPath)
 
     if (_emptyTexture == nullptr)
     {
-        Image* emptyImage = new Image();
-        emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
+//         Image* emptyImage = new Image();
+//         emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
 //         _emptyTexture = new Texture2D();
 //         _emptyTexture->initWithImage(emptyImage);
-        delete emptyImage;
+//         delete emptyImage;
     }
 
     Data data;
@@ -491,51 +491,51 @@ void* UIPackage::getItemAsset(PackageItem * item)
 
 void UIPackage::loadAtlas(PackageItem * item)
 {
-    Image* image = new Image();
-    Image::setPNGPremultipliedAlphaEnabled(false);
-    if (!image->initWithImageFile(item->file))
-    {
-        item->texture = _emptyTexture;
-        //_emptyTexture->retain();
-        delete image;
-        Image::setPNGPremultipliedAlphaEnabled(true);
-        CCLOGWARN("FairyGUI: texture '%s' not found in %s", item->file.c_str(), _name.c_str());
-        return;
-    }
-    Image::setPNGPremultipliedAlphaEnabled(true);
-
+//     Image* image = new Image();
+//     Image::setPNGPremultipliedAlphaEnabled(false);
+//     if (!image->initWithImageFile(item->file))
+//     {
+//         item->texture = _emptyTexture;
+//         //_emptyTexture->retain();
+//         delete image;
+//         Image::setPNGPremultipliedAlphaEnabled(true);
+//         CCLOGWARN("FairyGUI: texture '%s' not found in %s", item->file.c_str(), _name.c_str());
+//         return;
+//     }
+//     Image::setPNGPremultipliedAlphaEnabled(true);
+// 
 //     Texture2D* tex = new Texture2D();
 //     tex->initWithImage(image);
 //     item->texture = tex;
 //     delete image;
-
-    string alphaFilePath;
-    string ext = FileUtils::getInstance()->getFileExtension(item->file);
-    size_t pos = item->file.find_last_of('.');
-    if (pos != -1)
-        alphaFilePath = item->file.substr(0, pos) + "!a" + ext;
-    else
-        alphaFilePath = item->file + "!a" + ext;
-
-    bool tmp = FileUtils::getInstance()->isPopupNotify();
-    FileUtils::getInstance()->setPopupNotify(false);
-    bool hasAlphaTexture = FileUtils::getInstance()->isFileExist(alphaFilePath);
-    FileUtils::getInstance()->setPopupNotify(tmp);
-    if (hasAlphaTexture)
-    {
-        image = new Image();
-        if (!image->initWithImageFile(alphaFilePath))
-        {
-            delete image;
-            return;
-        }
-
+// 
+//     string alphaFilePath;
+//     string ext = FileUtils::getInstance()->getFileExtension(item->file);
+//     size_t pos = item->file.find_last_of('.');
+//     if (pos != -1)
+//         alphaFilePath = item->file.substr(0, pos) + "!a" + ext;
+//     else
+//         alphaFilePath = item->file + "!a" + ext;
+// 
+//     bool tmp = FileUtils::getInstance()->isPopupNotify();
+//     FileUtils::getInstance()->setPopupNotify(false);
+//     bool hasAlphaTexture = FileUtils::getInstance()->isFileExist(alphaFilePath);
+//     FileUtils::getInstance()->setPopupNotify(tmp);
+//     if (hasAlphaTexture)
+//     {
+//         image = new Image();
+//         if (!image->initWithImageFile(alphaFilePath))
+//         {
+//             delete image;
+//             return;
+//         }
+// 
 //         tex = new Texture2D();
 //         tex->initWithImage(image);
 //         item->texture->setAlphaTexture(tex);
-//        tex->release();
-        delete image;
-    }
+//         tex->release();
+//         delete image;
+//     }
 }
 
 AtlasSprite * UIPackage::getSprite(const std::string & spriteId)

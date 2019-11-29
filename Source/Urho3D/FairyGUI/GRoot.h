@@ -6,7 +6,7 @@
 #include "event/InputProcessor.h"
 #include "GComponent.h"
 #include "GGraph.h"
-#include "Window.h"
+#include "FairyWindow.h"
 
 NS_FGUI_BEGIN
 

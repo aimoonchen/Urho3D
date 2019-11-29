@@ -20,7 +20,7 @@
 #include "GScrollBar.h"
 #include "GList.h"
 #include "GRoot.h"
-#include "Window.h"
+#include "FairyWindow.h"
 #include "PopupMenu.h"
 #include "treeview/TreeView.h"
 #include "UIObjectFactory.h"

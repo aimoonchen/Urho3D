@@ -1,4 +1,4 @@
-#include "Window.h"
+#include "FairyWindow.h"
 #include "GRoot.h"
 #include "UIPackage.h"
 #include "UIConfig.h"

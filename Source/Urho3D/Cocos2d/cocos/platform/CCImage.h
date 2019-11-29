@@ -29,7 +29,6 @@ THE SOFTWARE.
 /// @cond DO_NOT_SHOW
 
 #include "base/CCRef.h"
-#include <string>
 //#include "renderer/CCTexture2D.h"
 #include "platform/CCStdC.h"
 #if CC_USE_WIC
@@ -141,7 +140,7 @@ public:
     unsigned char *   getData()               { return _data; }
     ssize_t           getDataLen()            { return _dataLen; }
     Format            getFileType()           { return _fileType; }
-    //Texture2D::PixelFormat getRenderFormat()  { return _renderFormat; }
+//    Texture2D::PixelFormat getRenderFormat()  { return _renderFormat; }
     int               getWidth()              { return _width; }
     int               getHeight()             { return _height; }
     int               getNumberOfMipmaps()    { return _numberOfMipmaps; }
@@ -201,7 +200,7 @@ protected:
     int _height;
     bool _unpack;
     Format _fileType;
-//    Texture2D::PixelFormat _renderFormat;
+    //Texture2D::PixelFormat _renderFormat;
     MipmapInfo _mipmaps[MIPMAP_MAX];   // pointer to mipmap images
     int _numberOfMipmaps;
     // false if we can't auto detect the image is premultiplied or not.
