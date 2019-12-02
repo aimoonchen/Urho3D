@@ -112,7 +112,7 @@ THE SOFTWARE.
 #include "2d/CCTweenFunction.h"
 
 // 2d nodes
-#include "2d/CCAtlasNode.h"
+//#include "2d/CCAtlasNode.h"
 // #include "2d/CCClippingNode.h"
 // #include "2d/CCClippingRectangleNode.h"
 #include "2d/CCDrawNode.h"
@@ -213,9 +213,9 @@ THE SOFTWARE.
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-    #include "platform/win32/CCApplication-win32.h"
+//    #include "platform/win32/CCApplication-win32.h"
 //    #include "platform/desktop/CCGLViewImpl-desktop.h"
-    #include "platform/win32/CCGL-win32.h"
+//    #include "platform/win32/CCGL-win32.h"
     #include "platform/win32/CCStdC-win32.h"
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 

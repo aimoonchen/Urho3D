@@ -32,7 +32,8 @@ THE SOFTWARE.
 
 #include "base/CCRef.h"
 #include "base/CCValue.h"
-#include "platform/CCGL.h"
+#include "GLEW/glew.h"
+//#include "platform/CCGL.h"
 //#include "3d/CCAnimate3D.h"
 
 /**

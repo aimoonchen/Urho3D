@@ -29,7 +29,8 @@ THE SOFTWARE.
 #define __SUPPORT_TRANSFORM_UTILS_H__
 
 // TODO: when in MAC or windows, it includes <OpenGL/gl.h>
-#include "platform/CCGL.h"
+//#include "platform/CCGL.h"
+#include "GLEW/glew.h"
 #include "base/ccMacros.h"
 
 /**

@@ -29,7 +29,7 @@
 #include "math/Quat.h"
 //#include "2d/CCCameraBackgroundBrush.h"
 #include "base/CCDirector.h"
-#include "platform/CCGLView.h"
+//#include "platform/CCGLView.h"
 //#include "2d/CCScene.h"
 // #include "renderer/CCRenderer.h"
 // #include "renderer/CCQuadCommand.h"

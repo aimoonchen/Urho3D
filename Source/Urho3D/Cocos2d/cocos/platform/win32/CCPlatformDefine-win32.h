@@ -33,15 +33,13 @@ THE SOFTWARE.
 #include <string.h>
 #endif
 
-#if defined(CC_STATIC)
+#if defined(URHO3D_STATIC_DEFINE)
     #define CC_DLL
 #else
-#if defined(_USRDLL)
-    //#define CC_DLL     __declspec(dllexport)
-	#define CC_DLL
+#if defined(Urho3D_EXPORTS)
+    #define CC_DLL     __declspec(dllexport)
 #else         /* use a DLL library */
-    //#define CC_DLL     __declspec(dllimport)
-	#define CC_DLL
+    #define CC_DLL     __declspec(dllimport)
 #endif
 #endif
 

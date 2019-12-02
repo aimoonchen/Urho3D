@@ -26,14 +26,14 @@ THE SOFTWARE.
  ****************************************************************************/
 
 #include "base/CCController.h"
-
+#include <map>
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <functional>
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "base/CCScheduler.h"
 #include "base/CCEventController.h"
-#include "glfw3.h"
+//#include "glfw3.h"
 
 NS_CC_BEGIN
 
@@ -4815,7 +4815,7 @@ class CC_DLL ControllerImpl
 			if (iter == Controller::s_allController.end())
 			{
 				CCLOG("ControllerImpl::onButtonEvent: new controller detected. Registering...");
-				onConnected(glfwGetJoystickName(deviceId), deviceId);
+				//onConnected(glfwGetJoystickName(deviceId), deviceId);
 				iter = findController(deviceId);
 			}
 
@@ -4828,7 +4828,7 @@ class CC_DLL ControllerImpl
 			if (iter == Controller::s_allController.end())
 			{
 				CCLOG("ControllerImpl::onAxisEvent: new controller detected. Registering...");
-				onConnected(glfwGetJoystickName(deviceId), deviceId);
+				//onConnected(glfwGetJoystickName(deviceId), deviceId);
 				iter = findController(deviceId);
 			}
 
@@ -4839,60 +4839,60 @@ class CC_DLL ControllerImpl
 		{
 			// glfw supports up to 16 game controllers
 			// Handle game controller connections and disconnections
-			if ( event == GLFW_CONNECTED )
-			{
-				onConnected(glfwGetJoystickName(deviceId), deviceId);
-			}
-			else if ( event == GLFW_DISCONNECTED )
-			{
-				ControllerImpl::getInstance()->onDisconnected(deviceId);
-			}
-			#ifdef COCOS2D_DEBUG
-			else
-			{
-				CCLOG("ControllerImpl: Unhandled GLFW joystick event: %d", event);
-			}
-			#endif
+// 			if ( event == GLFW_CONNECTED )
+// 			{
+// 				onConnected(glfwGetJoystickName(deviceId), deviceId);
+// 			}
+// 			else if ( event == GLFW_DISCONNECTED )
+// 			{
+// 				ControllerImpl::getInstance()->onDisconnected(deviceId);
+// 			}
+// 			#ifdef COCOS2D_DEBUG
+// 			else
+// 			{
+// 				CCLOG("ControllerImpl: Unhandled GLFW joystick event: %d", event);
+// 			}
+// 			#endif
 		}
 
 		void update(float /*dt*/)
 		{
-			for (int deviceId = GLFW_JOYSTICK_1;  deviceId <= GLFW_JOYSTICK_LAST;  ++deviceId)
-			{
-				if ( glfwJoystickPresent(deviceId) )
-				{
-					auto controller = Controller::getControllerByDeviceId(deviceId);
-
-					// Poll game controller button presses
-					int count;
-					const unsigned char* buttonArray = glfwGetJoystickButtons(deviceId, &count);
-					for ( int i = 0; i < count; ++i )
-					{
-						// Map the button to the Controller:Key keys from the controller profile if it's available:
-						int keyCode = i;
-						const auto & it = controller->_buttonInputMap.find(keyCode);
-						if ( it != controller->_buttonInputMap.end() )
-						{
-							keyCode = it->second;
-						}
-						ControllerImpl::onButtonEvent(deviceId, keyCode, buttonArray[i] == GLFW_PRESS, 0, false);
-					}
-
-					// Poll game controller joystick axis
-					const float * axisArray = glfwGetJoystickAxes(deviceId, &count);
-					for ( int i = 0; i < count; ++i )
-					{
-						// Map the axis to the Controller:Key keys from the controller profile if it's available:
-						int keyCode = i;
-						const auto & it = controller->_axisInputMap.find(keyCode);
-						if ( it != controller->_axisInputMap.end() )
-						{
-							keyCode = it->second;
-						}
-						ControllerImpl::onAxisEvent(deviceId, keyCode, axisArray[i], true);
-					}
-				}
-			}
+// 			for (int deviceId = GLFW_JOYSTICK_1;  deviceId <= GLFW_JOYSTICK_LAST;  ++deviceId)
+// 			{
+// 				if ( glfwJoystickPresent(deviceId) )
+// 				{
+// 					auto controller = Controller::getControllerByDeviceId(deviceId);
+// 
+// 					// Poll game controller button presses
+// 					int count;
+// 					const unsigned char* buttonArray = glfwGetJoystickButtons(deviceId, &count);
+// 					for ( int i = 0; i < count; ++i )
+// 					{
+// 						// Map the button to the Controller:Key keys from the controller profile if it's available:
+// 						int keyCode = i;
+// 						const auto & it = controller->_buttonInputMap.find(keyCode);
+// 						if ( it != controller->_buttonInputMap.end() )
+// 						{
+// 							keyCode = it->second;
+// 						}
+// 						ControllerImpl::onButtonEvent(deviceId, keyCode, buttonArray[i] == GLFW_PRESS, 0, false);
+// 					}
+// 
+// 					// Poll game controller joystick axis
+// 					const float * axisArray = glfwGetJoystickAxes(deviceId, &count);
+// 					for ( int i = 0; i < count; ++i )
+// 					{
+// 						// Map the axis to the Controller:Key keys from the controller profile if it's available:
+// 						int keyCode = i;
+// 						const auto & it = controller->_axisInputMap.find(keyCode);
+// 						if ( it != controller->_axisInputMap.end() )
+// 						{
+// 							keyCode = it->second;
+// 						}
+// 						ControllerImpl::onAxisEvent(deviceId, keyCode, axisArray[i], true);
+// 					}
+// 				}
+// 			}
 		}
 
 	private:
@@ -4909,21 +4909,21 @@ std::map<std::string, std::pair< std::unordered_map<int, int>, std::unordered_ma
 void Controller::startDiscoveryController()
 {
 	// Check for existing josyticks and register them as cocos2d::Controller:
-	for (int deviceId = GLFW_JOYSTICK_1;  deviceId <= GLFW_JOYSTICK_LAST;  ++deviceId)
-	{
-		if (glfwJoystickPresent(deviceId))
-		{
-			int axis_count, button_count;
-			glfwGetJoystickAxes(deviceId, &axis_count);
-			glfwGetJoystickButtons(deviceId, &button_count);
-			const char* name = glfwGetJoystickName(deviceId);
-			ControllerImpl::onConnected(name, deviceId);
-		}
-	}
+// 	for (int deviceId = GLFW_JOYSTICK_1;  deviceId <= GLFW_JOYSTICK_LAST;  ++deviceId)
+// 	{
+// 		if (glfwJoystickPresent(deviceId))
+// 		{
+// 			int axis_count, button_count;
+// 			glfwGetJoystickAxes(deviceId, &axis_count);
+// 			glfwGetJoystickButtons(deviceId, &button_count);
+// 			const char* name = glfwGetJoystickName(deviceId);
+// 			ControllerImpl::onConnected(name, deviceId);
+// 		}
+// 	}
 
 	// GFLW sends events when a joystick is connected and disconnected only.
 	// These events need to be filtered:
-	glfwSetJoystickCallback(ControllerImpl::handleConnectionsAndDisconnections);
+	//glfwSetJoystickCallback(ControllerImpl::handleConnectionsAndDisconnections);
 
 	// Poll the joystick axis and buttons
 	Director::getInstance()->getScheduler()->scheduleUpdate(ControllerImpl::getInstance(), 0, false);
@@ -4932,7 +4932,7 @@ void Controller::startDiscoveryController()
 void Controller::stopDiscoveryController()
 {
 	Director::getInstance()->getScheduler()->unscheduleUpdate(ControllerImpl::getInstance());
-	glfwSetJoystickCallback(nullptr);
+	//glfwSetJoystickCallback(nullptr);
 
 	// Also remove all the connected controllers:
 	for ( auto& controller : Controller::s_allController )

@@ -42,7 +42,7 @@ THE SOFTWARE.
 #include "2d/CCAnimationCache.h"
 //#include "2d/CCTransition.h"
 #include "2d/CCFontFreeType.h"
-#include "2d/CCLabelAtlas.h"
+//#include "2d/CCLabelAtlas.h"
 // #include "renderer/CCGLProgramCache.h"
 // #include "renderer/CCGLProgramStateCache.h"
 // #include "renderer/CCTextureCache.h"
@@ -62,7 +62,7 @@ THE SOFTWARE.
 #include "base/CCConfiguration.h"
 //#include "base/CCAsyncTaskPool.h"
 #include "base/ObjectFactory.h"
-#include "platform/CCApplication.h"
+//#include "platform/CCApplication.h"
 
 #if CC_ENABLE_SCRIPT_BINDING
 #include "base/CCScriptSupport.h"
@@ -164,9 +164,9 @@ Director::~Director()
 {
     CCLOGINFO("deallocing Director: %p", this);
 
-    CC_SAFE_RELEASE(_FPSLabel);
-    CC_SAFE_RELEASE(_drawnVerticesLabel);
-    CC_SAFE_RELEASE(_drawnBatchesLabel);
+//     CC_SAFE_RELEASE(_FPSLabel);
+//     CC_SAFE_RELEASE(_drawnVerticesLabel);
+//     CC_SAFE_RELEASE(_drawnBatchesLabel);
 
 //    CC_SAFE_RELEASE(_runningScene);
     CC_SAFE_RELEASE(_notificationNode);
@@ -368,10 +368,10 @@ float Director::getDeltaTime() const
 {
     return _deltaTime;
 }
-void Director::setOpenGLView(GLView *openGLView)
-{
-    CCASSERT(openGLView, "opengl view should not be null");
-
+// void Director::setOpenGLView(GLView *openGLView)
+// {
+//     CCASSERT(openGLView, "opengl view should not be null");
+// 
 //     if (_openGLView != openGLView)
 //     {
 //         // Configuration. Gather GPU info
@@ -403,7 +403,7 @@ void Director::setOpenGLView(GLView *openGLView)
 //             _eventDispatcher->setEnabled(true);
 //         }
 //     }
-}
+// }
 
 TextureCache* Director::getTextureCache() const
 {
@@ -1073,9 +1073,9 @@ void Director::reset()
     stopAnimation();
     
     CC_SAFE_RELEASE_NULL(_notificationNode);
-    CC_SAFE_RELEASE_NULL(_FPSLabel);
-    CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
-    CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
+//     CC_SAFE_RELEASE_NULL(_FPSLabel);
+//     CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
+//     CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
     
     // purge bitmap cache
 //     FontFNT::purgeCachedData();
@@ -1261,40 +1261,40 @@ void Director::showStats()
     ++_frames;
     _accumDt += _deltaTime;
     
-    if (_displayStats && _FPSLabel && _drawnBatchesLabel && _drawnVerticesLabel)
-    {
-        char buffer[30] = {0};
-
-        // Probably we don't need this anymore since
-        // the framerate is using a low-pass filter
-        // to make the FPS stable
-        if (_accumDt > CC_DIRECTOR_STATS_INTERVAL)
-        {
-            sprintf(buffer, "%.1f / %.3f", _frames / _accumDt, _secondsPerFrame);
-            _FPSLabel->setString(buffer);
-            _accumDt = 0;
-            _frames = 0;
-        }
-
-//         auto currentCalls = (unsigned long)_renderer->getDrawnBatches();
-//         auto currentVerts = (unsigned long)_renderer->getDrawnVertices();
-//         if( currentCalls != prevCalls ) {
-//             sprintf(buffer, "GL calls:%6lu", currentCalls);
-//             _drawnBatchesLabel->setString(buffer);
-//             prevCalls = currentCalls;
+//     if (_displayStats && _FPSLabel && _drawnBatchesLabel && _drawnVerticesLabel)
+//     {
+//         char buffer[30] = {0};
+// 
+//         // Probably we don't need this anymore since
+//         // the framerate is using a low-pass filter
+//         // to make the FPS stable
+//         if (_accumDt > CC_DIRECTOR_STATS_INTERVAL)
+//         {
+//             sprintf(buffer, "%.1f / %.3f", _frames / _accumDt, _secondsPerFrame);
+//             _FPSLabel->setString(buffer);
+//             _accumDt = 0;
+//             _frames = 0;
 //         }
 // 
-//         if( currentVerts != prevVerts) {
-//             sprintf(buffer, "GL verts:%6lu", currentVerts);
-//             _drawnVerticesLabel->setString(buffer);
-//             prevVerts = currentVerts;
-//         }
-
-        const Mat4& identity = Mat4::IDENTITY;
-        _drawnVerticesLabel->visit(_renderer, identity, 0);
-        _drawnBatchesLabel->visit(_renderer, identity, 0);
-        _FPSLabel->visit(_renderer, identity, 0);
-    }
+// //         auto currentCalls = (unsigned long)_renderer->getDrawnBatches();
+// //         auto currentVerts = (unsigned long)_renderer->getDrawnVertices();
+// //         if( currentCalls != prevCalls ) {
+// //             sprintf(buffer, "GL calls:%6lu", currentCalls);
+// //             _drawnBatchesLabel->setString(buffer);
+// //             prevCalls = currentCalls;
+// //         }
+// // 
+// //         if( currentVerts != prevVerts) {
+// //             sprintf(buffer, "GL verts:%6lu", currentVerts);
+// //             _drawnVerticesLabel->setString(buffer);
+// //             prevVerts = currentVerts;
+// //         }
+// 
+//         const Mat4& identity = Mat4::IDENTITY;
+//         _drawnVerticesLabel->visit(_renderer, identity, 0);
+//         _drawnBatchesLabel->visit(_renderer, identity, 0);
+//         _FPSLabel->visit(_renderer, identity, 0);
+//     }
 }
 
 void Director::calculateMPF()
@@ -1316,22 +1316,22 @@ void Director::getFPSImageData(unsigned char** datapointer, ssize_t* length)
 
 void Director::createStatsLabel()
 {
-    Texture2D *texture = nullptr;
-    std::string fpsString = "00.0";
-    std::string drawBatchString = "000";
-    std::string drawVerticesString = "00000";
-    if (_FPSLabel)
-    {
-        fpsString = _FPSLabel->getString();
-        drawBatchString = _drawnBatchesLabel->getString();
-        drawVerticesString = _drawnVerticesLabel->getString();
-        
-        CC_SAFE_RELEASE_NULL(_FPSLabel);
-        CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
-        CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
-        //_textureCache->removeTextureForKey("/cc_fps_images");
-		FileUtils::getInstance()->purgeCachedEntries();
-    }
+//     Texture2D *texture = nullptr;
+//     std::string fpsString = "00.0";
+//     std::string drawBatchString = "000";
+//     std::string drawVerticesString = "00000";
+//     if (_FPSLabel)
+//     {
+//         fpsString = _FPSLabel->getString();
+//         drawBatchString = _drawnBatchesLabel->getString();
+//         drawVerticesString = _drawnVerticesLabel->getString();
+//         
+//         CC_SAFE_RELEASE_NULL(_FPSLabel);
+//         CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
+//         CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
+//         //_textureCache->removeTextureForKey("/cc_fps_images");
+// 		FileUtils::getInstance()->purgeCachedEntries();
+//     }
 
 //     Texture2D::PixelFormat currentFormat = Texture2D::getDefaultAlphaPixelFormat();
 //     Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
@@ -1382,10 +1382,10 @@ void Director::createStatsLabel()
 
     //Texture2D::setDefaultAlphaPixelFormat(currentFormat);
 
-    const int height_spacing = 22 / CC_CONTENT_SCALE_FACTOR();
-    _drawnVerticesLabel->setPosition(Vec2(0, height_spacing*2) + CC_DIRECTOR_STATS_POSITION);
-    _drawnBatchesLabel->setPosition(Vec2(0, height_spacing*1) + CC_DIRECTOR_STATS_POSITION);
-    _FPSLabel->setPosition(Vec2(0, height_spacing*0)+CC_DIRECTOR_STATS_POSITION);
+//     const int height_spacing = 22 / CC_CONTENT_SCALE_FACTOR();
+//     _drawnVerticesLabel->setPosition(Vec2(0, height_spacing*2) + CC_DIRECTOR_STATS_POSITION);
+//     _drawnBatchesLabel->setPosition(Vec2(0, height_spacing*1) + CC_DIRECTOR_STATS_POSITION);
+//     _FPSLabel->setPosition(Vec2(0, height_spacing*0)+CC_DIRECTOR_STATS_POSITION);
 }
 
 #endif // #if !CC_STRIP_FPS

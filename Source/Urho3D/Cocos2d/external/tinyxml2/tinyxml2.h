@@ -25,20 +25,19 @@ distribution.
 #define TINYXML2_INCLUDED
 
 // external "tinyxml2.h" shouldn't depend on cocos internal headers "CCPlatformMacros.h"
-// #if defined(_MSC_VER)
-// #   if defined(CC_STATIC)
-// #       define CC_DLL
-// #   else
-// #       if defined(_USRDLL)
-// #           define CC_DLL   __declspec(dllexport)
-// #       else         /* use a DLL library */
-// #           define CC_DLL   __declspec(dllimport)
-// #       endif  
-// #   endif
-// #else
-// #   define CC_DLL
-// #endif
+#if defined(_MSC_VER)
+#   if defined(CC_STATIC)
+#       define CC_DLL
+#   else
+#       if defined(Urho3D_EXPORTS)
+#           define CC_DLL   __declspec(dllexport)
+#       else         /* use a DLL library */
+#           define CC_DLL   __declspec(dllimport)
+#       endif  
+#   endif
+#else
 #   define CC_DLL
+#endif
 
 #if defined(ANDROID_NDK) || defined(__BORLANDC__)
 #   include <ctype.h>

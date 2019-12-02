@@ -27,7 +27,7 @@ THE SOFTWARE.
 #ifndef __CC_IMAGE_H__
 #define __CC_IMAGE_H__
 /// @cond DO_NOT_SHOW
-
+#include <string>
 #include "base/CCRef.h"
 //#include "renderer/CCTexture2D.h"
 #include "platform/CCStdC.h"

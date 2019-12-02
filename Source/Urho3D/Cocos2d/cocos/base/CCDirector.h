@@ -34,12 +34,14 @@ THE SOFTWARE.
 #include <chrono>
 
 #include "platform/CCPlatformMacros.h"
+#include "base/ccTypes.h"
 #include "base/CCRef.h"
 #include "base/CCVector.h"
 //#include "2d/CCScene.h"
 #include "math/CCMath.h"
-#include "platform/CCGL.h"
-#include "platform/CCGLView.h"
+#include "math/CCGeometry.h"
+//#include "platform/CCGL.h"
+//#include "platform/CCGLView.h"
 
 NS_CC_BEGIN
 
@@ -49,7 +51,7 @@ NS_CC_BEGIN
  */
 
 /* Forward declarations. */
-class LabelAtlas;
+//class LabelAtlas;
 //class GLView;
 class DirectorDelegate;
 class Node;
@@ -61,7 +63,7 @@ class EventListenerCustom;
 class TextureCache;
 class Renderer;
 class Camera;
-
+class Scene;
 class Console;
 namespace experimental
 {
@@ -187,7 +189,7 @@ public:
      * Sets the GLView. 
      * @lua NA
      */
-    void setOpenGLView(GLView *openGLView);
+//    void setOpenGLView(GLView *openGLView);
 
     /*
      * Gets singleton of TextureCache.
@@ -665,9 +667,9 @@ protected:
     float _accumDt = 0.0f;
     float _frameRate = 0.0f;
     
-    LabelAtlas *_FPSLabel = nullptr;
-    LabelAtlas *_drawnBatchesLabel = nullptr;
-    LabelAtlas *_drawnVerticesLabel = nullptr;
+//     LabelAtlas *_FPSLabel = nullptr;
+//     LabelAtlas *_drawnBatchesLabel = nullptr;
+//     LabelAtlas *_drawnVerticesLabel = nullptr;
     
     /** Whether or not the Director is paused */
     bool _paused = false;
@@ -723,7 +725,7 @@ protected:
     bool _invalid = false;
 
     // GLView will recreate stats labels to fit visible rect
-    friend class GLView;
+    //friend class GLView;
 };
 
 // FIXME: Added for backward compatibility in case
