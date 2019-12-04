@@ -45,6 +45,10 @@
 #include "base/CCEventCustom.h"
 #include "2d/CCFontFNT.h"
 
+#include "Urho3DContext.h"
+// #include "Core/Context.h"
+// #include "Resource/ResourceCache.h"
+#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 /**
@@ -1278,16 +1282,17 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
 {
     _currentLabelType = LabelType::STRING_TEXTURE;
 
-//     auto texture = new (std::nothrow) Texture2D;
-//     texture->initWithString(_utf8Text.c_str(), fontDef);
-// 
-//     _textSprite = Sprite::createWithTexture(texture);
-//     //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
-//     _textSprite->setCameraMask(getCameraMask());
-//     _textSprite->setGlobalZOrder(getGlobalZOrder());
-//     _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
-//     this->setContentSize(_textSprite->getContentSize());
-//     texture->release();
+	//auto* cache = g_urho3d_context->GetSubsystem<Urho3D::ResourceCache>();
+    auto texture = new (std::nothrow) Urho3D::Texture2D(g_urho3d_context);
+    texture->initWithString(_utf8Text.c_str(), fontDef);
+
+    _textSprite = Sprite::createWithTexture(texture);
+    //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
+    _textSprite->setCameraMask(getCameraMask());
+    _textSprite->setGlobalZOrder(getGlobalZOrder());
+    _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
+    this->setContentSize(_textSprite->getContentSize());
+    texture->release();
     if (_blendFuncDirty)
     {
         _textSprite->setBlendFunc(_blendFunc);

@@ -31,8 +31,8 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "2d/CCSprite.h"
-#include "renderer/ccGLStateCache.h"
-#include "renderer/CCRenderer.h"
+// #include "renderer/ccGLStateCache.h"
+// #include "renderer/CCRenderer.h"
 
 NS_CC_BEGIN
 
@@ -79,7 +79,7 @@ bool ProgressTimer::initWithSprite(Sprite* sp)
     setSprite(sp);
 
     // shader state
-    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, sp->getTexture()));
+    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, sp->getTexture()));
     return true;
 }
 
@@ -505,50 +505,50 @@ Vec2 ProgressTimer::boundaryTexCoord(char index)
 
 void ProgressTimer::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 {
-
-    getGLProgram()->use();
-    getGLProgram()->setUniformsForBuiltins(transform);
-
-    GL::blendFunc( _sprite->getBlendFunc().src, _sprite->getBlendFunc().dst );
-
-    GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX );
-
-    GL::bindTexture2D( _sprite->getTexture() );
-
-    glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]) , &_vertexData[0].vertices);
-    glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].texCoords);
-    glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(_vertexData[0]), &_vertexData[0].colors);
-
-    if(_type == Type::RADIAL)
-    {
-        glDrawArrays(GL_TRIANGLE_FAN, 0, _vertexDataCount);
-        CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_vertexDataCount);
-    }
-    else if (_type == Type::BAR)
-    {
-        if (!_reverseDirection) 
-        {
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount);
-            CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_vertexDataCount);
-        }
-        else 
-        {
-            glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount/2);
-            glDrawArrays(GL_TRIANGLE_STRIP, 4, _vertexDataCount/2);
-            // 2 draw calls
-            CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(2,_vertexDataCount);
-        }
-    }
+// 
+//     getGLProgram()->use();
+//     getGLProgram()->setUniformsForBuiltins(transform);
+// 
+//     GL::blendFunc( _sprite->getBlendFunc().src, _sprite->getBlendFunc().dst );
+// 
+//     GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX );
+// 
+//     GL::bindTexture2D( _sprite->getTexture() );
+// 
+//     glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]) , &_vertexData[0].vertices);
+//     glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(_vertexData[0]), &_vertexData[0].texCoords);
+//     glVertexAttribPointer( GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(_vertexData[0]), &_vertexData[0].colors);
+// 
+//     if(_type == Type::RADIAL)
+//     {
+//         glDrawArrays(GL_TRIANGLE_FAN, 0, _vertexDataCount);
+//         CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_vertexDataCount);
+//     }
+//     else if (_type == Type::BAR)
+//     {
+//         if (!_reverseDirection) 
+//         {
+//             glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount);
+//             CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1,_vertexDataCount);
+//         }
+//         else 
+//         {
+//             glDrawArrays(GL_TRIANGLE_STRIP, 0, _vertexDataCount/2);
+//             glDrawArrays(GL_TRIANGLE_STRIP, 4, _vertexDataCount/2);
+//             // 2 draw calls
+//             CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(2,_vertexDataCount);
+//         }
+//     }
 }
 
 void ProgressTimer::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
-    if( ! _vertexData || ! _sprite)
-        return;
-
-    _customCommand.init(_globalZOrder, transform, flags);
-    _customCommand.func = CC_CALLBACK_0(ProgressTimer::onDraw, this, transform, flags);
-    renderer->addCommand(&_customCommand);
+//     if( ! _vertexData || ! _sprite)
+//         return;
+// 
+//     _customCommand.init(_globalZOrder, transform, flags);
+//     _customCommand.func = CC_CALLBACK_0(ProgressTimer::onDraw, this, transform, flags);
+//     renderer->addCommand(&_customCommand);
 }
 
 

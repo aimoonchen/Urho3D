@@ -59,13 +59,13 @@
 #include "SceneReplication.h"
 
 #include <Urho3D/DebugNew.h>
-
+#include "Cocos2d/cocos/platform/CCFileUtils.h"
 #include "Race.h"
 //#include "Character.h"
 #include "RaceRoom.h"
 #include "Avatar.h"
 
-
+Urho3D::Context* g_urho3d_context;
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
 // Identifier for our custom remote event we use to tell the client which object they control
@@ -213,6 +213,9 @@ void SceneReplication::CreateUI()
 }
 void SceneReplication::InitFairyGUI()
 {
+	g_urho3d_context = GetContext();
+
+	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
 	fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
 	_view->getChild("n1")->addClickListener([this](fairygui::EventContext*)

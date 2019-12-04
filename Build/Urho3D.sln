@@ -598,6 +598,8 @@ Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "toluapp", "Source\ThirdPart
 		{68E51C65-338B-3291-8A43-290CC4A46C8F} = {68E51C65-338B-3291-8A43-290CC4A46C8F}
 	EndProjectSection
 EndProject
+Project("{8BC9CEB8-8B4A-11D0-8D11-00A0C91BC942}") = "libfairygui", "..\Source\ThirdParty\libfairygui\libfairygui.vcxproj", "{82A896D1-640F-42AC-B818-BFBBFA58ED03}"
+EndProject
 Global
 	GlobalSection(SolutionConfigurationPlatforms) = preSolution
 		Debug|x64 = Debug|x64
@@ -1722,6 +1724,22 @@ Global
 		{C57A93A5-3884-3615-8D6F-07423EB32CBA}.RelWithDebInfo|x64.ActiveCfg = RelWithDebInfo|x64
 		{C57A93A5-3884-3615-8D6F-07423EB32CBA}.RelWithDebInfo|x64.Build.0 = RelWithDebInfo|x64
 		{C57A93A5-3884-3615-8D6F-07423EB32CBA}.RelWithDebInfo|x86.ActiveCfg = RelWithDebInfo|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Debug|x64.ActiveCfg = Debug|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Debug|x64.Build.0 = Debug|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Debug|x86.ActiveCfg = Debug|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Debug|x86.Build.0 = Debug|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.MinSizeRel|x64.ActiveCfg = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.MinSizeRel|x64.Build.0 = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.MinSizeRel|x86.ActiveCfg = Release|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.MinSizeRel|x86.Build.0 = Release|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Release|x64.ActiveCfg = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Release|x64.Build.0 = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Release|x86.ActiveCfg = Release|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.Release|x86.Build.0 = Release|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.RelWithDebInfo|x64.ActiveCfg = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.RelWithDebInfo|x64.Build.0 = Release|x64
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.RelWithDebInfo|x86.ActiveCfg = Release|Win32
+		{82A896D1-640F-42AC-B818-BFBBFA58ED03}.RelWithDebInfo|x86.Build.0 = Release|Win32
 	EndGlobalSection
 	GlobalSection(SolutionProperties) = preSolution
 		HideSolutionNode = FALSE

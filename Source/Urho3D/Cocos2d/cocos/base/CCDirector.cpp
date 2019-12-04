@@ -241,7 +241,7 @@ void Director::setDefaultValues(void)
 void Director::setGLDefaultValues()
 {
     // This method SHOULD be called only after openGLView_ was initialized
-    CCASSERT(_openGLView, "opengl view should not be null");
+    //CCASSERT(_openGLView, "opengl view should not be null");
 
     setAlphaBlending(true);
     setDepthTest(false);
