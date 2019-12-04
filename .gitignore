@@ -30,6 +30,7 @@ build/
 /Source/Urho3D/Urho3D.pc.msvc
 /Source/Urho3D/Urho3DAll.h
 /Source/Urho3D/librevision.h
+/Source/ThirdParty/libfairygui/x64
 /Source/ThirdParty/libfairygui/proj.win32/Debug.win32
 /Source/ThirdParty/libfairygui/proj.win32/Release.win32
 # Compiled shaders
