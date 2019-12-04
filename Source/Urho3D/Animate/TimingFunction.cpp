@@ -75,7 +75,7 @@ double FramesTimingFunction::Velocity(double x) const {
 
 double FramesTimingFunction::GetPreciseValue(double t) const {
 	const double frames = static_cast<double>(frames_);
-	double output_progress = std::floor(frames * t) / (frames - 1);
+	double output_progress = floor(frames * t) / (frames - 1);
 	if (t <= 1 && output_progress > 1)
 		output_progress = 1;
 	return output_progress;
