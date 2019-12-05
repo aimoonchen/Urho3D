@@ -33,9 +33,12 @@ THE SOFTWARE.
 
 #include "base/ccTypes.h"
 //#include "renderer/CCTexture2D.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
-class Texture2D;
+//class Texture2D;
 /**
  * RGBA protocol that affects Node's color and opacity
  */
@@ -213,7 +216,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual Texture2D* getTexture() const = 0;
+    virtual Urho3D::Texture2D* getTexture() const = 0;
 
     /**
      * Sets a new texture. It will be retained.
@@ -222,7 +225,7 @@ public:
      * @js NA
      * @lua NA
      */
-    virtual void setTexture(Texture2D *texture) = 0;
+    virtual void setTexture(Urho3D::Texture2D *texture) = 0;
 };
 
 /**

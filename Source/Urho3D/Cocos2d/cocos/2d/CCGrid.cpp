@@ -61,7 +61,7 @@ GridBase* GridBase::create(const Size& gridSize)
     return pGridBase;
 }
 
-GridBase* GridBase::create(const Size& gridSize, Texture2D *texture, bool flipped)
+GridBase* GridBase::create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped)
 {
     GridBase *pGridBase = new (std::nothrow) GridBase();
 
@@ -124,12 +124,12 @@ bool GridBase::initWithSize(const cocos2d::Size &gridSize, const cocos2d::Rect &
     return true;
 }
 
-bool GridBase::initWithSize(const Size& gridSize, Texture2D *texture, bool flipped)
+bool GridBase::initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped)
 {
     return initWithSize(gridSize, texture, flipped, Rect::ZERO);
 }
 
-bool GridBase::initWithSize(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect)
+bool GridBase::initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect)
 {
     bool ret = true;
     
@@ -323,7 +323,7 @@ Grid3D* Grid3D::create(const Size& gridSize, const Rect& rect)
     return ret;
 }
 
-Grid3D* Grid3D::create(const Size& gridSize, Texture2D *texture, bool flipped)
+Grid3D* Grid3D::create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped)
 {
     Grid3D *ret= new (std::nothrow) Grid3D();
     
@@ -343,7 +343,7 @@ Grid3D* Grid3D::create(const Size& gridSize, Texture2D *texture, bool flipped)
     return ret;
 }
 
-Grid3D* Grid3D::create(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect)
+Grid3D* Grid3D::create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect)
 {
     Grid3D *ret= new (std::nothrow) Grid3D();
     
@@ -614,7 +614,7 @@ TiledGrid3D* TiledGrid3D::create(const Size& gridSize, const Rect& rect)
     return ret;
 }
 
-TiledGrid3D* TiledGrid3D::create(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect)
+TiledGrid3D* TiledGrid3D::create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect)
 {
     TiledGrid3D *ret= new (std::nothrow) TiledGrid3D();
     
@@ -634,7 +634,7 @@ TiledGrid3D* TiledGrid3D::create(const Size& gridSize, Texture2D *texture, bool 
     return ret;
 }
 
-TiledGrid3D* TiledGrid3D::create(const Size& gridSize, Texture2D *texture, bool flipped)
+TiledGrid3D* TiledGrid3D::create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped)
 {
     TiledGrid3D *ret= new (std::nothrow) TiledGrid3D();
     

@@ -44,7 +44,7 @@ SpriteFrame* SpriteFrame::create(const std::string& filename, const Rect& rect)
     return spriteFrame;
 }
 
-SpriteFrame* SpriteFrame::createWithTexture(Texture2D *texture, const Rect& rect)
+SpriteFrame* SpriteFrame::createWithTexture(Urho3D::Texture2D *texture, const Rect& rect)
 {
     SpriteFrame *spriteFrame = new (std::nothrow) SpriteFrame();
     spriteFrame->initWithTexture(texture, rect);
@@ -53,7 +53,7 @@ SpriteFrame* SpriteFrame::createWithTexture(Texture2D *texture, const Rect& rect
     return spriteFrame;
 }
 
-SpriteFrame* SpriteFrame::createWithTexture(Texture2D* texture, const Rect& rect, bool rotated, const Vec2& offset, const Size& originalSize)
+SpriteFrame* SpriteFrame::createWithTexture(Urho3D::Texture2D* texture, const Rect& rect, bool rotated, const Vec2& offset, const Size& originalSize)
 {
     SpriteFrame *spriteFrame = new (std::nothrow) SpriteFrame();
     if (spriteFrame && spriteFrame->initWithTexture(texture, rect, rotated, offset, originalSize)) {
@@ -82,7 +82,7 @@ SpriteFrame::SpriteFrame()
 {
 }
 
-bool SpriteFrame::initWithTexture(Texture2D* texture, const Rect& rect)
+bool SpriteFrame::initWithTexture(Urho3D::Texture2D* texture, const Rect& rect)
 {
     Rect rectInPixels = CC_RECT_POINTS_TO_PIXELS(rect);
     return initWithTexture(texture, rectInPixels, false, Vec2::ZERO, rectInPixels.size);
@@ -94,7 +94,7 @@ bool SpriteFrame::initWithTextureFilename(const std::string& filename, const Rec
     return initWithTextureFilename(filename, rectInPixels, false, Vec2::ZERO, rectInPixels.size);
 }
 
-bool SpriteFrame::initWithTexture(Texture2D* texture, const Rect& rect, bool rotated, const Vec2& offset, const Size& originalSize)
+bool SpriteFrame::initWithTexture(Urho3D::Texture2D* texture, const Rect& rect, bool rotated, const Vec2& offset, const Size& originalSize)
 {
     _texture = texture;
 
@@ -210,7 +210,7 @@ bool SpriteFrame::hasAnchorPoint() const
     return !std::isnan(_anchorPoint.x);
 }
 
-void SpriteFrame::setTexture(Texture2D * texture)
+void SpriteFrame::setTexture(Urho3D::Texture2D * texture)
 {
     if( _texture != texture ) {
 //         CC_SAFE_RELEASE(_texture);
@@ -219,7 +219,7 @@ void SpriteFrame::setTexture(Texture2D * texture)
     }
 }
 
-Texture2D* SpriteFrame::getTexture()
+Urho3D::Texture2D* SpriteFrame::getTexture()
 {
     if( _texture ) {
         return _texture;

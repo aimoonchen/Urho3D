@@ -30,10 +30,13 @@ THE SOFTWARE.
 #include "base/CCRef.h"
 #include "base/ccTypes.h"
 #include "base/CCDirector.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
-class Texture2D;
+//class Texture2D;
 class Grabber;
 class GLProgram;
 class Node;
@@ -49,7 +52,7 @@ class CC_DLL GridBase : public Ref
 {
 public:
     /** create one Grid */
-    static GridBase* create(const Size& gridSize, Texture2D *texture, bool flipped);
+    static GridBase* create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped);
     /** create one Grid */
     static GridBase* create(const Size& gridSize);
     /**
@@ -68,8 +71,8 @@ public:
     */
     bool initWithSize(const Size& gridSize);
     bool initWithSize(const Size& gridSize, const Rect& rect);
-    bool initWithSize(const Size& gridSize, Texture2D *texture, bool flipped);
-    bool initWithSize(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect);
+    bool initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped);
+    bool initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect);
 
     /**@}*/
     /** @{
@@ -139,7 +142,7 @@ protected:
     bool _active;
     int  _reuseGrid;
     Size _gridSize;
-    Texture2D *_texture;
+	Urho3D::Texture2D *_texture;
     Vec2 _step;
     Grabber *_grabber;
     bool _isTextureFlipped;
@@ -159,9 +162,9 @@ public:
     /** create one Grid. */
     static Grid3D* create(const Size& gridSize, const Rect& rect);
     /** create one Grid. */
-    static Grid3D* create(const Size& gridSize, Texture2D *texture, bool flipped);
+    static Grid3D* create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped);
     /** create one Grid. */
-    static Grid3D* create(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect);
+    static Grid3D* create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect);
     /**
      Constructor.
      * @js ctor
@@ -236,9 +239,9 @@ public:
     /** Create one Grid. */
     static TiledGrid3D* create(const Size& gridSize, const Rect& rect);
     /** Create one Grid. */
-    static TiledGrid3D* create(const Size& gridSize, Texture2D *texture, bool flipped);
+    static TiledGrid3D* create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped);
     /** Create one Grid. */
-    static TiledGrid3D* create(const Size& gridSize, Texture2D *texture, bool flipped, const Rect& rect);
+    static TiledGrid3D* create(const Size& gridSize, Urho3D::Texture2D *texture, bool flipped, const Rect& rect);
     /**
      Constructor.
      * @js ctor

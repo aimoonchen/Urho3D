@@ -35,10 +35,13 @@ THE SOFTWARE.
 #include "2d/CCSpriteFrame.h"
 
 #include <string>
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
-class Texture2D;
+//class Texture2D;
 class SpriteFrame;
 
 /**
@@ -213,7 +216,7 @@ public:
      * @param pobTexture A frame with a texture.
      * @param rect The Texture of rect.
      */
-    void addSpriteFrameWithTexture(Texture2D* pobTexture, const Rect& rect);
+    void addSpriteFrameWithTexture(Urho3D::Texture2D* pobTexture, const Rect& rect);
 
     /** Gets the total Delay units of the Animation. 
      *

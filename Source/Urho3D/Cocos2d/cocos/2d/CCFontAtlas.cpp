@@ -467,13 +467,13 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
     return true;
 }
 
-void FontAtlas::addTexture(Texture2D *texture, int slot)
+void FontAtlas::addTexture(Urho3D::Texture2D *texture, int slot)
 {
 //     texture->retain();
 //     _atlasTextures[slot] = texture;
 }
 
-Texture2D* FontAtlas::getTexture(int slot)
+Urho3D::Texture2D* FontAtlas::getTexture(int slot)
 {
     return _atlasTextures[slot];
 }

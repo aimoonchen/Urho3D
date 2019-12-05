@@ -35,7 +35,7 @@ THE SOFTWARE.
 #include "2d/CCSpriteFrame.h"
 #include "2d/CCSpriteFrameCache.h"
 // #include "renderer/CCTextureCache.h"
-// #include "renderer/CCTexture2D.h"
+#include "Graphics/Texture2D.h"
 // #include "renderer/CCRenderer.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
@@ -44,7 +44,7 @@ THE SOFTWARE.
 NS_CC_BEGIN
 
 // MARK: create, init, dealloc
-Sprite* Sprite::createWithTexture(Texture2D *texture)
+Sprite* Sprite::createWithTexture(Urho3D::Texture2D *texture)
 {
     Sprite *sprite = new (std::nothrow) Sprite();
     if (sprite && sprite->initWithTexture(texture))
@@ -56,7 +56,7 @@ Sprite* Sprite::createWithTexture(Texture2D *texture)
     return nullptr;
 }
 
-Sprite* Sprite::createWithTexture(Texture2D *texture, const Rect& rect, bool rotated)
+Sprite* Sprite::createWithTexture(Urho3D::Texture2D *texture, const Rect& rect, bool rotated)
 {
     Sprite *sprite = new (std::nothrow) Sprite();
     if (sprite && sprite->initWithTexture(texture, rect, rotated))
@@ -148,19 +148,19 @@ bool Sprite::init()
     return true;
 }
 
-bool Sprite::initWithTexture(Texture2D *texture)
+bool Sprite::initWithTexture(Urho3D::Texture2D *texture)
 {
     CCASSERT(texture != nullptr, "Invalid texture for sprite");
 
     Rect rect = Rect::ZERO;
-//     if (texture) {
-//         rect.size = texture->getContentSize();
-//     }
+    if (texture) {
+		rect.size = Vec2{ static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight()) };
+    }
 
     return initWithTexture(texture, rect, false);
 }
 
-bool Sprite::initWithTexture(Texture2D *texture, const Rect& rect)
+bool Sprite::initWithTexture(Urho3D::Texture2D *texture, const Rect& rect)
 {
     return initWithTexture(texture, rect, false);
 }
@@ -176,7 +176,7 @@ bool Sprite::initWithFile(const std::string& filename)
     _fileName = filename;
     _fileType = 0;
 
-//     Texture2D *texture = _director->getTextureCache()->addImage(filename);
+//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
 //     if (texture)
 //     {
 //         Rect rect = Rect::ZERO;
@@ -201,7 +201,7 @@ bool Sprite::initWithFile(const std::string &filename, const Rect& rect)
     _fileName = filename;
     _fileType = 0;
 
-//     Texture2D *texture = _director->getTextureCache()->addImage(filename);
+//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
 //     if (texture)
 //     {
 //         return initWithTexture(texture, rect);
@@ -246,7 +246,7 @@ bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
 {
     bool ret = false;
 
-//     Texture2D *texture = _director->getTextureCache()->addImage(info.getFilename());
+//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(info.getFilename());
 //     if(texture && initWithTexture(texture))
 //     {
 //         _polyInfo = info;
@@ -259,7 +259,7 @@ bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
 }
 
 // designated initializer
-bool Sprite::initWithTexture(Texture2D *texture, const Rect& rect, bool rotated)
+bool Sprite::initWithTexture(Urho3D::Texture2D *texture, const Rect& rect, bool rotated)
 {
     bool result = false;
     if (Node::init())
@@ -362,7 +362,7 @@ static unsigned char cc_2x2_white_image[] = {
 // MARK: texture
 void Sprite::setTexture(const std::string &filename)
 {
-//     Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
+//     Urho3D::Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
 //     setTexture(texture);
 //     _unflippedOffsetPositionFromCenter = Vec2::ZERO;
 //     Rect rect = Rect::ZERO;
@@ -371,7 +371,7 @@ void Sprite::setTexture(const std::string &filename)
 //     setTextureRect(rect);
 }
 
-void Sprite::setTexture(Texture2D *texture)
+void Sprite::setTexture(Urho3D::Texture2D *texture)
 {
 //     if(_glProgramState == nullptr)
 //     {
@@ -411,7 +411,7 @@ void Sprite::setTexture(Texture2D *texture)
 //     }
 }
 
-Texture2D* Sprite::getTexture() const
+Urho3D::Texture2D* Sprite::getTexture() const
 {
     return _texture;
 }
@@ -775,7 +775,7 @@ void Sprite::setTextureCoords(const Rect& rectInPoints)
 
 void Sprite::setTextureCoords(const Rect& rectInPoints, V3F_C4B_T2F_Quad* outQuad)
 {
-//     Texture2D *tex = (_renderMode == RenderMode::QUAD_BATCHNODE) ? _textureAtlas->getTexture() : _texture;
+//     Urho3D::Texture2D *tex = (_renderMode == RenderMode::QUAD_BATCHNODE) ? _textureAtlas->getTexture() : _texture;
 //     if (tex == nullptr)
 //     {
 //         return;
@@ -1586,7 +1586,7 @@ void Sprite::setSpriteFrame(SpriteFrame *spriteFrame)
     }
     _unflippedOffsetPositionFromCenter = spriteFrame->getOffset();
 
-    Texture2D *texture = spriteFrame->getTexture();
+	Urho3D::Texture2D *texture = spriteFrame->getTexture();
     // update texture before updating texture rect
     if (texture != _texture)
     {

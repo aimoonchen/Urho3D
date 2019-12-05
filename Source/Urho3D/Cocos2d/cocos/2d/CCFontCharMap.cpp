@@ -84,7 +84,7 @@ FontCharMap* FontCharMap::create(const std::string& charMapFile, int itemWidth, 
 	return {};
 }
 
-FontCharMap* FontCharMap::create(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
+FontCharMap* FontCharMap::create(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
     FontCharMap *tempFont =  new FontCharMap(texture,itemWidth,itemHeight,startCharMap);
 

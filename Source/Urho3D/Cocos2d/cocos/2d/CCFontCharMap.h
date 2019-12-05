@@ -30,22 +30,25 @@
 /// @cond DO_NOT_SHOW
 
 #include "2d/CCFont.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
-class Texture2D;
+//class Texture2D;
 class FontCharMap : public Font
 {  
 public:
     static FontCharMap * create(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap);
-    static FontCharMap * create(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
+    static FontCharMap * create(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
     static FontCharMap * create(const std::string& plistFile);
     
     virtual int* getHorizontalKerningForTextUTF32(const std::u32string& text, int &outNumLetters) const override;
     virtual FontAtlas *createFontAtlas() override;
     
 protected:    
-    FontCharMap(Texture2D* texture,int itemWidth, int itemHeight, int startCharMap)
+    FontCharMap(Urho3D::Texture2D* texture,int itemWidth, int itemHeight, int startCharMap)
         :_texture(texture)
         ,_mapStartChar(startCharMap)
         ,_itemWidth(itemWidth)
@@ -58,7 +61,7 @@ protected:
     virtual ~FontCharMap();
     
 private:
-    Texture2D* _texture;
+	Urho3D::Texture2D* _texture;
     int _mapStartChar;
     int _itemWidth;
     int _itemHeight;

@@ -37,7 +37,10 @@ THE SOFTWARE.
 // #include "renderer/CCTrianglesCommand.h"
 // #include "renderer/CCCustomCommand.h"
 #include "2d/CCAutoPolygon.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
 class TextureAtlas;
@@ -46,7 +49,7 @@ class SpriteFrame;
 class Animation;
 class Rect;
 class Size;
-class Texture2D;
+//class Texture2D;
 struct transformValues_;
 
 #ifdef SPRITE_RENDER_IN_SUBPIXEL
@@ -156,7 +159,7 @@ public:
      * @param   texture    A pointer to a Texture2D object.
      * @return  An autoreleased sprite object.
      */
-    static Sprite* createWithTexture(Texture2D *texture);
+    static Sprite* createWithTexture(Urho3D::Texture2D *texture);
 
     /**
      * Creates a sprite with a texture and a rect.
@@ -169,7 +172,7 @@ public:
      * @param   rotated     Whether or not the rect is rotated.
      * @return  An autoreleased sprite object.
      */
-    static Sprite* createWithTexture(Texture2D *texture, const Rect& rect, bool rotated=false);
+    static Sprite* createWithTexture(Urho3D::Texture2D *texture, const Rect& rect, bool rotated=false);
 
     /**
      * Creates a sprite with an sprite frame.
@@ -238,10 +241,10 @@ public:
      *
      *  The Texture's rect is not changed.
      */
-    virtual void setTexture(Texture2D *texture) override;
+    virtual void setTexture(Urho3D::Texture2D *texture) override;
 
     /** Returns the Texture2D object used by the sprite. */
-    virtual Texture2D* getTexture() const override;
+    virtual Urho3D::Texture2D* getTexture() const override;
 
     /**
      * Updates the texture rect of the Sprite in points.
@@ -565,7 +568,7 @@ CC_CONSTRUCTOR_ACCESS :
      *                      You can use a Texture2D object for many sprites.
      * @return  True if the sprite is initialized properly, false otherwise.
      */
-    virtual bool initWithTexture(Texture2D *texture);
+    virtual bool initWithTexture(Urho3D::Texture2D *texture);
     
     
     /**
@@ -588,7 +591,7 @@ CC_CONSTRUCTOR_ACCESS :
      * @param   rect        Only the contents inside rect of this texture will be applied for this sprite.
      * @return  True if the sprite is initialized properly, false otherwise.
      */
-    virtual bool initWithTexture(Texture2D *texture, const Rect& rect);
+    virtual bool initWithTexture(Urho3D::Texture2D *texture, const Rect& rect);
 
     /**
      * Initializes a sprite with a texture and a rect in points, optionally rotated.
@@ -601,7 +604,7 @@ CC_CONSTRUCTOR_ACCESS :
      * @param   rotated     Whether or not the texture rectangle is rotated.
      * @return  True if the sprite is initialized properly, false otherwise.
      */
-    virtual bool initWithTexture(Texture2D *texture, const Rect& rect, bool rotated);
+    virtual bool initWithTexture(Urho3D::Texture2D *texture, const Rect& rect, bool rotated);
 
     /**
      * Initializes a sprite with an SpriteFrame. The texture and rect in SpriteFrame will be applied on this sprite.
@@ -682,7 +685,7 @@ protected:
     // Data used when the sprite is self-rendered
     //
     BlendFunc        _blendFunc;            /// It's required for TextureProtocol inheritance
-    Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
+	Urho3D::Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
     SpriteFrame*     _spriteFrame;
 //    TrianglesCommand _trianglesCommand;     ///
 #if CC_SPRITE_DEBUG_DRAW

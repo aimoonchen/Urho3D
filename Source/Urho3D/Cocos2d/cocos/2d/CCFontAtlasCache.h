@@ -31,11 +31,14 @@
 
 #include <unordered_map>
 #include "base/ccTypes.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
 class FontAtlas;
-class Texture2D;
+//class Texture2D;
 struct _ttfConfig;
 
 class CC_DLL FontAtlasCache
@@ -45,7 +48,7 @@ public:
     static FontAtlas* getFontAtlasFNT(const std::string& fontFileName, const Vec2& imageOffset = Vec2::ZERO);
 
     static FontAtlas* getFontAtlasCharMap(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap);
-    static FontAtlas* getFontAtlasCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
+    static FontAtlas* getFontAtlasCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
     static FontAtlas* getFontAtlasCharMap(const std::string& plistFile);
     
     static bool releaseFontAtlas(FontAtlas *atlas);

@@ -142,7 +142,7 @@ FontAtlas* FontAtlasCache::getFontAtlasCharMap(const std::string& plistFile)
     return nullptr;
 }
 
-FontAtlas* FontAtlasCache::getFontAtlasCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
+FontAtlas* FontAtlasCache::getFontAtlasCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
 //     char key[ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE];
 //     sprintf(key,"name:%u_%d_%d_%d",texture->getName(),itemWidth,itemHeight,startCharMap);

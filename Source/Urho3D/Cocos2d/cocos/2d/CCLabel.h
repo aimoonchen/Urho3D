@@ -228,7 +228,7 @@ public:
     *
     * @return An automatically released Label object.
     */
-    static Label * createWithCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
+    static Label * createWithCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
 
     /**
     * Allocates and initializes a Label, with char map configuration.
@@ -275,7 +275,7 @@ public:
      *
      * @see `createWithCharMap(Texture2D*,int,int,int)`
      */
-    virtual bool setCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
+    virtual bool setCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap);
 
     /**
      * Sets a new char map configuration to Label.

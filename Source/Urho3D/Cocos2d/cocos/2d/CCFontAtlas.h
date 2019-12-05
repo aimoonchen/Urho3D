@@ -35,11 +35,14 @@
 #include "platform/CCPlatformMacros.h"
 #include "base/CCRef.h"
 #include "platform/CCStdC.h" // ssize_t on windows
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
 class Font;
-class Texture2D;
+//class Texture2D;
 class EventCustom;
 class EventListenerCustom;
 class FontFreeType;
@@ -79,14 +82,14 @@ public:
     
     bool prepareLetterDefinitions(const std::u32string& utf16String);
 
-    const std::unordered_map<ssize_t, Texture2D*>& getTextures() const { return _atlasTextures; }
-    void  addTexture(Texture2D *texture, int slot);
+    const std::unordered_map<ssize_t, Urho3D::Texture2D*>& getTextures() const { return _atlasTextures; }
+    void  addTexture(Urho3D::Texture2D *texture, int slot);
     float getLineHeight() const { return _lineHeight; }
     void  setLineHeight(float newHeight);
     
     std::string getFontName() const;
 
-    Texture2D* getTexture(int slot);
+	Urho3D::Texture2D* getTexture(int slot);
     const Font* getFont() const { return _font; }
 
     /** listen the event that renderer was recreated on Android/WP8
@@ -129,7 +132,7 @@ protected:
      */
     void scaleFontLetterDefinition(float scaleFactor);
 
-    std::unordered_map<ssize_t, Texture2D*> _atlasTextures;
+    std::unordered_map<ssize_t, Urho3D::Texture2D*> _atlasTextures;
     std::unordered_map<char32_t, FontLetterDefinition> _letterDefinitions;
     float _lineHeight;
     Font* _font;

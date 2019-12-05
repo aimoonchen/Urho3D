@@ -32,14 +32,17 @@
 #include "platform/CCPlatformMacros.h"
 #include "ui/GUIExport.h"
 //#include "renderer/CCTrianglesCommand.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 /**
  * @addtogroup ui
  * @{
  */
 NS_CC_BEGIN
 class DrawNode;
-class Texture2D;
+//class Texture2D;
 
 namespace ui {
 
@@ -595,7 +598,7 @@ namespace ui {
 
     protected:
         void updateCapInset();
-        void setupSlice9(Texture2D* texture, const Rect& capInsets);
+        void setupSlice9(Urho3D::Texture2D* texture, const Rect& capInsets);
 
         bool _isPatch9;
 

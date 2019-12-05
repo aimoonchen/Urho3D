@@ -74,7 +74,7 @@ public:
      * @param capacity The capacity of children.
      * @return Return an autorelease object.
      */
-    static SpriteBatchNode* createWithTexture(Texture2D* tex, ssize_t capacity = DEFAULT_CAPACITY);
+    static SpriteBatchNode* createWithTexture(Urho3D::Texture2D* tex, ssize_t capacity = DEFAULT_CAPACITY);
 
     /** Creates a SpriteBatchNode with a file image (.png, .jpeg, .pvr, etc) and capacity of children.
      * The capacity will be increased in 33% in runtime if it runs out of space.
@@ -173,8 +173,8 @@ public:
     // Overrides
     //
     // TextureProtocol
-    virtual Texture2D* getTexture() const override;
-    virtual void setTexture(Texture2D *texture) override;
+    virtual Urho3D::Texture2D* getTexture() const override;
+    virtual void setTexture(Urho3D::Texture2D *texture) override;
     /**
     *@code
     * When this function bound into js or lua,the parameter will be changed.
@@ -241,7 +241,7 @@ CC_CONSTRUCTOR_ACCESS:
     /** initializes a SpriteBatchNode with a texture2d and capacity of children.
      The capacity will be increased in 33% in runtime if it runs out of space.
      */
-    bool initWithTexture(Texture2D *tex, ssize_t capacity = DEFAULT_CAPACITY);
+    bool initWithTexture(Urho3D::Texture2D *tex, ssize_t capacity = DEFAULT_CAPACITY);
     /** initializes a SpriteBatchNode with a file image (.png, .jpeg, .pvr, etc) and a capacity of children.
      The capacity will be increased in 33% in runtime if it runs out of space.
      The file will be loaded using the TextureMgr.

@@ -179,7 +179,7 @@ void Animation::addSpriteFrameWithFile(const std::string& filename)
 //     addSpriteFrame(frame);
 }
 
-void Animation::addSpriteFrameWithTexture(Texture2D *pobTexture, const Rect& rect)
+void Animation::addSpriteFrameWithTexture(Urho3D::Texture2D *pobTexture, const Rect& rect)
 {
     SpriteFrame *frame = SpriteFrame::createWithTexture(pobTexture, rect);
     addSpriteFrame(frame);

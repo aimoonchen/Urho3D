@@ -42,7 +42,7 @@ NS_CC_BEGIN
 * creation with Texture2D
 */
 
-SpriteBatchNode* SpriteBatchNode::createWithTexture(Texture2D* tex, ssize_t capacity/* = DEFAULT_CAPACITY*/)
+SpriteBatchNode* SpriteBatchNode::createWithTexture(Urho3D::Texture2D* tex, ssize_t capacity/* = DEFAULT_CAPACITY*/)
 {
     SpriteBatchNode *batchNode = new (std::nothrow) SpriteBatchNode();
     if(batchNode && batchNode->initWithTexture(tex, capacity))
@@ -75,7 +75,7 @@ SpriteBatchNode* SpriteBatchNode::create(const std::string& fileImage, ssize_t c
 /*
 * init with Texture2D
 */
-bool SpriteBatchNode::initWithTexture(Texture2D *tex, ssize_t capacity/* = DEFAULT_CAPACITY*/)
+bool SpriteBatchNode::initWithTexture(Urho3D::Texture2D *tex, ssize_t capacity/* = DEFAULT_CAPACITY*/)
 {
     if(tex == nullptr)
     {
@@ -110,7 +110,7 @@ bool SpriteBatchNode::initWithTexture(Texture2D *tex, ssize_t capacity/* = DEFAU
 
 bool SpriteBatchNode::init()
 {
-//     Texture2D * texture = new (std::nothrow) Texture2D();
+//     Urho3D::Texture2D * texture = new (std::nothrow) Texture2D();
 //     texture->autorelease();
 //     return this->initWithTexture(texture, 0);
 	return false;
@@ -121,7 +121,7 @@ bool SpriteBatchNode::init()
 */
 bool SpriteBatchNode::initWithFile(const std::string& fileImage, ssize_t capacity/* = DEFAULT_CAPACITY*/)
 {
-//     Texture2D *texture2D = Director::getInstance()->getTextureCache()->addImage(fileImage);
+//     Urho3D::Texture2D *texture2D = Director::getInstance()->getTextureCache()->addImage(fileImage);
 //     return initWithTexture(texture2D, capacity);
 	return false;
 }
@@ -634,12 +634,12 @@ const BlendFunc& SpriteBatchNode::getBlendFunc() const
     return _blendFunc;
 }
 
-Texture2D* SpriteBatchNode::getTexture() const
+Urho3D::Texture2D* SpriteBatchNode::getTexture() const
 {
 	return {};// _textureAtlas->getTexture();
 }
 
-void SpriteBatchNode::setTexture(Texture2D *texture)
+void SpriteBatchNode::setTexture(Urho3D::Texture2D *texture)
 {
    // _textureAtlas->setTexture(texture);
     updateBlendFunc();

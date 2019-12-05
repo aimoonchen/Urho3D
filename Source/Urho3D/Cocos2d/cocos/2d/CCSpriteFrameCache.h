@@ -38,11 +38,14 @@ THE SOFTWARE.
 #include "base/CCRef.h"
 #include "base/CCValue.h"
 #include "base/CCMap.h"
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 
 class Sprite;
-class Texture2D;
+//class Texture2D;
 class PolygonInfo;
 
 /**
@@ -196,7 +199,7 @@ public:
      * @param plist Plist file name.
      * @param texture Texture pointer.
      */
-    void addSpriteFramesWithFile(const std::string&plist, Texture2D *texture);
+    void addSpriteFramesWithFile(const std::string&plist, Urho3D::Texture2D *texture);
 
     /** Adds multiple Sprite Frames from a plist file content. The texture will be associated with the created sprite frames. 
      * @js NA
@@ -205,7 +208,7 @@ public:
      * @param plist_content Plist file content string.
      * @param texture Texture pointer.
      */
-    void addSpriteFramesWithFileContent(const std::string& plist_content, Texture2D *texture);
+    void addSpriteFramesWithFileContent(const std::string& plist_content, Urho3D::Texture2D *texture);
 
     /** Adds an sprite frame with a given name.
      If the name already exists, then the contents of the old name will be replaced with the new one.
@@ -269,7 +272,7 @@ public:
      *
      * @param texture The texture that needs to removed.
      */
-    void removeSpriteFramesFromTexture(Texture2D* texture);
+    void removeSpriteFramesFromTexture(Urho3D::Texture2D* texture);
 
     /** Returns an Sprite Frame that was previously added.
      If the name is not found it will return nil.
@@ -293,7 +296,7 @@ protected:
 
     /*Adds multiple Sprite Frames with a dictionary. The texture will be associated with the created sprite frames.
      */
-    void addSpriteFramesWithDictionary(ValueMap& dictionary, Texture2D *texture, const std::string &plist);
+    void addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3D::Texture2D *texture, const std::string &plist);
     
     /*Adds multiple Sprite Frames with a dictionary. The texture will be associated with the created sprite frames.
      */
@@ -312,7 +315,7 @@ protected:
                                const std::vector<int> &triangleIndices,
                                PolygonInfo &polygonInfo);
 
-    void reloadSpriteFramesWithDictionary(ValueMap& dictionary, Texture2D *texture, const std::string &plist);
+    void reloadSpriteFramesWithDictionary(ValueMap& dictionary, Urho3D::Texture2D *texture, const std::string &plist);
 
     ValueMap _spriteFramesAliases;
     PlistFramesCache _spriteFramesCache;

@@ -63,7 +63,7 @@ public:
         _letterVisible = true;
     }
 
-    static LabelLetter* createWithTexture(Texture2D *texture, const Rect& rect, bool rotated = false)
+    static LabelLetter* createWithTexture(Urho3D::Texture2D *texture, const Rect& rect, bool rotated = false)
     {
         auto letter = new (std::nothrow) LabelLetter();
         if (letter && letter->initWithTexture(texture, rect, rotated))
@@ -279,7 +279,7 @@ Label* Label::createWithCharMap(const std::string& plistFile)
     return nullptr;
 }
 
-Label* Label::createWithCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
+Label* Label::createWithCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
     auto ret = new (std::nothrow) Label();
 
@@ -353,7 +353,7 @@ bool Label::initWithTTF(const TTFConfig& ttfConfig, const std::string& text, Tex
     return false;
 }
 
-bool Label::setCharMap(Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
+bool Label::setCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
     auto newAtlas = FontAtlasCache::getFontAtlasCharMap(texture,itemWidth,itemHeight,startCharMap);
 
@@ -544,10 +544,10 @@ void Label::reset()
 }
 
 //  ETC1 ALPHA supports, for LabelType::BMFONT & LabelType::CHARMAP
-static Texture2D* _getTexture(Label* label)
+static Urho3D::Texture2D* _getTexture(Label* label)
 {
     auto fontAtlas = label->getFontAtlas();
-    Texture2D* texture = nullptr;
+	Urho3D::Texture2D* texture = nullptr;
     if (fontAtlas != nullptr) {
         auto textures = fontAtlas->getTextures();
         if(!textures.empty()) {

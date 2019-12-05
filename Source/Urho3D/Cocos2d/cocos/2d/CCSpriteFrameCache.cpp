@@ -114,7 +114,7 @@ void SpriteFrameCache::initializePolygonInfo(const Size &textureSize,
     info.setRect(Rect(0, 0, spriteSize.width, spriteSize.height));
 }
 
-void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Texture2D* texture, const std::string &plist)
+void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3D::Texture2D* texture, const std::string &plist)
 {
     /*
     Supported Zwoptex Formats:
@@ -288,7 +288,7 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
         }
     }
     
-    Texture2D *texture = nullptr;
+	Urho3D::Texture2D *texture = nullptr;
 //     static std::unordered_map<std::string, Texture2D::PixelFormat> pixelFormats = {
 //         {"RGBA8888", Texture2D::PixelFormat::RGBA8888},
 //         {"RGBA4444", Texture2D::PixelFormat::RGBA4444},
@@ -328,7 +328,7 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
     }
 }
 
-void SpriteFrameCache::addSpriteFramesWithFile(const std::string& plist, Texture2D *texture)
+void SpriteFrameCache::addSpriteFramesWithFile(const std::string& plist, Urho3D::Texture2D *texture)
 {
 	std::string fullPath = FileUtils::getInstance()->fullPathForFilename(plist);
 	ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(fullPath);
@@ -336,7 +336,7 @@ void SpriteFrameCache::addSpriteFramesWithFile(const std::string& plist, Texture
     addSpriteFramesWithDictionary(dict, texture, plist);
 }
 
-void SpriteFrameCache::addSpriteFramesWithFileContent(const std::string& plist_content, Texture2D *texture)
+void SpriteFrameCache::addSpriteFramesWithFileContent(const std::string& plist_content, Urho3D::Texture2D *texture)
 {
     ValueMap dict = FileUtils::getInstance()->getValueMapFromData(plist_content.c_str(), static_cast<int>(plist_content.size()));
     addSpriteFramesWithDictionary(dict, texture, "by#addSpriteFramesWithFileContent()");
@@ -505,7 +505,7 @@ void SpriteFrameCache::removeSpriteFramesFromDictionary(ValueMap& dictionary)
     _spriteFramesCache.eraseFrames(keysToRemove);
 }
 
-void SpriteFrameCache::removeSpriteFramesFromTexture(Texture2D* texture)
+void SpriteFrameCache::removeSpriteFramesFromTexture(Urho3D::Texture2D* texture)
 {
     std::vector<std::string> keysToRemove;
 
@@ -548,7 +548,7 @@ SpriteFrame* SpriteFrameCache::getSpriteFrameByName(const std::string& name)
     return frame;
 }
 
-void SpriteFrameCache::reloadSpriteFramesWithDictionary(ValueMap& dictionary, Texture2D *texture, const std::string &plist)
+void SpriteFrameCache::reloadSpriteFramesWithDictionary(ValueMap& dictionary, Urho3D::Texture2D *texture, const std::string &plist)
 {
     ValueMap& framesDict = dictionary["frames"].asValueMap();
     int format = 0;
@@ -698,7 +698,7 @@ bool SpriteFrameCache::reloadTexture(const std::string& plist)
         texturePath = texturePath.append(".png");
     }
 
-    Texture2D *texture = nullptr;
+	Urho3D::Texture2D *texture = nullptr;
 //     if (Director::getInstance()->getTextureCache()->reloadTexture(texturePath))
 //         texture = Director::getInstance()->getTextureCache()->getTextureForKey(texturePath);
 
