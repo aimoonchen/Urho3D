@@ -94,13 +94,12 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	Size  imageSize = Size((float)imageWidth, (float)imageHeight);
 	pixelFormat = Texture2D::convertDataToFormat(outData.getBytes(), imageWidth*imageHeight * 4, Texture2D::PixelFormat::RGBA8888, pixelFormat, &outTempData, &outTempDataLen);
 
-	ret = initWithData(outTempData, outTempDataLen, pixelFormat, imageWidth, imageHeight, imageSize);
-	texture->SetData();
-	if (outTempData != nullptr && outTempData != outData.getBytes())
-	{
+	//ret = initWithData(outTempData, outTempDataLen, pixelFormat, imageWidth, imageHeight, imageSize);
+	texture->SetData(0, 0, 0, imageWidth, imageHeight, outTempData);
+	if (outTempData != nullptr && outTempData != outData.getBytes()) {
 		free(outTempData);
 	}
-	_hasPremultipliedAlpha = hasPremultipliedAlpha;
+	//_hasPremultipliedAlpha = hasPremultipliedAlpha;
 
 	return ret;
 }

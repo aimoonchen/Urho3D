@@ -52,9 +52,9 @@ using namespace std;
 
 NS_CC_BEGIN
 
-LabelBMFont * LabelBMFont::create()
+LabelBMFont * LabelBMFont::create(Urho3D::Context* context)
 {
-    LabelBMFont * pRet = new (std::nothrow) LabelBMFont();
+    LabelBMFont * pRet = new (std::nothrow) LabelBMFont(context);
     if (pRet)
     {
         pRet->autorelease();
@@ -65,9 +65,9 @@ LabelBMFont * LabelBMFont::create()
 }
 
 //LabelBMFont - Creation & Init
-LabelBMFont *LabelBMFont::create(const std::string& str, const std::string& fntFile, float width /* = 0 */, TextHAlignment alignment /* = TextHAlignment::LEFT */,const Vec2& imageOffset /* = Vec2::ZERO */)
+LabelBMFont *LabelBMFont::create(Urho3D::Context* context, const std::string& str, const std::string& fntFile, float width /* = 0 */, TextHAlignment alignment /* = TextHAlignment::LEFT */,const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-    LabelBMFont *ret = new (std::nothrow) LabelBMFont();
+    LabelBMFont *ret = new (std::nothrow) LabelBMFont(context);
     if(ret && ret->initWithString(str, fntFile, width, alignment,imageOffset))
     {
         ret->autorelease();
@@ -92,9 +92,9 @@ bool LabelBMFont::initWithString(const std::string& str, const std::string& fntF
     return false;
 }
 
-LabelBMFont::LabelBMFont()
+LabelBMFont::LabelBMFont(Urho3D::Context* context)
 {
-    _label = Label::create();
+    _label = Label::create(context);
     _label->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
     this->addChild(_label);
     this->setAnchorPoint(Vec2::ANCHOR_MIDDLE);

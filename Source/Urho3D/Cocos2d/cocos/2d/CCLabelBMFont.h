@@ -87,7 +87,7 @@ public:
     /**
      * @js ctor
      */
-    LabelBMFont();
+    LabelBMFont(Urho3D::Context* context);
     /**
      * @js NA
      * @lua NA
@@ -95,11 +95,11 @@ public:
     virtual ~LabelBMFont();
 
     /** creates a bitmap font atlas with an initial string and the FNT file */
-    static LabelBMFont * create(const std::string& str, const std::string& fntFile, float width = 0, TextHAlignment alignment = TextHAlignment::LEFT,const Vec2& imageOffset = Vec2::ZERO);
+    static LabelBMFont * create(Urho3D::Context* context, const std::string& str, const std::string& fntFile, float width = 0, TextHAlignment alignment = TextHAlignment::LEFT,const Vec2& imageOffset = Vec2::ZERO);
 
     /** Creates an label.
      */
-    static LabelBMFont * create();
+    static LabelBMFont * create(Urho3D::Context* context);
 
     /** init a bitmap font atlas with an initial string and the FNT file */
     bool initWithString(const std::string& str, const std::string& fntFile, float width = 0, TextHAlignment alignment = TextHAlignment::LEFT,const Vec2& imageOffset = Vec2::ZERO);

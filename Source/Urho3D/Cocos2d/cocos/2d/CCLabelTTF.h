@@ -31,7 +31,9 @@ THE SOFTWARE.
 /// @cond DO_NOT_SHOW
 
 #include "2d/CCNode.h"
-
+namespace Urho3D {
+	class Context;
+}
 NS_CC_BEGIN
 
 #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
@@ -71,7 +73,7 @@ public:
     /**
      * @js ctor
      */
-    LabelTTF();
+    LabelTTF(Urho3D::Context* context);
     /**
      * @js NA
      * @lua NA
@@ -81,13 +83,13 @@ public:
     /** creates a Label from a fontname, alignment, dimension in points and font size in points
      @since v2.0.1
      */
-    static LabelTTF * create(const std::string& string, const std::string& fontName, float fontSize,
+    static LabelTTF * create(Urho3D::Context* context, const std::string& string, const std::string& fontName, float fontSize,
                              const Size& dimensions = Size::ZERO, TextHAlignment hAlignment = TextHAlignment::CENTER,
                              TextVAlignment vAlignment = TextVAlignment::TOP);
     
     
     /** Create a label with string and a font definition*/
-    static LabelTTF * createWithFontDefinition(const std::string& string, FontDefinition &textDefinition);
+    static LabelTTF * createWithFontDefinition(Urho3D::Context* context, const std::string& string, FontDefinition &textDefinition);
     
     /** initializes the LabelTTF with a font name, alignment, dimension and font size */
     bool initWithString(const std::string& string, const std::string& fontName, float fontSize,
@@ -122,7 +124,7 @@ public:
 
     /** Creates an label.
      */
-    static LabelTTF * create();
+    static LabelTTF * create(Urho3D::Context* context);
 
     /** changes the string to render
     * @warning Changing the string is as expensive as creating a new LabelTTF. To obtain better performance use LabelAtlas
@@ -165,6 +167,7 @@ protected:
     Label*    _renderLabel;
     bool _contentDirty;
     FontDefinition _fontDef;
+	Urho3D::Context* context_{ nullptr };
 };
 
 

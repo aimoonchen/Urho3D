@@ -82,8 +82,9 @@ bool TextFieldDelegate::onVisit(TextFieldTTF* /*sender*/, Renderer* /*renderer*/
 // constructor and destructor
 //////////////////////////////////////////////////////////////////////////
 
-TextFieldTTF::TextFieldTTF()
-: _delegate(0)
+TextFieldTTF::TextFieldTTF(Urho3D::Context* context)
+: Label(context)
+,_delegate(0)
 , _charCount(0)
 , _inputText("")
 , _placeHolder("")   // prevent Label initWithString assertion
@@ -108,9 +109,9 @@ TextFieldTTF::~TextFieldTTF()
 // static constructor
 //////////////////////////////////////////////////////////////////////////
 
-TextFieldTTF * TextFieldTTF::textFieldWithPlaceHolder(const std::string& placeholder, const Size& dimensions, TextHAlignment alignment, const std::string& fontName, float fontSize)
+TextFieldTTF * TextFieldTTF::textFieldWithPlaceHolder(Urho3D::Context* context, const std::string& placeholder, const Size& dimensions, TextHAlignment alignment, const std::string& fontName, float fontSize)
 {
-    TextFieldTTF *ret = new (std::nothrow) TextFieldTTF();
+    TextFieldTTF *ret = new (std::nothrow) TextFieldTTF(context);
     if(ret && ret->initWithPlaceHolder("", dimensions, alignment, fontName, fontSize))
     {
         ret->autorelease();
@@ -124,9 +125,9 @@ TextFieldTTF * TextFieldTTF::textFieldWithPlaceHolder(const std::string& placeho
     return nullptr;
 }
 
-TextFieldTTF * TextFieldTTF::textFieldWithPlaceHolder(const std::string& placeholder, const std::string& fontName, float fontSize)
+TextFieldTTF * TextFieldTTF::textFieldWithPlaceHolder(Urho3D::Context* context, const std::string& placeholder, const std::string& fontName, float fontSize)
 {
-    TextFieldTTF *ret = new (std::nothrow) TextFieldTTF();
+    TextFieldTTF *ret = new (std::nothrow) TextFieldTTF(context);
     if(ret && ret->initWithPlaceHolder("", fontName, fontSize))
     {
         ret->autorelease();

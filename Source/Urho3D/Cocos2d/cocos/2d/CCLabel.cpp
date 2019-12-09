@@ -49,6 +49,7 @@
 // #include "Core/Context.h"
 // #include "Resource/ResourceCache.h"
 #include "Graphics/Texture2D.h"
+#include "renderer/Texture2DUtils.h"
 NS_CC_BEGIN
 
 /**
@@ -176,9 +177,9 @@ private:
     bool _letterVisible;
 };
 
-Label* Label::create()
+Label* Label::create(Urho3D::Context* contex)
 {
-    auto ret = new (std::nothrow) Label;
+    auto ret = new (std::nothrow) Label(contex);
 
     if (ret)
     {
@@ -188,22 +189,22 @@ Label* Label::create()
     return ret;
 }
 
-Label* Label::create(const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
+Label* Label::create(Urho3D::Context* context, const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
 {
     if (FileUtils::getInstance()->isFileExist(font))
     {
-        return createWithTTF(text,font,fontSize,dimensions,hAlignment,vAlignment);
+        return createWithTTF(context, text,font,fontSize,dimensions,hAlignment,vAlignment);
     } 
     else
     {
-        return createWithSystemFont(text,font,fontSize,dimensions,hAlignment,vAlignment);
+        return createWithSystemFont(context, text,font,fontSize,dimensions,hAlignment,vAlignment);
     }
 	return {};
 }
 
-Label* Label::createWithSystemFont(const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
+Label* Label::createWithSystemFont(Urho3D::Context* context, const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
 {
-    auto ret = new (std::nothrow) Label(hAlignment,vAlignment);
+    auto ret = new (std::nothrow) Label(context, hAlignment,vAlignment);
 
     if (ret)
     {
@@ -220,9 +221,9 @@ Label* Label::createWithSystemFont(const std::string& text, const std::string& f
     return nullptr;
 }
 
-Label* Label::createWithTTF(const std::string& text, const std::string& fontFile, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
+Label* Label::createWithTTF(Urho3D::Context* context, const std::string& text, const std::string& fontFile, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
 {
-    auto ret = new (std::nothrow) Label(hAlignment,vAlignment);
+    auto ret = new (std::nothrow) Label(context, hAlignment,vAlignment);
 
     if (ret && ret->initWithTTF(text, fontFile, fontSize, dimensions, hAlignment, vAlignment))
     {
@@ -234,9 +235,9 @@ Label* Label::createWithTTF(const std::string& text, const std::string& fontFile
     return nullptr;
 }
 
-Label* Label::createWithTTF(const TTFConfig& ttfConfig, const std::string& text, TextHAlignment hAlignment /* = TextHAlignment::CENTER */, int maxLineWidth /* = 0 */)
+Label* Label::createWithTTF(Urho3D::Context* context, const TTFConfig& ttfConfig, const std::string& text, TextHAlignment hAlignment /* = TextHAlignment::CENTER */, int maxLineWidth /* = 0 */)
 {
-    auto ret = new (std::nothrow) Label(hAlignment);
+    auto ret = new (std::nothrow) Label(context, hAlignment);
 
     if (ret && ret->initWithTTF(ttfConfig, text, hAlignment, maxLineWidth))
     {
@@ -248,9 +249,9 @@ Label* Label::createWithTTF(const TTFConfig& ttfConfig, const std::string& text,
     return nullptr;
 }
 
-Label* Label::createWithBMFont(const std::string& bmfontFilePath, const std::string& text,const TextHAlignment& hAlignment /* = TextHAlignment::LEFT */, int maxLineWidth /* = 0 */, const Vec2& imageOffset /* = Vec2::ZERO */)
+Label* Label::createWithBMFont(Urho3D::Context* contex, const std::string& bmfontFilePath, const std::string& text,const TextHAlignment& hAlignment /* = TextHAlignment::LEFT */, int maxLineWidth /* = 0 */, const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-    auto ret = new (std::nothrow) Label(hAlignment);
+    auto ret = new (std::nothrow) Label(contex, hAlignment);
 
     if (ret && ret->setBMFontFilePath(bmfontFilePath,imageOffset))
     {
@@ -265,9 +266,9 @@ Label* Label::createWithBMFont(const std::string& bmfontFilePath, const std::str
     return nullptr;
 }
 
-Label* Label::createWithCharMap(const std::string& plistFile)
+Label* Label::createWithCharMap(Urho3D::Context* context, const std::string& plistFile)
 {
-    auto ret = new (std::nothrow) Label();
+    auto ret = new (std::nothrow) Label(context);
 
     if (ret && ret->setCharMap(plistFile))
     {
@@ -281,9 +282,9 @@ Label* Label::createWithCharMap(const std::string& plistFile)
 
 Label* Label::createWithCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
-    auto ret = new (std::nothrow) Label();
+    auto ret = new (std::nothrow) Label(texture->GetContext());
 
-    if (ret && ret->setCharMap(texture,itemWidth,itemHeight,startCharMap))
+    if (ret && ret->setCharMap(texture, itemWidth,itemHeight,startCharMap))
     {
         ret->autorelease();
         return ret;
@@ -293,9 +294,9 @@ Label* Label::createWithCharMap(Urho3D::Texture2D* texture, int itemWidth, int i
     return nullptr;
 }
 
-Label* Label::createWithCharMap(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap)
+Label* Label::createWithCharMap(Urho3D::Context* contex, const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap)
 {
-    auto ret = new (std::nothrow) Label();
+    auto ret = new (std::nothrow) Label(contex);
 
     if (ret && ret->setCharMap(charMapFile,itemWidth,itemHeight,startCharMap))
     {
@@ -385,7 +386,7 @@ bool Label::setCharMap(const std::string& charMapFile, int itemWidth, int itemHe
     return true;
 }
 
-Label::Label(TextHAlignment hAlignment /* = TextHAlignment::LEFT */, 
+Label::Label(Urho3D::Context* contex, TextHAlignment hAlignment /* = TextHAlignment::LEFT */,
              TextVAlignment vAlignment /* = TextVAlignment::TOP */)
 : _textSprite(nullptr)
 , _shadowNode(nullptr)
@@ -395,6 +396,7 @@ Label::Label(TextHAlignment hAlignment /* = TextHAlignment::LEFT */,
 , _boldEnabled(false)
 , _underlineNode(nullptr)
 , _strikethroughEnabled(false)
+, context_{ contex }
 {
     setAnchorPoint(Vec2::ANCHOR_MIDDLE);
     reset();
@@ -1283,8 +1285,8 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
     _currentLabelType = LabelType::STRING_TEXTURE;
 
 	//auto* cache = g_urho3d_context->GetSubsystem<Urho3D::ResourceCache>();
-    auto texture = new (std::nothrow) Urho3D::Texture2D(g_urho3d_context);
-    texture->initWithString(_utf8Text.c_str(), fontDef);
+    auto texture = new (std::nothrow) Urho3D::Texture2D(context_);
+	InitWithString(texture, _utf8Text.c_str(), fontDef);
 
     _textSprite = Sprite::createWithTexture(texture);
     //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
@@ -1292,7 +1294,7 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
     _textSprite->setGlobalZOrder(getGlobalZOrder());
     _textSprite->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
     this->setContentSize(_textSprite->getContentSize());
-    texture->release();
+    //texture->release();
     if (_blendFuncDirty)
     {
         _textSprite->setBlendFunc(_blendFunc);

@@ -92,13 +92,13 @@ void EditBoxImplCommon::initInactiveLabels(const Size& size)
 {
     const char* pDefaultFontName = this->getNativeDefaultFontName();
 
-    _label = Label::create();
+    _label = Label::create(nullptr);
     _label->setAnchorPoint(Vec2(0,1));
     _label->setOverflow(Label::Overflow::CLAMP);
     _label->setVisible(false);
     _editBox->addChild(_label, kLabelZOrder);
 
-    _labelPlaceHolder = Label::create();
+    _labelPlaceHolder = Label::create(nullptr);
     _labelPlaceHolder->setAnchorPoint(Vec2(0, 1.0f));
     _labelPlaceHolder->setTextColor(Color4B::GRAY);
     _labelPlaceHolder->enableWrap(false);
