@@ -4,7 +4,9 @@
 #include "event/HitTest.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
-
+#include "Urho3D/Resource/Image.h"
+#include "Urho3D/Graphics/Texture2D.h"
+#include "Urho3DContext.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -21,7 +23,7 @@ std::unordered_map<std::string, UIPackage*> UIPackage::_packageInstById;
 std::unordered_map<std::string, UIPackage*> UIPackage::_packageInstByName;
 std::vector<UIPackage*> UIPackage::_packageList;
 
-Texture2D* UIPackage::_emptyTexture;
+Urho3D::Texture2D* UIPackage::_emptyTexture;
 
 struct AtlasSprite
 {
@@ -97,11 +99,11 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
 
     if (_emptyTexture == nullptr)
     {
-//         Image* emptyImage = new Image();
-//         emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
-//         _emptyTexture = new Texture2D();
-//         _emptyTexture->initWithImage(emptyImage);
-//         delete emptyImage;
+		Urho3D::Image* emptyImage = new Urho3D::Image(GetUrho3DContext());
+        emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
+        _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
+        _emptyTexture->initWithImage(emptyImage);
+        delete emptyImage;
     }
 
     Data data;
@@ -587,7 +589,7 @@ void* UIPackage::getItemAsset(PackageItem* item)
 
 void UIPackage::loadAtlas(PackageItem* item)
 {
-//     Image* image = new Image();
+//     Urho3D::Image* image = new Urho3D::Image();
 //     Image::setPNGPremultipliedAlphaEnabled(false);
 //     if (!image->initWithImageFile(item->file))
 //     {
@@ -600,13 +602,13 @@ void UIPackage::loadAtlas(PackageItem* item)
 //     }
 //     Image::setPNGPremultipliedAlphaEnabled(true);
 // 
-//     Texture2D* tex = new Texture2D();
+//     Urho3D::Texture2D* tex = new Urho3D::Texture2D();
 //     tex->initWithImage(image);
 //     item->texture = tex;
 //     delete image;
 
-    string alphaFilePath;
-    string ext = FileUtils::getInstance()->getFileExtension(item->file);
+    std::string alphaFilePath;
+	std::string ext = FileUtils::getInstance()->getFileExtension(item->file);
     size_t pos = item->file.find_last_of('.');
     if (pos != -1)
         alphaFilePath = item->file.substr(0, pos) + "!a" + ext;
@@ -619,14 +621,14 @@ void UIPackage::loadAtlas(PackageItem* item)
     FileUtils::getInstance()->setPopupNotify(tmp);
     if (hasAlphaTexture)
     {
-//         image = new Image();
+//         image = new Urho3D::Image();
 //         if (!image->initWithImageFile(alphaFilePath))
 //         {
 //             delete image;
 //             return;
 //         }
 // 
-//         tex = new Texture2D();
+//         tex = new Urho3D::Texture2D();
 //         tex->initWithImage(image);
 //         item->texture->setAlphaTexture(tex);
 //         tex->release();
@@ -667,7 +669,7 @@ void UIPackage::loadImage(PackageItem* item)
     }
     if (item->scaleByTile)
     {
-//         Texture2D::TexParams tp = {GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT};
+//         Urho3D::Texture2D::TexParams tp = {GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT};
 //         item->spriteFrame->getTexture()->setTexParameters(tp);
     }
 }
@@ -754,11 +756,11 @@ void UIPackage::loadFont(PackageItem* item)
     int xadvance = buffer->readInt();
     int lineHeight = buffer->readInt();
 
-    Texture2D* mainTexture = nullptr;
+    Urho3D::Texture2D* mainTexture = nullptr;
     AtlasSprite* mainSprite = nullptr;
 
     if (ttf && (mainSprite = getSprite(item->id)) != nullptr)
-        mainTexture = (Texture2D*)getItemAsset(mainSprite->atlas);
+        mainTexture = (Urho3D::Texture2D*)getItemAsset(mainSprite->atlas);
 
     buffer->seek(0, 1);
 

@@ -1,8 +1,7 @@
 #pragma once
 
-namespace Urho3D
-{
+namespace Urho3D {
 	class Context;
 }
-
-extern Urho3D::Context* g_urho3d_context;
+void SetUrho3DContext(Urho3D::Context* context);
+Urho3D::Context* GetUrho3DContext();

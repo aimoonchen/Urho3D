@@ -2,6 +2,7 @@
 #include <memory>
 #include <vector>
 #include <map>
+#include <string>
 #include "Urho3D/Math/Vector3.h"
 
 namespace Urho3D

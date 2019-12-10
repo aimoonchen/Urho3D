@@ -7,7 +7,7 @@ USING_NS_CC;
 //  kProgressTextureCoords holds points {0,1} {0,0} {1,0} {1,1} we can represent it as bits
 const char kProgressTextureCoords = 0x4b;
 
-Texture2D* FUISprite::_empty = nullptr;
+Urho3D::Texture2D* FUISprite::_empty = nullptr;
 
 FUISprite::FUISprite()
     : _fillMethod(FillMethod::None),

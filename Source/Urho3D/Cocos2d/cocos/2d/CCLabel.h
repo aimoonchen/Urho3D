@@ -142,7 +142,7 @@ public:
     *
     * @return An automatically released Label object.
     */
-    static Label* create(Urho3D::Context* contex);
+    static Label* create();
 
     /**
      * Allocates and initializes a Label, base on platform-dependent API.
@@ -158,7 +158,7 @@ public:
      *
      * @return An automatically released Label object.
      */
-    static Label* createWithSystemFont(Urho3D::Context* contex, const std::string& text, const std::string& font, float fontSize,
+    static Label* createWithSystemFont(const std::string& text, const std::string& font, float fontSize,
         const Size& dimensions = Size::ZERO, TextHAlignment hAlignment = TextHAlignment::LEFT,
         TextVAlignment vAlignment = TextVAlignment::TOP);
 
@@ -174,7 +174,7 @@ public:
     *
     * @return An automatically released Label object.
     */
-    static Label * createWithTTF(Urho3D::Context* contex, const std::string& text, const std::string& fontFilePath, float fontSize,
+    static Label * createWithTTF(const std::string& text, const std::string& fontFilePath, float fontSize,
         const Size& dimensions = Size::ZERO, TextHAlignment hAlignment = TextHAlignment::LEFT,
         TextVAlignment vAlignment = TextVAlignment::TOP);
 
@@ -189,7 +189,7 @@ public:
     * @return An automatically released Label object.
     * @see TTFConfig setTTFConfig setMaxLineWidth
     */
-    static Label* createWithTTF(Urho3D::Context* contex, const TTFConfig& ttfConfig, const std::string& text,
+    static Label* createWithTTF(const TTFConfig& ttfConfig, const std::string& text,
         TextHAlignment hAlignment = TextHAlignment::LEFT, int maxLineWidth = 0);
 
     /**
@@ -204,7 +204,7 @@ public:
     * @return An automatically released Label object.
     * @see setBMFontFilePath setMaxLineWidth
     */
-    static Label* createWithBMFont(Urho3D::Context* contex, const std::string& bmfontPath, const std::string& text,
+    static Label* createWithBMFont(const std::string& bmfontPath, const std::string& text,
         const TextHAlignment& hAlignment = TextHAlignment::LEFT, int maxLineWidth = 0,
         const Vec2& imageOffset = Vec2::ZERO);
 
@@ -218,7 +218,7 @@ public:
     *
     * @return An automatically released Label object.
     */
-    static Label * createWithCharMap(Urho3D::Context* contex, const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap);
+    static Label * createWithCharMap(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap);
 
     /**
     * Allocates and initializes a Label, with char map configuration.
@@ -239,7 +239,7 @@ public:
     *
     * @return An automatically released Label object.
     */
-    static Label * createWithCharMap(Urho3D::Context* context, const std::string& plistFile);
+    static Label * createWithCharMap(const std::string& plistFile);
 
     //  end of creators group
     /// @}
@@ -610,7 +610,7 @@ public:
     virtual void removeChild(Node* child, bool cleanup = true) override;
     virtual void setGlobalZOrder(float globalZOrder) override;
 
-    CC_DEPRECATED_ATTRIBUTE static Label* create(Urho3D::Context* contex, const std::string& text, const std::string& font, float fontSize,
+    CC_DEPRECATED_ATTRIBUTE static Label* create(const std::string& text, const std::string& font, float fontSize,
         const Size& dimensions = Size::ZERO, TextHAlignment hAlignment = TextHAlignment::LEFT,
         TextVAlignment vAlignment = TextVAlignment::TOP);
     CC_DEPRECATED_ATTRIBUTE virtual void setFontDefinition(const FontDefinition& textDefinition);
@@ -622,7 +622,7 @@ CC_CONSTRUCTOR_ACCESS:
      * Constructor of Label.
      * @js NA
      */
-    Label(Urho3D::Context* contex, TextHAlignment hAlignment = TextHAlignment::LEFT,
+    Label(TextHAlignment hAlignment = TextHAlignment::LEFT,
       TextVAlignment vAlignment = TextVAlignment::TOP);
 
     /**
@@ -792,7 +792,6 @@ protected:
     bool _boldEnabled;
     DrawNode* _underlineNode;
     bool _strikethroughEnabled;
-	Urho3D::Context* context_{ nullptr };
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(Label);
 };

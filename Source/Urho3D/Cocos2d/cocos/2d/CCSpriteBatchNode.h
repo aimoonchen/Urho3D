@@ -86,7 +86,7 @@ public:
      * @param capacity The capacity of children.
      * @return Return an autorelease object.
      */
-    static SpriteBatchNode* create(Urho3D::Context* contex, const std::string& fileImage, ssize_t capacity = DEFAULT_CAPACITY);
+    static SpriteBatchNode* create(const std::string& fileImage, ssize_t capacity = DEFAULT_CAPACITY);
 
 
     /** Returns the TextureAtlas object. 
@@ -233,7 +233,7 @@ CC_CONSTRUCTOR_ACCESS:
     /**
      * @js ctor
      */
-    SpriteBatchNode(Urho3D::Context* contex);
+    SpriteBatchNode();
     /**
      * @js NA
      * @lua NA
@@ -272,7 +272,6 @@ protected:
     // There is not need to retain/release these objects, since they are already retained by _children
     // So, using std::vector<Sprite*> is slightly faster than using cocos2d::Array for this particular case
     std::vector<Sprite*> _descendants;
-	Urho3D::Context* context_{ nullptr };
 };
 
 // end of sprite_nodes group

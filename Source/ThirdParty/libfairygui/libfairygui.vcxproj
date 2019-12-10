@@ -90,7 +90,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>_DEBUG;_LIB;_WINDOWS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Github\Urho3D\Source\Urho3D\Cocos2d\cocos;D:\Github\Urho3D\Source\ThirdParty\libfairygui\Classes;D:\Github\Urho3D\Source\ThirdParty;D:\Github\Urho3D\Source\Urho3D\Cocos2d\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Github\Urho3D\Build\include;D:\Github\Urho3D\Source\Urho3D\Cocos2d\cocos;D:\Github\Urho3D\Source\ThirdParty\libfairygui\Classes;D:\Github\Urho3D\Source\ThirdParty;D:\Github\Urho3D\Source\Urho3D\Cocos2d\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>
@@ -139,7 +139,7 @@
       <SDLCheck>true</SDLCheck>
       <PreprocessorDefinitions>NDEBUG;_LIB;_WINDOWS;%(PreprocessorDefinitions);_CRT_SECURE_NO_WARNINGS</PreprocessorDefinitions>
       <ConformanceMode>true</ConformanceMode>
-      <AdditionalIncludeDirectories>D:\Github\Urho3D\Source\Urho3D\Cocos2d\cocos;D:\Github\Urho3D\Source\ThirdParty\libfairygui\Classes;D:\Github\Urho3D\Source\ThirdParty;D:\Github\Urho3D\Source\Urho3D\Cocos2d\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
+      <AdditionalIncludeDirectories>D:\Github\Urho3D\Build\include;D:\Github\Urho3D\Source\Urho3D\Cocos2d\cocos;D:\Github\Urho3D\Source\ThirdParty\libfairygui\Classes;D:\Github\Urho3D\Source\ThirdParty;D:\Github\Urho3D\Source\Urho3D\Cocos2d\external;%(AdditionalIncludeDirectories)</AdditionalIncludeDirectories>
     </ClCompile>
     <Link>
       <SubSystem>Windows</SubSystem>

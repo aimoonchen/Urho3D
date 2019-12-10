@@ -37,10 +37,9 @@ NS_CC_BEGIN
 #pragma warning (disable: 4996)
 #endif
 
-LabelTTF::LabelTTF(Urho3D::Context* context)
-	: context_{ context }
+LabelTTF::LabelTTF()
 {
-    _renderLabel = Label::create(context);
+    _renderLabel = Label::create();
     _renderLabel->setAnchorPoint(Vec2::ANCHOR_BOTTOM_LEFT);
     this->addChild(_renderLabel);
     this->setAnchorPoint(Vec2::ANCHOR_MIDDLE);
@@ -54,9 +53,9 @@ LabelTTF::~LabelTTF()
 {
 }
 
-LabelTTF * LabelTTF::create(Urho3D::Context* context)
+LabelTTF * LabelTTF::create()
 {
-    LabelTTF * ret = new (std::nothrow) LabelTTF(context);
+    LabelTTF * ret = new (std::nothrow) LabelTTF();
     if (ret)
     {
         ret->autorelease();
@@ -68,11 +67,11 @@ LabelTTF * LabelTTF::create(Urho3D::Context* context)
     return ret;
 }
 
-LabelTTF* LabelTTF::create(Urho3D::Context* context, const std::string& string, const std::string& fontName, float fontSize,
+LabelTTF* LabelTTF::create(const std::string& string, const std::string& fontName, float fontSize,
                                const Size &dimensions, TextHAlignment hAlignment, 
                                TextVAlignment vAlignment)
 {
-    LabelTTF *ret = new (std::nothrow) LabelTTF(context);
+    LabelTTF *ret = new (std::nothrow) LabelTTF();
     if(ret && ret->initWithString(string, fontName, fontSize, dimensions, hAlignment, vAlignment))
     {
         ret->autorelease();
@@ -82,9 +81,9 @@ LabelTTF* LabelTTF::create(Urho3D::Context* context, const std::string& string, 
     return nullptr;
 }
 
-LabelTTF * LabelTTF::createWithFontDefinition(Urho3D::Context* context, const std::string& string, FontDefinition &textDefinition)
+LabelTTF * LabelTTF::createWithFontDefinition(const std::string& string, FontDefinition &textDefinition)
 {
-    LabelTTF *ret = new (std::nothrow) LabelTTF(context);
+    LabelTTF *ret = new (std::nothrow) LabelTTF();
     if(ret && ret->initWithStringAndTextDefinition(string, textDefinition))
     {
         ret->autorelease();
