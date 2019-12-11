@@ -31,6 +31,10 @@ namespace fairygui
 {
 	class GRoot;
 }
+namespace cocos2d
+{
+    class Scene;
+}
 namespace Urho3D
 {
 
@@ -134,4 +138,5 @@ private:
 	int current_player_id_{ 0 };
 
 	fairygui::GRoot* groot_{ nullptr };
+    cocos2d::Scene* ui_scene_{ nullptr };
 };
