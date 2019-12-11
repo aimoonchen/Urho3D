@@ -65,6 +65,7 @@
 //#include "Character.h"
 #include "RaceRoom.h"
 #include "Avatar.h"
+#include "GRoot.h"
 
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
@@ -214,7 +215,7 @@ void SceneReplication::CreateUI()
 void SceneReplication::InitFairyGUI()
 {
 	SetUrho3DContext(GetContext());
-
+	groot_ = fairygui::GRoot::create(this);
 	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
 	fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();

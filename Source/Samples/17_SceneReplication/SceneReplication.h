@@ -27,6 +27,10 @@
 
 #include "Sample.h"
 #include "Race.h"
+namespace fairygui
+{
+	class GRoot;
+}
 namespace Urho3D
 {
 
@@ -128,4 +132,6 @@ private:
 	//
 	std::vector<std::unique_ptr<server::Player>> players_;
 	int current_player_id_{ 0 };
+
+	fairygui::GRoot* groot_{ nullptr };
 };

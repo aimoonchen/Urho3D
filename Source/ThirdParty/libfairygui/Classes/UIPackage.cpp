@@ -5,8 +5,11 @@
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
 #include "Urho3D/Resource/Image.h"
+#include "Urho3D/Graphics/Graphics.h"
 #include "Urho3D/Graphics/Texture2D.h"
 #include "Urho3DContext.h"
+#include "Urho3D/Core/Context.h"
+#include "Urho3D/Resource/ResourceCache.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -99,11 +102,15 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
 
     if (_emptyTexture == nullptr)
     {
-		Urho3D::Image* emptyImage = new Urho3D::Image(GetUrho3DContext());
-        emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
-        _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
-        _emptyTexture->initWithImage(emptyImage);
-        delete emptyImage;
+// 		Urho3D::Image* emptyImage = new Urho3D::Image(GetUrho3DContext());
+//         //emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
+// 		emptyImage->SetSize(2, 2, 4);
+// 		emptyImage->SetData(emptyTextureData);
+         _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
+        //_emptyTexture->initWithImage(emptyImage);
+		_emptyTexture->SetSize(2,2, Urho3D::Graphics::GetRGBAFormat());
+		_emptyTexture->SetData(0, 0, 0, 2, 2, emptyTextureData);
+        //delete emptyImage;
     }
 
     Data data;
@@ -601,7 +608,8 @@ void UIPackage::loadAtlas(PackageItem* item)
 //         return;
 //     }
 //     Image::setPNGPremultipliedAlphaEnabled(true);
-// 
+	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+	item->texture = cache->GetResource<Urho3D::Texture2D>(item->file.c_str());
 //     Urho3D::Texture2D* tex = new Urho3D::Texture2D();
 //     tex->initWithImage(image);
 //     item->texture = tex;
@@ -633,6 +641,8 @@ void UIPackage::loadAtlas(PackageItem* item)
 //         item->texture->setAlphaTexture(tex);
 //         tex->release();
 //         delete image;
+// 		auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+// 		item->texture->setAlphaTexture(cache->GetResource<Urho3D::Texture2D>(alphaFilePath.c_str()));
     }
 }
 
@@ -671,6 +681,9 @@ void UIPackage::loadImage(PackageItem* item)
     {
 //         Urho3D::Texture2D::TexParams tp = {GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT};
 //         item->spriteFrame->getTexture()->setTexParameters(tp);
+		item->spriteFrame->getTexture()->SetFilterMode(Urho3D::FILTER_BILINEAR);
+		item->spriteFrame->getTexture()->SetAddressMode(Urho3D::COORD_U, Urho3D::ADDRESS_WRAP);
+		item->spriteFrame->getTexture()->SetAddressMode(Urho3D::COORD_V, Urho3D::ADDRESS_WRAP);
     }
 }
 
