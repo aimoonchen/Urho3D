@@ -687,7 +687,7 @@ protected:
     BlendFunc        _blendFunc;            /// It's required for TextureProtocol inheritance
 	Urho3D::Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
     SpriteFrame*     _spriteFrame;
-//    TrianglesCommand _trianglesCommand;     ///
+	TrianglesCommand _trianglesCommand;     ///
 #if CC_SPRITE_DEBUG_DRAW
     DrawNode *_debugDrawNode;
 #endif //CC_SPRITE_DEBUG_DRAW

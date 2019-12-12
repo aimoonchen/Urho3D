@@ -36,11 +36,14 @@ THE SOFTWARE.
 #include "2d/CCSpriteFrameCache.h"
 // #include "renderer/CCTextureCache.h"
 #include "Graphics/Texture2D.h"
-// #include "renderer/CCRenderer.h"
+#include "renderer/CCRenderer.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
 #include "2d/CCCamera.h"
 
+#include "Urho3DContext.h"
+#include "Core/Context.h"
+#include "Resource/ResourceCache.h"
 NS_CC_BEGIN
 
 // MARK: create, init, dealloc
@@ -245,15 +248,15 @@ bool Sprite::initWithSpriteFrame(SpriteFrame *spriteFrame)
 bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
 {
     bool ret = false;
-
-//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(info.getFilename());
-//     if(texture && initWithTexture(texture))
-//     {
-//         _polyInfo = info;
-//         _renderMode = RenderMode::POLYGON;
-//         Node::setContentSize(_polyInfo.getRect().size / _director->getContentScaleFactor());
-//         ret = true;
-//     }
+	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+	Urho3D::Texture2D* texture = cache->GetResource<Urho3D::Texture2D>(info.getFilename().c_str());//_director->getTextureCache()->addImage(info.getFilename());
+    if(texture && initWithTexture(texture))
+    {
+        _polyInfo = info;
+        _renderMode = RenderMode::POLYGON;
+        Node::setContentSize(_polyInfo.getRect().size / _director->getContentScaleFactor());
+        ret = true;
+    }
 
     return ret;
 }
@@ -1075,15 +1078,15 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
     if(_insideBounds)
 #endif
     {
-//         _trianglesCommand.init(_globalZOrder,
-//                                _texture,
-//                                getGLProgramState(),
-//                                _blendFunc,
-//                                _polyInfo.triangles,
-//                                transform,
-//                                flags);
-// 
-//         renderer->addCommand(&_trianglesCommand);
+        _trianglesCommand.init(_globalZOrder,
+                               _texture,
+                               getGLProgramState(),
+                               _blendFunc,
+                               _polyInfo.triangles,
+                               transform,
+                               flags);
+
+        renderer->addCommand(&_trianglesCommand);
 
 #if CC_SPRITE_DEBUG_DRAW
         _debugDrawNode->clear();
