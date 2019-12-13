@@ -62,6 +62,7 @@
 #include "Cocos2d/cocos/Urho3DContext.h"
 #include "Cocos2d/cocos/platform/CCFileUtils.h"
 #include "Cocos2d/cocos/2d/CCScene.h"
+#include "Cocos2d/cocos/renderer/CCRenderer.h"
 #include "Race.h"
 //#include "Character.h"
 #include "RaceRoom.h"
@@ -168,48 +169,48 @@ void SceneReplication::CreateScene()
 
 void SceneReplication::CreateUI()
 {
-//     auto* cache = GetSubsystem<ResourceCache>();
-//     auto* ui = GetSubsystem<UI>();
-//     UIElement* root = ui->GetRoot();
-//     auto* uiStyle = cache->GetResource<XMLFile>("UI/DefaultStyle.xml");
-//     // Set style to the UI root so that elements will inherit it
-//     root->SetDefaultStyle(uiStyle);
-// 
-//     // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor will
-//     // control the camera, and when visible, it can interact with the login UI
-//     SharedPtr<Cursor> cursor(new Cursor(context_));
-//     cursor->SetStyleAuto(uiStyle);
-//     ui->SetCursor(cursor);
-//     // Set starting position of the cursor at the rendering window center
-//     auto* graphics = GetSubsystem<Graphics>();
-//     cursor->SetPosition(graphics->GetWidth() / 2, graphics->GetHeight() / 2);
-// 
-//     // Construct the instructions text element
-//     instructionsText_ = ui->GetRoot()->CreateChild<Text>();
-//     instructionsText_->SetText(
-//         "Use WASD keys to move and RMB to rotate view"
-//     );
-//     instructionsText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
-//     // Position the text relative to the screen center
-//     instructionsText_->SetHorizontalAlignment(HA_CENTER);
-//     instructionsText_->SetVerticalAlignment(VA_CENTER);
-//     instructionsText_->SetPosition(0, graphics->GetHeight() / 4);
-//     // Hide until connected
-//     instructionsText_->SetVisible(false);
-// 
-//     buttonContainer_ = root->CreateChild<UIElement>();
-//     buttonContainer_->SetFixedSize(500, 20);
-//     buttonContainer_->SetPosition(20, 20);
-//     buttonContainer_->SetLayoutMode(LM_HORIZONTAL);
-// 
-//     textEdit_ = buttonContainer_->CreateChild<LineEdit>();
-//     textEdit_->SetStyleAuto();
-// 
-//     connectButton_ = CreateButton("Connect", 90);
-//     disconnectButton_ = CreateButton("Disconnect", 100);
-//     startServerButton_ = CreateButton("Start Server", 110);
-// 
-//     UpdateButtons();
+    auto* cache = GetSubsystem<ResourceCache>();
+    auto* ui = GetSubsystem<UI>();
+    UIElement* root = ui->GetRoot();
+    auto* uiStyle = cache->GetResource<XMLFile>("UI/DefaultStyle.xml");
+    // Set style to the UI root so that elements will inherit it
+    root->SetDefaultStyle(uiStyle);
+
+    // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor will
+    // control the camera, and when visible, it can interact with the login UI
+    SharedPtr<Cursor> cursor(new Cursor(context_));
+    cursor->SetStyleAuto(uiStyle);
+    ui->SetCursor(cursor);
+    // Set starting position of the cursor at the rendering window center
+    auto* graphics = GetSubsystem<Graphics>();
+    cursor->SetPosition(graphics->GetWidth() / 2, graphics->GetHeight() / 2);
+
+    // Construct the instructions text element
+    instructionsText_ = ui->GetRoot()->CreateChild<Text>();
+    instructionsText_->SetText(
+        "Use WASD keys to move and RMB to rotate view"
+    );
+    instructionsText_->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
+    // Position the text relative to the screen center
+    instructionsText_->SetHorizontalAlignment(HA_CENTER);
+    instructionsText_->SetVerticalAlignment(VA_CENTER);
+    instructionsText_->SetPosition(0, graphics->GetHeight() / 4);
+    // Hide until connected
+    instructionsText_->SetVisible(false);
+
+    buttonContainer_ = root->CreateChild<UIElement>();
+    buttonContainer_->SetFixedSize(500, 20);
+    buttonContainer_->SetPosition(20, 20);
+    buttonContainer_->SetLayoutMode(LM_HORIZONTAL);
+
+    textEdit_ = buttonContainer_->CreateChild<LineEdit>();
+    textEdit_->SetStyleAuto();
+
+    connectButton_ = CreateButton("Connect", 90);
+    disconnectButton_ = CreateButton("Disconnect", 100);
+    startServerButton_ = CreateButton("Start Server", 110);
+
+    UpdateButtons();
 
 	InitFairyGUI();
 }
@@ -217,15 +218,18 @@ void SceneReplication::InitFairyGUI()
 {
 	SetUrho3DContext(GetContext());
     ui_scene_ = cocos2d::Scene::create();
+    ui_renderder_ = new cocos2d::Renderer;
 	groot_ = fairygui::GRoot::create(ui_scene_);
 	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
 	fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
+    groot_->addChild(_view);
 	_view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
 	{
 // 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
 // 		Director::getInstance()->replaceScene(scene);
 	});
+    ui_scene_->render(ui_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
 }
 void SceneReplication::SetupViewport()
 {

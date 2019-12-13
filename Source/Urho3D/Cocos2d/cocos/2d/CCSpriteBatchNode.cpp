@@ -33,8 +33,8 @@ THE SOFTWARE.
 //#include "base/CCProfiling.h"
 #include "base/ccUTF8.h"
 // #include "renderer/CCTextureCache.h"
-// #include "renderer/CCRenderer.h"
-// #include "renderer/CCQuadCommand.h"
+#include "renderer/CCRenderer.h"
+#include "renderer/CCQuadCommand.h"
 #include "Urho3DContext.h"
 #include "Graphics/Texture2D.h"
 
@@ -376,18 +376,18 @@ void SpriteBatchNode::reorderBatch(bool reorder)
 void SpriteBatchNode::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
     // Optimization: Fast Dispatch
-//     if( _textureAtlas->getTotalQuads() == 0 )
-//     {
-//         return;
-//     }
-// 
-//     for (const auto &child : _children)
-//     {
-//         child->updateTransform();
-//     }
-// 
-//     _batchCommand.init(_globalZOrder, getGLProgram(), _blendFunc, _textureAtlas, transform, flags);
-//     renderer->addCommand(&_batchCommand);
+    if( _textureAtlas->getTotalQuads() == 0 )
+    {
+        return;
+    }
+
+    for (const auto &child : _children)
+    {
+        child->updateTransform();
+    }
+
+    _batchCommand.init(_globalZOrder, getGLProgram(), _blendFunc, _textureAtlas, transform, flags);
+    renderer->addCommand(&_batchCommand);
 }
 
 void SpriteBatchNode::increaseAtlasCapacity()

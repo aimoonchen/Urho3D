@@ -27,7 +27,7 @@ THE SOFTWARE.
 #ifndef __MISC_NODE_CCPROGRESS_TIMER_H__
 #define __MISC_NODE_CCPROGRESS_TIMER_H__
 
-//#include "renderer/CCCustomCommand.h"
+#include "renderer/CCCustomCommand.h"
 #include "2d/CCNode.h"
 
 NS_CC_BEGIN
@@ -195,7 +195,7 @@ protected:
     int _vertexDataCount;
     V2F_C4B_T2F *_vertexData;
     
-//    CustomCommand _customCommand;
+    CustomCommand _customCommand;
 
     bool _reverseDirection;
 

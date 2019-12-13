@@ -32,8 +32,8 @@ RectClippingSupport::RectClippingSupport() :
 }
 
 StencilClippingSupport::StencilClippingSupport() :
-    _stencil(nullptr)
-//     _originStencilProgram(nullptr),
+    _stencil(nullptr),
+    _originStencilProgram(nullptr)
 //     _stencilStateManager(new StencilStateManager())
 {
 }
@@ -333,108 +333,108 @@ const Rect& FUIContainer::getClippingRect()
 
 void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & parentTransform, uint32_t parentFlags)
 {
-//     if (_stencilClippingSupport != nullptr)
-//     {
-//         if (!_visible || _children.empty())
-//             return;
-// 
-//         uint32_t flags = processParentFlags(parentTransform, parentFlags);
-// 
-//         // IMPORTANT:
-//         // To ease the migration to v3.0, we still support the Mat4 stack,
-//         // but it is deprecated and your code should not rely on it
-//         Director* director = Director::getInstance();
-//         CCASSERT(nullptr != director, "Director is null when setting matrix stack");
-//         director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-//         director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW, _modelViewTransform);
-// 
-//         //Add group command
-// 
-//         _stencilClippingSupport->_groupCommand.init(_globalZOrder);
-//         renderer->addCommand(&_stencilClippingSupport->_groupCommand);
-// 
-//         renderer->pushGroup(_stencilClippingSupport->_groupCommand.getRenderQueueID());
-// 
-//         _stencilClippingSupport->_beforeVisitCmd.init(_globalZOrder);
-//         _stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
-//         renderer->addCommand(&_stencilClippingSupport->_beforeVisitCmd);
-// 
-//         auto alphaThreshold = this->getAlphaThreshold();
-//         if (alphaThreshold < 1)
-//         {
-// #if CC_CLIPPING_NODE_OPENGLES
-//             // since glAlphaTest do not exists in OES, use a shader that writes
-//             // pixel only if greater than an alpha threshold
-//             GLProgram *program = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST_NO_MV);
-//             GLint alphaValueLocation = glGetUniformLocation(program->getProgram(), GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
-//             // set our alphaThreshold
-//             program->use();
-//             program->setUniformLocationWith1f(alphaValueLocation, alphaThreshold);
-//             // we need to recursively apply this shader to all the nodes in the stencil node
-//             // FIXME: we should have a way to apply shader to all nodes without having to do this
-//             setProgram(_stencilClippingSupport->_stencil, program);
-// #endif
-// 
-//         }
-//         _stencilClippingSupport->_stencil->visit(renderer, _modelViewTransform, flags);
-// 
-//         _stencilClippingSupport->_afterDrawStencilCmd.init(_globalZOrder);
-//         _stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
-//         renderer->addCommand(&_stencilClippingSupport->_afterDrawStencilCmd);
-// 
-//         int i = 0;
-//         bool visibleByCamera = isVisitableByVisitingCamera();
-// 
-//         if (!_children.empty())
-//         {
-//             sortAllChildren();
-//             // draw children zOrder < 0
-//             for (auto size = _children.size(); i < size; ++i)
-//             {
-//                 auto node = _children.at(i);
-// 
-//                 if (node && node->getLocalZOrder() < 0)
-//                     node->visit(renderer, _modelViewTransform, flags);
-//                 else
-//                     break;
-//             }
-//             // self draw
-//             if (visibleByCamera)
-//                 this->draw(renderer, _modelViewTransform, flags);
-// 
-//             for (auto it = _children.cbegin() + i, itCend = _children.cend(); it != itCend; ++it)
-//                 (*it)->visit(renderer, _modelViewTransform, flags);
-//         }
-//         else if (visibleByCamera)
-//         {
-//             this->draw(renderer, _modelViewTransform, flags);
-//         }
-// 
-//         _stencilClippingSupport->_afterVisitCmd.init(_globalZOrder);
-//         _stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
-//         renderer->addCommand(&_stencilClippingSupport->_afterVisitCmd);
-// 
-//         renderer->popGroup();
-// 
-//         director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-//     }
-//     else if (_rectClippingSupport != nullptr && _rectClippingSupport->_clippingEnabled)
-//     {
-//         if (parentFlags & FLAGS_DIRTY_MASK)
+    if (_stencilClippingSupport != nullptr)
+    {
+        if (!_visible || _children.empty())
+            return;
+
+        uint32_t flags = processParentFlags(parentTransform, parentFlags);
+
+        // IMPORTANT:
+        // To ease the migration to v3.0, we still support the Mat4 stack,
+        // but it is deprecated and your code should not rely on it
+        Director* director = Director::getInstance();
+        CCASSERT(nullptr != director, "Director is null when setting matrix stack");
+        director->pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+        director->loadMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW, _modelViewTransform);
+
+        //Add group command
+
+        _stencilClippingSupport->_groupCommand.init(_globalZOrder);
+        renderer->addCommand(&_stencilClippingSupport->_groupCommand);
+
+        renderer->pushGroup(_stencilClippingSupport->_groupCommand.getRenderQueueID());
+
+        _stencilClippingSupport->_beforeVisitCmd.init(_globalZOrder);
+        //_stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
+        renderer->addCommand(&_stencilClippingSupport->_beforeVisitCmd);
+
+        auto alphaThreshold = this->getAlphaThreshold();
+        if (alphaThreshold < 1)
+        {
+#if CC_CLIPPING_NODE_OPENGLES
+            // since glAlphaTest do not exists in OES, use a shader that writes
+            // pixel only if greater than an alpha threshold
+            GLProgram *program = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE_ALPHA_TEST_NO_MV);
+            GLint alphaValueLocation = glGetUniformLocation(program->getProgram(), GLProgram::UNIFORM_NAME_ALPHA_TEST_VALUE);
+            // set our alphaThreshold
+            program->use();
+            program->setUniformLocationWith1f(alphaValueLocation, alphaThreshold);
+            // we need to recursively apply this shader to all the nodes in the stencil node
+            // FIXME: we should have a way to apply shader to all nodes without having to do this
+            setProgram(_stencilClippingSupport->_stencil, program);
+#endif
+
+        }
+        _stencilClippingSupport->_stencil->visit(renderer, _modelViewTransform, flags);
+
+        _stencilClippingSupport->_afterDrawStencilCmd.init(_globalZOrder);
+        //_stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
+        renderer->addCommand(&_stencilClippingSupport->_afterDrawStencilCmd);
+
+        int i = 0;
+        bool visibleByCamera = isVisitableByVisitingCamera();
+ 
+        if (!_children.empty())
+        {
+            sortAllChildren();
+            // draw children zOrder < 0
+            for (auto size = _children.size(); i < size; ++i)
+            {
+                auto node = _children.at(i);
+
+                if (node && node->getLocalZOrder() < 0)
+                    node->visit(renderer, _modelViewTransform, flags);
+                else
+                    break;
+            }
+            // self draw
+            if (visibleByCamera)
+                this->draw(renderer, _modelViewTransform, flags);
+
+            for (auto it = _children.cbegin() + i, itCend = _children.cend(); it != itCend; ++it)
+                (*it)->visit(renderer, _modelViewTransform, flags);
+        }
+        else if (visibleByCamera)
+        {
+            this->draw(renderer, _modelViewTransform, flags);
+        }
+
+        _stencilClippingSupport->_afterVisitCmd.init(_globalZOrder);
+        //_stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
+        renderer->addCommand(&_stencilClippingSupport->_afterVisitCmd);
+
+        renderer->popGroup();
+
+        director->popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+    }
+    else if (_rectClippingSupport != nullptr && _rectClippingSupport->_clippingEnabled)
+    {
+        if (parentFlags & FLAGS_DIRTY_MASK)
         {
             _rectClippingSupport->_clippingRectDirty = true;
         }
-//         _rectClippingSupport->_beforeVisitCmdScissor.init(_globalZOrder);
-//         _rectClippingSupport->_beforeVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onBeforeVisitScissor, this);
-//         renderer->addCommand(&_rectClippingSupport->_beforeVisitCmdScissor);
-// 
-//         Node::visit(renderer, parentTransform, parentFlags);
-// 
-//         _rectClippingSupport->_afterVisitCmdScissor.init(_globalZOrder);
-//         _rectClippingSupport->_afterVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onAfterVisitScissor, this);
-//         renderer->addCommand(&_rectClippingSupport->_afterVisitCmdScissor);
-//     }
-//     else
+        _rectClippingSupport->_beforeVisitCmdScissor.init(_globalZOrder);
+        _rectClippingSupport->_beforeVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onBeforeVisitScissor, this);
+        renderer->addCommand(&_rectClippingSupport->_beforeVisitCmdScissor);
+
+        Node::visit(renderer, parentTransform, parentFlags);
+
+        _rectClippingSupport->_afterVisitCmdScissor.init(_globalZOrder);
+        _rectClippingSupport->_afterVisitCmdScissor.func = CC_CALLBACK_0(FUIContainer::onAfterVisitScissor, this);
+        renderer->addCommand(&_rectClippingSupport->_afterVisitCmdScissor);
+    }
+    else
         Node::visit(renderer, parentTransform, parentFlags);
 }
 

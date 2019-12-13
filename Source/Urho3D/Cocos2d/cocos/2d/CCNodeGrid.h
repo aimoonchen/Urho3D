@@ -27,8 +27,8 @@
 #define __MISCNODE_CCGRID_NODE_H__
 
 #include "2d/CCNode.h"
-// #include "renderer/CCGroupCommand.h"
-// #include "renderer/CCCustomCommand.h"
+#include "renderer/CCGroupCommand.h"
+#include "renderer/CCCustomCommand.h"
 
 NS_CC_BEGIN
 
@@ -100,9 +100,9 @@ protected:
 
     Node* _gridTarget;
     GridBase* _nodeGrid;
-//     GroupCommand _groupCommand;
-//     CustomCommand _gridBeginCommand;
-//     CustomCommand _gridEndCommand;
+    GroupCommand _groupCommand;
+    CustomCommand _gridBeginCommand;
+    CustomCommand _gridEndCommand;
     
     Rect _gridRect;
 

@@ -482,9 +482,9 @@ void FUISprite::draw(cocos2d::Renderer* renderer, const cocos2d::Mat4& transform
         Sprite::draw(renderer, transform, flags);
     else
     {
-//         _customCommand.init(_globalZOrder, transform, flags);
-//         _customCommand.func = CC_CALLBACK_0(FUISprite::onDraw, this, transform, flags);
-//         renderer->addCommand(&_customCommand);
+        _customCommand.init(_globalZOrder, transform, flags);
+        _customCommand.func = CC_CALLBACK_0(FUISprite::onDraw, this, transform, flags);
+        renderer->addCommand(&_customCommand);
     }
 }
 

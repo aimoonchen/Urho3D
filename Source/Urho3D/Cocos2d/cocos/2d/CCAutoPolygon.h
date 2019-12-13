@@ -33,26 +33,9 @@ THE SOFTWARE.
 #include <vector>
 #include "platform/CCImage.h"
 #include "base/ccTypes.h"
-//#include "renderer/CCTrianglesCommand.h"
+#include "renderer/CCTrianglesCommand.h"
 
 NS_CC_BEGIN
-
-class CC_DLL TrianglesCommand/* : public RenderCommand*/
-{
-public:
-	/**The structure of Triangles. */
-	struct Triangles
-	{
-		/**Vertex data pointer.*/
-		V3F_C4B_T2F* verts;
-		/**Index data pointer.*/
-		unsigned short* indices;
-		/**The number of vertices.*/
-		int vertCount;
-		/**The number of indices.*/
-		int indexCount;
-	};
-};
 
 /**
  * @addtogroup _2d

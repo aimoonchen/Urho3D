@@ -34,7 +34,7 @@
 
 #include "2d/CCNode.h"
 #include "base/ccTypes.h"
-//#include "renderer/CCCustomCommand.h"
+#include "renderer/CCCustomCommand.h"
 #include "math/CCMath.h"
 
 NS_CC_BEGIN
@@ -363,9 +363,9 @@ protected:
     V2F_C4B_T2F *_bufferGLLine = nullptr;
 
     BlendFunc   _blendFunc;
-//     CustomCommand _customCommand;
-//     CustomCommand _customCommandGLPoint;
-//     CustomCommand _customCommandGLLine;
+    CustomCommand _customCommand;
+    CustomCommand _customCommandGLPoint;
+    CustomCommand _customCommandGLLine;
 
     bool        _dirty = false;
     bool        _dirtyGLPoint = false;

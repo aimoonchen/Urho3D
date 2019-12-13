@@ -139,4 +139,5 @@ private:
 
 	fairygui::GRoot* groot_{ nullptr };
     cocos2d::Scene* ui_scene_{ nullptr };
+    cocos2d::Renderer* ui_renderder_{ nullptr };
 };

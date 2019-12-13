@@ -27,10 +27,10 @@
 
 #include <algorithm>
 
-// #include "renderer/CCTrianglesCommand.h"
-// #include "renderer/CCBatchCommand.h"
-// #include "renderer/CCCustomCommand.h"
-// #include "renderer/CCGroupCommand.h"
+#include "renderer/CCTrianglesCommand.h"
+#include "renderer/CCBatchCommand.h"
+#include "renderer/CCCustomCommand.h"
+#include "renderer/CCGroupCommand.h"
 // #include "renderer/CCPrimitiveCommand.h"
 // #include "renderer/CCMeshCommand.h"
 // #include "renderer/CCGLProgramCache.h"
@@ -161,32 +161,32 @@ void RenderQueue::saveRenderState()
 
 void RenderQueue::restoreRenderState()
 {
-    if (_isCullEnabled)
-    {
-        glEnable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setCullFace(true);
-    }
-    else
-    {
-        glDisable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setCullFace(false);
-    }
-
-    if (_isDepthEnabled)
-    {
-        glEnable(GL_DEPTH_TEST);
-        RenderState::StateBlock::_defaultState->setDepthTest(true);
-    }
-    else
-    {
-        glDisable(GL_DEPTH_TEST);
-        RenderState::StateBlock::_defaultState->setDepthTest(false);
-    }
-    
-    glDepthMask(_isDepthWrite);
-    RenderState::StateBlock::_defaultState->setDepthWrite(_isDepthEnabled);
-
-    CHECK_GL_ERROR_DEBUG();
+//     if (_isCullEnabled)
+//     {
+//         glEnable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setCullFace(true);
+//     }
+//     else
+//     {
+//         glDisable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setCullFace(false);
+//     }
+// 
+//     if (_isDepthEnabled)
+//     {
+//         glEnable(GL_DEPTH_TEST);
+//         RenderState::StateBlock::_defaultState->setDepthTest(true);
+//     }
+//     else
+//     {
+//         glDisable(GL_DEPTH_TEST);
+//         RenderState::StateBlock::_defaultState->setDepthTest(false);
+//     }
+//     
+//     glDepthMask(_isDepthWrite);
+//     RenderState::StateBlock::_defaultState->setDepthWrite(_isDepthEnabled);
+// 
+//     CHECK_GL_ERROR_DEBUG();
 }
 
 //
@@ -231,15 +231,15 @@ Renderer::~Renderer()
     _renderGroups.clear();
     _groupCommandManager->release();
     
-    glDeleteBuffers(2, _buffersVBO);
+//    glDeleteBuffers(2, _buffersVBO);
 
     free(_triBatchesToDraw);
 
-    if (Configuration::getInstance()->supportsShareableVAO())
-    {
-        glDeleteVertexArrays(1, &_buffersVAO);
-        GL::bindVAO(0);
-    }
+//     if (Configuration::getInstance()->supportsShareableVAO())
+//     {
+//         glDeleteVertexArrays(1, &_buffersVAO);
+//         GL::bindVAO(0);
+//     }
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     Director::getInstance()->getEventDispatcher()->removeEventListener(_cacheTextureListener);
 #endif
@@ -276,47 +276,47 @@ void Renderer::setupBuffer()
 void Renderer::setupVBOAndVAO()
 {
     //generate vbo and vao for trianglesCommand
-    glGenVertexArrays(1, &_buffersVAO);
-    GL::bindVAO(_buffersVAO);
-
-    glGenBuffers(2, &_buffersVBO[0]);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-    // Issue #15652
-    // Should not initialize VBO with a large size (VBO_SIZE=65536),
-    // it may cause low FPS on some Android devices like LG G4 & Nexus 5X.
-    // It's probably because some implementations of OpenGLES driver will
-    // copy the whole memory of VBO which initialized at the first time
-    // once glBufferData/glBufferSubData is invoked.
-    // For more discussion, please refer to https://github.com/cocos2d/cocos2d-x/issues/15652
-    //glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * VBO_SIZE, _verts, GL_DYNAMIC_DRAW);
-
-    // vertices
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, vertices));
-
-    // colors
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, colors));
-
-    // tex coords
-    glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
-    glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, texCoords));
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * INDEX_VBO_SIZE, _indices, GL_STATIC_DRAW);
-
-    // Must unbind the VAO before changing the element buffer.
-    GL::bindVAO(0);
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    CHECK_GL_ERROR_DEBUG();
+//     glGenVertexArrays(1, &_buffersVAO);
+//     GL::bindVAO(_buffersVAO);
+// 
+//     glGenBuffers(2, &_buffersVBO[0]);
+// 
+//     glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+//     // Issue #15652
+//     // Should not initialize VBO with a large size (VBO_SIZE=65536),
+//     // it may cause low FPS on some Android devices like LG G4 & Nexus 5X.
+//     // It's probably because some implementations of OpenGLES driver will
+//     // copy the whole memory of VBO which initialized at the first time
+//     // once glBufferData/glBufferSubData is invoked.
+//     // For more discussion, please refer to https://github.com/cocos2d/cocos2d-x/issues/15652
+//     //glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * VBO_SIZE, _verts, GL_DYNAMIC_DRAW);
+// 
+//     // vertices
+//     glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, vertices));
+// 
+//     // colors
+//     glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, colors));
+// 
+//     // tex coords
+//     glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
+//     glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid*) offsetof( V3F_C4B_T2F, texCoords));
+// 
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * INDEX_VBO_SIZE, _indices, GL_STATIC_DRAW);
+// 
+//     // Must unbind the VAO before changing the element buffer.
+//     GL::bindVAO(0);
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+//     CHECK_GL_ERROR_DEBUG();
 }
 
 void Renderer::setupVBO()
 {
-    glGenBuffers(2, &_buffersVBO[0]);
+   // glGenBuffers(2, &_buffersVBO[0]);
     // Issue #15652
     // Should not initialize VBO with a large size (VBO_SIZE=65536),
     // it may cause low FPS on some Android devices like LG G4 & Nexus 5X.
@@ -329,21 +329,21 @@ void Renderer::setupVBO()
 
 void Renderer::mapBuffers()
 {
-    // Avoid changing the element buffer for whatever VAO might be bound.
-    GL::bindVAO(0);
-
-    glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-    glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * VBO_SIZE, _verts, GL_DYNAMIC_DRAW);
-    
-
-    glBindBuffer(GL_ARRAY_BUFFER, 0);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-    glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * INDEX_VBO_SIZE, _indices, GL_STATIC_DRAW);
-
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-
-    CHECK_GL_ERROR_DEBUG();
+//     // Avoid changing the element buffer for whatever VAO might be bound.
+//     GL::bindVAO(0);
+// 
+//     glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+//     glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * VBO_SIZE, _verts, GL_DYNAMIC_DRAW);
+//     
+// 
+//     glBindBuffer(GL_ARRAY_BUFFER, 0);
+// 
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+//     glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * INDEX_VBO_SIZE, _indices, GL_STATIC_DRAW);
+// 
+//     glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+// 
+//     CHECK_GL_ERROR_DEBUG();
 }
 
 void Renderer::addCommand(RenderCommand* command)
@@ -405,34 +405,34 @@ void Renderer::processRenderCommand(RenderCommand* command)
     }
     else if (RenderCommand::Type::MESH_COMMAND == commandType)
     {
-        flush2D();
-        auto cmd = static_cast<MeshCommand*>(command);
-        
-        if (cmd->isSkipBatching() || _lastBatchedMeshCommand == nullptr || _lastBatchedMeshCommand->getMaterialID() != cmd->getMaterialID())
-        {
-            flush3D();
-
-            CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_MESH_COMMAND");
-
-            if(cmd->isSkipBatching())
-            {
-                // XXX: execute() will call bind() and unbind()
-                // but unbind() shouldn't be call if the next command is a MESH_COMMAND with Material.
-                // Once most of cocos2d-x moves to Pass/StateBlock, only bind() should be used.
-                cmd->execute();
-            }
-            else
-            {
-                cmd->preBatchDraw();
-                cmd->batchDraw();
-                _lastBatchedMeshCommand = cmd;
-            }
-        }
-        else
-        {
-            CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_MESH_COMMAND");
-            cmd->batchDraw();
-        }
+//         flush2D();
+//         auto cmd = static_cast<MeshCommand*>(command);
+//         
+//         if (cmd->isSkipBatching() || _lastBatchedMeshCommand == nullptr || _lastBatchedMeshCommand->getMaterialID() != cmd->getMaterialID())
+//         {
+//             flush3D();
+// 
+//             CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_MESH_COMMAND");
+// 
+//             if(cmd->isSkipBatching())
+//             {
+//                 // XXX: execute() will call bind() and unbind()
+//                 // but unbind() shouldn't be call if the next command is a MESH_COMMAND with Material.
+//                 // Once most of cocos2d-x moves to Pass/StateBlock, only bind() should be used.
+//                 cmd->execute();
+//             }
+//             else
+//             {
+//                 cmd->preBatchDraw();
+//                 cmd->batchDraw();
+//                 _lastBatchedMeshCommand = cmd;
+//             }
+//         }
+//         else
+//         {
+//             CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_MESH_COMMAND");
+//             cmd->batchDraw();
+//         }
     }
     else if(RenderCommand::Type::GROUP_COMMAND == commandType)
     {
@@ -458,10 +458,10 @@ void Renderer::processRenderCommand(RenderCommand* command)
     }
     else if(RenderCommand::Type::PRIMITIVE_COMMAND == commandType)
     {
-        flush();
-        auto cmd = static_cast<PrimitiveCommand*>(command);
-        CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_PRIMITIVE_COMMAND");
-        cmd->execute();
+//         flush();
+//         auto cmd = static_cast<PrimitiveCommand*>(command);
+//         CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_PRIMITIVE_COMMAND");
+//         cmd->execute();
     }
     else
     {
@@ -471,162 +471,162 @@ void Renderer::processRenderCommand(RenderCommand* command)
 
 void Renderer::visitRenderQueue(RenderQueue& queue)
 {
-    queue.saveRenderState();
-    
-    //
-    //Process Global-Z < 0 Objects
-    //
-    const auto& zNegQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_NEG);
-    if (zNegQueue.size() > 0)
-    {
-        if(_isDepthTestFor2D)
-        {
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(true);
-            glEnable(GL_BLEND);
-            RenderState::StateBlock::_defaultState->setDepthTest(true);
-            RenderState::StateBlock::_defaultState->setDepthWrite(true);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        else
-        {
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
-            glEnable(GL_BLEND);
-            RenderState::StateBlock::_defaultState->setDepthTest(false);
-            RenderState::StateBlock::_defaultState->setDepthWrite(false);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        glDisable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setCullFace(false);
-        
-        for (const auto& zNegNext : zNegQueue)
-        {
-            processRenderCommand(zNegNext);
-        }
-        flush();
-    }
-    
-    //
-    //Process Opaque Object
-    //
-    const auto& opaqueQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::OPAQUE_3D);
-    if (opaqueQueue.size() > 0)
-    {
-        //Clear depth to achieve layered rendering
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(true);
-        glDisable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setDepthTest(true);
-        RenderState::StateBlock::_defaultState->setDepthWrite(true);
-        RenderState::StateBlock::_defaultState->setBlend(false);
-        RenderState::StateBlock::_defaultState->setCullFace(true);
-
-        for (const auto& opaqueNext : opaqueQueue)
-        {
-            processRenderCommand(opaqueNext);
-        }
-        flush();
-    }
-    
-    //
-    //Process 3D Transparent object
-    //
-    const auto& transQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::TRANSPARENT_3D);
-    if (transQueue.size() > 0)
-    {
-        glEnable(GL_DEPTH_TEST);
-        glDepthMask(false);
-        glEnable(GL_BLEND);
-        glEnable(GL_CULL_FACE);
-
-        RenderState::StateBlock::_defaultState->setDepthTest(true);
-        RenderState::StateBlock::_defaultState->setDepthWrite(false);
-        RenderState::StateBlock::_defaultState->setBlend(true);
-        RenderState::StateBlock::_defaultState->setCullFace(true);
-
-
-        for (const auto& transNext : transQueue)
-        {
-            processRenderCommand(transNext);
-        }
-        flush();
-    }
-    
-    //
-    //Process Global-Z = 0 Queue
-    //
-    const auto& zZeroQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_ZERO);
-    if (zZeroQueue.size() > 0)
-    {
-        if(_isDepthTestFor2D)
-        {
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(true);
-            glEnable(GL_BLEND);
-
-            RenderState::StateBlock::_defaultState->setDepthTest(true);
-            RenderState::StateBlock::_defaultState->setDepthWrite(true);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        else
-        {
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
-            glEnable(GL_BLEND);
-
-            RenderState::StateBlock::_defaultState->setDepthTest(false);
-            RenderState::StateBlock::_defaultState->setDepthWrite(false);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        glDisable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setCullFace(false);
-        
-        for (const auto& zZeroNext : zZeroQueue)
-        {
-            processRenderCommand(zZeroNext);
-        }
-        flush();
-    }
-    
-    //
-    //Process Global-Z > 0 Queue
-    //
-    const auto& zPosQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_POS);
-    if (zPosQueue.size() > 0)
-    {
-        if(_isDepthTestFor2D)
-        {
-            glEnable(GL_DEPTH_TEST);
-            glDepthMask(true);
-            glEnable(GL_BLEND);
-            
-            RenderState::StateBlock::_defaultState->setDepthTest(true);
-            RenderState::StateBlock::_defaultState->setDepthWrite(true);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        else
-        {
-            glDisable(GL_DEPTH_TEST);
-            glDepthMask(false);
-            glEnable(GL_BLEND);
-            
-            RenderState::StateBlock::_defaultState->setDepthTest(false);
-            RenderState::StateBlock::_defaultState->setDepthWrite(false);
-            RenderState::StateBlock::_defaultState->setBlend(true);
-        }
-        glDisable(GL_CULL_FACE);
-        RenderState::StateBlock::_defaultState->setCullFace(false);
-        
-        for (const auto& zPosNext : zPosQueue)
-        {
-            processRenderCommand(zPosNext);
-        }
-        flush();
-    }
-    
-    queue.restoreRenderState();
+//     queue.saveRenderState();
+//     
+//     //
+//     //Process Global-Z < 0 Objects
+//     //
+//     const auto& zNegQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_NEG);
+//     if (zNegQueue.size() > 0)
+//     {
+//         if(_isDepthTestFor2D)
+//         {
+//             glEnable(GL_DEPTH_TEST);
+//             glDepthMask(true);
+//             glEnable(GL_BLEND);
+//             RenderState::StateBlock::_defaultState->setDepthTest(true);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(true);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         else
+//         {
+//             glDisable(GL_DEPTH_TEST);
+//             glDepthMask(false);
+//             glEnable(GL_BLEND);
+//             RenderState::StateBlock::_defaultState->setDepthTest(false);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(false);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         glDisable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setCullFace(false);
+//         
+//         for (const auto& zNegNext : zNegQueue)
+//         {
+//             processRenderCommand(zNegNext);
+//         }
+//         flush();
+//     }
+//     
+//     //
+//     //Process Opaque Object
+//     //
+//     const auto& opaqueQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::OPAQUE_3D);
+//     if (opaqueQueue.size() > 0)
+//     {
+//         //Clear depth to achieve layered rendering
+//         glEnable(GL_DEPTH_TEST);
+//         glDepthMask(true);
+//         glDisable(GL_BLEND);
+//         glEnable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setDepthTest(true);
+//         RenderState::StateBlock::_defaultState->setDepthWrite(true);
+//         RenderState::StateBlock::_defaultState->setBlend(false);
+//         RenderState::StateBlock::_defaultState->setCullFace(true);
+// 
+//         for (const auto& opaqueNext : opaqueQueue)
+//         {
+//             processRenderCommand(opaqueNext);
+//         }
+//         flush();
+//     }
+//     
+//     //
+//     //Process 3D Transparent object
+//     //
+//     const auto& transQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::TRANSPARENT_3D);
+//     if (transQueue.size() > 0)
+//     {
+//         glEnable(GL_DEPTH_TEST);
+//         glDepthMask(false);
+//         glEnable(GL_BLEND);
+//         glEnable(GL_CULL_FACE);
+// 
+//         RenderState::StateBlock::_defaultState->setDepthTest(true);
+//         RenderState::StateBlock::_defaultState->setDepthWrite(false);
+//         RenderState::StateBlock::_defaultState->setBlend(true);
+//         RenderState::StateBlock::_defaultState->setCullFace(true);
+// 
+// 
+//         for (const auto& transNext : transQueue)
+//         {
+//             processRenderCommand(transNext);
+//         }
+//         flush();
+//     }
+//     
+//     //
+//     //Process Global-Z = 0 Queue
+//     //
+//     const auto& zZeroQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_ZERO);
+//     if (zZeroQueue.size() > 0)
+//     {
+//         if(_isDepthTestFor2D)
+//         {
+//             glEnable(GL_DEPTH_TEST);
+//             glDepthMask(true);
+//             glEnable(GL_BLEND);
+// 
+//             RenderState::StateBlock::_defaultState->setDepthTest(true);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(true);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         else
+//         {
+//             glDisable(GL_DEPTH_TEST);
+//             glDepthMask(false);
+//             glEnable(GL_BLEND);
+// 
+//             RenderState::StateBlock::_defaultState->setDepthTest(false);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(false);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         glDisable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setCullFace(false);
+//         
+//         for (const auto& zZeroNext : zZeroQueue)
+//         {
+//             processRenderCommand(zZeroNext);
+//         }
+//         flush();
+//     }
+//     
+//     //
+//     //Process Global-Z > 0 Queue
+//     //
+//     const auto& zPosQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_POS);
+//     if (zPosQueue.size() > 0)
+//     {
+//         if(_isDepthTestFor2D)
+//         {
+//             glEnable(GL_DEPTH_TEST);
+//             glDepthMask(true);
+//             glEnable(GL_BLEND);
+//             
+//             RenderState::StateBlock::_defaultState->setDepthTest(true);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(true);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         else
+//         {
+//             glDisable(GL_DEPTH_TEST);
+//             glDepthMask(false);
+//             glEnable(GL_BLEND);
+//             
+//             RenderState::StateBlock::_defaultState->setDepthTest(false);
+//             RenderState::StateBlock::_defaultState->setDepthWrite(false);
+//             RenderState::StateBlock::_defaultState->setBlend(true);
+//         }
+//         glDisable(GL_CULL_FACE);
+//         RenderState::StateBlock::_defaultState->setCullFace(false);
+//         
+//         for (const auto& zPosNext : zPosQueue)
+//         {
+//             processRenderCommand(zPosNext);
+//         }
+//         flush();
+//     }
+//     
+//     queue.restoreRenderState();
 }
 
 void Renderer::render()
@@ -673,37 +673,37 @@ void Renderer::clean()
 
 void Renderer::clear()
 {
-    //Enable Depth mask to make sure glClear clear the depth buffer correctly
-    glDepthMask(true);
-    glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
-    glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-    glDepthMask(false);
-
-    RenderState::StateBlock::_defaultState->setDepthWrite(false);
+//     //Enable Depth mask to make sure glClear clear the depth buffer correctly
+//     glDepthMask(true);
+//     glClearColor(_clearColor.r, _clearColor.g, _clearColor.b, _clearColor.a);
+//     glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+//     glDepthMask(false);
+// 
+//     RenderState::StateBlock::_defaultState->setDepthWrite(false);
 }
 
 void Renderer::setDepthTest(bool enable)
 {
-    if (enable)
-    {
-        glClearDepth(1.0f);
-        glEnable(GL_DEPTH_TEST);
-        glDepthFunc(GL_LEQUAL);
-
-        RenderState::StateBlock::_defaultState->setDepthTest(true);
-        RenderState::StateBlock::_defaultState->setDepthFunction(RenderState::DEPTH_LEQUAL);
-
-//        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
-    }
-    else
-    {
-        glDisable(GL_DEPTH_TEST);
-
-        RenderState::StateBlock::_defaultState->setDepthTest(false);
-    }
-
-    _isDepthTestFor2D = enable;
-    CHECK_GL_ERROR_DEBUG();
+//     if (enable)
+//     {
+//         glClearDepth(1.0f);
+//         glEnable(GL_DEPTH_TEST);
+//         glDepthFunc(GL_LEQUAL);
+// 
+//         RenderState::StateBlock::_defaultState->setDepthTest(true);
+//         RenderState::StateBlock::_defaultState->setDepthFunction(RenderState::DEPTH_LEQUAL);
+// 
+// //        glHint(GL_PERSPECTIVE_CORRECTION_HINT, GL_NICEST);
+//     }
+//     else
+//     {
+//         glDisable(GL_DEPTH_TEST);
+// 
+//         RenderState::StateBlock::_defaultState->setDepthTest(false);
+//     }
+// 
+//     _isDepthTestFor2D = enable;
+//     CHECK_GL_ERROR_DEBUG();
 }
 
 void Renderer::fillVerticesAndIndices(const TrianglesCommand* cmd)
@@ -790,78 +790,78 @@ void Renderer::drawBatchedTriangles()
     batchesTotal++;
 
     /************** 2: Copy vertices/indices to GL objects *************/
-    auto conf = Configuration::getInstance();
-    if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-    {
-        //Bind VAO
-        GL::bindVAO(_buffersVAO);
-        //Set VBO data
-        glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-
-        // option 1: subdata
-//        glBufferSubData(GL_ARRAY_BUFFER, sizeof(_quads[0])*start, sizeof(_quads[0]) * n , &_quads[start] );
-
-        // option 2: data
-//        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, _verts, GL_STATIC_DRAW);
-
-        // option 3: orphaning + glMapBuffer
-        // FIXME: in order to work as fast as possible, it must "and the exact same size and usage hints it had before."
-        //  source: https://www.opengl.org/wiki/Buffer_Object_Streaming#Explicit_multiple_buffering
-        // so most probably we won't have any benefit of using it
-        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, nullptr, GL_STATIC_DRAW);
-        void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-        memcpy(buf, _verts, sizeof(_verts[0]) * _filledVertex);
-        glUnmapBuffer(GL_ARRAY_BUFFER);
-
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-    }
-    else
-    {
-        // Client Side Arrays
-#define kQuadSize sizeof(_verts[0])
-        glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-
-        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex , _verts, GL_DYNAMIC_DRAW);
-
-        GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
-
-        // vertices
-        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, vertices));
-
-        // colors
-        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, colors));
-
-        // tex coords
-        glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, texCoords));
-
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-    }
-
-    /************** 3: Draw *************/
-    for (int i=0; i<batchesTotal; ++i)
-    {
-        CC_ASSERT(_triBatchesToDraw[i].cmd && "Invalid batch");
-        _triBatchesToDraw[i].cmd->useMaterial();
-        glDrawElements(GL_TRIANGLES, (GLsizei) _triBatchesToDraw[i].indicesToDraw, GL_UNSIGNED_SHORT, (GLvoid*) (_triBatchesToDraw[i].offset*sizeof(_indices[0])) );
-        _drawnBatches++;
-        _drawnVertices += _triBatchesToDraw[i].indicesToDraw;
-    }
-
-    /************** 4: Cleanup *************/
-    if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-    {
-        //Unbind VAO
-        GL::bindVAO(0);
-    }
-    else
-    {
-        glBindBuffer(GL_ARRAY_BUFFER, 0);
-        glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-    }
+//     auto conf = Configuration::getInstance();
+//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
+//     {
+//         //Bind VAO
+//         GL::bindVAO(_buffersVAO);
+//         //Set VBO data
+//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+// 
+//         // option 1: subdata
+// //        glBufferSubData(GL_ARRAY_BUFFER, sizeof(_quads[0])*start, sizeof(_quads[0]) * n , &_quads[start] );
+// 
+//         // option 2: data
+// //        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, _verts, GL_STATIC_DRAW);
+// 
+//         // option 3: orphaning + glMapBuffer
+//         // FIXME: in order to work as fast as possible, it must "and the exact same size and usage hints it had before."
+//         //  source: https://www.opengl.org/wiki/Buffer_Object_Streaming#Explicit_multiple_buffering
+//         // so most probably we won't have any benefit of using it
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, nullptr, GL_STATIC_DRAW);
+//         void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
+//         memcpy(buf, _verts, sizeof(_verts[0]) * _filledVertex);
+//         glUnmapBuffer(GL_ARRAY_BUFFER);
+// 
+//         glBindBuffer(GL_ARRAY_BUFFER, 0);
+//         
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
+//     }
+//     else
+//     {
+//         // Client Side Arrays
+// #define kQuadSize sizeof(_verts[0])
+//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
+// 
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex , _verts, GL_DYNAMIC_DRAW);
+// 
+//         GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
+// 
+//         // vertices
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, vertices));
+// 
+//         // colors
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, colors));
+// 
+//         // tex coords
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, texCoords));
+// 
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
+//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
+//     }
+// 
+//     /************** 3: Draw *************/
+//     for (int i=0; i<batchesTotal; ++i)
+//     {
+//         CC_ASSERT(_triBatchesToDraw[i].cmd && "Invalid batch");
+//         _triBatchesToDraw[i].cmd->useMaterial();
+//         glDrawElements(GL_TRIANGLES, (GLsizei) _triBatchesToDraw[i].indicesToDraw, GL_UNSIGNED_SHORT, (GLvoid*) (_triBatchesToDraw[i].offset*sizeof(_indices[0])) );
+//         _drawnBatches++;
+//         _drawnVertices += _triBatchesToDraw[i].indicesToDraw;
+//     }
+// 
+//     /************** 4: Cleanup *************/
+//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
+//     {
+//         //Unbind VAO
+//         GL::bindVAO(0);
+//     }
+//     else
+//     {
+//         glBindBuffer(GL_ARRAY_BUFFER, 0);
+//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
+//     }
 
     _queuedTriangleCommands.clear();
     _filledVertex = 0;
@@ -881,13 +881,13 @@ void Renderer::flush2D()
 
 void Renderer::flush3D()
 {
-    if (_lastBatchedMeshCommand)
-    {
-        CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_MESH");
-
-        _lastBatchedMeshCommand->postBatchDraw();
-        _lastBatchedMeshCommand = nullptr;
-    }
+//     if (_lastBatchedMeshCommand)
+//     {
+//         CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_MESH");
+// 
+//         _lastBatchedMeshCommand->postBatchDraw();
+//         _lastBatchedMeshCommand = nullptr;
+//     }
 }
 
 void Renderer::flushTriangles()

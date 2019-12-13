@@ -37,7 +37,7 @@
 #include "2d/CCCamera.h"
 #include "base/ccUTF8.h"
 #include "platform/CCFileUtils.h"
-// #include "renderer/CCRenderer.h"
+#include "renderer/CCRenderer.h"
 // #include "renderer/ccGLStateCache.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
@@ -1626,26 +1626,26 @@ void Label::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
     if (_insideBounds)
 #endif
     {
-//         if (!_shadowEnabled && (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP))
-//         {
-//             for (auto&& it : _letters)
-//             {
-//                 it.second->updateTransform();
-//             }
-//             // ETC1 ALPHA supports for BMFONT & CHARMAP
-//             auto textureAtlas = _batchNodes.at(0)->getTextureAtlas();
-//             auto texture = textureAtlas->getTexture();
-//             _quadCommand.init(_globalZOrder, texture, getGLProgramState(), 
-//                 _blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
-//             renderer->addCommand(&_quadCommand);
-//         }
-//         else
-//         {
-//             _customCommand.init(_globalZOrder, transform, flags);
-//             _customCommand.func = CC_CALLBACK_0(Label::onDraw, this, transform, transformUpdated);
-// 
-//             renderer->addCommand(&_customCommand);
-//         }
+        if (!_shadowEnabled && (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP))
+        {
+            for (auto&& it : _letters)
+            {
+                it.second->updateTransform();
+            }
+            // ETC1 ALPHA supports for BMFONT & CHARMAP
+            auto textureAtlas = _batchNodes.at(0)->getTextureAtlas();
+            auto texture = textureAtlas->getTexture();
+            _quadCommand.init(_globalZOrder, texture, getGLProgramState(), 
+                _blendFunc, textureAtlas->getQuads(), textureAtlas->getTotalQuads(), transform, flags);
+            renderer->addCommand(&_quadCommand);
+        }
+        else
+        {
+            _customCommand.init(_globalZOrder, transform, flags);
+            _customCommand.func = CC_CALLBACK_0(Label::onDraw, this, transform, transformUpdated);
+
+            renderer->addCommand(&_customCommand);
+        }
     }
 }
 

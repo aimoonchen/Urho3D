@@ -31,7 +31,7 @@
 #include <stack>
 
 #include "platform/CCPlatformMacros.h"
-// #include "renderer/CCRenderCommand.h"
+#include "renderer/CCRenderCommand.h"
 // #include "renderer/CCGLProgram.h"
 // #include "platform/CCGL.h"
 

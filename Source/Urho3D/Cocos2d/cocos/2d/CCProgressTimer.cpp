@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include "base/CCDirector.h"
 #include "2d/CCSprite.h"
 // #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCRenderer.h"
+#include "renderer/CCRenderer.h"
 
 NS_CC_BEGIN
 
@@ -543,12 +543,12 @@ void ProgressTimer::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 
 void ProgressTimer::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 {
-//     if( ! _vertexData || ! _sprite)
-//         return;
-// 
-//     _customCommand.init(_globalZOrder, transform, flags);
-//     _customCommand.func = CC_CALLBACK_0(ProgressTimer::onDraw, this, transform, flags);
-//     renderer->addCommand(&_customCommand);
+    if( ! _vertexData || ! _sprite)
+        return;
+
+    _customCommand.init(_globalZOrder, transform, flags);
+    _customCommand.func = CC_CALLBACK_0(ProgressTimer::onDraw, this, transform, flags);
+    renderer->addCommand(&_customCommand);
 }
 
 
