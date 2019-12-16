@@ -471,49 +471,49 @@ void Renderer::processRenderCommand(RenderCommand* command)
 
 void Renderer::visitRenderQueue(RenderQueue& queue)
 {
-//     queue.saveRenderState();
-//     
-//     //
-//     //Process Global-Z < 0 Objects
-//     //
-//     const auto& zNegQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_NEG);
-//     if (zNegQueue.size() > 0)
-//     {
-//         if(_isDepthTestFor2D)
-//         {
+    queue.saveRenderState();
+    
+    //
+    //Process Global-Z < 0 Objects
+    //
+    const auto& zNegQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_NEG);
+    if (zNegQueue.size() > 0)
+    {
+        if(_isDepthTestFor2D)
+        {
 //             glEnable(GL_DEPTH_TEST);
 //             glDepthMask(true);
 //             glEnable(GL_BLEND);
 //             RenderState::StateBlock::_defaultState->setDepthTest(true);
 //             RenderState::StateBlock::_defaultState->setDepthWrite(true);
 //             RenderState::StateBlock::_defaultState->setBlend(true);
-//         }
-//         else
-//         {
+        }
+        else
+        {
 //             glDisable(GL_DEPTH_TEST);
 //             glDepthMask(false);
 //             glEnable(GL_BLEND);
 //             RenderState::StateBlock::_defaultState->setDepthTest(false);
 //             RenderState::StateBlock::_defaultState->setDepthWrite(false);
 //             RenderState::StateBlock::_defaultState->setBlend(true);
-//         }
+        }
 //         glDisable(GL_CULL_FACE);
 //         RenderState::StateBlock::_defaultState->setCullFace(false);
-//         
-//         for (const auto& zNegNext : zNegQueue)
-//         {
-//             processRenderCommand(zNegNext);
-//         }
-//         flush();
-//     }
-//     
-//     //
-//     //Process Opaque Object
-//     //
-//     const auto& opaqueQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::OPAQUE_3D);
-//     if (opaqueQueue.size() > 0)
-//     {
-//         //Clear depth to achieve layered rendering
+        
+        for (const auto& zNegNext : zNegQueue)
+        {
+            processRenderCommand(zNegNext);
+        }
+        flush();
+    }
+    
+    //
+    //Process Opaque Object
+    //
+    const auto& opaqueQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::OPAQUE_3D);
+    if (opaqueQueue.size() > 0)
+    {
+        //Clear depth to achieve layered rendering
 //         glEnable(GL_DEPTH_TEST);
 //         glDepthMask(true);
 //         glDisable(GL_BLEND);
@@ -522,20 +522,20 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
 //         RenderState::StateBlock::_defaultState->setDepthWrite(true);
 //         RenderState::StateBlock::_defaultState->setBlend(false);
 //         RenderState::StateBlock::_defaultState->setCullFace(true);
-// 
-//         for (const auto& opaqueNext : opaqueQueue)
-//         {
-//             processRenderCommand(opaqueNext);
-//         }
-//         flush();
-//     }
-//     
-//     //
-//     //Process 3D Transparent object
-//     //
-//     const auto& transQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::TRANSPARENT_3D);
-//     if (transQueue.size() > 0)
-//     {
+
+        for (const auto& opaqueNext : opaqueQueue)
+        {
+            processRenderCommand(opaqueNext);
+        }
+        flush();
+    }
+    
+    //
+    //Process 3D Transparent object
+    //
+    const auto& transQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::TRANSPARENT_3D);
+    if (transQueue.size() > 0)
+    {
 //         glEnable(GL_DEPTH_TEST);
 //         glDepthMask(false);
 //         glEnable(GL_BLEND);
@@ -545,21 +545,21 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
 //         RenderState::StateBlock::_defaultState->setDepthWrite(false);
 //         RenderState::StateBlock::_defaultState->setBlend(true);
 //         RenderState::StateBlock::_defaultState->setCullFace(true);
-// 
-// 
-//         for (const auto& transNext : transQueue)
-//         {
-//             processRenderCommand(transNext);
-//         }
-//         flush();
-//     }
-//     
-//     //
-//     //Process Global-Z = 0 Queue
-//     //
-//     const auto& zZeroQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_ZERO);
-//     if (zZeroQueue.size() > 0)
-//     {
+
+
+        for (const auto& transNext : transQueue)
+        {
+            processRenderCommand(transNext);
+        }
+        flush();
+    }
+    
+    //
+    //Process Global-Z = 0 Queue
+    //
+    const auto& zZeroQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_ZERO);
+    if (zZeroQueue.size() > 0)
+    {
 //         if(_isDepthTestFor2D)
 //         {
 //             glEnable(GL_DEPTH_TEST);
@@ -582,20 +582,20 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
 //         }
 //         glDisable(GL_CULL_FACE);
 //         RenderState::StateBlock::_defaultState->setCullFace(false);
-//         
-//         for (const auto& zZeroNext : zZeroQueue)
-//         {
-//             processRenderCommand(zZeroNext);
-//         }
-//         flush();
-//     }
-//     
-//     //
-//     //Process Global-Z > 0 Queue
-//     //
-//     const auto& zPosQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_POS);
-//     if (zPosQueue.size() > 0)
-//     {
+        
+        for (const auto& zZeroNext : zZeroQueue)
+        {
+            processRenderCommand(zZeroNext);
+        }
+        flush();
+    }
+    
+    //
+    //Process Global-Z > 0 Queue
+    //
+    const auto& zPosQueue = queue.getSubQueue(RenderQueue::QUEUE_GROUP::GLOBALZ_POS);
+    if (zPosQueue.size() > 0)
+    {
 //         if(_isDepthTestFor2D)
 //         {
 //             glEnable(GL_DEPTH_TEST);
@@ -618,15 +618,15 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
 //         }
 //         glDisable(GL_CULL_FACE);
 //         RenderState::StateBlock::_defaultState->setCullFace(false);
-//         
-//         for (const auto& zPosNext : zPosQueue)
-//         {
-//             processRenderCommand(zPosNext);
-//         }
-//         flush();
-//     }
-//     
-//     queue.restoreRenderState();
+        
+        for (const auto& zPosNext : zPosQueue)
+        {
+            processRenderCommand(zPosNext);
+        }
+        flush();
+    }
+    
+    queue.restoreRenderState();
 }
 
 void Renderer::render()
@@ -637,7 +637,7 @@ void Renderer::render()
     //TODO: setup camera or MVP
     _isRendering = true;
     
-    if (_glViewAssigned)
+    if (true/*_glViewAssigned*/)
     {
         //Process render commands
         //1. Sort render commands based on ID

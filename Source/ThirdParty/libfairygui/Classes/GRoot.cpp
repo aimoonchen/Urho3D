@@ -2,7 +2,9 @@
 //#include "AudioEngine.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
-
+#include "Urho3DContext.h"
+#include "Urho3D/Core/Context.h"
+#include "Urho3D/Graphics/Graphics.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -516,17 +518,18 @@ bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
 // #ifdef CC_PLATFORM_PC
 //     _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
 // #endif
-//     onWindowSizeChanged();
-// 
-//     scene->addChild(_displayObject, zOrder);
+    onWindowSizeChanged();
+
+    scene->addChild(_displayObject, zOrder);
 
     return true;
 }
 
 void GRoot::onWindowSizeChanged()
 {
-//     const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-//     setSize(rs.width, rs.height);
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    //const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+    setSize(graphics->GetWidth(), graphics->GetHeight());
 
     updateContentScaleLevel();
 }

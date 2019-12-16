@@ -135,7 +135,7 @@ THE SOFTWARE.
 // #include "2d/CCProgressTimer.h"
 // #include "2d/CCProtectedNode.h"
 // #include "2d/CCRenderTexture.h"
-// #include "2d/CCScene.h"
+#include "2d/CCScene.h"
 // #include "2d/CCTransition.h"
 // #include "2d/CCTransitionPageTurn.h"
 // #include "2d/CCTransitionProgress.h"
