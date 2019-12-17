@@ -4,7 +4,10 @@
 #include "platform/CCDevice.h"
 #include "Graphics/Texture2D.h"
 #include "renderer/CCTexture2D.h"
-
+#include "Urho3DContext.h"
+#include "Core/Context.h"
+#include "Graphics/Graphics.h"
+#include "Resource/ResourceCache.h"
 NS_CC_BEGIN
 
 static Texture2D::PixelFormat g_defaultAlphaPixelFormat = Texture2D::PixelFormat::DEFAULT;
@@ -95,13 +98,20 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	pixelFormat = Texture2D::convertDataToFormat(outData.getBytes(), imageWidth*imageHeight * 4, Texture2D::PixelFormat::RGBA8888, pixelFormat, &outTempData, &outTempDataLen);
 
 	//ret = initWithData(outTempData, outTempDataLen, pixelFormat, imageWidth, imageHeight, imageSize);
-	texture->SetData(0, 0, 0, imageWidth, imageHeight, outTempData);
+	texture->SetSize(imageWidth, imageHeight, Urho3D::Graphics::GetRGBAFormat());
+	ret = texture->SetData(0, 0, 0, imageWidth, imageHeight, outTempData);
 	if (outTempData != nullptr && outTempData != outData.getBytes()) {
 		free(outTempData);
 	}
 	//_hasPremultipliedAlpha = hasPremultipliedAlpha;
 
 	return ret;
+}
+
+Urho3D::Texture2D* GetUrho3DTexture(const std::string& path)
+{
+	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+	return cache->GetResource<Urho3D::Texture2D>(path.c_str());
 }
 
 NS_CC_END

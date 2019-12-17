@@ -384,10 +384,10 @@ void Sprite::setTexture(Urho3D::Texture2D *texture)
     CCASSERT(! _batchNode || (texture &&  texture->getName() == _batchNode->getTexture()->getName()), "CCSprite: Batched sprites should use the same texture as the batchnode");
     // accept texture==nil as argument
     CCASSERT( !texture/* || dynamic_cast<Texture2D*>(texture)*/, "setTexture expects a Texture2D. Invalid argument");
-// 
-//     if (texture == nullptr)
-//     {
-//         // Gets the texture by key firstly.
+
+    if (texture == nullptr)
+    {
+        // Gets the texture by key firstly.
 //         texture = _director->getTextureCache()->getTextureForKey(CC_2x2_WHITE_IMAGE_KEY);
 // 
 //         // If texture wasn't in cache, create it from RAW data.
@@ -400,7 +400,7 @@ void Sprite::setTexture(Urho3D::Texture2D *texture)
 //             texture = _director->getTextureCache()->addImage(image, CC_2x2_WHITE_IMAGE_KEY);
 //             CC_SAFE_RELEASE(image);
 //         }
-//     }
+    }
 
     if (_renderMode != RenderMode::QUAD_BATCHNODE)
     {

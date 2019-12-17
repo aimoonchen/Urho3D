@@ -30,7 +30,7 @@ THE SOFTWARE.
 #include "2d/CCSpriteFrame.h"
 #include "base/CCDirector.h"
 #include "platform/CCFileUtils.h"
-
+#include "renderer/Texture2DUtils.h"
 NS_CC_BEGIN
 
 // implementation of SpriteFrame
@@ -225,9 +225,10 @@ Urho3D::Texture2D* SpriteFrame::getTexture()
         return _texture;
     }
 
-//     if( !_textureFilename.empty()) {
-//         return Director::getInstance()->getTextureCache()->addImage(_textureFilename);
-//     }
+    if( !_textureFilename.empty()) {
+        //return Director::getInstance()->getTextureCache()->addImage(_textureFilename);
+        return GetUrho3DTexture(_textureFilename);
+    }
     // no texture or texture filename
     return nullptr;
 }

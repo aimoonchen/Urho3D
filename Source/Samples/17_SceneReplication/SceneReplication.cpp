@@ -221,6 +221,7 @@ void SceneReplication::InitFairyGUI()
     ui_renderder_ = new cocos2d::Renderer;
 	groot_ = fairygui::GRoot::create(ui_scene_);
 	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
+    GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
 	fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
     groot_->addChild(_view);
