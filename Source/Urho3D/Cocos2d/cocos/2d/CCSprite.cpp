@@ -44,6 +44,8 @@ THE SOFTWARE.
 #include "Urho3DContext.h"
 #include "Core/Context.h"
 #include "Resource/ResourceCache.h"
+#include "renderer/Texture2DUtils.h"
+#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 // MARK: create, init, dealloc
@@ -180,12 +182,13 @@ bool Sprite::initWithFile(const std::string& filename)
     _fileType = 0;
 
 //     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
-//     if (texture)
-//     {
-//         Rect rect = Rect::ZERO;
-//         rect.size = texture->getContentSize();
-//         return initWithTexture(texture, rect);
-//     }
+    auto texture = GetUrho3DTexture(filename);
+    if (texture)
+    {
+        Rect rect = Rect::ZERO;
+        rect.size = Size{ (float)texture->GetWidth(), (float)texture->GetHeight() };// texture->getContentSize();
+        return initWithTexture(texture, rect);
+    }
 
     // don't release here.
     // when load texture failed, it's better to get a "transparent" sprite then a crashed program
@@ -205,10 +208,11 @@ bool Sprite::initWithFile(const std::string &filename, const Rect& rect)
     _fileType = 0;
 
 //     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
-//     if (texture)
-//     {
-//         return initWithTexture(texture, rect);
-//     }
+    auto texture = GetUrho3DTexture(filename);
+    if (texture)
+    {
+        return initWithTexture(texture, rect);
+    }
 
     // don't release here.
     // when load texture failed, it's better to get a "transparent" sprite then a crashed program
@@ -365,13 +369,14 @@ static unsigned char cc_2x2_white_image[] = {
 // MARK: texture
 void Sprite::setTexture(const std::string &filename)
 {
-//     Urho3D::Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
-//     setTexture(texture);
-//     _unflippedOffsetPositionFromCenter = Vec2::ZERO;
-//     Rect rect = Rect::ZERO;
-//     if (texture)
-//         rect.size = texture->getContentSize();
-//     setTextureRect(rect);
+    //Urho3D::Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
+    auto texture = GetUrho3DTexture(filename);
+    setTexture(texture);
+    _unflippedOffsetPositionFromCenter = Vec2::ZERO;
+    Rect rect = Rect::ZERO;
+    if (texture)
+        rect.size = Size{(float)texture->GetWidth(), (float)texture->GetHeight()};// texture->getContentSize();
+    setTextureRect(rect);
 }
 
 void Sprite::setTexture(Urho3D::Texture2D *texture)
@@ -389,8 +394,8 @@ void Sprite::setTexture(Urho3D::Texture2D *texture)
     {
         // Gets the texture by key firstly.
 //         texture = _director->getTextureCache()->getTextureForKey(CC_2x2_WHITE_IMAGE_KEY);
-// 
-//         // If texture wasn't in cache, create it from RAW data.
+
+        // If texture wasn't in cache, create it from RAW data.
 //         if (texture == nullptr)
 //         {
 //             Image* image = new (std::nothrow) Image();

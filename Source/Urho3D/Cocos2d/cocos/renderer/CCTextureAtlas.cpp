@@ -42,6 +42,7 @@ THE SOFTWARE.
 // #include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
 #include "renderer/CCTexture2D.h"
+#include "renderer/Texture2DUtils.h"
 //#include "platform/CCGL.h"
 
 //According to some tests GL_TRIANGLE_STRIP is slower, MUCH slower. Probably I'm doing something very wrong
@@ -144,7 +145,7 @@ TextureAtlas * TextureAtlas::createWithTexture(Urho3D::Texture2D *texture, ssize
 bool TextureAtlas::initWithFile(const std::string& file, ssize_t capacity)
 {
     // retained in property
-    Urho3D::Texture2D* texture = nullptr;//Director::getInstance()->getTextureCache()->addImage(file);
+    auto texture = GetUrho3DTexture(file);//Director::getInstance()->getTextureCache()->addImage(file);
 
     if (texture)
     {   

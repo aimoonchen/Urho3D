@@ -5,7 +5,8 @@
 #include "display/FUISprite.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
-
+#include "renderer/Texture2DUtils.h"
+#include "Graphics/Texture2D.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -274,13 +275,14 @@ void GLoader::loadFromPackage()
 void GLoader::loadExternal()
 {
 //     auto tex = Director::getInstance()->getTextureCache()->addImage(_url);
-//     if (tex)
-//     {
-//         auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, tex->getContentSize()));
-//         onExternalLoadSuccess(sf);
-//     }
-//     else
-//         onExternalLoadFailed();
+    auto tex = GetUrho3DTexture(_url);
+    if (tex)
+    {
+        auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, { tex->GetWidth(), tex->GetHeight() }/*tex->getContentSize()*/));
+        onExternalLoadSuccess(sf);
+    }
+    else
+        onExternalLoadFailed();
 }
 
 void GLoader::freeExternal(cocos2d::SpriteFrame* spriteFrame)

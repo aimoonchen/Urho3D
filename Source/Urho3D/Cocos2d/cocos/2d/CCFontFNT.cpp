@@ -32,7 +32,7 @@
 #include "base/CCMap.h"
 #include "base/ccUTF8.h"
 //#include "renderer/CCTextureCache.h"
-
+#include "renderer/Texture2DUtils.h"
 #include <cmath>
 #include <set>
 #include <unordered_map>
@@ -605,26 +605,26 @@ void BMFontConfiguration::parseKerningEntry(const char* line)
 
 FontFNT * FontFNT::create(const std::string& fntFilePath, const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-//     BMFontConfiguration *newConf = FNTConfigLoadFile(fntFilePath);
-//     if (!newConf)
-//         return nullptr;
-//     
-//     // add the texture
-//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(newConf->getAtlasName());
-//     if (!tempTexture)
-//     {
-//         return nullptr;
-//     }
-//     
-//     FontFNT *tempFont =  new FontFNT(newConf,imageOffset);
-//     tempFont->setFontSize(newConf->_fontSize);
-//     if (!tempFont)
-//     {
-//         return nullptr;
-//     }
-//     tempFont->autorelease();
-//     return tempFont;
-	return {};
+    BMFontConfiguration *newConf = FNTConfigLoadFile(fntFilePath);
+    if (!newConf)
+        return nullptr;
+    
+    // add the texture
+    //Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(newConf->getAtlasName());
+    auto tempTexture = GetUrho3DTexture(newConf->getAtlasName());
+    if (!tempTexture)
+    {
+        return nullptr;
+    }
+    
+    FontFNT *tempFont =  new FontFNT(newConf,imageOffset);
+    tempFont->setFontSize(newConf->_fontSize);
+    if (!tempFont)
+    {
+        return nullptr;
+    }
+    tempFont->autorelease();
+    return tempFont;
 }
 
 FontFNT::FontFNT(BMFontConfiguration *theContfig, const Vec2& imageOffset /* = Vec2::ZERO */)
@@ -760,17 +760,17 @@ FontAtlas * FontFNT::createFontAtlas()
     // add the texture (only one texture for now)
     
 //     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(_configuration->getAtlasName());
-//     if (!tempTexture) {
-//         CC_SAFE_RELEASE(tempAtlas);
-//         return nullptr;
-//     }
-//     
-//     // add the texture
-//     tempAtlas->addTexture(tempTexture, 0);
-//     
-//     // done
-//     return tempAtlas;
-	return {};
+    auto tempTexture = GetUrho3DTexture(_configuration->getAtlasName());
+    if (!tempTexture) {
+        CC_SAFE_RELEASE(tempAtlas);
+        return nullptr;
+    }
+    
+    // add the texture
+    tempAtlas->addTexture(tempTexture, 0);
+    
+    // done
+    return tempAtlas;
 }
 
 void FontFNT::reloadBMFontResource(const std::string& fntFilePath)

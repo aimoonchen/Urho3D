@@ -44,7 +44,7 @@ THE SOFTWARE.
 // #include "renderer/CCTexture2D.h"
 // #include "renderer/CCTextureCache.h"
 #include "base/CCNinePatchImageParser.h"
-
+#include "renderer/Texture2DUtils.h"
 using namespace std;
 
 NS_CC_BEGIN
@@ -310,13 +310,13 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
 //         const Texture2D::PixelFormat pixelFormat = (*pixelFormatIt).second;
 //         const Texture2D::PixelFormat currentPixelFormat = Texture2D::getDefaultAlphaPixelFormat();
 //         Texture2D::setDefaultAlphaPixelFormat(pixelFormat);
-//         texture = Director::getInstance()->getTextureCache()->addImage(texturePath);
+//         texture = GetUrho3DTexture(texturePath);// Director::getInstance()->getTextureCache()->addImage(texturePath);
 //         Texture2D::setDefaultAlphaPixelFormat(currentPixelFormat);
 //     }
 //     else
 //     {
-//         texture = Director::getInstance()->getTextureCache()->addImage(texturePath);
-//     }
+        texture = GetUrho3DTexture(texturePath);// ::getInstance()->getTextureCache()->addImage(texturePath);
+//    }
     
     if (texture)
     {

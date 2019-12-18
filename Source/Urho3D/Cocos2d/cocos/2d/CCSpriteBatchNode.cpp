@@ -37,6 +37,7 @@ THE SOFTWARE.
 #include "renderer/CCQuadCommand.h"
 #include "Urho3DContext.h"
 #include "Graphics/Texture2D.h"
+#include "renderer/Texture2DUtils.h"
 
 NS_CC_BEGIN
 
@@ -123,9 +124,9 @@ bool SpriteBatchNode::init()
 */
 bool SpriteBatchNode::initWithFile(const std::string& fileImage, ssize_t capacity/* = DEFAULT_CAPACITY*/)
 {
-//     Urho3D::Texture2D *texture2D = Director::getInstance()->getTextureCache()->addImage(fileImage);
-//     return initWithTexture(texture2D, capacity);
-	return false;
+//    Urho3D::Texture2D *texture2D = Director::getInstance()->getTextureCache()->addImage(fileImage);
+    auto texture = GetUrho3DTexture(fileImage);
+    return initWithTexture(texture, capacity);
 }
 
 SpriteBatchNode::SpriteBatchNode()

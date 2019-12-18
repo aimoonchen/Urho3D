@@ -29,7 +29,8 @@ THE SOFTWARE.
 // #include "renderer/CCTextureCache.h"
 // #include "renderer/CCTexture2D.h"
 #include "base/CCDirector.h"
-
+#include "renderer/Texture2DUtils.h"
+#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 AnimationFrame* AnimationFrame::create(SpriteFrame* spriteFrame, float delayUnits, const ValueMap& userInfo)
@@ -172,11 +173,12 @@ void Animation::addSpriteFrame(SpriteFrame* spriteFrame)
 
 void Animation::addSpriteFrameWithFile(const std::string& filename)
 {
-//     Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
-//     Rect rect = Rect::ZERO;
-//     rect.size = texture->getContentSize();
-//     SpriteFrame *frame = SpriteFrame::createWithTexture(texture, rect);
-//     addSpriteFrame(frame);
+    //Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
+    auto texture = GetUrho3DTexture(filename);
+    Rect rect = Rect::ZERO;
+    rect.size = Size{ (float)texture->GetWidth(), (float)texture->GetHeight() };// texture->getContentSize();
+    SpriteFrame *frame = SpriteFrame::createWithTexture(texture, rect);
+    addSpriteFrame(frame);
 }
 
 void Animation::addSpriteFrameWithTexture(Urho3D::Texture2D *pobTexture, const Rect& rect)

@@ -29,7 +29,8 @@
 #include "platform/CCFileUtils.h"
 #include "base/CCDirector.h"
 //#include "renderer/CCTextureCache.h"
-
+#include "renderer/Texture2DUtils.h"
+#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 FontCharMap * FontCharMap::create(const std::string& plistFile)
@@ -48,40 +49,39 @@ FontCharMap * FontCharMap::create(const std::string& plistFile)
     unsigned int startChar = dict["firstChar"].asInt();
 
 //     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(textureFilename);
-//     if (!tempTexture)
-//     {
-//         return nullptr;
-//     }
-//     
-//     FontCharMap *tempFont =  new FontCharMap(tempTexture,width,height,startChar);
-//     
-//     if (!tempFont)
-//     {
-//         return nullptr;
-//     }
-//     tempFont->autorelease();
-//     return tempFont;
-	return{};
+    auto tempTexture = GetUrho3DTexture(textureFilename);
+    if (!tempTexture)
+    {
+        return nullptr;
+    }
+    
+    FontCharMap *tempFont =  new FontCharMap(tempTexture,width,height,startChar);
+    
+    if (!tempFont)
+    {
+        return nullptr;
+    }
+    tempFont->autorelease();
+    return tempFont;
 }
 
 FontCharMap* FontCharMap::create(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap)
 {
 //     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(charMapFile);
-// 
-//     if (!tempTexture)
-//     {
-//         return nullptr;
-//     }
-// 
-//     FontCharMap *tempFont =  new FontCharMap(tempTexture,itemWidth,itemHeight,startCharMap);
-// 
-//     if (!tempFont)
-//     {
-//         return nullptr;
-//     }
-//     tempFont->autorelease();
-//     return tempFont;
-	return {};
+    auto tempTexture = GetUrho3DTexture(charMapFile);
+    if (!tempTexture)
+    {
+        return nullptr;
+    }
+
+    FontCharMap *tempFont =  new FontCharMap(tempTexture,itemWidth,itemHeight,startCharMap);
+
+    if (!tempFont)
+    {
+        return nullptr;
+    }
+    tempFont->autorelease();
+    return tempFont;
 }
 
 FontCharMap* FontCharMap::create(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
@@ -112,7 +112,7 @@ FontAtlas * FontCharMap::createFontAtlas()
     if (!tempAtlas)
         return nullptr;
     
-	Size s;// = _texture->getContentSizeInPixels();
+    Size s = { (float)_texture->GetWidth(), (float)_texture->GetHeight() };// _texture->getContentSizeInPixels();
     int itemsPerColumn = (int)(s.height / _itemHeight);
     int itemsPerRow = (int)(s.width / _itemWidth);
 
