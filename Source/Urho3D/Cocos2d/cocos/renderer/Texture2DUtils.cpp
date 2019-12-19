@@ -108,7 +108,7 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	return ret;
 }
 
-Urho3D::Texture2D* GetUrho3DTexture(const std::string& path)
+CC_DLL Urho3D::Texture2D* GetUrho3DTexture(const std::string& path)
 {
 	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
 	return cache->GetResource<Urho3D::Texture2D>(path.c_str());

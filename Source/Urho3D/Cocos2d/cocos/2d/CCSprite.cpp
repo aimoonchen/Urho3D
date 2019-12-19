@@ -43,9 +43,10 @@ THE SOFTWARE.
 
 #include "Urho3DContext.h"
 #include "Core/Context.h"
-#include "Resource/ResourceCache.h"
 #include "renderer/Texture2DUtils.h"
+#include "Graphics/Graphics.h"
 #include "Graphics/Texture2D.h"
+
 NS_CC_BEGIN
 
 // MARK: create, init, dealloc
@@ -252,8 +253,7 @@ bool Sprite::initWithSpriteFrame(SpriteFrame *spriteFrame)
 bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
 {
     bool ret = false;
-	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
-	Urho3D::Texture2D* texture = cache->GetResource<Urho3D::Texture2D>(info.getFilename().c_str());//_director->getTextureCache()->addImage(info.getFilename());
+	auto texture = GetUrho3DTexture(info.getFilename().c_str());//_director->getTextureCache()->addImage(info.getFilename());
     if(texture && initWithTexture(texture))
     {
         _polyInfo = info;
@@ -405,6 +405,9 @@ void Sprite::setTexture(Urho3D::Texture2D *texture)
 //             texture = _director->getTextureCache()->addImage(image, CC_2x2_WHITE_IMAGE_KEY);
 //             CC_SAFE_RELEASE(image);
 //         }
+        texture = new Urho3D::Texture2D(GetUrho3DContext());
+        texture->SetSize(2, 2, Urho3D::Graphics::GetRGBAFormat());
+        texture->SetData(0, 0, 0, 2, 2, cc_2x2_white_image);
     }
 
     if (_renderMode != RenderMode::QUAD_BATCHNODE)

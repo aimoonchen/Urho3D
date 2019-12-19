@@ -106,7 +106,7 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
 //         //emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
 // 		emptyImage->SetSize(2, 2, 4);
 // 		emptyImage->SetData(emptyTextureData);
-         _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
+        _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
         //_emptyTexture->initWithImage(emptyImage);
 		_emptyTexture->SetSize(2,2, Urho3D::Graphics::GetRGBAFormat());
 		_emptyTexture->SetData(0, 0, 0, 2, 2, emptyTextureData);

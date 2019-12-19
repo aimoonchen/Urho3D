@@ -278,7 +278,7 @@ void GLoader::loadExternal()
     auto tex = GetUrho3DTexture(_url);
     if (tex)
     {
-        auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, { tex->GetWidth(), tex->GetHeight() }/*tex->getContentSize()*/));
+        auto sf = SpriteFrame::createWithTexture(tex, Rect(Vec2::ZERO, { (float)tex->GetWidth(), (float)tex->GetHeight() }/*tex->getContentSize()*/));
         onExternalLoadSuccess(sf);
     }
     else
