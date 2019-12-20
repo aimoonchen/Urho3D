@@ -1,7 +1,9 @@
 #include "GGraph.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
-
+#ifndef M_PI
+#define M_PI      3.14159265358
+#endif
 NS_FGUI_BEGIN
 USING_NS_CC;
 

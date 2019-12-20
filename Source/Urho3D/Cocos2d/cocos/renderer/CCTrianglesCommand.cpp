@@ -80,6 +80,7 @@ void TrianglesCommand::init(float globalOrder, Urho3D::Texture2D* texture, GLPro
 {
     init(globalOrder, texture->GetGPUObjectName(), glProgramState, blendType, triangles, mv, flags);
     //_alphaTextureID = texture->getAlphaTextureName();
+    _texture = texture;
 }
 
 TrianglesCommand::~TrianglesCommand()

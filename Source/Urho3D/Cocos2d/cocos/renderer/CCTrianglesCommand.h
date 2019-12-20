@@ -99,7 +99,7 @@ public:
     BlendFunc getBlendType() const { return _blendType; }
     /**Get the model view matrix.*/
     const Mat4& getModelView() const { return _mv; }
-    
+    Urho3D::Texture2D* GetTexture() { return _texture; }
 protected:
     /**Generate the material ID by textureID, glProgramState, and blend function.*/
     void generateMaterialID();
@@ -118,6 +118,7 @@ protected:
     Mat4 _mv;
 
     GLuint _alphaTextureID; // ANDROID ETC1 ALPHA supports.
+    Urho3D::Texture2D* _texture{ nullptr };
 };
 
 NS_CC_END

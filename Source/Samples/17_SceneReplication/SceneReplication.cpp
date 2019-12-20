@@ -230,7 +230,7 @@ void SceneReplication::InitFairyGUI()
 // 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
 // 		Director::getInstance()->replaceScene(scene);
 	});
-    ui_scene_->render(ui_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
+    
 }
 void SceneReplication::SetupViewport()
 {
@@ -497,6 +497,7 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
 {
     // We only rotate the camera according to mouse movement since last frame, so do not need the time step
     MoveCamera();
+    ui_scene_->render(ui_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
 }
 
 void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)

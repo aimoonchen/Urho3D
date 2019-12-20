@@ -32,6 +32,10 @@
 
 #include "platform/CCPlatformMacros.h"
 #include "renderer/CCRenderCommand.h"
+
+#include "Core/Object.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
 // #include "renderer/CCGLProgram.h"
 // #include "platform/CCGL.h"
 
@@ -217,7 +221,8 @@ protected:
     void setupVBO();
     void mapBuffers();
     void drawBatchedTriangles();
-
+    void SetVertexData(Urho3D::VertexBuffer* dest);
+    void SetIndexData(Urho3D::IndexBuffer* dest);
     //Draw the previews queued triangles and flush previous context
     void flush();
     
@@ -278,6 +283,12 @@ protected:
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     EventListenerCustom* _cacheTextureListener;
 #endif
+
+    Urho3D::WeakPtr<Urho3D::Graphics> graphics_;
+	/// UI vertex buffer.
+    Urho3D::SharedPtr<Urho3D::VertexBuffer> vertexBuffer_;
+	/// UI index buffer.
+    Urho3D::SharedPtr<Urho3D::IndexBuffer> indexBuffer_;
 };
 
 NS_CC_END

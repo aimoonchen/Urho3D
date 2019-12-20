@@ -48,6 +48,13 @@
 #include "2d/CCCamera.h"
 #include "2d/CCScene.h"
 
+#include "Urho3DContext.h"
+#include "Core/Context.h"
+#include "Core/Timer.h"
+#include "Graphics/Graphics.h"
+#include "Graphics/VertexBuffer.h"
+#include "Graphics/IndexBuffer.h"
+#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 // helper
@@ -224,6 +231,18 @@ Renderer::Renderer()
     // for the batched TriangleCommand
     _triBatchesToDrawCapacity = 500;
     _triBatchesToDraw = (TriBatchToDraw*) malloc(sizeof(_triBatchesToDraw[0]) * _triBatchesToDrawCapacity);
+
+
+    auto ctx = GetUrho3DContext();
+	auto* graphics = ctx->GetSubsystem<Urho3D::Graphics>();
+
+	if (!graphics || !graphics->IsInitialized())
+		return;
+
+	graphics_ = graphics;
+
+	vertexBuffer_ = new Urho3D::VertexBuffer(ctx);
+	indexBuffer_ = new Urho3D::IndexBuffer(ctx);
 }
 
 Renderer::~Renderer()
@@ -727,6 +746,33 @@ void Renderer::fillVerticesAndIndices(const TrianglesCommand* cmd)
     _filledVertex += cmd->getVertexCount();
     _filledIndex += cmd->getIndexCount();
 }
+void Renderer::SetVertexData(Urho3D::VertexBuffer* dest)
+{
+	if (_filledVertex <= 0)
+		return;
+
+	// Update quad geometry into the vertex buffer
+	// Resize the vertex buffer first if too small or much too large
+    unsigned numVertices = _filledVertex;// vertexData.Size() / UI_VERTEX_SIZE;
+	if (dest->GetVertexCount() < numVertices || dest->GetVertexCount() > numVertices * 2)
+		dest->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+
+	dest->SetData(&_verts[0]);
+}
+
+void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
+{
+	if (_filledIndex <= 0)
+		return;
+
+	// Update quad geometry into the vertex buffer
+	// Resize the vertex buffer first if too small or much too large
+	unsigned numIndices = _filledVertex;// vertexData.Size() / UI_VERTEX_SIZE;
+	if (dest->GetIndexCount() < numIndices || dest->GetIndexCount() > numIndices * 2)
+		dest->SetSize(numIndices, false, true);
+
+	dest->SetData(&_indices[0]);
+}
 
 void Renderer::drawBatchedTriangles()
 {
@@ -789,6 +835,8 @@ void Renderer::drawBatchedTriangles()
     }
     batchesTotal++;
 
+    SetVertexData(vertexBuffer_);
+    SetIndexData(indexBuffer_);
     /************** 2: Copy vertices/indices to GL objects *************/
 //     auto conf = Configuration::getInstance();
 //     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
@@ -862,6 +910,143 @@ void Renderer::drawBatchedTriangles()
 //         glBindBuffer(GL_ARRAY_BUFFER, 0);
 //         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 //     }
+
+	// Engine does not render when window is closed or device is lost
+	assert(graphics_ && graphics_->IsInitialized() && !graphics_->IsDeviceLost());
+
+// 	if (batches.Empty())
+// 		return;
+    float uiScale_ = 1.0f;
+	unsigned alphaFormat = Urho3D::Graphics::GetAlphaFormat();
+	Urho3D::RenderSurface* surface = graphics_->GetRenderTarget(0);
+    Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
+    Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
+    Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
+    Urho3D::Vector2 offset(-1.0f, 1.0f);
+
+	if (surface)
+	{
+#ifdef URHO3D_OPENGL
+		// On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the
+		// same way as a render texture produced on Direct3D.
+		offset.y_ = -offset.y_;
+		scale.y_ = -scale.y_;
+#endif
+	}
+
+    Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
+	projection.m00_ = scale.x_ * uiScale_;
+	projection.m03_ = offset.x_;
+	projection.m11_ = scale.y_ * uiScale_;
+	projection.m13_ = offset.y_;
+	projection.m22_ = 1.0f;
+	projection.m23_ = 0.0f;
+	projection.m33_ = 1.0f;
+
+	graphics_->ClearParameterSources();
+	graphics_->SetColorWrite(true);
+#ifdef URHO3D_OPENGL
+	// Reverse winding if rendering to texture on OpenGL
+	if (surface)
+		graphics_->SetCullMode(Urho3D::CULL_CW);
+	else
+#endif
+		graphics_->SetCullMode(Urho3D::CULL_CCW);
+	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
+	graphics_->SetDepthWrite(false);
+	graphics_->SetFillMode(Urho3D::FILL_SOLID);
+	graphics_->SetStencilTest(false);
+	graphics_->SetVertexBuffer(vertexBuffer_);
+    graphics_->SetIndexBuffer(indexBuffer_);
+
+    Urho3D::ShaderVariation* noTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR");
+    Urho3D::ShaderVariation* diffTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "DIFFMAP VERTEXCOLOR");
+    Urho3D::ShaderVariation* noTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR");
+    Urho3D::ShaderVariation* diffTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP VERTEXCOLOR");
+    Urho3D::ShaderVariation* diffMaskTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP ALPHAMASK VERTEXCOLOR");
+    Urho3D::ShaderVariation* alphaTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "ALPHAMAP VERTEXCOLOR");
+
+
+	//for (unsigned i = batchStart; i < batchEnd; ++i)
+    for (int i = 0; i < batchesTotal; ++i)
+	{
+// 		const UIBatch& batch = batches[i];
+// 		if (batch.vertexStart_ == batch.vertexEnd_)
+// 			continue;
+
+		Urho3D::ShaderVariation* ps;
+        Urho3D::ShaderVariation* vs;
+
+        auto texture = _triBatchesToDraw[i].cmd->GetTexture();
+        auto blendType = _triBatchesToDraw[i].cmd->getBlendType();
+        Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
+        if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
+        {
+            blendMode = Urho3D::BLEND_PREMULALPHA;
+        }
+        else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
+        {
+            blendMode = Urho3D::BLEND_ALPHA;
+        }
+        else if (blendType == BlendFunc::ADDITIVE)
+        {
+            blendMode = Urho3D::BLEND_ADD;
+        }
+
+		if (!texture)
+		{
+			ps = noTexturePS;
+			vs = noTextureVS;
+		}
+		else
+		{
+			// If texture contains only an alpha channel, use alpha shader (for fonts)
+			vs = diffTextureVS;
+
+			if (texture->GetFormat() == alphaFormat)
+				ps = alphaTexturePS;
+// 			else if (batch.blendMode_ != Urho3D::BLEND_ALPHA && batch.blendMode_ != Urho3D::BLEND_ADDALPHA && batch.blendMode_ != Urho3D::BLEND_PREMULALPHA)
+// 				ps = diffMaskTexturePS;
+ 			else
+				ps = diffTexturePS;
+		}
+
+		graphics_->SetShaders(vs, ps);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
+			graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
+
+		float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+		graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+		graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
+
+//         Urho3D::IntRect scissor = batch.scissor_;
+// 		scissor.left_ = (int)(scissor.left_ * uiScale_);
+// 		scissor.top_ = (int)(scissor.top_ * uiScale_);
+// 		scissor.right_ = (int)(scissor.right_ * uiScale_);
+// 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
+
+		// Flip scissor vertically if using OpenGL texture rendering
+#ifdef URHO3D_OPENGL
+		if (surface)
+		{
+// 			int top = scissor.top_;
+// 			int bottom = scissor.bottom_;
+// 			scissor.top_ = viewSize.y_ - bottom;
+// 			scissor.bottom_ = viewSize.y_ - top;
+		}
+#endif
+
+		graphics_->SetBlendMode(blendMode);
+//		graphics_->SetScissorTest(true, scissor);
+		graphics_->SetTexture(0, texture);
+// 		graphics_->Draw(Urho3D::TRIANGLE_LIST, batch.vertexStart_ / UI_VERTEX_SIZE,
+// 			(batch.vertexEnd_ - batch.vertexStart_) / UI_VERTEX_SIZE);
+        graphics_->Draw(Urho3D::TRIANGLE_LIST, _triBatchesToDraw[i].offset, _triBatchesToDraw[i].indicesToDraw, 0, 0);
+	}
 
     _queuedTriangleCommands.clear();
     _filledVertex = 0;
