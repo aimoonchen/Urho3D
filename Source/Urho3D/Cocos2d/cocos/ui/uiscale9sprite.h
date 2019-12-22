@@ -31,15 +31,16 @@
 #include "2d/CCSpriteBatchNode.h"
 #include "platform/CCPlatformMacros.h"
 #include "ui/GUIExport.h"
-//#include "renderer/CCTrianglesCommand.h"
-namespace Urho3D
-{
-	class Texture2D;
-}
+#include "renderer/CCTrianglesCommand.h"
+
 /**
  * @addtogroup ui
  * @{
  */
+namespace Urho3D
+{
+	class Texture2D;
+}
 NS_CC_BEGIN
 class DrawNode;
 //class Texture2D;

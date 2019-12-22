@@ -173,11 +173,10 @@ public:
             if (fontPath.size() > 0)
             {
                 _curFontPath = fontPath;
-                //wchar_t * pwszBuffer = utf8ToUtf16(fontPath);
-				auto pwszBuffer = fontPath.c_str();
+                wchar_t * pwszBuffer = utf8ToUtf16(fontPath);
                 if (pwszBuffer)
                 {
-                    if (AddFontResource(pwszBuffer))
+                    if (AddFontResourceW(pwszBuffer))
                     {
                         PostMessage(_wnd, WM_FONTCHANGE, 0, 0);
                     }
@@ -431,11 +430,10 @@ private:
         // release temp font resource
         if (_curFontPath.size() > 0)
         {
-            //wchar_t * pwszBuffer = utf8ToUtf16(_curFontPath);
-			auto pwszBuffer = _curFontPath.c_str();
+            wchar_t * pwszBuffer = utf8ToUtf16(_curFontPath);
             if (pwszBuffer)
             {
-                RemoveFontResource(pwszBuffer);
+                RemoveFontResourceW(pwszBuffer);
                 PostMessage(_wnd, WM_FONTCHANGE, 0, 0);
                 delete[] pwszBuffer;
                 pwszBuffer = nullptr;

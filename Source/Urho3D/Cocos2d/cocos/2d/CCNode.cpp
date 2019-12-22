@@ -37,14 +37,14 @@ THE SOFTWARE.
 #include "base/CCScheduler.h"
 #include "base/CCEventDispatcher.h"
 #include "base/ccUTF8.h"
-#include "base/CCTouch.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 #include "2d/CCActionManager.h"
-//#include "2d/CCScene.h"
+#include "2d/CCScene.h"
+#include "base/CCTouch.h"
 //#include "2d/CCComponent.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramState.h"
-// #include "renderer/CCMaterial.h"
+//#include "renderer/CCGLProgram.h"
+//#include "renderer/CCGLProgramState.h"
+//#include "renderer/CCMaterial.h"
 #include "math/TransformUtils.h"
 
 
@@ -167,7 +167,7 @@ Node::~Node()
     CC_SAFE_RELEASE_NULL(_userObject);
     
     // attributes
-//    CC_SAFE_RELEASE_NULL(_glProgramState);
+    //CC_SAFE_RELEASE_NULL(_glProgramState);
 
     for (auto& child : _children)
     {
@@ -760,7 +760,7 @@ void Node::setGLProgram(GLProgram* glProgram)
 
 GLProgram * Node::getGLProgram() const
 {
-	return {};// _glProgramState ? _glProgramState->getGLProgram() : nullptr;
+    return nullptr;// _glProgramState ? _glProgramState->getGLProgram() : nullptr;
 }
 
 Scene* Node::getScene() const
@@ -774,7 +774,7 @@ Scene* Node::getScene() const
         sceneNode = sceneNode->_parent;
     }
 
-	return {};// dynamic_cast<Scene*>(sceneNode);
+    return dynamic_cast<Scene*>(sceneNode);
 }
 
 Rect Node::getBoundingBox() const
@@ -1966,7 +1966,7 @@ bool Node::addComponent(Component *component)
 //     scheduleUpdate();
 //     
 //     return _componentContainer->add(component);
-	return false;
+    return false;
 }
 
 bool Node::removeComponent(const std::string& name)
@@ -2165,8 +2165,8 @@ bool isScreenPointInRect(const Vec2 &pt, const Camera* camera, const Mat4& w2l, 
     
     // first, convert pt to near/far plane, get Pn and Pf
     Vec3 Pn(pt.x, pt.y, -1), Pf(pt.x, pt.y, 1);
-    Pn = camera->unprojectGL(Pn);
-    Pf = camera->unprojectGL(Pf);
+//     Pn = camera->unprojectGL(Pn);
+//     Pf = camera->unprojectGL(Pf);
     
     //  then convert Pn and Pf to node space
     w2l.transformPoint(&Pn);

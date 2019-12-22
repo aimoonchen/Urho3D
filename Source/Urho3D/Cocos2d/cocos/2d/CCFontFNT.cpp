@@ -245,7 +245,7 @@ void BMFontConfiguration::purgeFontDefDictionary()
 
 std::set<unsigned int>* BMFontConfiguration::parseConfigFile(const std::string& controlFile)
 {
-	std::string data = FileUtils::getInstance()->getStringFromFile(controlFile);
+    std::string data = FileUtils::getInstance()->getStringFromFile(controlFile);
     if (data.empty())
     {
         return nullptr;
@@ -610,8 +610,7 @@ FontFNT * FontFNT::create(const std::string& fntFilePath, const Vec2& imageOffse
         return nullptr;
     
     // add the texture
-    //Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(newConf->getAtlasName());
-    auto tempTexture = GetUrho3DTexture(newConf->getAtlasName());
+    Urho3D::Texture2D *tempTexture = GetUrho3DTexture(newConf->getAtlasName());
     if (!tempTexture)
     {
         return nullptr;
@@ -759,8 +758,7 @@ FontAtlas * FontFNT::createFontAtlas()
     
     // add the texture (only one texture for now)
     
-//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(_configuration->getAtlasName());
-    auto tempTexture = GetUrho3DTexture(_configuration->getAtlasName());
+    Urho3D::Texture2D *tempTexture = GetUrho3DTexture(_configuration->getAtlasName());
     if (!tempTexture) {
         CC_SAFE_RELEASE(tempAtlas);
         return nullptr;
@@ -786,12 +784,12 @@ void FontFNT::reloadBMFontResource(const std::string& fntFilePath)
         s_configurations->erase(fntFilePath);
     }
     ret = BMFontConfiguration::create(fntFilePath);
-//     if (ret)
-//     {
-//         s_configurations->insert(fntFilePath, ret);
-//         Director::getInstance()->getTextureCache()->reloadTexture(ret->getAtlasName());
-// 
-//     }
+    if (ret)
+    {
+        s_configurations->insert(fntFilePath, ret);
+        //Director::getInstance()->getTextureCache()->reloadTexture(ret->getAtlasName());
+        GetUrho3DTexture(ret->getAtlasName());
+    }
 }
 
 NS_CC_END

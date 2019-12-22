@@ -37,11 +37,11 @@ THE SOFTWARE.
 #include "base/CCConfiguration.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventListenerCustom.h"
-//#include "renderer/CCTextureCache.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/ccGLStateCache.h"
+////#include "renderer/CCTextureCache.h"
+// //#include "renderer/CCGLProgram.h"
+// //#include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
-#include "renderer/CCTexture2D.h"
+#include "../Graphics/Texture2D.h"
 #include "renderer/Texture2DUtils.h"
 //#include "platform/CCGL.h"
 
@@ -145,7 +145,7 @@ TextureAtlas * TextureAtlas::createWithTexture(Urho3D::Texture2D *texture, ssize
 bool TextureAtlas::initWithFile(const std::string& file, ssize_t capacity)
 {
     // retained in property
-    auto texture = GetUrho3DTexture(file);//Director::getInstance()->getTextureCache()->addImage(file);
+    auto texture = GetUrho3DTexture(file);//GetUrho3DTexture(file);
 
     if (texture)
     {   

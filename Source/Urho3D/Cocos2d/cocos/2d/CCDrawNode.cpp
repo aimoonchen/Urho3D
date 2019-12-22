@@ -21,21 +21,20 @@
  * OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN THE
  * SOFTWARE.
  */
+
 #include "2d/CCDrawNode.h"
 #include "base/CCEventType.h"
 #include "base/CCConfiguration.h"
 #include "renderer/CCRenderer.h"
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCGLProgramState.h"
-// #include "renderer/CCGLProgramCache.h"
+//#include "renderer/ccGLStateCache.h"
+//#include "renderer/CCGLProgramState.h"
+//#include "renderer/CCGLProgramCache.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
 #include "2d/CCActionCatmullRom.h"
-//#include "platform/CCGL.h"
-#ifndef M_PI
-#define M_PI      3.14159265358
-#endif
+#include "platform/CCGL.h"
+
 NS_CC_BEGIN
 
 // Vec2 == CGPoint in 32-bits, but not in 64-bits (OS X)
@@ -129,10 +128,10 @@ DrawNode::~DrawNode()
 //     glDeleteBuffers(1, &_vbo);
 //     glDeleteBuffers(1, &_vboGLLine);
 //     glDeleteBuffers(1, &_vboGLPoint);
-    _vbo = 0;
-    _vboGLPoint = 0;
-    _vboGLLine = 0;
-    
+//     _vbo = 0;
+//     _vboGLPoint = 0;
+//     _vboGLLine = 0;
+//     
 //     if (Configuration::getInstance()->supportsShareableVAO())
 //     {
 //         GL::bindVAO(0);

@@ -32,13 +32,12 @@ THE SOFTWARE.
 #include "base/CCDirector.h"
 //#include "base/CCProfiling.h"
 #include "base/ccUTF8.h"
-// #include "renderer/CCTextureCache.h"
+//#include "renderer/CCTextureCache.h"
 #include "renderer/CCRenderer.h"
 #include "renderer/CCQuadCommand.h"
-#include "Urho3DContext.h"
-#include "Graphics/Texture2D.h"
 #include "renderer/Texture2DUtils.h"
-
+#include "Urho3DContext.h"
+#include "../Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 /*
@@ -87,27 +86,27 @@ bool SpriteBatchNode::initWithTexture(Urho3D::Texture2D *tex, ssize_t capacity/*
     
     CCASSERT(capacity>=0, "Capacity must be >= 0");
     
-//     _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
-//     if(!tex->hasPremultipliedAlpha())
-//     {
-//         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
-//     }
-//     _textureAtlas = new (std::nothrow) TextureAtlas();
-// 
-//     if (capacity <= 0)
-//     {
-//         capacity = DEFAULT_CAPACITY;
-//     }
-//     
-//     _textureAtlas->initWithTexture(tex, capacity);
-// 
-//     updateBlendFunc();
-// 
-//     _children.reserve(capacity);
-// 
-//     _descendants.reserve(capacity);
-//     
-//     setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, tex));
+    _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+    if(true/*!tex->hasPremultipliedAlpha()*/)
+    {
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+    }
+    _textureAtlas = new (std::nothrow) TextureAtlas();
+
+    if (capacity <= 0)
+    {
+        capacity = DEFAULT_CAPACITY;
+    }
+    
+    _textureAtlas->initWithTexture(tex, capacity);
+
+    updateBlendFunc();
+
+    _children.reserve(capacity);
+
+    _descendants.reserve(capacity);
+    
+//    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, tex));
     return true;
 }
 
@@ -116,7 +115,6 @@ bool SpriteBatchNode::init()
     Urho3D::Texture2D * texture = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
     //texture->autorelease();
     return this->initWithTexture(texture, 0);
-	//return false;
 }
 
 /*
@@ -124,9 +122,8 @@ bool SpriteBatchNode::init()
 */
 bool SpriteBatchNode::initWithFile(const std::string& fileImage, ssize_t capacity/* = DEFAULT_CAPACITY*/)
 {
-//    Urho3D::Texture2D *texture2D = Director::getInstance()->getTextureCache()->addImage(fileImage);
-    auto texture = GetUrho3DTexture(fileImage);
-    return initWithTexture(texture, capacity);
+    Urho3D::Texture2D *texture2D = GetUrho3DTexture(fileImage);
+    return initWithTexture(texture2D, capacity);
 }
 
 SpriteBatchNode::SpriteBatchNode()
@@ -136,7 +133,7 @@ SpriteBatchNode::SpriteBatchNode()
 
 SpriteBatchNode::~SpriteBatchNode()
 {
-    //CC_SAFE_RELEASE(_textureAtlas);
+    CC_SAFE_RELEASE(_textureAtlas);
 }
 
 // override visit
@@ -257,7 +254,7 @@ void SpriteBatchNode::removeAllChildrenWithCleanup(bool doCleanup)
     Node::removeAllChildrenWithCleanup(doCleanup);
 
     _descendants.clear();
-    //if (_textureAtlas) {_textureAtlas->removeAllQuads();}
+    if (_textureAtlas) {_textureAtlas->removeAllQuads();}
 }
 
 //override sortAllChildren
@@ -355,18 +352,18 @@ void SpriteBatchNode::swap(ssize_t oldIndex, ssize_t newIndex)
 {
     CCASSERT(oldIndex>=0 && oldIndex < (int)_descendants.size() && newIndex >=0 && newIndex < (int)_descendants.size(), "Invalid index");
 
-//     V3F_C4B_T2F_Quad* quads = _textureAtlas->getQuads();
-//     std::swap( quads[oldIndex], quads[newIndex] );
-// 
-//     //update the index of other swapped item
-// 
-//     auto oldIt = std::next( _descendants.begin(), oldIndex );
-//     auto newIt = std::next( _descendants.begin(), newIndex );
-// 
-//     (*newIt)->setAtlasIndex(oldIndex);
-// //    (*oldIt)->setAtlasIndex(newIndex);
-// 
-//     std::swap( *oldIt, *newIt );
+    V3F_C4B_T2F_Quad* quads = _textureAtlas->getQuads();
+    std::swap( quads[oldIndex], quads[newIndex] );
+
+    //update the index of other swapped item
+
+    auto oldIt = std::next( _descendants.begin(), oldIndex );
+    auto newIt = std::next( _descendants.begin(), newIndex );
+
+    (*newIt)->setAtlasIndex(oldIndex);
+//    (*oldIt)->setAtlasIndex(newIndex);
+
+    std::swap( *oldIt, *newIt );
 }
 
 void SpriteBatchNode::reorderBatch(bool reorder)
@@ -396,31 +393,31 @@ void SpriteBatchNode::increaseAtlasCapacity()
     // if we're going beyond the current TextureAtlas's capacity,
     // all the previously initialized sprites will need to redo their texture coords
     // this is likely computationally expensive
-//     ssize_t quantity = (_textureAtlas->getCapacity() + 1) * 4 / 3;
-// 
-//     CCLOG("cocos2d: SpriteBatchNode: resizing TextureAtlas capacity from [%d] to [%d].",
-//         static_cast<int>(_textureAtlas->getCapacity()),
-//         static_cast<int>(quantity));
-// 
-//     if (! _textureAtlas->resizeCapacity(quantity))
-//     {
-//         // serious problems
-//         CCLOGWARN("cocos2d: WARNING: Not enough memory to resize the atlas");
-//         CCASSERT(false, "Not enough memory to resize the atlas");
-//     }
+    ssize_t quantity = (_textureAtlas->getCapacity() + 1) * 4 / 3;
+
+    CCLOG("cocos2d: SpriteBatchNode: resizing TextureAtlas capacity from [%d] to [%d].",
+        static_cast<int>(_textureAtlas->getCapacity()),
+        static_cast<int>(quantity));
+
+    if (! _textureAtlas->resizeCapacity(quantity))
+    {
+        // serious problems
+        CCLOGWARN("cocos2d: WARNING: Not enough memory to resize the atlas");
+        CCASSERT(false, "Not enough memory to resize the atlas");
+    }
 }
 
 void SpriteBatchNode::reserveCapacity(ssize_t newCapacity)
 {
-//     if (newCapacity <= _textureAtlas->getCapacity())
-//         return;
-// 
-//     if (! _textureAtlas->resizeCapacity(newCapacity))
-//     {
-//         // serious problems
-//         CCLOGWARN("cocos2d: WARNING: Not enough memory to resize the atlas");
-//         CCASSERT(false, "Not enough memory to resize the atlas");
-//     }
+    if (newCapacity <= _textureAtlas->getCapacity())
+        return;
+
+    if (! _textureAtlas->resizeCapacity(newCapacity))
+    {
+        // serious problems
+        CCLOGWARN("cocos2d: WARNING: Not enough memory to resize the atlas");
+        CCASSERT(false, "Not enough memory to resize the atlas");
+    }
 }
 
 ssize_t SpriteBatchNode::rebuildIndexInOrder(Sprite *parent, ssize_t index)
@@ -548,17 +545,17 @@ void SpriteBatchNode::appendChild(Sprite* sprite)
     sprite->setBatchNode(this);
     sprite->setDirty(true);
 
-//     if(_textureAtlas->getTotalQuads() == _textureAtlas->getCapacity()) {
-//         increaseAtlasCapacity();
-//     }
-// 
-//     _descendants.push_back(sprite);
-//     int index = static_cast<int>(_descendants.size()-1);
-// 
-//     sprite->setAtlasIndex(index);
-// 
-//     V3F_C4B_T2F_Quad quad = sprite->getQuad();
-//     _textureAtlas->insertQuad(&quad, index);
+    if(_textureAtlas->getTotalQuads() == _textureAtlas->getCapacity()) {
+        increaseAtlasCapacity();
+    }
+
+    _descendants.push_back(sprite);
+    int index = static_cast<int>(_descendants.size()-1);
+
+    sprite->setAtlasIndex(index);
+
+    V3F_C4B_T2F_Quad quad = sprite->getQuad();
+    _textureAtlas->insertQuad(&quad, index);
 
     // add children recursively
     auto& children = sprite->getChildren();
@@ -582,7 +579,7 @@ void SpriteBatchNode::appendChild(Sprite* sprite)
 void SpriteBatchNode::removeSpriteFromAtlas(Sprite *sprite)
 {
     // remove from TextureAtlas
-   // _textureAtlas->removeQuadAtIndex(sprite->getAtlasIndex());
+    _textureAtlas->removeQuadAtIndex(sprite->getAtlasIndex());
 
     // Cleanup sprite. It might be reused (issue #569)
     sprite->setBatchNode(nullptr);
@@ -614,16 +611,16 @@ void SpriteBatchNode::removeSpriteFromAtlas(Sprite *sprite)
 
 void SpriteBatchNode::updateBlendFunc()
 {
-//     if (! _textureAtlas->getTexture()->hasPremultipliedAlpha())
-//     {
-//         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
-//         setOpacityModifyRGB(false);
-//     }
-//     else
-//     {
-//         _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
-//         setOpacityModifyRGB(true);
-//     }
+    if (true/*! _textureAtlas->getTexture()->hasPremultipliedAlpha()*/)
+    {
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+        setOpacityModifyRGB(false);
+    }
+    else
+    {
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+        setOpacityModifyRGB(true);
+    }
 }
 
 // CocosNodeTexture protocol
@@ -639,12 +636,12 @@ const BlendFunc& SpriteBatchNode::getBlendFunc() const
 
 Urho3D::Texture2D* SpriteBatchNode::getTexture() const
 {
-	return {};// _textureAtlas->getTexture();
+    return _textureAtlas->getTexture();
 }
 
 void SpriteBatchNode::setTexture(Urho3D::Texture2D *texture)
 {
-   // _textureAtlas->setTexture(texture);
+    _textureAtlas->setTexture(texture);
     updateBlendFunc();
 }
 
@@ -658,18 +655,18 @@ void SpriteBatchNode::insertQuadFromSprite(Sprite *sprite, ssize_t index)
     CCASSERT( dynamic_cast<Sprite*>(sprite), "CCSpriteBatchNode only supports Sprites as children");
 
     // make needed room
-//     while(index >= _textureAtlas->getCapacity() || _textureAtlas->getCapacity() == _textureAtlas->getTotalQuads())
-//     {
-//         this->increaseAtlasCapacity();
-//     }
+    while(index >= _textureAtlas->getCapacity() || _textureAtlas->getCapacity() == _textureAtlas->getTotalQuads())
+    {
+        this->increaseAtlasCapacity();
+    }
     //
     // update the quad directly. Don't add the sprite to the scene graph
     //
     sprite->setBatchNode(this);
     sprite->setAtlasIndex(index);
 
-//     V3F_C4B_T2F_Quad quad = sprite->getQuad();
-//     _textureAtlas->insertQuad(&quad, index);
+    V3F_C4B_T2F_Quad quad = sprite->getQuad();
+    _textureAtlas->insertQuad(&quad, index);
 
     // FIXME:: updateTransform will update the textureAtlas too, using updateQuad.
     // FIXME:: so, it should be AFTER the insertQuad
@@ -683,10 +680,10 @@ void SpriteBatchNode::updateQuadFromSprite(Sprite *sprite, ssize_t index)
     CCASSERT(dynamic_cast<Sprite*>(sprite) != nullptr, "CCSpriteBatchNode only supports Sprites as children");
     
     // make needed room
-//     while (index >= _textureAtlas->getCapacity() || _textureAtlas->getCapacity() == _textureAtlas->getTotalQuads())
-//     {
-//         this->increaseAtlasCapacity();
-//     }
+    while (index >= _textureAtlas->getCapacity() || _textureAtlas->getCapacity() == _textureAtlas->getTotalQuads())
+    {
+        this->increaseAtlasCapacity();
+    }
     
     //
     // update the quad directly. Don't add the sprite to the scene graph

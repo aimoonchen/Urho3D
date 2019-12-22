@@ -2,15 +2,14 @@
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "platform/CCDevice.h"
-#include "Graphics/Texture2D.h"
-#include "renderer/CCTexture2D.h"
 #include "Urho3DContext.h"
-#include "Core/Context.h"
-#include "Graphics/Graphics.h"
-#include "Resource/ResourceCache.h"
+#include "../Graphics/Texture2D.h"
+#include "../Core/Context.h"
+#include "../Graphics/Graphics.h"
+#include "../Resource/ResourceCache.h"
 NS_CC_BEGIN
 
-static Texture2D::PixelFormat g_defaultAlphaPixelFormat = Texture2D::PixelFormat::DEFAULT;
+//static Texture2D::PixelFormat g_defaultAlphaPixelFormat = Texture2D::PixelFormat::DEFAULT;
 
 bool InitWithString(Urho3D::Texture2D* texture, const char *text, const std::string& fontName, float fontSize, const Size& dimensions/* = Size(0, 0)*/, TextHAlignment hAlignment/* =  TextHAlignment::CENTER */, TextVAlignment vAlignment/* =  TextVAlignment::TOP */, bool enableWrap /* = false */, int overflow /* = 0 */)
 {
@@ -72,7 +71,7 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	CCASSERT(textDefinition._stroke._strokeEnabled == false, "Currently stroke only supported on iOS and Android!");
 #endif
 
-	Texture2D::PixelFormat pixelFormat = g_defaultAlphaPixelFormat;
+	//Texture2D::PixelFormat pixelFormat = g_defaultAlphaPixelFormat;
 	unsigned char* outTempData = nullptr;
 	ssize_t outTempDataLen = 0;
 
@@ -95,7 +94,7 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	}
 
 	Size  imageSize = Size((float)imageWidth, (float)imageHeight);
-	pixelFormat = Texture2D::convertDataToFormat(outData.getBytes(), imageWidth*imageHeight * 4, Texture2D::PixelFormat::RGBA8888, pixelFormat, &outTempData, &outTempDataLen);
+	//pixelFormat = Texture2D::convertDataToFormat(outData.getBytes(), imageWidth*imageHeight * 4, Texture2D::PixelFormat::RGBA8888, pixelFormat, &outTempData, &outTempDataLen);
 
 	//ret = initWithData(outTempData, outTempDataLen, pixelFormat, imageWidth, imageHeight, imageSize);
 	texture->SetSize(imageWidth, imageHeight, Urho3D::Graphics::GetRGBAFormat());

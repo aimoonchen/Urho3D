@@ -37,6 +37,7 @@ namespace Urho3D
 {
     class Texture2D;
 }
+
 NS_CC_BEGIN
 /**
  Command used to render one or more Triangles, which is similar to QuadCommand.

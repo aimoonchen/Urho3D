@@ -23,44 +23,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+
+#ifndef __PLATFORM_CCGL_H__
+#define __PLATFORM_CCGL_H__
+/// @cond DO_NOT_SHOW
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
-#ifdef __MINGW32__
-#include <string.h>
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+#include "platform/mac/CCGL-mac.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+#include "platform/ios/CCGL-ios.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+#include "platform/android/CCGL-android.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include "platform/win32/CCGL-win32.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
+#include "platform/winrt/CCGL.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+#include "platform/linux/CCGL-linux.h"
+#elif CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN
+#include "platform/tizen/CCGL-tizen.h"
 #endif
 
-#if defined(CC_STATIC)
-    #define CC_DLL
-#else
-#if defined(Urho3D_EXPORTS)
-    #define CC_DLL     __declspec(dllexport)
-#else         /* use a DLL library */
-    #define CC_DLL     __declspec(dllimport)
-#endif
-#endif
-
-#include <assert.h>
-
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
-
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
-
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/
+/// @endcond
+#endif /* __PLATFORM_CCPLATFORMDEFINE_H__*/

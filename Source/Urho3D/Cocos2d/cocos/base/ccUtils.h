@@ -32,6 +32,7 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCData.h"
 #include "platform/CCCommon.h"
+
 /** @file ccUtils.h
 Misc free functions
 */

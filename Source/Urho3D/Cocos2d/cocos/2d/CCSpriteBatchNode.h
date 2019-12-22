@@ -36,9 +36,7 @@ THE SOFTWARE.
 #include "base/CCProtocols.h"
 #include "renderer/CCTextureAtlas.h"
 #include "renderer/CCBatchCommand.h"
-namespace Urho3D {
-	class Context;
-}
+
 NS_CC_BEGIN
 
 /**
@@ -46,7 +44,7 @@ NS_CC_BEGIN
  * @{
  */
 
-class TextureAtlas;
+
 class Sprite;
 
 /** SpriteBatchNode is like a batch node: if it contains children, it will draw them in 1 single OpenGL call
@@ -101,12 +99,12 @@ public:
      */
     void setTextureAtlas(TextureAtlas* textureAtlas)
     { 
-//         if (textureAtlas != _textureAtlas)
-//         {
-//             CC_SAFE_RETAIN(textureAtlas);
-//             CC_SAFE_RELEASE(_textureAtlas);
-//             _textureAtlas = textureAtlas;
-//         }
+        if (textureAtlas != _textureAtlas)
+        {
+            CC_SAFE_RETAIN(textureAtlas);
+            CC_SAFE_RELEASE(_textureAtlas);
+            _textureAtlas = textureAtlas;
+        }
     }
 
     /** Returns an array with the descendants (children, gran children, etc.).

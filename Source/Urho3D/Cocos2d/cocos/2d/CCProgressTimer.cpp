@@ -31,12 +31,8 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "2d/CCSprite.h"
-// #include "renderer/ccGLStateCache.h"
+//#include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
-
-#ifndef M_PI
-#define M_PI      3.14159265358
-#endif
 
 NS_CC_BEGIN
 
@@ -509,7 +505,7 @@ Vec2 ProgressTimer::boundaryTexCoord(char index)
 
 void ProgressTimer::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 {
-// 
+
 //     getGLProgram()->use();
 //     getGLProgram()->setUniformsForBuiltins(transform);
 // 

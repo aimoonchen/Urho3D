@@ -89,7 +89,7 @@ public:
     
     std::string getFontName() const;
 
-	Urho3D::Texture2D* getTexture(int slot);
+    Urho3D::Texture2D* getTexture(int slot);
     const Font* getFont() const { return _font; }
 
     /** listen the event that renderer was recreated on Android/WP8

@@ -28,12 +28,12 @@ THE SOFTWARE.
 
 #include "2d/CCScene.h"
 #include "base/CCDirector.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/ccUTF8.h"
 #include "renderer/CCRenderer.h"
-// #include "renderer/CCFrameBuffer.h"
+//#include "renderer/CCFrameBuffer.h"
 #include "platform/CCDataManager.h"
 
 #if CC_USE_PHYSICS
@@ -70,13 +70,13 @@ Scene::Scene()
     _cameraOrderDirty = true;
     
     //create default camera
-    _defaultCamera = Camera::create();
-    addChild(_defaultCamera);
+//     _defaultCamera = Camera::create();
+//     addChild(_defaultCamera);
     
     _event = Director::getInstance()->getEventDispatcher()->addCustomEventListener(Director::EVENT_PROJECTION_CHANGED, std::bind(&Scene::onProjectionChanged, this, std::placeholders::_1));
     _event->retain();
     
-    Camera::_visitingCamera = nullptr;
+    //Camera::_visitingCamera = nullptr;
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
     DataManager::onSceneLoaderBegin();
@@ -178,24 +178,24 @@ std::string Scene::getDescription() const
 
 void Scene::onProjectionChanged(EventCustom* /*event*/)
 {
-    if (_defaultCamera)
-    {
-        _defaultCamera->initDefault();
-    }
+//     if (_defaultCamera)
+//     {
+//         _defaultCamera->initDefault();
+//     }
 }
 
-static bool camera_cmp(const Camera* a, const Camera* b)
-{
-    return a->getRenderOrder() < b->getRenderOrder();
-}
+// static bool camera_cmp(const Camera* a, const Camera* b)
+// {
+//     return a->getRenderOrder() < b->getRenderOrder();
+// }
 
 const std::vector<Camera*>& Scene::getCameras()
 {
-    if (_cameraOrderDirty)
-    {
-        stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
-        _cameraOrderDirty = false;
-    }
+//     if (_cameraOrderDirty)
+//     {
+//         stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
+//         _cameraOrderDirty = false;
+//     }
     return _cameras;
 }
 
@@ -294,16 +294,16 @@ void Scene::render(Renderer* renderer, const Mat4* eyeTransforms, const Mat4* ey
 
 void Scene::removeAllChildren()
 {
-    if (_defaultCamera)
-        _defaultCamera->retain();
+//     if (_defaultCamera)
+//         _defaultCamera->retain();
 
     Node::removeAllChildren();
 
-    if (_defaultCamera)
-    {
-        addChild(_defaultCamera);
-        _defaultCamera->release();
-    }
+//     if (_defaultCamera)
+//     {
+//         addChild(_defaultCamera);
+//         _defaultCamera->release();
+//     }
 }
 
 #if CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION

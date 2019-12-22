@@ -83,7 +83,7 @@ bool TextFieldDelegate::onVisit(TextFieldTTF* /*sender*/, Renderer* /*renderer*/
 //////////////////////////////////////////////////////////////////////////
 
 TextFieldTTF::TextFieldTTF()
-:_delegate(0)
+: _delegate(0)
 , _charCount(0)
 , _inputText("")
 , _placeHolder("")   // prevent Label initWithString assertion

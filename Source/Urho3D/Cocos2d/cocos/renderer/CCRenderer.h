@@ -33,11 +33,11 @@
 #include "platform/CCPlatformMacros.h"
 #include "renderer/CCRenderCommand.h"
 
-#include "Core/Object.h"
-#include "Graphics/VertexBuffer.h"
-#include "Graphics/IndexBuffer.h"
-// #include "renderer/CCGLProgram.h"
-// #include "platform/CCGL.h"
+#include "../Core/Object.h"
+#include "../Graphics/VertexBuffer.h"
+#include "../Graphics/IndexBuffer.h"
+// //#include "renderer/CCGLProgram.h"
+#include "platform/CCGL.h"
 
 #if !defined(NDEBUG) && CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 

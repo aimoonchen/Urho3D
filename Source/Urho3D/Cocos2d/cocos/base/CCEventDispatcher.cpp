@@ -35,10 +35,10 @@
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID || CC_TARGET_PLATFORM == CC_PLATFORM_IOS || CC_TARGET_PLATFORM == CC_PLATFORM_MAC || CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include "base/CCEventListenerController.h"
 #endif
-//#include "2d/CCScene.h"
+#include "2d/CCScene.h"
 #include "base/CCDirector.h"
 #include "base/CCEventType.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 #include "base/CCEventTouch.h"
 #define DUMP_LISTENER_ITEM_PRIORITY_INFO 0
 
@@ -830,22 +830,22 @@ void EventDispatcher::dispatchTouchEventToListeners(EventListenerVector* listene
     auto scene = Director::getInstance()->getRunningScene();
     if (scene && sceneGraphPriorityListeners)
     {
-        if (!shouldStopPropagation)
-        {
-            // priority == 0, scene graph priority
-            
-            // first, get all enabled, unPaused and registered listeners
-            std::vector<EventListener*> sceneListeners;
-            for (auto& l : *sceneGraphPriorityListeners)
-            {
-                if (l->isEnabled() && !l->isPaused() && l->isRegistered())
-                {
-                    sceneListeners.push_back(l);
-                }
-            }
-            // second, for all camera call all listeners
-            // get a copy of cameras, prevent it's been modified in listener callback
-            // if camera's depth is greater, process it earlier
+//         if (!shouldStopPropagation)
+//         {
+//             // priority == 0, scene graph priority
+//             
+//             // first, get all enabled, unPaused and registered listeners
+//             std::vector<EventListener*> sceneListeners;
+//             for (auto& l : *sceneGraphPriorityListeners)
+//             {
+//                 if (l->isEnabled() && !l->isPaused() && l->isRegistered())
+//                 {
+//                     sceneListeners.push_back(l);
+//                 }
+//             }
+//             // second, for all camera call all listeners
+//             // get a copy of cameras, prevent it's been modified in listener callback
+//             // if camera's depth is greater, process it earlier
 //             auto cameras = scene->getCameras();
 //             for (auto rit = cameras.rbegin(), ritRend = cameras.rend(); rit != ritRend; ++rit)
 //             {
@@ -875,7 +875,7 @@ void EventDispatcher::dispatchTouchEventToListeners(EventListenerVector* listene
 //                 }
 //             }
 //             Camera::_visitingCamera = nullptr;
-        }
+//         }
     }
     
     if (fixedPriorityListeners)
@@ -1298,15 +1298,15 @@ void EventDispatcher::sortEventListeners(const EventListener::ListenerID& listen
         
         if ((int)dirtyFlag & (int)DirtyFlag::SCENE_GRAPH_PRIORITY)
         {
-//             auto rootNode = Director::getInstance()->getRunningScene();
-//             if (rootNode)
-//             {
-//                 sortEventListenersOfSceneGraphPriority(listenerID, rootNode);
-//             }
-//             else
-//             {
-//                 dirtyIter->second = DirtyFlag::SCENE_GRAPH_PRIORITY;
-//             }
+            auto rootNode = Director::getInstance()->getRunningScene();
+            if (rootNode)
+            {
+                sortEventListenersOfSceneGraphPriority(listenerID, rootNode);
+            }
+            else
+            {
+                dirtyIter->second = DirtyFlag::SCENE_GRAPH_PRIORITY;
+            }
         }
     }
 }

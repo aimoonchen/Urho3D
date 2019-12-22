@@ -29,7 +29,6 @@ THE SOFTWARE.
 /// @cond DO_NOT_SHOW
 #include <string>
 #include "base/CCRef.h"
-//#include "renderer/CCTexture2D.h"
 #include "platform/CCStdC.h"
 #if CC_USE_WIC
 #include "platform/winrt/WICImageLoader-winrt.h"

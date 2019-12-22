@@ -32,7 +32,7 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "platform/CCSAXParser.h"
-#include "base/ccUtils.h"
+//#include "base/ccUtils.h"
 
 #include "tinyxml2/tinyxml2.h"
 #ifdef MINIZIP_FROM_SYSTEM
@@ -350,8 +350,8 @@ ValueVector FileUtils::getValueVectorFromFile(const std::string& filename) const
 /*
  * forward statement
  */
-// static tinyxml2::XMLElement* generateElementForArray(const ValueVector& array, tinyxml2::XMLDocument *doc);
-// static tinyxml2::XMLElement* generateElementForDict(const ValueMap& dict, tinyxml2::XMLDocument *doc);
+static tinyxml2::XMLElement* generateElementForArray(const ValueVector& array, tinyxml2::XMLDocument *doc);
+static tinyxml2::XMLElement* generateElementForDict(const ValueMap& dict, tinyxml2::XMLDocument *doc);
 
 /*
  * Use tinyxml2 to write plist files
@@ -363,171 +363,169 @@ bool FileUtils::writeToFile(const ValueMap& dict, const std::string &fullPath) c
 
 bool FileUtils::writeValueMapToFile(const ValueMap& dict, const std::string& fullPath) const
 {
-//     tinyxml2::XMLDocument *doc = new (std::nothrow)tinyxml2::XMLDocument();
-//     if (nullptr == doc)
-//         return false;
-// 
-//     tinyxml2::XMLDeclaration *declaration = doc->NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
-//     if (nullptr == declaration)
-//     {
-//         delete doc;
-//         return false;
-//     }
-// 
-//     doc->LinkEndChild(declaration);
-//     tinyxml2::XMLElement *docType = doc->NewElement("!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
-//     doc->LinkEndChild(docType);
-// 
-//     tinyxml2::XMLElement *rootEle = doc->NewElement("plist");
-//     if (nullptr == rootEle)
-//     {
-//         delete doc;
-//         return false;
-//     }
-//     rootEle->SetAttribute("version", "1.0");
-//     doc->LinkEndChild(rootEle);
-// 
-//     tinyxml2::XMLElement *innerDict = generateElementForDict(dict, doc);
-//     if (nullptr == innerDict)
-//     {
-//         delete doc;
-//         return false;
-//     }
-//     rootEle->LinkEndChild(innerDict);
-// 
-//     bool ret = tinyxml2::XML_SUCCESS == doc->SaveFile(getSuitableFOpen(fullPath).c_str());
-// 
-//     delete doc;
-//     return ret;
-	return {};
+    tinyxml2::XMLDocument *doc = new (std::nothrow)tinyxml2::XMLDocument();
+    if (nullptr == doc)
+        return false;
+
+    tinyxml2::XMLDeclaration *declaration = doc->NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
+    if (nullptr == declaration)
+    {
+        delete doc;
+        return false;
+    }
+
+    doc->LinkEndChild(declaration);
+    tinyxml2::XMLElement *docType = doc->NewElement("!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
+    doc->LinkEndChild(docType);
+
+    tinyxml2::XMLElement *rootEle = doc->NewElement("plist");
+    if (nullptr == rootEle)
+    {
+        delete doc;
+        return false;
+    }
+    rootEle->SetAttribute("version", "1.0");
+    doc->LinkEndChild(rootEle);
+
+    tinyxml2::XMLElement *innerDict = generateElementForDict(dict, doc);
+    if (nullptr == innerDict)
+    {
+        delete doc;
+        return false;
+    }
+    rootEle->LinkEndChild(innerDict);
+
+    bool ret = tinyxml2::XML_SUCCESS == doc->SaveFile(getSuitableFOpen(fullPath).c_str());
+
+    delete doc;
+    return ret;
 }
 
 bool FileUtils::writeValueVectorToFile(const ValueVector& vecData, const std::string& fullPath) const
 {
-//     tinyxml2::XMLDocument *doc = new (std::nothrow)tinyxml2::XMLDocument();
-//     if (nullptr == doc)
-//         return false;
-// 
-//     tinyxml2::XMLDeclaration *declaration = doc->NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
-//     if (nullptr == declaration)
-//     {
-//         delete doc;
-//         return false;
-//     }
-// 
-//     doc->LinkEndChild(declaration);
-//     tinyxml2::XMLElement *docType = doc->NewElement("!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
-//     doc->LinkEndChild(docType);
-// 
-//     tinyxml2::XMLElement *rootEle = doc->NewElement("plist");
-//     if (nullptr == rootEle)
-//     {
-//         delete doc;
-//         return false;
-//     }
-//     rootEle->SetAttribute("version", "1.0");
-//     doc->LinkEndChild(rootEle);
-// 
-//     tinyxml2::XMLElement *innerDict = generateElementForArray(vecData, doc);
-//     if (nullptr == innerDict)
-//     {
-//         delete doc;
-//         return false;
-//     }
-//     rootEle->LinkEndChild(innerDict);
-// 
-//     bool ret = tinyxml2::XML_SUCCESS == doc->SaveFile(getSuitableFOpen(fullPath).c_str());
-// 
-//     delete doc;
-//     return ret;
-	return{};
+    tinyxml2::XMLDocument *doc = new (std::nothrow)tinyxml2::XMLDocument();
+    if (nullptr == doc)
+        return false;
+
+    tinyxml2::XMLDeclaration *declaration = doc->NewDeclaration("xml version=\"1.0\" encoding=\"UTF-8\"");
+    if (nullptr == declaration)
+    {
+        delete doc;
+        return false;
+    }
+
+    doc->LinkEndChild(declaration);
+    tinyxml2::XMLElement *docType = doc->NewElement("!DOCTYPE plist PUBLIC \"-//Apple//DTD PLIST 1.0//EN\" \"http://www.apple.com/DTDs/PropertyList-1.0.dtd\"");
+    doc->LinkEndChild(docType);
+
+    tinyxml2::XMLElement *rootEle = doc->NewElement("plist");
+    if (nullptr == rootEle)
+    {
+        delete doc;
+        return false;
+    }
+    rootEle->SetAttribute("version", "1.0");
+    doc->LinkEndChild(rootEle);
+
+    tinyxml2::XMLElement *innerDict = generateElementForArray(vecData, doc);
+    if (nullptr == innerDict)
+    {
+        delete doc;
+        return false;
+    }
+    rootEle->LinkEndChild(innerDict);
+
+    bool ret = tinyxml2::XML_SUCCESS == doc->SaveFile(getSuitableFOpen(fullPath).c_str());
+
+    delete doc;
+    return ret;
 }
 
 /*
  * Generate tinyxml2::XMLElement for Object through a tinyxml2::XMLDocument
  */
-// static tinyxml2::XMLElement* generateElementForObject(const Value& value, tinyxml2::XMLDocument *doc)
-// {
-//     // object is String
-//     if (value.getType() == Value::Type::STRING)
-//     {
-//         tinyxml2::XMLElement* node = doc->NewElement("string");
-//         tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
-//         node->LinkEndChild(content);
-//         return node;
-//     }
-// 
-//     // object is integer
-//     if (value.getType() == Value::Type::INTEGER)
-//     {
-//         tinyxml2::XMLElement* node = doc->NewElement("integer");
-//         tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
-//         node->LinkEndChild(content);
-//         return node;
-//     }
-// 
-//     // object is real
-//     if (value.getType() == Value::Type::FLOAT || value.getType() == Value::Type::DOUBLE)
-//     {
-//         tinyxml2::XMLElement* node = doc->NewElement("real");
-//         tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
-//         node->LinkEndChild(content);
-//         return node;
-//     }
-// 
-//     //object is bool
-//     if (value.getType() == Value::Type::BOOLEAN) {
-//         tinyxml2::XMLElement* node = doc->NewElement(value.asString().c_str());
-//         return node;
-//     }
-// 
-//     // object is Array
-//     if (value.getType() == Value::Type::VECTOR)
-//         return generateElementForArray(value.asValueVector(), doc);
-// 
-//     // object is Dictionary
-//     if (value.getType() == Value::Type::MAP)
-//         return generateElementForDict(value.asValueMap(), doc);
-// 
-//     CCLOG("This type cannot appear in property list");
-//     return nullptr;
-// }
-// 
-// /*
-//  * Generate tinyxml2::XMLElement for Dictionary through a tinyxml2::XMLDocument
-//  */
-// static tinyxml2::XMLElement* generateElementForDict(const ValueMap& dict, tinyxml2::XMLDocument *doc)
-// {
-//     tinyxml2::XMLElement* rootNode = doc->NewElement("dict");
-// 
-//     for (const auto &iter : dict)
-//     {
-//         tinyxml2::XMLElement* tmpNode = doc->NewElement("key");
-//         rootNode->LinkEndChild(tmpNode);
-//         tinyxml2::XMLText* content = doc->NewText(iter.first.c_str());
-//         tmpNode->LinkEndChild(content);
-// 
-//         tinyxml2::XMLElement *element = generateElementForObject(iter.second, doc);
-//         if (element)
-//             rootNode->LinkEndChild(element);
-//     }
-//     return rootNode;
-// }
-// 
-// /*
-//  * Generate tinyxml2::XMLElement for Array through a tinyxml2::XMLDocument
-//  */
-// static tinyxml2::XMLElement* generateElementForArray(const ValueVector& array, tinyxml2::XMLDocument *pDoc)
-// {
-//     tinyxml2::XMLElement* rootNode = pDoc->NewElement("array");
-// 
-//     for(const auto &value : array) {
-//         tinyxml2::XMLElement *element = generateElementForObject(value, pDoc);
-//         if (element)
-//             rootNode->LinkEndChild(element);
-//     }
-//     return rootNode;
-// }
+static tinyxml2::XMLElement* generateElementForObject(const Value& value, tinyxml2::XMLDocument *doc)
+{
+    // object is String
+    if (value.getType() == Value::Type::STRING)
+    {
+        tinyxml2::XMLElement* node = doc->NewElement("string");
+        tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
+        node->LinkEndChild(content);
+        return node;
+    }
+
+    // object is integer
+    if (value.getType() == Value::Type::INTEGER)
+    {
+        tinyxml2::XMLElement* node = doc->NewElement("integer");
+        tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
+        node->LinkEndChild(content);
+        return node;
+    }
+
+    // object is real
+    if (value.getType() == Value::Type::FLOAT || value.getType() == Value::Type::DOUBLE)
+    {
+        tinyxml2::XMLElement* node = doc->NewElement("real");
+        tinyxml2::XMLText* content = doc->NewText(value.asString().c_str());
+        node->LinkEndChild(content);
+        return node;
+    }
+
+    //object is bool
+    if (value.getType() == Value::Type::BOOLEAN) {
+        tinyxml2::XMLElement* node = doc->NewElement(value.asString().c_str());
+        return node;
+    }
+
+    // object is Array
+    if (value.getType() == Value::Type::VECTOR)
+        return generateElementForArray(value.asValueVector(), doc);
+
+    // object is Dictionary
+    if (value.getType() == Value::Type::MAP)
+        return generateElementForDict(value.asValueMap(), doc);
+
+    CCLOG("This type cannot appear in property list");
+    return nullptr;
+}
+
+/*
+ * Generate tinyxml2::XMLElement for Dictionary through a tinyxml2::XMLDocument
+ */
+static tinyxml2::XMLElement* generateElementForDict(const ValueMap& dict, tinyxml2::XMLDocument *doc)
+{
+    tinyxml2::XMLElement* rootNode = doc->NewElement("dict");
+
+    for (const auto &iter : dict)
+    {
+        tinyxml2::XMLElement* tmpNode = doc->NewElement("key");
+        rootNode->LinkEndChild(tmpNode);
+        tinyxml2::XMLText* content = doc->NewText(iter.first.c_str());
+        tmpNode->LinkEndChild(content);
+
+        tinyxml2::XMLElement *element = generateElementForObject(iter.second, doc);
+        if (element)
+            rootNode->LinkEndChild(element);
+    }
+    return rootNode;
+}
+
+/*
+ * Generate tinyxml2::XMLElement for Array through a tinyxml2::XMLDocument
+ */
+static tinyxml2::XMLElement* generateElementForArray(const ValueVector& array, tinyxml2::XMLDocument *pDoc)
+{
+    tinyxml2::XMLElement* rootNode = pDoc->NewElement("array");
+
+    for(const auto &value : array) {
+        tinyxml2::XMLElement *element = generateElementForObject(value, pDoc);
+        if (element)
+            rootNode->LinkEndChild(element);
+    }
+    return rootNode;
+}
 
 #else
 

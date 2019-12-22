@@ -29,15 +29,17 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/ccUtils.h"
 #include "2d/CCNode.h"
-// #include "2d/CCGrabber.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramCache.h"
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCRenderer.h"
-// #include "renderer/CCRenderState.h"
-// #include "renderer/CCTexture2D.h"
-//#include "platform/CCGL.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCGrabber.h"
+//#include "renderer/CCGLProgram.h"
+//#include "renderer/CCGLProgramCache.h"
+//#include "renderer/ccGLStateCache.h"
+#include "renderer/CCRenderer.h"
+//#include "renderer/CCRenderState.h"
+#include "../Graphics/Graphics.h"
+#include "../Graphics/Texture2D.h"
+#include "Urho3DContext.h"
+#include "platform/CCGL.h"
+//#include "2d/CCCamera.h"
 
 NS_CC_BEGIN
 // implementation of GridBase
@@ -94,32 +96,34 @@ bool GridBase::initWithSize(const cocos2d::Size &gridSize, const cocos2d::Rect &
     auto POTHigh = ccNextPOT((unsigned int)s.height);
     
     // we only use rgba8888
-//     Texture2D::PixelFormat format = Texture2D::PixelFormat::RGBA8888;
-//     
-//     auto dataLen = POTWide * POTHigh * 4;
-//     void *data = calloc(dataLen, 1);
-//     if (! data)
-//     {
-//         CCLOG("cocos2d: Grid: not enough memory.");
-//         this->release();
-//         return false;
-//     }
-//     
-//     Texture2D *texture = new (std::nothrow) Texture2D();
-//     
-//     if (! texture)
-//     {
-//         free(data);
-//         CCLOG("cocos2d: Grid: error creating texture");
-//         return false;
-//     }
-//     
-//     texture->initWithData(data, dataLen,  format, POTWide, POTHigh, s);
-//     free(data);
-//     
-//     initWithSize(gridSize, texture, false, rect);
-//     
-//     texture->release();
+    //Texture2D::PixelFormat format = Texture2D::PixelFormat::RGBA8888;
+    
+    auto dataLen = POTWide * POTHigh * 4;
+    void *data = calloc(dataLen, 1);
+    if (! data)
+    {
+        CCLOG("cocos2d: Grid: not enough memory.");
+        this->release();
+        return false;
+    }
+    
+    Urho3D::Texture2D *texture = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
+    
+    if (! texture)
+    {
+        free(data);
+        CCLOG("cocos2d: Grid: error creating texture");
+        return false;
+    }
+    
+    //texture->initWithData(data, dataLen,  format, POTWide, POTHigh, s);
+    texture->SetSize(POTWide, POTHigh, Urho3D::Graphics::GetRGBAFormat());
+    texture->SetData(0, 0, 0, POTWide, POTHigh, data);
+    free(data);
+    
+    initWithSize(gridSize, texture, false, rect);
+    
+    //texture->release();
     
     return true;
 }
@@ -133,24 +137,24 @@ bool GridBase::initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bo
 {
     bool ret = true;
     
-//     _active = false;
-//     _reuseGrid = 0;
-//     _gridSize = gridSize;
-//     
-//     _texture = texture;
-//     CC_SAFE_RETAIN(_texture);
-//     _isTextureFlipped = flipped;
-//     
-//     if (rect.equals(Rect::ZERO)) {
-//         auto size = _texture->getContentSize();
-//         _gridRect.setRect(0, 0, size.width, size.height);
-//     }
-//     else{
-//         _gridRect = rect;
-//     }
-//     _step.x = _gridRect.size.width/_gridSize.width;
-//     _step.y = _gridRect.size.height/_gridSize.height;
-//     
+    _active = false;
+    _reuseGrid = 0;
+    _gridSize = gridSize;
+    
+    _texture = texture;
+    //CC_SAFE_RETAIN(_texture);
+    _isTextureFlipped = flipped;
+    
+    if (rect.equals(Rect::ZERO)) {
+        auto size = Size(_texture->GetWidth(), _texture->GetHeight());// _texture->getContentSize();
+        _gridRect.setRect(0, 0, size.width, size.height);
+    }
+    else{
+        _gridRect = rect;
+    }
+    _step.x = _gridRect.size.width/_gridSize.width;
+    _step.y = _gridRect.size.height/_gridSize.height;
+    
 //     _grabber = new (std::nothrow) Grabber();
 //     if (_grabber)
 //     {
@@ -160,9 +164,9 @@ bool GridBase::initWithSize(const Size& gridSize, Urho3D::Texture2D *texture, bo
 //     {
 //         ret = false;
 //     }
-//     
-//     _shaderProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE);
-//     calculateVertexPoints();
+    
+    //_shaderProgram = GLProgramCache::getInstance()->getGLProgram(GLProgram::SHADER_NAME_POSITION_TEXTURE);
+    calculateVertexPoints();
     
     return ret;
 }
@@ -199,18 +203,18 @@ void GridBase::setTextureFlipped(bool flipped)
 
 void GridBase::set2DProjection()
 {
-    Director *director = Director::getInstance();
-    Size    size = director->getWinSizeInPixels();
-    
-    director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-
-    Mat4 orthoMatrix;
-    Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1, 1, &orthoMatrix);
-    director->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
-
-    director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-
-    //GL::setProjectionMatrixDirty();
+//     Director *director = Director::getInstance();
+//     Size    size = director->getWinSizeInPixels();
+//     
+//     director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+// 
+//     Mat4 orthoMatrix;
+//     Mat4::createOrthographicOffCenter(0, size.width, 0, size.height, -1, 1, &orthoMatrix);
+//     director->multiplyMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION, orthoMatrix);
+// 
+//     director->loadIdentityMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+// 
+//     GL::setProjectionMatrixDirty();
 }
 
 void GridBase::setGridRect(const cocos2d::Rect &rect)
@@ -220,7 +224,7 @@ void GridBase::setGridRect(const cocos2d::Rect &rect)
 
 void GridBase::beforeDraw(void)
 {
-    // save projection
+//     // save projection
 //     Director *director = Director::getInstance();
 //     _directorProjection = director->getProjection();
 // 
@@ -438,78 +442,78 @@ void Grid3D::blit(void)
 
 void Grid3D::calculateVertexPoints(void)
 {
-//     float width = (float)_texture->getPixelsWide();
-//     float height = (float)_texture->getPixelsHigh();
-//     float imageH = _texture->getContentSizeInPixels().height;
-// 
-//     int x, y, i;
-//     CC_SAFE_FREE(_vertices);
-//     CC_SAFE_FREE(_originalVertices);
-//     CC_SAFE_FREE(_texCoordinates);
-//     CC_SAFE_FREE(_indices);
-// 
-//     unsigned int numOfPoints = (_gridSize.width+1) * (_gridSize.height+1);
-// 
-//     _vertices = malloc(numOfPoints * sizeof(Vec3));
-//     _originalVertices = malloc(numOfPoints * sizeof(Vec3));
-//     _texCoordinates = malloc(numOfPoints * sizeof(Vec2));
-//     _indices = (GLushort*)malloc(_gridSize.width * _gridSize.height * sizeof(GLushort) * 6);
-// 
-//     GLfloat *vertArray = (GLfloat*)_vertices;
-//     GLfloat *texArray = (GLfloat*)_texCoordinates;
-//     GLushort *idxArray = _indices;
-// 
-//     for (x = 0; x < _gridSize.width; ++x)
-//     {
-//         for (y = 0; y < _gridSize.height; ++y)
-//         {
-//             int idx = (y * _gridSize.width) + x;
-// 
-//             GLfloat x1 = x * _step.x + _gridRect.origin.x;
-//             GLfloat x2 = x1 + _step.x;
-//             GLfloat y1 = y * _step.y + _gridRect.origin.y;
-//             GLfloat y2= y1 + _step.y;
-// 
-//             GLushort a = (GLushort)(x * (_gridSize.height + 1) + y);
-//             GLushort b = (GLushort)((x + 1) * (_gridSize.height + 1) + y);
-//             GLushort c = (GLushort)((x + 1) * (_gridSize.height + 1) + (y + 1));
-//             GLushort d = (GLushort)(x * (_gridSize.height + 1) + (y + 1));
-// 
-//             GLushort tempidx[6] = {a, b, d, b, c, d};
-// 
-//             memcpy(&idxArray[6*idx], tempidx, 6*sizeof(GLushort));
-// 
-//             int l1[4] = {a*3, b*3, c*3, d*3};
-//             Vec3 e(x1, y1, 0);
-//             Vec3 f(x2, y1, 0);
-//             Vec3 g(x2, y2, 0);
-//             Vec3 h(x1, y2, 0);
-// 
-//             Vec3 l2[4] = {e, f, g, h};
-// 
-//             int tex1[4] = {a*2, b*2, c*2, d*2};
-//             Vec2 Tex2F[4] = {Vec2(x1, y1), Vec2(x2, y1), Vec2(x2, y2), Vec2(x1, y2)};
-// 
-//             for (i = 0; i < 4; ++i)
-//             {
-//                 vertArray[l1[i]] = l2[i].x;
-//                 vertArray[l1[i] + 1] = l2[i].y;
-//                 vertArray[l1[i] + 2] = l2[i].z;
-// 
-//                 texArray[tex1[i]] = Tex2F[i].x / width;
-//                 if (_isTextureFlipped)
-//                 {
-//                     texArray[tex1[i] + 1] = (imageH - Tex2F[i].y) / height;
-//                 }
-//                 else
-//                 {
-//                     texArray[tex1[i] + 1] = Tex2F[i].y / height;
-//                 }
-//             }
-//         }
-//     }
-// 
-//     memcpy(_originalVertices, _vertices, (_gridSize.width+1) * (_gridSize.height+1) * sizeof(Vec3));
+    float width = (float)_texture->GetWidth();
+    float height = (float)_texture->GetHeight();
+    float imageH = height;// _texture->getContentSizeInPixels().height;
+
+    int x, y, i;
+    CC_SAFE_FREE(_vertices);
+    CC_SAFE_FREE(_originalVertices);
+    CC_SAFE_FREE(_texCoordinates);
+    CC_SAFE_FREE(_indices);
+
+    unsigned int numOfPoints = (_gridSize.width+1) * (_gridSize.height+1);
+
+    _vertices = malloc(numOfPoints * sizeof(Vec3));
+    _originalVertices = malloc(numOfPoints * sizeof(Vec3));
+    _texCoordinates = malloc(numOfPoints * sizeof(Vec2));
+    _indices = (GLushort*)malloc(_gridSize.width * _gridSize.height * sizeof(GLushort) * 6);
+
+    GLfloat *vertArray = (GLfloat*)_vertices;
+    GLfloat *texArray = (GLfloat*)_texCoordinates;
+    GLushort *idxArray = _indices;
+
+    for (x = 0; x < _gridSize.width; ++x)
+    {
+        for (y = 0; y < _gridSize.height; ++y)
+        {
+            int idx = (y * _gridSize.width) + x;
+
+            GLfloat x1 = x * _step.x + _gridRect.origin.x;
+            GLfloat x2 = x1 + _step.x;
+            GLfloat y1 = y * _step.y + _gridRect.origin.y;
+            GLfloat y2= y1 + _step.y;
+
+            GLushort a = (GLushort)(x * (_gridSize.height + 1) + y);
+            GLushort b = (GLushort)((x + 1) * (_gridSize.height + 1) + y);
+            GLushort c = (GLushort)((x + 1) * (_gridSize.height + 1) + (y + 1));
+            GLushort d = (GLushort)(x * (_gridSize.height + 1) + (y + 1));
+
+            GLushort tempidx[6] = {a, b, d, b, c, d};
+
+            memcpy(&idxArray[6*idx], tempidx, 6*sizeof(GLushort));
+
+            int l1[4] = {a*3, b*3, c*3, d*3};
+            Vec3 e(x1, y1, 0);
+            Vec3 f(x2, y1, 0);
+            Vec3 g(x2, y2, 0);
+            Vec3 h(x1, y2, 0);
+
+            Vec3 l2[4] = {e, f, g, h};
+
+            int tex1[4] = {a*2, b*2, c*2, d*2};
+            Vec2 Tex2F[4] = {Vec2(x1, y1), Vec2(x2, y1), Vec2(x2, y2), Vec2(x1, y2)};
+
+            for (i = 0; i < 4; ++i)
+            {
+                vertArray[l1[i]] = l2[i].x;
+                vertArray[l1[i] + 1] = l2[i].y;
+                vertArray[l1[i] + 2] = l2[i].z;
+
+                texArray[tex1[i]] = Tex2F[i].x / width;
+                if (_isTextureFlipped)
+                {
+                    texArray[tex1[i] + 1] = (imageH - Tex2F[i].y) / height;
+                }
+                else
+                {
+                    texArray[tex1[i] + 1] = Tex2F[i].y / height;
+                }
+            }
+        }
+    }
+
+    memcpy(_originalVertices, _vertices, (_gridSize.width+1) * (_gridSize.height+1) * sizeof(Vec3));
 }
 
 Vec3 Grid3D::getVertex(const Vec2& pos) const
@@ -680,81 +684,81 @@ void TiledGrid3D::blit(void)
 
 void TiledGrid3D::calculateVertexPoints(void)
 {
-//     float width = (float)_texture->getPixelsWide();
-//     float height = (float)_texture->getPixelsHigh();
-//     float imageH = _texture->getContentSizeInPixels().height;
-//     
-//     int numQuads = _gridSize.width * _gridSize.height;
-//     CC_SAFE_FREE(_vertices);
-//     CC_SAFE_FREE(_originalVertices);
-//     CC_SAFE_FREE(_texCoordinates);
-//     CC_SAFE_FREE(_indices);
-// 
-//     _vertices = malloc(numQuads*4*sizeof(Vec3));
-//     _originalVertices = malloc(numQuads*4*sizeof(Vec3));
-//     _texCoordinates = malloc(numQuads*4*sizeof(Vec2));
-//     _indices = (GLushort*)malloc(numQuads*6*sizeof(GLushort));
-// 
-//     GLfloat *vertArray = (GLfloat*)_vertices;
-//     GLfloat *texArray = (GLfloat*)_texCoordinates;
-//     GLushort *idxArray = _indices;
-//     
-//     int x, y;
-//     
-//     for( x = 0; x < _gridSize.width; x++ )
-//     {
-//         for( y = 0; y < _gridSize.height; y++ )
-//         {
-//             float x1 = x * _step.x + _gridRect.origin.x;
-//             float x2 = x1 + _step.x;
-//             float y1 = y * _step.y + _gridRect.origin.y;
-//             float y2 = y1 + _step.y;
-//             
-//             *vertArray++ = x1;
-//             *vertArray++ = y1;
-//             *vertArray++ = 0;
-//             *vertArray++ = x2;
-//             *vertArray++ = y1;
-//             *vertArray++ = 0;
-//             *vertArray++ = x1;
-//             *vertArray++ = y2;
-//             *vertArray++ = 0;
-//             *vertArray++ = x2;
-//             *vertArray++ = y2;
-//             *vertArray++ = 0;
-//             
-//             float newY1 = y1;
-//             float newY2 = y2;
-//             
-//             if (_isTextureFlipped) 
-//             {
-//                 newY1 = imageH - y1;
-//                 newY2 = imageH - y2;
-//             }
-// 
-//             *texArray++ = x1 / width;
-//             *texArray++ = newY1 / height;
-//             *texArray++ = x2 / width;
-//             *texArray++ = newY1 / height;
-//             *texArray++ = x1 / width;
-//             *texArray++ = newY2 / height;
-//             *texArray++ = x2 / width;
-//             *texArray++ = newY2 / height;
-//         }
-//     }
-//     
-//     for (x = 0; x < numQuads; x++)
-//     {
-//         idxArray[x*6+0] = (GLushort)(x * 4 + 0);
-//         idxArray[x*6+1] = (GLushort)(x * 4 + 1);
-//         idxArray[x*6+2] = (GLushort)(x * 4 + 2);
-//         
-//         idxArray[x*6+3] = (GLushort)(x * 4 + 1);
-//         idxArray[x*6+4] = (GLushort)(x * 4 + 2);
-//         idxArray[x*6+5] = (GLushort)(x * 4 + 3);
-//     }
-//     
-//     memcpy(_originalVertices, _vertices, numQuads * 12 * sizeof(GLfloat));
+    float width = (float)_texture->GetWidth();
+    float height = (float)_texture->GetHeight();
+    float imageH = height;// _texture->getContentSizeInPixels().height;
+    
+    int numQuads = _gridSize.width * _gridSize.height;
+    CC_SAFE_FREE(_vertices);
+    CC_SAFE_FREE(_originalVertices);
+    CC_SAFE_FREE(_texCoordinates);
+    CC_SAFE_FREE(_indices);
+
+    _vertices = malloc(numQuads*4*sizeof(Vec3));
+    _originalVertices = malloc(numQuads*4*sizeof(Vec3));
+    _texCoordinates = malloc(numQuads*4*sizeof(Vec2));
+    _indices = (GLushort*)malloc(numQuads*6*sizeof(GLushort));
+
+    GLfloat *vertArray = (GLfloat*)_vertices;
+    GLfloat *texArray = (GLfloat*)_texCoordinates;
+    GLushort *idxArray = _indices;
+    
+    int x, y;
+    
+    for( x = 0; x < _gridSize.width; x++ )
+    {
+        for( y = 0; y < _gridSize.height; y++ )
+        {
+            float x1 = x * _step.x + _gridRect.origin.x;
+            float x2 = x1 + _step.x;
+            float y1 = y * _step.y + _gridRect.origin.y;
+            float y2 = y1 + _step.y;
+            
+            *vertArray++ = x1;
+            *vertArray++ = y1;
+            *vertArray++ = 0;
+            *vertArray++ = x2;
+            *vertArray++ = y1;
+            *vertArray++ = 0;
+            *vertArray++ = x1;
+            *vertArray++ = y2;
+            *vertArray++ = 0;
+            *vertArray++ = x2;
+            *vertArray++ = y2;
+            *vertArray++ = 0;
+            
+            float newY1 = y1;
+            float newY2 = y2;
+            
+            if (_isTextureFlipped) 
+            {
+                newY1 = imageH - y1;
+                newY2 = imageH - y2;
+            }
+
+            *texArray++ = x1 / width;
+            *texArray++ = newY1 / height;
+            *texArray++ = x2 / width;
+            *texArray++ = newY1 / height;
+            *texArray++ = x1 / width;
+            *texArray++ = newY2 / height;
+            *texArray++ = x2 / width;
+            *texArray++ = newY2 / height;
+        }
+    }
+    
+    for (x = 0; x < numQuads; x++)
+    {
+        idxArray[x*6+0] = (GLushort)(x * 4 + 0);
+        idxArray[x*6+1] = (GLushort)(x * 4 + 1);
+        idxArray[x*6+2] = (GLushort)(x * 4 + 2);
+        
+        idxArray[x*6+3] = (GLushort)(x * 4 + 1);
+        idxArray[x*6+4] = (GLushort)(x * 4 + 2);
+        idxArray[x*6+5] = (GLushort)(x * 4 + 3);
+    }
+    
+    memcpy(_originalVertices, _vertices, numQuads * 12 * sizeof(GLfloat));
 }
 
 void TiledGrid3D::setTile(const Vec2& pos, const Quad3& coords)

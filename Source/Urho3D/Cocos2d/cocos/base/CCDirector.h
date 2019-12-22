@@ -34,13 +34,11 @@ THE SOFTWARE.
 #include <chrono>
 
 #include "platform/CCPlatformMacros.h"
-#include "base/ccTypes.h"
 #include "base/CCRef.h"
 #include "base/CCVector.h"
-//#include "2d/CCScene.h"
+#include "2d/CCScene.h"
 #include "math/CCMath.h"
-#include "math/CCGeometry.h"
-//#include "platform/CCGL.h"
+#include "platform/CCGL.h"
 //#include "platform/CCGLView.h"
 
 NS_CC_BEGIN
@@ -51,7 +49,7 @@ NS_CC_BEGIN
  */
 
 /* Forward declarations. */
-//class LabelAtlas;
+class LabelAtlas;
 //class GLView;
 class DirectorDelegate;
 class Node;
@@ -63,7 +61,7 @@ class EventListenerCustom;
 class TextureCache;
 class Renderer;
 class Camera;
-class Scene;
+
 class Console;
 namespace experimental
 {
@@ -184,12 +182,12 @@ public:
      * Get the GLView.
      * @lua NA
      */
-//    GLView* getOpenGLView() { return _openGLView; }
+    //GLView* getOpenGLView() { return _openGLView; }
     /** 
      * Sets the GLView. 
      * @lua NA
      */
-//    void setOpenGLView(GLView *openGLView);
+    //void setOpenGLView(GLView *openGLView);
 
     /*
      * Gets singleton of TextureCache.
@@ -658,7 +656,7 @@ protected:
     //GLView *_openGLView = nullptr;
 
     //texture cache belongs to this director
-    TextureCache *_textureCache = nullptr;
+    //TextureCache *_textureCache = nullptr;
 
     float _animationInterval = 0.0f;
     float _oldAnimationInterval = 0.0f;
@@ -690,7 +688,7 @@ protected:
     bool _sendCleanupToScene = false;
 
     /* scheduled scenes */
-//    Vector<Scene*> _scenesStack;
+    //Vector<Scene*> _scenesStack;
     
     /* last time the main loop was updated */
     std::chrono::steady_clock::time_point _lastUpdate;

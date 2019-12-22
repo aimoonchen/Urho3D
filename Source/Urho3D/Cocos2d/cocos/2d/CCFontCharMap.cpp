@@ -30,15 +30,15 @@
 #include "base/CCDirector.h"
 //#include "renderer/CCTextureCache.h"
 #include "renderer/Texture2DUtils.h"
-#include "Graphics/Texture2D.h"
+#include "../Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 FontCharMap * FontCharMap::create(const std::string& plistFile)
 {
-	std::string pathStr = FileUtils::getInstance()->fullPathForFilename(plistFile);
+    std::string pathStr = FileUtils::getInstance()->fullPathForFilename(plistFile);
     std::string relPathStr = pathStr.substr(0, pathStr.find_last_of('/'))+"/";
 
-	ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(pathStr);
+    ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(pathStr);
 
     CCASSERT(dict["version"].asInt() == 1, "Unsupported version. Upgrade cocos2d version");
 
@@ -48,8 +48,7 @@ FontCharMap * FontCharMap::create(const std::string& plistFile)
     unsigned int height = dict["itemHeight"].asInt();
     unsigned int startChar = dict["firstChar"].asInt();
 
-//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(textureFilename);
-    auto tempTexture = GetUrho3DTexture(textureFilename);
+    Urho3D::Texture2D *tempTexture = GetUrho3DTexture(textureFilename);
     if (!tempTexture)
     {
         return nullptr;
@@ -67,8 +66,8 @@ FontCharMap * FontCharMap::create(const std::string& plistFile)
 
 FontCharMap* FontCharMap::create(const std::string& charMapFile, int itemWidth, int itemHeight, int startCharMap)
 {
-//     Texture2D *tempTexture = Director::getInstance()->getTextureCache()->addImage(charMapFile);
-    auto tempTexture = GetUrho3DTexture(charMapFile);
+    Urho3D::Texture2D *tempTexture = GetUrho3DTexture(charMapFile);
+
     if (!tempTexture)
     {
         return nullptr;
@@ -112,7 +111,7 @@ FontAtlas * FontCharMap::createFontAtlas()
     if (!tempAtlas)
         return nullptr;
     
-    Size s = { (float)_texture->GetWidth(), (float)_texture->GetHeight() };// _texture->getContentSizeInPixels();
+    Size s = Size(_texture->GetWidth(), _texture->GetHeight());// _texture->getContentSizeInPixels();
     int itemsPerColumn = (int)(s.height / _itemHeight);
     int itemsPerRow = (int)(s.width / _itemWidth);
 

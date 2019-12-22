@@ -201,7 +201,7 @@ public:
      *
      * @return The texture of the sprite frame.
      */
-	Urho3D::Texture2D* getTexture();
+    Urho3D::Texture2D* getTexture();
     /** Set texture of the frame, the texture is retained.
      *
      * @param pobTexture The texture of the sprite frame.
@@ -299,7 +299,7 @@ protected:
     Rect _centerRect;
     Vec2 _offsetInPixels;
     Size _originalSizeInPixels;
-	Urho3D::Texture2D *_texture;
+    Urho3D::Texture2D *_texture;
     std::string  _textureFilename;
     PolygonInfo _polygonInfo;
 };

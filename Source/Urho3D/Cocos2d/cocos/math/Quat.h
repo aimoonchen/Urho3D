@@ -377,7 +377,7 @@ public:
      */
     inline Quat& operator*=(const Quat& q);
     
-    /** equals to Quaternion(0,0,0, 0) */
+    /** equals to Quat(0,0,0, 0) */
     static const Quat ZERO;
 
 private:

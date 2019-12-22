@@ -42,17 +42,17 @@ THE SOFTWARE.
 #include "2d/CCAnimationCache.h"
 //#include "2d/CCTransition.h"
 #include "2d/CCFontFreeType.h"
-//#include "2d/CCLabelAtlas.h"
-// #include "renderer/CCGLProgramCache.h"
-// #include "renderer/CCGLProgramStateCache.h"
-// #include "renderer/CCTextureCache.h"
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCRenderer.h"
-// #include "renderer/CCRenderState.h"
-// #include "renderer/CCFrameBuffer.h"
-#include "2d/CCCamera.h"
-//#include "base/CCUserDefault.h"
-//#include "base/ccFPSImages.h"
+#include "2d/CCLabelAtlas.h"
+//#include "renderer/CCGLProgramCache.h"
+//#include "renderer/CCGLProgramStateCache.h"
+//#include "renderer/CCTextureCache.h"
+//#include "renderer/ccGLStateCache.h"
+#include "renderer/CCRenderer.h"
+//#include "renderer/CCRenderState.h"
+//#include "renderer/CCFrameBuffer.h"
+//#include "2d/CCCamera.h"
+// #include "base/CCUserDefault.h"
+// #include "base/ccFPSImages.h"
 #include "base/CCScheduler.h"
 #include "base/ccMacros.h"
 #include "base/CCEventDispatcher.h"
@@ -63,9 +63,9 @@ THE SOFTWARE.
 //#include "base/CCAsyncTaskPool.h"
 #include "base/ObjectFactory.h"
 //#include "platform/CCApplication.h"
-
+//#include "../Graphics/Graphics.h"
 #if CC_ENABLE_SCRIPT_BINDING
-#include "base/CCScriptSupport.h"
+//#include "base/CCScriptSupport.h"
 #endif
 
 /**
@@ -118,7 +118,7 @@ bool Director::init()
 {
     setDefaultValues();
 
-//    _scenesStack.reserve(15);
+    //_scenesStack.reserve(15);
 
     // FPS
     _lastUpdate = std::chrono::steady_clock::now();
@@ -154,8 +154,8 @@ bool Director::init()
     initTextureCache();
     initMatrixStack();
 
-//     _renderer = new (std::nothrow) Renderer;
-//     RenderState::initialize();
+    _renderer = new (std::nothrow) Renderer;
+    //RenderState::initialize();
 
     return true;
 }
@@ -168,7 +168,7 @@ Director::~Director()
 //     CC_SAFE_RELEASE(_drawnVerticesLabel);
 //     CC_SAFE_RELEASE(_drawnBatchesLabel);
 
-//    CC_SAFE_RELEASE(_runningScene);
+    CC_SAFE_RELEASE(_runningScene);
     CC_SAFE_RELEASE(_notificationNode);
     CC_SAFE_RELEASE(_scheduler);
     CC_SAFE_RELEASE(_actionManager);
@@ -183,13 +183,13 @@ Director::~Director()
     CC_SAFE_RELEASE(_eventProjectionChanged);
     CC_SAFE_RELEASE(_eventResetDirector);
 
-//    delete _renderer;
+    delete _renderer;
     delete _console;
 
     CC_SAFE_RELEASE(_eventDispatcher);
     
     Configuration::destroyInstance();
-    //ObjectFactory::destroyInstance();
+    ObjectFactory::destroyInstance();
 
     s_SharedDirector = nullptr;
 
@@ -204,36 +204,36 @@ Director::~Director()
 
 void Director::setDefaultValues(void)
 {
-    Configuration *conf = Configuration::getInstance();
-
-    // default FPS
-    double fps = conf->getValue("cocos2d.x.fps", Value(kDefaultFPS)).asDouble();
-    _oldAnimationInterval = _animationInterval = 1.0 / fps;
-
-    // Display FPS
-    _displayStats = conf->getValue("cocos2d.x.display_fps", Value(false)).asBool();
-
-    // GL projection
-    std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
-    if (projection == "3d")
-        _projection = Projection::_3D;
-    else if (projection == "2d")
-        _projection = Projection::_2D;
-    else if (projection == "custom")
-        _projection = Projection::CUSTOM;
-    else
-        CCASSERT(false, "Invalid projection value");
-
-    // Default pixel format for PNG images with alpha
-    std::string pixel_format = conf->getValue("cocos2d.x.texture.pixel_format_for_png", Value("rgba8888")).asString();
+//     Configuration *conf = Configuration::getInstance();
+// 
+//     // default FPS
+//     double fps = conf->getValue("cocos2d.x.fps", Value(kDefaultFPS)).asDouble();
+//     _oldAnimationInterval = _animationInterval = 1.0 / fps;
+// 
+//     // Display FPS
+//     _displayStats = conf->getValue("cocos2d.x.display_fps", Value(false)).asBool();
+// 
+//     // GL projection
+//     std::string projection = conf->getValue("cocos2d.x.gl.projection", Value("3d")).asString();
+//     if (projection == "3d")
+//         _projection = Projection::_3D;
+//     else if (projection == "2d")
+//         _projection = Projection::_2D;
+//     else if (projection == "custom")
+//         _projection = Projection::CUSTOM;
+//     else
+//         CCASSERT(false, "Invalid projection value");
+// 
+//     // Default pixel format for PNG images with alpha
+//     std::string pixel_format = conf->getValue("cocos2d.x.texture.pixel_format_for_png", Value("rgba8888")).asString();
 //     if (pixel_format == "rgba8888")
-//         Urho3D::Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA8888);
+//         Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA8888);
 //     else if(pixel_format == "rgba4444")
-//         Urho3D::Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
+//         Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
 //     else if(pixel_format == "rgba5551")
-//         Urho3D::Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB5A1);
-
-    // PVR v2 has alpha premultiplied ?
+//         Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGB5A1);
+// 
+//     // PVR v2 has alpha premultiplied ?
 //     bool pvr_alpha_premultiplied = conf->getValue("cocos2d.x.texture.pvrv2_has_alpha_premultiplied", Value(false)).asBool();
 //     Image::setPVRImagesHavePremultipliedAlpha(pvr_alpha_premultiplied);
 }
@@ -241,7 +241,7 @@ void Director::setDefaultValues(void)
 void Director::setGLDefaultValues()
 {
     // This method SHOULD be called only after openGLView_ was initialized
-    //CCASSERT(_openGLView, "opengl view should not be null");
+    CCASSERT(_openGLView, "opengl view should not be null");
 
     setAlphaBlending(true);
     setDepthTest(false);
@@ -258,80 +258,80 @@ void Director::drawScene()
 //     {
 //         _openGLView->pollEvents();
 //     }
-
-    //tick before glClear: issue #533
-    if (! _paused)
-    {
-        _eventDispatcher->dispatchEvent(_eventBeforeUpdate);
-        _scheduler->update(_deltaTime);
-        _eventDispatcher->dispatchEvent(_eventAfterUpdate);
-    }
-
+// 
+//     //tick before glClear: issue #533
+//     if (! _paused)
+//     {
+//         _eventDispatcher->dispatchEvent(_eventBeforeUpdate);
+//         _scheduler->update(_deltaTime);
+//         _eventDispatcher->dispatchEvent(_eventAfterUpdate);
+//     }
+// 
 //     _renderer->clear();
 //     experimental::FrameBuffer::clearAllFBOs();
-    
-    _eventDispatcher->dispatchEvent(_eventBeforeDraw);
-    
-    /* to avoid flickr, nextScene MUST be here: after tick and before draw.
-     * FIXME: Which bug is this one. It seems that it can't be reproduced with v0.9
-     */
-    if (_nextScene)
-    {
-        setNextScene();
-    }
-
-    pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-    
-    if (_runningScene)
-    {
-#if (CC_USE_PHYSICS || (CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION) || CC_USE_NAVMESH)
-        _runningScene->stepPhysicsAndNavigation(_deltaTime);
-#endif
-        //clear draw stats
-        //_renderer->clearDrawStats();
-        
-        //render the scene
+//     
+//     _eventDispatcher->dispatchEvent(_eventBeforeDraw);
+//     
+//     /* to avoid flickr, nextScene MUST be here: after tick and before draw.
+//      * FIXME: Which bug is this one. It seems that it can't be reproduced with v0.9
+//      */
+//     if (_nextScene)
+//     {
+//         setNextScene();
+//     }
+// 
+//     pushMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+//     
+//     if (_runningScene)
+//     {
+// #if (CC_USE_PHYSICS || (CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION) || CC_USE_NAVMESH)
+//         _runningScene->stepPhysicsAndNavigation(_deltaTime);
+// #endif
+//         //clear draw stats
+//         _renderer->clearDrawStats();
+//         
+//         //render the scene
 //         if(_openGLView)
 //             _openGLView->renderScene(_runningScene, _renderer);
-        
-        _eventDispatcher->dispatchEvent(_eventAfterVisit);
-    }
-
-    // draw the notifications node
-    if (_notificationNode)
-    {
-        _notificationNode->visit(_renderer, Mat4::IDENTITY, 0);
-    }
-
-    updateFrameRate();
-    
-    if (_displayStats)
-    {
-#if !CC_STRIP_FPS
-        showStats();
-#endif
-    }
-    
-   // _renderer->render();
-
-    _eventDispatcher->dispatchEvent(_eventAfterDraw);
-
-    popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
-
-    _totalFrames++;
-
-    // swap buffers
+//         
+//         _eventDispatcher->dispatchEvent(_eventAfterVisit);
+//     }
+// 
+//     // draw the notifications node
+//     if (_notificationNode)
+//     {
+//         _notificationNode->visit(_renderer, Mat4::IDENTITY, 0);
+//     }
+// 
+//     updateFrameRate();
+//     
+//     if (_displayStats)
+//     {
+// #if !CC_STRIP_FPS
+//         showStats();
+// #endif
+//     }
+//     
+//     _renderer->render();
+// 
+//     _eventDispatcher->dispatchEvent(_eventAfterDraw);
+// 
+//     popMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW);
+// 
+//     _totalFrames++;
+// 
+//     // swap buffers
 //     if (_openGLView)
 //     {
 //         _openGLView->swapBuffers();
 //     }
-
-    if (_displayStats)
-    {
-#if !CC_STRIP_FPS
-        calculateMPF();
-#endif
-    }
+// 
+//     if (_displayStats)
+//     {
+// #if !CC_STRIP_FPS
+//         calculateMPF();
+// #endif
+//     }
 }
 
 void Director::calculateDeltaTime()
@@ -407,7 +407,7 @@ float Director::getDeltaTime() const
 
 TextureCache* Director::getTextureCache() const
 {
-    return _textureCache;
+    return nullptr;// _textureCache;
 }
 
 void Director::initTextureCache()
@@ -691,8 +691,8 @@ void Director::setProjection(Projection projection)
 
 void Director::purgeCachedData(void)
 {
-//     FontFNT::purgeCachedData();
-//     FontAtlasCache::purgeCachedData();
+    FontFNT::purgeCachedData();
+    FontAtlasCache::purgeCachedData();
 
 //     if (s_SharedDirector->getOpenGLView())
 //     {
@@ -727,17 +727,17 @@ void Director::setAlphaBlending(bool on)
 
 void Director::setDepthTest(bool on)
 {
-    //_renderer->setDepthTest(on);
+    _renderer->setDepthTest(on);
 }
 
 void Director::setClearColor(const Color4F& clearColor)
 {
-    //_renderer->setClearColor(clearColor);
+    _renderer->setClearColor(clearColor);
 }
 
 const Color4F& Director::getClearColor() const
 {
-	return {};// _renderer->getClearColor();
+    return _renderer->getClearColor();
 }
 
 static void GLToClipTransform(Mat4 *transformOut)
@@ -762,14 +762,15 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
     // Calculate z=0 using -> transform*[0, 0, 0, 1]/w
     float zClip = transform.m[14]/transform.m[15];
 
-	Size glSize;// = _openGLView->getDesignResolutionSize();
-    Vec4 clipCoord(2.0f*uiPoint.x/glSize.width - 1.0f, 1.0f - 2.0f*uiPoint.y/glSize.height, zClip, 1);
-
-    Vec4 glCoord;
-    //transformInv.transformPoint(clipCoord, &glCoord);
-    transformInv.transformVector(clipCoord, &glCoord);
-    float factor = 1.0f / glCoord.w;
-    return Vec2(glCoord.x * factor, glCoord.y * factor);
+//     Size glSize = _openGLView->getDesignResolutionSize();
+//     Vec4 clipCoord(2.0f*uiPoint.x/glSize.width - 1.0f, 1.0f - 2.0f*uiPoint.y/glSize.height, zClip, 1);
+// 
+//     Vec4 glCoord;
+//     //transformInv.transformPoint(clipCoord, &glCoord);
+//     transformInv.transformVector(clipCoord, &glCoord);
+//     float factor = 1.0f / glCoord.w;
+//     return Vec2(glCoord.x * factor, glCoord.y * factor);
+    return{};
 }
 
 Vec2 Director::convertToUI(const Vec2& glPoint)
@@ -794,9 +795,10 @@ Vec2 Director::convertToUI(const Vec2& glPoint)
     clipCoord.y = clipCoord.y / clipCoord.w;
     clipCoord.z = clipCoord.z / clipCoord.w;
 
-	Size glSize;// = _openGLView->getDesignResolutionSize();
-    float factor = 1.0f / glCoord.w;
-    return Vec2(glSize.width * (clipCoord.x * 0.5f + 0.5f) * factor, glSize.height * (-clipCoord.y * 0.5f + 0.5f) * factor);
+//     Size glSize = _openGLView->getDesignResolutionSize();
+//     float factor = 1.0f / glCoord.w;
+//     return Vec2(glSize.width * (clipCoord.x * 0.5f + 0.5f) * factor, glSize.height * (-clipCoord.y * 0.5f + 0.5f) * factor);
+    return {};
 }
 
 const Size& Director::getWinSize(void) const
@@ -817,9 +819,8 @@ Size Director::getVisibleSize() const
 //     }
 //     else
 //     {
-//         return Size::ZERO;
-//     }
-	return {};
+        return Size::ZERO;
+//    }
 }
 
 Vec2 Director::getVisibleOrigin() const
@@ -830,9 +831,8 @@ Vec2 Director::getVisibleOrigin() const
 //     }
 //     else
 //     {
-//         return Vec2::ZERO;
-//     }
-	return {};
+        return Vec2::ZERO;
+//    }
 }
 
 Rect Director::getSafeAreaRect() const
@@ -843,9 +843,8 @@ Rect Director::getSafeAreaRect() const
 //     }
 //     else
 //     {
-//         return Rect::ZERO;
-//     }
-	return {};
+        return Rect::ZERO;
+//    }
 }
 
 // scene management
@@ -861,17 +860,17 @@ void Director::runWithScene(Scene *scene)
 
 void Director::replaceScene(Scene *scene)
 {
-    //CCASSERT(_runningScene, "Use runWithScene: instead to start the director");
-    CCASSERT(scene != nullptr, "the scene should not be null");
-    
-    if (_runningScene == nullptr) {
-        runWithScene(scene);
-        return;
-    }
-    
-    if (scene == _nextScene)
-        return;
-    
+//     //CCASSERT(_runningScene, "Use runWithScene: instead to start the director");
+//     CCASSERT(scene != nullptr, "the scene should not be null");
+//     
+//     if (_runningScene == nullptr) {
+//         runWithScene(scene);
+//         return;
+//     }
+//     
+//     if (scene == _nextScene)
+//         return;
+//     
 //     if (_nextScene)
 //     {
 //         if (_nextScene->isRunning())
@@ -881,52 +880,52 @@ void Director::replaceScene(Scene *scene)
 //         _nextScene->cleanup();
 //         _nextScene = nullptr;
 //     }
-
-//    ssize_t index = _scenesStack.size() - 1;
-
-    _sendCleanupToScene = true;
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-    if (sEngine)
-    {
-        sEngine->retainScriptObject(this, scene);
-        sEngine->releaseScriptObject(this, _scenesStack.at(index));
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-//    _scenesStack.replace(index, scene);
+// 
+//     ssize_t index = _scenesStack.size() - 1;
+// 
+//     _sendCleanupToScene = true;
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//     if (sEngine)
+//     {
+//         sEngine->retainScriptObject(this, scene);
+//         sEngine->releaseScriptObject(this, _scenesStack.at(index));
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.replace(index, scene);
 
     _nextScene = scene;
 }
 
 void Director::pushScene(Scene *scene)
 {
-    CCASSERT(scene, "the scene should not null");
-
-    _sendCleanupToScene = false;
-
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-    if (sEngine)
-    {
-        sEngine->retainScriptObject(this, scene);
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-//    _scenesStack.pushBack(scene);
-    _nextScene = scene;
+//     CCASSERT(scene, "the scene should not null");
+// 
+//     _sendCleanupToScene = false;
+// 
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//     if (sEngine)
+//     {
+//         sEngine->retainScriptObject(this, scene);
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.pushBack(scene);
+//     _nextScene = scene;
 }
 
 void Director::popScene(void)
 {
-    CCASSERT(_runningScene != nullptr, "running scene should not null");
-    
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-    if (sEngine)
-    {
-        sEngine->releaseScriptObject(this, _scenesStack.back());
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-//    _scenesStack.popBack();
+//     CCASSERT(_runningScene != nullptr, "running scene should not null");
+//     
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//     if (sEngine)
+//     {
+//         sEngine->releaseScriptObject(this, _scenesStack.back());
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.popBack();
 //     ssize_t c = _scenesStack.size();
 // 
 //     if (c == 0)
@@ -947,7 +946,7 @@ void Director::popToRootScene(void)
 
 void Director::popToSceneStackLevel(int level)
 {
-    CCASSERT(_runningScene != nullptr, "A running Scene is needed");
+//     CCASSERT(_runningScene != nullptr, "A running Scene is needed");
 //     ssize_t c = _scenesStack.size();
 // 
 //     // level 0? -> end
@@ -960,7 +959,7 @@ void Director::popToSceneStackLevel(int level)
 //     // current level or lower -> nothing
 //     if (level >= c)
 //         return;
-
+// 
 //     auto firstOnStackScene = _scenesStack.back();
 //     if (firstOnStackScene == _runningScene)
 //     {
@@ -971,11 +970,11 @@ void Director::popToSceneStackLevel(int level)
 //             sEngine->releaseScriptObject(this, _scenesStack.back());
 //         }
 // #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-// //        _scenesStack.popBack();
+//         _scenesStack.popBack();
 //         --c;
 //     }
-
-    // pop stack until reaching desired level
+// 
+//     // pop stack until reaching desired level
 //     while (c > level)
 //     {
 //         auto current = _scenesStack.back();
@@ -996,8 +995,8 @@ void Director::popToSceneStackLevel(int level)
 //         _scenesStack.popBack();
 //         --c;
 //     }
-
-//    _nextScene = _scenesStack.back();
+// 
+//     _nextScene = _scenesStack.back();
 
     // cleanup running scene
     _sendCleanupToScene = true;
@@ -1015,106 +1014,106 @@ void Director::restart()
 
 void Director::reset()
 {
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    
-    if (_runningScene)
-    {
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-        if (sEngine)
-        {
-            sEngine->releaseScriptObject(this, _runningScene);
-        }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     
+//     if (_runningScene)
+//     {
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//         if (sEngine)
+//         {
+//             sEngine->releaseScriptObject(this, _runningScene);
+//         }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
 //         _runningScene->onExit();
 //         _runningScene->cleanup();
 //         _runningScene->release();
-    }
-    
-    _runningScene = nullptr;
-    _nextScene = nullptr;
-
-    if (_eventDispatcher)
-        _eventDispatcher->dispatchEvent(_eventResetDirector);
-    
-    // cleanup scheduler
-    getScheduler()->unscheduleAll();
-    
-    // Remove all events
-    if (_eventDispatcher)
-    {
-        _eventDispatcher->removeAllEventListeners();
-    }
-    
-    if(_notificationNode)
-    {
-        _notificationNode->onExit();
-        _notificationNode->cleanup();
-        _notificationNode->release();
-    }
-    
-    _notificationNode = nullptr;
-    
-    // remove all objects, but don't release it.
-    // runWithScene might be executed after 'end'.
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    if (sEngine)
-    {
-        for (const auto &scene : _scenesStack)
-        {
-            if (scene)
-                sEngine->releaseScriptObject(this, scene);
-        }
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-//    _scenesStack.clear();
-    
-    stopAnimation();
-    
-    CC_SAFE_RELEASE_NULL(_notificationNode);
+//     }
+//     
+//     _runningScene = nullptr;
+//     _nextScene = nullptr;
+// 
+//     if (_eventDispatcher)
+//         _eventDispatcher->dispatchEvent(_eventResetDirector);
+//     
+//     // cleanup scheduler
+//     getScheduler()->unscheduleAll();
+//     
+//     // Remove all events
+//     if (_eventDispatcher)
+//     {
+//         _eventDispatcher->removeAllEventListeners();
+//     }
+//     
+//     if(_notificationNode)
+//     {
+//         _notificationNode->onExit();
+//         _notificationNode->cleanup();
+//         _notificationNode->release();
+//     }
+//     
+//     _notificationNode = nullptr;
+//     
+//     // remove all objects, but don't release it.
+//     // runWithScene might be executed after 'end'.
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     if (sEngine)
+//     {
+//         for (const auto &scene : _scenesStack)
+//         {
+//             if (scene)
+//                 sEngine->releaseScriptObject(this, scene);
+//         }
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.clear();
+//     
+//     stopAnimation();
+//     
+//     CC_SAFE_RELEASE_NULL(_notificationNode);
 //     CC_SAFE_RELEASE_NULL(_FPSLabel);
 //     CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
 //     CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
-    
-    // purge bitmap cache
+//     
+//     // purge bitmap cache
 //     FontFNT::purgeCachedData();
 //     FontAtlasCache::purgeCachedData();
 //     
 //     FontFreeType::shutdownFreeType();
-    
-    // purge all managed caches
-    
-#if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
-#pragma GCC diagnostic ignored "-Wdeprecated-declarations"
-#elif _MSC_VER >= 1400 //vs 2005 or higher
-#pragma warning (push)
-#pragma warning (disable: 4996)
-#endif
-//it will crash clang static analyzer so hide it if __clang_analyzer__ defined
-#ifndef __clang_analyzer__
-//    DrawPrimitives::free();
-#endif
-#if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
-#pragma GCC diagnostic warning "-Wdeprecated-declarations"
-#elif _MSC_VER >= 1400 //vs 2005 or higher
-#pragma warning (pop)
-#endif
-    AnimationCache::destroyInstance();
-    SpriteFrameCache::destroyInstance();
+//     
+//     // purge all managed caches
+//     
+// #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
+// #pragma GCC diagnostic ignored "-Wdeprecated-declarations"
+// #elif _MSC_VER >= 1400 //vs 2005 or higher
+// #pragma warning (push)
+// #pragma warning (disable: 4996)
+// #endif
+// //it will crash clang static analyzer so hide it if __clang_analyzer__ defined
+// #ifndef __clang_analyzer__
+//     DrawPrimitives::free();
+// #endif
+// #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))
+// #pragma GCC diagnostic warning "-Wdeprecated-declarations"
+// #elif _MSC_VER >= 1400 //vs 2005 or higher
+// #pragma warning (pop)
+// #endif
+//     AnimationCache::destroyInstance();
+//     SpriteFrameCache::destroyInstance();
 //     GLProgramCache::destroyInstance();
 //     GLProgramStateCache::destroyInstance();
-//    FileUtils::destroyInstance();
-//    AsyncTaskPool::destroyInstance();
-    
-    // cocos2d-x specific data structures
-//    UserDefault::destroyInstance();
-    
+//     FileUtils::destroyInstance();
+//     AsyncTaskPool::destroyInstance();
+//     
+//     // cocos2d-x specific data structures
+//     UserDefault::destroyInstance();
+//     
 //     GL::invalidateStateCache();
 // 
 //     RenderState::finalize();
-    
-    destroyTextureCache();
+//     
+//     destroyTextureCache();
 }
 
 void Director::purgeDirector()
@@ -1276,19 +1275,19 @@ void Director::showStats()
 //             _frames = 0;
 //         }
 // 
-// //         auto currentCalls = (unsigned long)_renderer->getDrawnBatches();
-// //         auto currentVerts = (unsigned long)_renderer->getDrawnVertices();
-// //         if( currentCalls != prevCalls ) {
-// //             sprintf(buffer, "GL calls:%6lu", currentCalls);
-// //             _drawnBatchesLabel->setString(buffer);
-// //             prevCalls = currentCalls;
-// //         }
-// // 
-// //         if( currentVerts != prevVerts) {
-// //             sprintf(buffer, "GL verts:%6lu", currentVerts);
-// //             _drawnVerticesLabel->setString(buffer);
-// //             prevVerts = currentVerts;
-// //         }
+//         auto currentCalls = (unsigned long)_renderer->getDrawnBatches();
+//         auto currentVerts = (unsigned long)_renderer->getDrawnVertices();
+//         if( currentCalls != prevCalls ) {
+//             sprintf(buffer, "GL calls:%6lu", currentCalls);
+//             _drawnBatchesLabel->setString(buffer);
+//             prevCalls = currentCalls;
+//         }
+// 
+//         if( currentVerts != prevVerts) {
+//             sprintf(buffer, "GL verts:%6lu", currentVerts);
+//             _drawnVerticesLabel->setString(buffer);
+//             prevVerts = currentVerts;
+//         }
 // 
 //         const Mat4& identity = Mat4::IDENTITY;
 //         _drawnVerticesLabel->visit(_renderer, identity, 0);
@@ -1316,7 +1315,7 @@ void Director::getFPSImageData(unsigned char** datapointer, ssize_t* length)
 
 void Director::createStatsLabel()
 {
-//     Urho3D::Texture2D *texture = nullptr;
+//     Texture2D *texture = nullptr;
 //     std::string fpsString = "00.0";
 //     std::string drawBatchString = "000";
 //     std::string drawVerticesString = "00000";
@@ -1329,16 +1328,16 @@ void Director::createStatsLabel()
 //         CC_SAFE_RELEASE_NULL(_FPSLabel);
 //         CC_SAFE_RELEASE_NULL(_drawnBatchesLabel);
 //         CC_SAFE_RELEASE_NULL(_drawnVerticesLabel);
-//         //_textureCache->removeTextureForKey("/cc_fps_images");
-// 		FileUtils::getInstance()->purgeCachedEntries();
+//         _textureCache->removeTextureForKey("/cc_fps_images");
+//         FileUtils::getInstance()->purgeCachedEntries();
 //     }
-
-//     Urho3D::Texture2D::PixelFormat currentFormat = Texture2D::getDefaultAlphaPixelFormat();
-//     Urho3D::Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
-    unsigned char *data = nullptr;
-    ssize_t dataLength = 0;
-    getFPSImageData(&data, &dataLength);
-
+// 
+//     Texture2D::PixelFormat currentFormat = Texture2D::getDefaultAlphaPixelFormat();
+//     Texture2D::setDefaultAlphaPixelFormat(Texture2D::PixelFormat::RGBA4444);
+//     unsigned char *data = nullptr;
+//     ssize_t dataLength = 0;
+//     getFPSImageData(&data, &dataLength);
+// 
 //     Image* image = new (std::nothrow) Image();
 //     bool isOK = image ? image->initWithImageData(data, dataLength) : false;
 //     if (! isOK) {
@@ -1348,19 +1347,19 @@ void Director::createStatsLabel()
 //         return;
 //     }
 // 
-//     //texture = _textureCache->addImage(image, "/cc_fps_images");
+//     texture = _textureCache->addImage(image, "/cc_fps_images");
 //     CC_SAFE_RELEASE(image);
-
-    /*
-     We want to use an image which is stored in the file named ccFPSImage.c 
-     for any design resolutions and all resource resolutions. 
-     
-     To achieve this, we need to ignore 'contentScaleFactor' in 'AtlasNode' and 'LabelAtlas'.
-     So I added a new method called 'setIgnoreContentScaleFactor' for 'AtlasNode',
-     this is not exposed to game developers, it's only used for displaying FPS now.
-     */
-    float scaleFactor = 1 / CC_CONTENT_SCALE_FACTOR();
-
+// 
+//     /*
+//      We want to use an image which is stored in the file named ccFPSImage.c 
+//      for any design resolutions and all resource resolutions. 
+//      
+//      To achieve this, we need to ignore 'contentScaleFactor' in 'AtlasNode' and 'LabelAtlas'.
+//      So I added a new method called 'setIgnoreContentScaleFactor' for 'AtlasNode',
+//      this is not exposed to game developers, it's only used for displaying FPS now.
+//      */
+//     float scaleFactor = 1 / CC_CONTENT_SCALE_FACTOR();
+// 
 //     _FPSLabel = LabelAtlas::create();
 //     _FPSLabel->retain();
 //     _FPSLabel->setIgnoreContentScaleFactor(true);
@@ -1378,10 +1377,10 @@ void Director::createStatsLabel()
 //     _drawnVerticesLabel->setIgnoreContentScaleFactor(true);
 //     _drawnVerticesLabel->initWithString(drawVerticesString, texture, 12, 32, '.');
 //     _drawnVerticesLabel->setScale(scaleFactor);
-
-
-    //Urho3D::Texture2D::setDefaultAlphaPixelFormat(currentFormat);
-
+// 
+// 
+//     Texture2D::setDefaultAlphaPixelFormat(currentFormat);
+// 
 //     const int height_spacing = 22 / CC_CONTENT_SCALE_FACTOR();
 //     _drawnVerticesLabel->setPosition(Vec2(0, height_spacing*2) + CC_DIRECTOR_STATS_POSITION);
 //     _drawnBatchesLabel->setPosition(Vec2(0, height_spacing*1) + CC_DIRECTOR_STATS_POSITION);
@@ -1455,7 +1454,7 @@ void Director::startAnimation()
 
     _cocos2d_thread_id = std::this_thread::get_id();
 
-   // Application::getInstance()->setAnimationInterval(_animationInterval);
+    //Application::getInstance()->setAnimationInterval(_animationInterval);
 
     // fix issue #3509, skip one fps to avoid incorrect time calculation.
     setNextDeltaTimeZero(true);

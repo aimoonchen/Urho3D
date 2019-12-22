@@ -42,7 +42,6 @@ NS_CC_BEGIN
 class EventListenerTouchOneByOne;
 class Camera;
 class Event;
-
 namespace ui {
     class LayoutComponent;
 
@@ -881,13 +880,13 @@ protected:
      *@since v3.4
      */
     
-//     GLProgramState* getNormalGLProgramState(Texture2D* texture)const;
-//     
-//     /**
-//      * Get a disabled state GLProgramState
-//      *@since v3.4
-//      */
-//     GLProgramState* getGrayGLProgramState(Texture2D* texture)const;
+    GLProgramState* getNormalGLProgramState(Urho3D::Texture2D* texture)const;
+    
+    /**
+     * Get a disabled state GLProgramState
+     *@since v3.4
+     */
+    GLProgramState* getGrayGLProgramState(Urho3D::Texture2D* texture)const;
      
     
     //call back function called when size changed.

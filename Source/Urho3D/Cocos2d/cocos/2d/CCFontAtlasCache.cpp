@@ -32,7 +32,7 @@
 #include "2d/CCFontCharMap.h"
 #include "2d/CCLabel.h"
 #include "platform/CCFileUtils.h"
-
+#include "../Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 std::unordered_map<std::string, FontAtlas *> FontAtlasCache::_atlasMap;
@@ -53,7 +53,7 @@ void FontAtlasCache::purgeCachedData()
 
 FontAtlas* FontAtlasCache::getFontAtlasTTF(const _ttfConfig* config)
 {
-	std::string realFontFilename = FileUtils::getInstance()->getNewFilename(config->fontFilePath);  // resolves real file path, to prevent storing multiple atlases for the same file.
+    auto realFontFilename = FileUtils::getInstance()->getNewFilename(config->fontFilePath);  // resolves real file path, to prevent storing multiple atlases for the same file.
     bool useDistanceField = config->distanceFieldEnabled;
     if(config->outlineSize > 0)
     {
@@ -90,7 +90,7 @@ FontAtlas* FontAtlasCache::getFontAtlasTTF(const _ttfConfig* config)
 
 FontAtlas* FontAtlasCache::getFontAtlasFNT(const std::string& fontFileName, const Vec2& imageOffset /* = Vec2::ZERO */)
 {
-	std::string realFontFilename = FileUtils::getInstance()->getNewFilename(fontFileName);  // resolves real file path, to prevent storing multiple atlases for the same file.
+    auto realFontFilename = FileUtils::getInstance()->getNewFilename(fontFileName);  // resolves real file path, to prevent storing multiple atlases for the same file.
     char keyPrefix[ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE];
     snprintf(keyPrefix, ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE, "%.2f %.2f ", imageOffset.x, imageOffset.y);
     std::string atlasName(keyPrefix);
@@ -144,27 +144,27 @@ FontAtlas* FontAtlasCache::getFontAtlasCharMap(const std::string& plistFile)
 
 FontAtlas* FontAtlasCache::getFontAtlasCharMap(Urho3D::Texture2D* texture, int itemWidth, int itemHeight, int startCharMap)
 {
-//     char key[ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE];
-//     sprintf(key,"name:%u_%d_%d_%d",texture->getName(),itemWidth,itemHeight,startCharMap);
-//     std::string atlasName = key;
-// 
-//     auto it = _atlasMap.find(atlasName);
-//     if ( it == _atlasMap.end() )
-//     {
-//         auto font = FontCharMap::create(texture,itemWidth,itemHeight,startCharMap);
-// 
-//         if(font)
-//         {
-//             auto tempAtlas = font->createFontAtlas();
-//             if (tempAtlas)
-//             {
-//                 _atlasMap[atlasName] = tempAtlas;
-//                 return _atlasMap[atlasName];
-//             }
-//         }
-//     }
-//     else
-//         return it->second;
+    char key[ATLAS_MAP_KEY_PREFIX_BUFFER_SIZE];
+    sprintf(key,"name:%u_%d_%d_%d",texture->GetGPUObjectName(),itemWidth,itemHeight,startCharMap);
+    std::string atlasName = key;
+
+    auto it = _atlasMap.find(atlasName);
+    if ( it == _atlasMap.end() )
+    {
+        auto font = FontCharMap::create(texture,itemWidth,itemHeight,startCharMap);
+
+        if(font)
+        {
+            auto tempAtlas = font->createFontAtlas();
+            if (tempAtlas)
+            {
+                _atlasMap[atlasName] = tempAtlas;
+                return _atlasMap[atlasName];
+            }
+        }
+    }
+    else
+        return it->second;
 
     return nullptr;
 }

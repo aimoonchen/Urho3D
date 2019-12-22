@@ -53,4 +53,5 @@
 #else
     #define CC_GUI_DLL
 #endif
+
 #endif /* __CCEXTENSIONEXPORT_H__*/

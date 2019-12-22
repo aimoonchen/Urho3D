@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "base/ccConfig.h"
 
 // base
-//#include "base/CCAsyncTaskPool.h"
+////#include "base/CCAsyncTaskPool.h"
 #include "base/CCAutoreleasePool.h"
 #include "base/CCConfiguration.h"
 #include "base/CCConsole.h"
@@ -49,7 +49,7 @@ THE SOFTWARE.
 #include "base/CCIMEDispatcher.h"
 #include "base/CCMap.h"
 #include "base/CCNS.h"
-// #include "base/CCProfiling.h"
+// //#include "base/CCProfiling.h"
 // #include "base/CCProperties.h"
 #include "base/CCRef.h"
 #include "base/CCRefPtr.h"
@@ -112,7 +112,7 @@ THE SOFTWARE.
 #include "2d/CCTweenFunction.h"
 
 // 2d nodes
-//#include "2d/CCAtlasNode.h"
+#include "2d/CCAtlasNode.h"
 // #include "2d/CCClippingNode.h"
 // #include "2d/CCClippingRectangleNode.h"
 #include "2d/CCDrawNode.h"
@@ -141,9 +141,9 @@ THE SOFTWARE.
 // #include "2d/CCTransitionProgress.h"
 
 // 2d utils
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 // #include "2d/CCCameraBackgroundBrush.h"
-// #include "2d/CCGrabber.h"
+// //#include "2d/CCGrabber.h"
 #include "2d/CCGrid.h"
 //#include "2d/CCLight.h"
 
@@ -152,30 +152,30 @@ THE SOFTWARE.
 
 // renderer
 #include "renderer/CCCustomCommand.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramCache.h"
-// #include "renderer/CCGLProgramState.h"
+// //#include "renderer/CCGLProgram.h"
+// //#include "renderer/CCGLProgramCache.h"
+// //#include "renderer/CCGLProgramState.h"
 // #include "renderer/CCGLProgramStateCache.h"
 #include "renderer/CCGroupCommand.h"
-// #include "renderer/CCMaterial.h"
+// //#include "renderer/CCMaterial.h"
 // #include "renderer/CCPass.h"
 // #include "renderer/CCPrimitive.h"
 // #include "renderer/CCPrimitiveCommand.h"
 #include "renderer/CCQuadCommand.h"
 #include "renderer/CCRenderCommand.h"
 #include "renderer/CCRenderCommandPool.h"
-// #include "renderer/CCRenderState.h"
+// //#include "renderer/CCRenderState.h"
 #include "renderer/CCRenderer.h"
 // #include "renderer/CCTechnique.h"
 // #include "renderer/CCTexture2D.h"
 // #include "renderer/CCTextureCube.h"
-// #include "renderer/CCTextureCache.h"
+// //#include "renderer/CCTextureCache.h"
 #include "renderer/CCTrianglesCommand.h"
 // #include "renderer/CCVertexAttribBinding.h"
 // #include "renderer/CCVertexIndexBuffer.h"
 // #include "renderer/CCVertexIndexData.h"
 // #include "renderer/CCFrameBuffer.h"
-// #include "renderer/ccGLStateCache.h"
+// //#include "renderer/ccGLStateCache.h"
 // #include "renderer/ccShaders.h"
 
 // physics
@@ -234,7 +234,7 @@ THE SOFTWARE.
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
 
 // script_support
-//#include "base/CCScriptSupport.h"
+////#include "base/CCScriptSupport.h"
 
 // sprite_nodes
 #include "2d/CCAnimation.h"
@@ -262,12 +262,12 @@ THE SOFTWARE.
 // #include "2d/CCFastTMXTiledMap.h"
 
 // component
-// #include "2d/CCComponent.h"
-// #include "2d/CCComponentContainer.h"
+// //#include "2d/CCComponent.h"
+// //#include "2d/CCComponentContainer.h"
 
 //3d
 #include "3d/CCAABB.h"
-// #include "3d/CCAnimate3D.h"
+// //#include "3d/CCAnimate3D.h"
 // #include "3d/CCAnimation3D.h"
 // #include "3d/CCAttachNode.h"
 // #include "3d/CCBillBoard.h"

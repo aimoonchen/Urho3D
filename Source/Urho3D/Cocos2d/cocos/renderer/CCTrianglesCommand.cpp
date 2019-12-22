@@ -24,13 +24,12 @@
  ****************************************************************************/
 
 #include "renderer/CCTrianglesCommand.h"
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramState.h"
+//#include "renderer/ccGLStateCache.h"
+//#include "renderer/CCGLProgram.h"
+//#include "renderer/CCGLProgramState.h"
 #include "xxhash/xxhash.h"
 #include "renderer/CCRenderer.h"
-#include "renderer/CCTexture2D.h"
-#include "Graphics/Texture2D.h"
+#include "../Graphics/Texture2D.h"
 
 NS_CC_BEGIN
 
@@ -78,8 +77,8 @@ void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState*
 
 void TrianglesCommand::init(float globalOrder, Urho3D::Texture2D* texture, GLProgramState* glProgramState, BlendFunc blendType, const Triangles& triangles, const Mat4& mv, uint32_t flags)
 {
-    init(globalOrder, texture->GetGPUObjectName(), glProgramState, blendType, triangles, mv, flags);
-    //_alphaTextureID = texture->getAlphaTextureName();
+    init(globalOrder, texture->getName(), glProgramState, blendType, triangles, mv, flags);
+    _alphaTextureID = texture->getAlphaTextureName();
     _texture = texture;
 }
 

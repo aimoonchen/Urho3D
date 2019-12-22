@@ -33,9 +33,9 @@ THE SOFTWARE.
 #include "2d/CCNode.h"
 #include "2d/CCDrawNode.h"
 #include "base/CCProtocols.h"
-// #include "renderer/CCTextureAtlas.h"
-// #include "renderer/CCTrianglesCommand.h"
-// #include "renderer/CCCustomCommand.h"
+#include "renderer/CCTextureAtlas.h"
+#include "renderer/CCTrianglesCommand.h"
+#include "renderer/CCCustomCommand.h"
 #include "2d/CCAutoPolygon.h"
 namespace Urho3D
 {
@@ -43,7 +43,6 @@ namespace Urho3D
 }
 NS_CC_BEGIN
 
-class TextureAtlas;
 class SpriteBatchNode;
 class SpriteFrame;
 class Animation;
@@ -685,9 +684,9 @@ protected:
     // Data used when the sprite is self-rendered
     //
     BlendFunc        _blendFunc;            /// It's required for TextureProtocol inheritance
-	Urho3D::Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
+    Urho3D::Texture2D*       _texture;              /// Texture2D object that is used to render the sprite
     SpriteFrame*     _spriteFrame;
-	TrianglesCommand _trianglesCommand;     ///
+    TrianglesCommand _trianglesCommand;     ///
 #if CC_SPRITE_DEBUG_DRAW
     DrawNode *_debugDrawNode;
 #endif //CC_SPRITE_DEBUG_DRAW

@@ -26,11 +26,10 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 #include "2d/CCAnimation.h"
-// #include "renderer/CCTextureCache.h"
-// #include "renderer/CCTexture2D.h"
+//#include "renderer/CCTextureCache.h"
+#include "../Graphics/Texture2D.h"
 #include "base/CCDirector.h"
 #include "renderer/Texture2DUtils.h"
-#include "Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 AnimationFrame* AnimationFrame::create(SpriteFrame* spriteFrame, float delayUnits, const ValueMap& userInfo)
@@ -173,10 +172,9 @@ void Animation::addSpriteFrame(SpriteFrame* spriteFrame)
 
 void Animation::addSpriteFrameWithFile(const std::string& filename)
 {
-    //Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
-    auto texture = GetUrho3DTexture(filename);
+    Urho3D::Texture2D *texture = GetUrho3DTexture(filename);
     Rect rect = Rect::ZERO;
-    rect.size = Size{ (float)texture->GetWidth(), (float)texture->GetHeight() };// texture->getContentSize();
+    rect.size = Size(texture->GetWidth(), texture->GetHeight());
     SpriteFrame *frame = SpriteFrame::createWithTexture(texture, rect);
     addSpriteFrame(frame);
 }

@@ -34,22 +34,20 @@
 #include "2d/CCSprite.h"
 #include "2d/CCSpriteBatchNode.h"
 #include "2d/CCDrawNode.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 #include "base/ccUTF8.h"
 #include "platform/CCFileUtils.h"
 #include "renderer/CCRenderer.h"
-// #include "renderer/ccGLStateCache.h"
+//#include "renderer/ccGLStateCache.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventCustom.h"
 #include "2d/CCFontFNT.h"
-
 #include "Urho3DContext.h"
-// #include "Core/Context.h"
-// #include "Resource/ResourceCache.h"
-#include "Graphics/Texture2D.h"
 #include "renderer/Texture2DUtils.h"
+#include "../Graphics/Texture2D.h"
+
 NS_CC_BEGIN
 
 /**
@@ -117,10 +115,10 @@ public:
             _quad.tl.vertices.set(SPRITE_RENDER_IN_SUBPIXEL(dx), SPRITE_RENDER_IN_SUBPIXEL(dy), _positionZ);
             _quad.tr.vertices.set(SPRITE_RENDER_IN_SUBPIXEL(cx), SPRITE_RENDER_IN_SUBPIXEL(cy), _positionZ);
 
-//             if (_textureAtlas)
-//             {
-//                 _textureAtlas->updateQuad(&_quad, _atlasIndex);
-//             }
+            if (_textureAtlas)
+            {
+                _textureAtlas->updateQuad(&_quad, _atlasIndex);
+            }
 
             _recursiveDirty = false;
             setDirty(false);
@@ -154,7 +152,7 @@ public:
         _quad.tl.colors = color4;
         _quad.tr.colors = color4;
 
-        //_textureAtlas->updateQuad(&_quad, _atlasIndex);
+        _textureAtlas->updateQuad(&_quad, _atlasIndex);
     }
 
     void setVisible(bool visible) override
@@ -179,7 +177,7 @@ private:
 
 Label* Label::create()
 {
-    auto ret = new (std::nothrow) Label();
+    auto ret = new (std::nothrow) Label;
 
     if (ret)
     {
@@ -199,7 +197,6 @@ Label* Label::create(const std::string& text, const std::string& font, float fon
     {
         return createWithSystemFont(text,font,fontSize,dimensions,hAlignment,vAlignment);
     }
-	return {};
 }
 
 Label* Label::createWithSystemFont(const std::string& text, const std::string& font, float fontSize, const Size& dimensions /* = Size::ZERO */, TextHAlignment hAlignment /* = TextHAlignment::LEFT */, TextVAlignment vAlignment /* = TextVAlignment::TOP */)
@@ -284,7 +281,7 @@ Label* Label::createWithCharMap(Urho3D::Texture2D* texture, int itemWidth, int i
 {
     auto ret = new (std::nothrow) Label();
 
-    if (ret && ret->setCharMap(texture, itemWidth,itemHeight,startCharMap))
+    if (ret && ret->setCharMap(texture,itemWidth,itemHeight,startCharMap))
     {
         ret->autorelease();
         return ret;
@@ -386,7 +383,7 @@ bool Label::setCharMap(const std::string& charMapFile, int itemWidth, int itemHe
     return true;
 }
 
-Label::Label(TextHAlignment hAlignment /* = TextHAlignment::LEFT */,
+Label::Label(TextHAlignment hAlignment /* = TextHAlignment::LEFT */, 
              TextVAlignment vAlignment /* = TextVAlignment::TOP */)
 : _textSprite(nullptr)
 , _shadowNode(nullptr)
@@ -548,7 +545,7 @@ void Label::reset()
 static Urho3D::Texture2D* _getTexture(Label* label)
 {
     auto fontAtlas = label->getFontAtlas();
-	Urho3D::Texture2D* texture = nullptr;
+    Urho3D::Texture2D* texture = nullptr;
     if (fontAtlas != nullptr) {
         auto textures = fontAtlas->getTextures();
         if(!textures.empty()) {
@@ -833,15 +830,15 @@ bool Label::alignText()
         {
             for (auto index = static_cast<size_t>(_batchNodes.size()); index < size; ++index)
             {
-//                 auto batchNode = SpriteBatchNode::createWithTexture(textures.at(index));
-//                 if (batchNode)
-//                 {
-//                     _isOpacityModifyRGB = batchNode->getTexture()->hasPremultipliedAlpha();
-//                     _blendFunc = batchNode->getBlendFunc();
-//                     batchNode->setAnchorPoint(Vec2::ANCHOR_TOP_LEFT);
-//                     batchNode->setPosition(Vec2::ZERO);
-//                     _batchNodes.pushBack(batchNode);
-//                 }
+                auto batchNode = SpriteBatchNode::createWithTexture(textures.at(index));
+                if (batchNode)
+                {
+                    _isOpacityModifyRGB = false;// batchNode->getTexture()->hasPremultipliedAlpha();
+                    _blendFunc = batchNode->getBlendFunc();
+                    batchNode->setAnchorPoint(Vec2::ANCHOR_TOP_LEFT);
+                    batchNode->setPosition(Vec2::ZERO);
+                    _batchNodes.pushBack(batchNode);
+                }
             }
         }
         if (_batchNodes.empty())
@@ -924,10 +921,10 @@ bool Label::isHorizontalClamped(float letterPositionX, int lineIndex)
 bool Label::updateQuads()
 {
     bool ret = true;
-//     for (auto&& batchNode : _batchNodes)
-//     {
-//         batchNode->getTextureAtlas()->removeAllQuads();
-//     }
+    for (auto&& batchNode : _batchNodes)
+    {
+        batchNode->getTextureAtlas()->removeAllQuads();
+    }
     
     for (int ctr = 0; ctr < _lengthOfString; ++ctr)
     {
@@ -980,12 +977,12 @@ bool Label::updateQuads()
                 _reusedLetter->setTextureRect(_reusedRect, false, _reusedRect.size);
                 float letterPositionX = _lettersInfo[ctr].positionX + _linesOffsetX[_lettersInfo[ctr].lineIndex];
                 _reusedLetter->setPosition(letterPositionX, py);
-//                 auto index = static_cast<int>(_batchNodes.at(letterDef.textureID)->getTextureAtlas()->getTotalQuads());
-//                 _lettersInfo[ctr].atlasIndex = index;
-// 
-//                 this->updateLetterSpriteScale(_reusedLetter);
-// 
-//                 _batchNodes.at(letterDef.textureID)->insertQuadFromSprite(_reusedLetter, index);
+                auto index = static_cast<int>(_batchNodes.at(letterDef.textureID)->getTextureAtlas()->getTotalQuads());
+                _lettersInfo[ctr].atlasIndex = index;
+
+                this->updateLetterSpriteScale(_reusedLetter);
+
+                _batchNodes.at(letterDef.textureID)->insertQuadFromSprite(_reusedLetter, index);
             }
         }     
     }
@@ -1283,9 +1280,8 @@ void Label::createSpriteForSystemFont(const FontDefinition& fontDef)
 {
     _currentLabelType = LabelType::STRING_TEXTURE;
 
-	//auto* cache = g_urho3d_context->GetSubsystem<Urho3D::ResourceCache>();
     auto texture = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
-	InitWithString(texture, _utf8Text.c_str(), fontDef);
+    InitWithString(texture, _utf8Text.c_str(), fontDef);
 
     _textSprite = Sprite::createWithTexture(texture);
     //set camera mask using label's camera mask, because _textSprite may be null when setting camera mask to label
@@ -1322,10 +1318,10 @@ void Label::createShadowSpriteForSystemFont(const FontDefinition& fontDef)
         shadowFontDefinition._stroke._strokeColor = shadowFontDefinition._fontFillColor;
         shadowFontDefinition._stroke._strokeAlpha = shadowFontDefinition._fontAlpha;
 
-//         auto texture = new (std::nothrow) Texture2D;
-//         texture->initWithString(_utf8Text.c_str(), shadowFontDefinition);
-//         _shadowNode = Sprite::createWithTexture(texture);
-//         texture->release();
+        auto texture = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
+        InitWithString(texture, _utf8Text.c_str(), shadowFontDefinition);
+        _shadowNode = Sprite::createWithTexture(texture);
+        //texture->release();
     }
 
     if (_shadowNode)
@@ -1501,8 +1497,8 @@ float Label::getBMFontSize()const
 
 void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 {
-    if (_currentLabelType == LabelType::TTF)
-    {
+//     if (_currentLabelType == LabelType::TTF)
+//     {
 //         if (_currLabelEffect == LabelEffect::OUTLINE)
 //         {
 //             glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
@@ -1526,14 +1522,14 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 //         {
 //             batchNode->getTextureAtlas()->drawQuads();
 //         }
-    }
-    else
-    {
-        Color3B oldColor = _realColor;
-        GLubyte oldOPacity = _displayedOpacity;
-        _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
-        setColor(Color3B(shadowColor));
-
+//     }
+//     else
+//     {
+//         Color3B oldColor = _realColor;
+//         GLubyte oldOPacity = _displayedOpacity;
+//         _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
+//         setColor(Color3B(shadowColor));
+// 
 //         glProgram->setUniformsForBuiltins(_shadowTransform);
 //         for (auto&& it : _letters)
 //         {
@@ -1543,10 +1539,10 @@ void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
 //         {
 //             batchNode->getTextureAtlas()->drawQuads();
 //         }
-
-        _displayedOpacity = oldOPacity;
-        setColor(oldColor);
-    }
+// 
+//         _displayedOpacity = oldOPacity;
+//         setColor(oldColor);
+//     }
 }
 
 void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
@@ -2017,23 +2013,23 @@ void Label::updateColor()
         color4.b *= _displayedOpacity/255.0f;
     }
 
-//     cocos2d::TextureAtlas* textureAtlas;
-//     V3F_C4B_T2F_Quad *quads;
-//     for (auto&& batchNode:_batchNodes)
-//     {
-//         textureAtlas = batchNode->getTextureAtlas();
-//         quads = textureAtlas->getQuads();
-//         auto count = textureAtlas->getTotalQuads();
-// 
-//         for (int index = 0; index < count; ++index)
-//         {
-//             quads[index].bl.colors = color4;
-//             quads[index].br.colors = color4;
-//             quads[index].tl.colors = color4;
-//             quads[index].tr.colors = color4;
-//             textureAtlas->updateQuad(&quads[index], index);
-//         }
-//     }
+    cocos2d::TextureAtlas* textureAtlas;
+    V3F_C4B_T2F_Quad *quads;
+    for (auto&& batchNode:_batchNodes)
+    {
+        textureAtlas = batchNode->getTextureAtlas();
+        quads = textureAtlas->getQuads();
+        auto count = textureAtlas->getTotalQuads();
+
+        for (int index = 0; index < count; ++index)
+        {
+            quads[index].bl.colors = color4;
+            quads[index].br.colors = color4;
+            quads[index].tl.colors = color4;
+            quads[index].tr.colors = color4;
+            textureAtlas->updateQuad(&quads[index], index);
+        }
+    }
 }
 
 std::string Label::getDescription() const

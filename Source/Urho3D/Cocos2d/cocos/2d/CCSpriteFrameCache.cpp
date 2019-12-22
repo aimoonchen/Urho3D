@@ -41,8 +41,8 @@ THE SOFTWARE.
 #include "base/ccUTF8.h"
 #include "base/ccUtils.h"
 #include "base/CCDirector.h"
-// #include "renderer/CCTexture2D.h"
-// #include "renderer/CCTextureCache.h"
+#include "../Graphics/Texture2D.h"
+//#include "renderer/CCTextureCache.h"
 #include "base/CCNinePatchImageParser.h"
 #include "renderer/Texture2DUtils.h"
 using namespace std;
@@ -150,9 +150,8 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3
 
     // check the format
     CCASSERT(format >=0 && format <= 3, "format is not supported for SpriteFrameCache addSpriteFramesWithDictionary:textureFilename:");
-
+    std::string textureFileName;
     //auto textureFileName = Director::getInstance()->getTextureCache()->getTextureFilePath(texture);
-	std::string textureFileName;
     Image* image = nullptr;
     NinePatchImageParser parser;
     for (auto& iter : framesDict)
@@ -262,10 +261,10 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3
         bool flag = NinePatchImageParser::isNinePatchImage(spriteFrameName);
         if(flag)
         {
-//             if (image == nullptr) {
-//                 image = new (std::nothrow) Image();
-//                 image->initWithImageFile(textureFileName);
-//             }
+            if (image == nullptr) {
+                image = new (std::nothrow) Image();
+                image->initWithImageFile(textureFileName);
+            }
             parser.setSpriteFrameInfo(image, spriteFrame->getRectInPixels(), spriteFrame->isRotated());
             //texture->addSpriteFrameCapInset(spriteFrame, parser.parseCapInset());
         }
@@ -273,7 +272,7 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3
         _spriteFramesCache.insertFrame(plist, spriteFrameName, spriteFrame);
     }
     _spriteFramesCache.markPlistFull(plist, true);
-    //CC_SAFE_DELETE(image);
+    CC_SAFE_DELETE(image);
 }
 
 void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::string &texturePath, const std::string &plist)
@@ -288,7 +287,7 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
         }
     }
     
-	Urho3D::Texture2D *texture = nullptr;
+    Urho3D::Texture2D *texture = nullptr;
 //     static std::unordered_map<std::string, Texture2D::PixelFormat> pixelFormats = {
 //         {"RGBA8888", Texture2D::PixelFormat::RGBA8888},
 //         {"RGBA4444", Texture2D::PixelFormat::RGBA4444},
@@ -303,19 +302,19 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
 //         //{"BGRA8888", Texture2D::PixelFormat::BGRA8888}, no Image conversion RGBA -> BGRA
 //         {"RGB888", Texture2D::PixelFormat::RGB888}
 //     };
-// 
+
 //     auto pixelFormatIt = pixelFormats.find(pixelFormatName);
 //     if (pixelFormatIt != pixelFormats.end())
 //     {
 //         const Texture2D::PixelFormat pixelFormat = (*pixelFormatIt).second;
 //         const Texture2D::PixelFormat currentPixelFormat = Texture2D::getDefaultAlphaPixelFormat();
 //         Texture2D::setDefaultAlphaPixelFormat(pixelFormat);
-//         texture = GetUrho3DTexture(texturePath);// Director::getInstance()->getTextureCache()->addImage(texturePath);
+//         texture = GetUrho3DTexture(texturePath);
 //         Texture2D::setDefaultAlphaPixelFormat(currentPixelFormat);
 //     }
 //     else
 //     {
-        texture = GetUrho3DTexture(texturePath);// ::getInstance()->getTextureCache()->addImage(texturePath);
+        texture = GetUrho3DTexture(texturePath);
 //    }
     
     if (texture)
@@ -330,8 +329,8 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dict, const std::
 
 void SpriteFrameCache::addSpriteFramesWithFile(const std::string& plist, Urho3D::Texture2D *texture)
 {
-	std::string fullPath = FileUtils::getInstance()->fullPathForFilename(plist);
-	ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(fullPath);
+    std::string fullPath = FileUtils::getInstance()->fullPathForFilename(plist);
+    ValueMap dict = FileUtils::getInstance()->getValueMapFromFile(fullPath);
 
     addSpriteFramesWithDictionary(dict, texture, plist);
 }
@@ -698,10 +697,10 @@ bool SpriteFrameCache::reloadTexture(const std::string& plist)
         texturePath = texturePath.append(".png");
     }
 
-	Urho3D::Texture2D *texture = nullptr;
+    Urho3D::Texture2D *texture = nullptr;
 //     if (Director::getInstance()->getTextureCache()->reloadTexture(texturePath))
 //         texture = Director::getInstance()->getTextureCache()->getTextureForKey(texturePath);
-
+    texture = GetUrho3DTexture(texturePath);
     if (texture)
     {
         reloadSpriteFramesWithDictionary(dict, texture, plist);

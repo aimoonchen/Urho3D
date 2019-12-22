@@ -35,12 +35,10 @@ THE SOFTWARE.
 #include "2d/CCAnimation.h"
 #include "base/CCProtocols.h"
 #include "base/CCVector.h"
-
 namespace Urho3D
 {
 	class Texture2D;
 }
-
 NS_CC_BEGIN
 
 class Node;
@@ -1515,6 +1513,7 @@ private:
     CC_DISALLOW_COPY_AND_ASSIGN(ReverseTime);
 };
 
+//class Texture2D;
 /** @class Animate
  * @brief Animates a sprite given the name of an Animation.
  */

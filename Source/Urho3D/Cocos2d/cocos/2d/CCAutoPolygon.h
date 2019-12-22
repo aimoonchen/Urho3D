@@ -32,7 +32,6 @@ THE SOFTWARE.
 #include <string>
 #include <vector>
 #include "platform/CCImage.h"
-#include "base/ccTypes.h"
 #include "renderer/CCTrianglesCommand.h"
 
 NS_CC_BEGIN

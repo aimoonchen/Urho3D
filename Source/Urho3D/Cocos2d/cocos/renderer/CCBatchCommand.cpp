@@ -25,9 +25,9 @@
 
 
 #include "renderer/CCBatchCommand.h"
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCTextureAtlas.h"
-#include "renderer/CCTexture2D.h"
+//#include "renderer/ccGLStateCache.h"
+#include "renderer/CCTextureAtlas.h"
+#include "../Graphics/Texture2D.h"
 //#include "renderer/CCGLProgram.h"
 
 NS_CC_BEGIN
@@ -47,7 +47,7 @@ void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendTyp
     CCASSERT(textureAtlas, "textureAtlas cannot be null");
     
     RenderCommand::init(globalOrder, modelViewTransform, flags);
-    _textureID = 0;// textureAtlas->getTexture()->getName();
+    _textureID = textureAtlas->getTexture()->getName();
     _blendType = blendType;
     _shader = shader;
     
@@ -68,13 +68,13 @@ BatchCommand::~BatchCommand()
 void BatchCommand::execute()
 {
     // Set material
-//     _shader->use();
-//     _shader->setUniformsForBuiltins(_mv);
-//     GL::bindTexture2D(_textureID);
-//     GL::blendFunc(_blendType.src, _blendType.dst);
-// 
-//     // Draw
-//     _textureAtlas->drawQuads();
+    _shader->use();
+    _shader->setUniformsForBuiltins(_mv);
+    GL::bindTexture2D(_textureID);
+    GL::blendFunc(_blendType.src, _blendType.dst);
+
+    // Draw
+    _textureAtlas->drawQuads();
 }
 
 NS_CC_END

@@ -36,7 +36,9 @@
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventType.h"
-
+#include "Urho3DContext.h"
+#include "../Graphics/Texture2D.h"
+#include "../Graphics/Graphics.h"
 NS_CC_BEGIN
 
 const int FontAtlas::CacheTextureWidth = 512;
@@ -83,32 +85,33 @@ FontAtlas::FontAtlas(Font &theFont)
 
 void FontAtlas::reinit()
 {
-//     if (_currentPageData)
-//     {
-//         delete []_currentPageData;
-//         _currentPageData = nullptr;
-//     }
-//     
-//     auto texture = new (std::nothrow) Texture2D;
-//     
-//     _currentPageDataSize = CacheTextureWidth * CacheTextureHeight;
-//     
-//     auto outlineSize = _fontFreeType->getOutlineSize();
-//     if(outlineSize > 0)
-//     {
-//         _lineHeight += 2 * outlineSize;
-//         _currentPageDataSize *= 2;
-//     }
-//     
-//     _currentPageData = new (std::nothrow) unsigned char[_currentPageDataSize];
-//     memset(_currentPageData, 0, _currentPageDataSize);
-//     
+    if (_currentPageData)
+    {
+        delete []_currentPageData;
+        _currentPageData = nullptr;
+    }
+    
+    auto texture = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
+    
+    _currentPageDataSize = CacheTextureWidth * CacheTextureHeight;
+    
+    auto outlineSize = _fontFreeType->getOutlineSize();
+    if(outlineSize > 0)
+    {
+        _lineHeight += 2 * outlineSize;
+        _currentPageDataSize *= 2;
+    }
+    
+    _currentPageData = new (std::nothrow) unsigned char[_currentPageDataSize];
+    memset(_currentPageData, 0, _currentPageDataSize);
+    
 //     auto  pixelFormat = outlineSize > 0 ? Texture2D::PixelFormat::AI88 : Texture2D::PixelFormat::A8;
 //     texture->initWithData(_currentPageData, _currentPageDataSize,
 //                           pixelFormat, CacheTextureWidth, CacheTextureHeight, Size(CacheTextureWidth,CacheTextureHeight) );
-//     
-//     addTexture(texture,0);
-//     texture->release();
+    texture->SetSize(CacheTextureWidth, CacheTextureHeight, outlineSize > 0 ? Urho3D::Graphics::GetLuminanceAlphaFormat() : Urho3D::Graphics::GetAlphaFormat());
+    texture->SetData(0, 0, 0, CacheTextureWidth, CacheTextureHeight, _currentPageData);
+    addTexture(texture,0);
+    //texture->release();
 }
 
 FontAtlas::~FontAtlas()
@@ -155,7 +158,7 @@ void FontAtlas::releaseTextures()
 //     {
 //         item.second->release();
 //     }
-//     _atlasTextures.clear();
+    _atlasTextures.clear();
 }
 
 void FontAtlas::purgeTexturesAtlas()
@@ -342,65 +345,66 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
         return false;
     } 
  
-//     if (!_currentPageData)
-//         reinit();     
-//  
-//     std::unordered_map<unsigned int, unsigned int> codeMapOfNewChar;
-//     findNewCharacters(utf32Text, codeMapOfNewChar);
-//     if (codeMapOfNewChar.empty())
-//     {
-//         return false;
-//     }
-// 
-//     int adjustForDistanceMap = _letterPadding / 2;
-//     int adjustForExtend = _letterEdgeExtend / 2;
-//     long bitmapWidth;
-//     long bitmapHeight;
-//     int glyphHeight;
-//     Rect tempRect;
-//     FontLetterDefinition tempDef;
-// 
-//     auto scaleFactor = CC_CONTENT_SCALE_FACTOR();
-//     auto  pixelFormat = _fontFreeType->getOutlineSize() > 0 ? Texture2D::PixelFormat::AI88 : Texture2D::PixelFormat::A8;
-// 
-//     float startY = _currentPageOrigY;
-// 
-//     for (auto&& it : codeMapOfNewChar)
-//     {
-//         auto bitmap = _fontFreeType->getGlyphBitmap(it.second, bitmapWidth, bitmapHeight, tempRect, tempDef.xAdvance);
-//         if (bitmap && bitmapWidth > 0 && bitmapHeight > 0)
-//         {
-//             tempDef.validDefinition = true;
-//             tempDef.width = tempRect.size.width + _letterPadding + _letterEdgeExtend;
-//             tempDef.height = tempRect.size.height + _letterPadding + _letterEdgeExtend;
-//             tempDef.offsetX = tempRect.origin.x - adjustForDistanceMap - adjustForExtend;
-//             tempDef.offsetY = _fontAscender + tempRect.origin.y - adjustForDistanceMap - adjustForExtend;
-// 
-//             if (_currentPageOrigX + tempDef.width > CacheTextureWidth)
-//             {
-//                 _currentPageOrigY += _currLineHeight;
-//                 _currLineHeight = 0;
-//                 _currentPageOrigX = 0;
-//                 if (_currentPageOrigY + _lineHeight + _letterPadding + _letterEdgeExtend >= CacheTextureHeight)
-//                 {
-//                     unsigned char *data = nullptr;
-//                     if (pixelFormat == Texture2D::PixelFormat::AI88)
-//                     {
-//                         data = _currentPageData + CacheTextureWidth * (int)startY * 2;
-//                     }
-//                     else
-//                     {
-//                         data = _currentPageData + CacheTextureWidth * (int)startY;
-//                     }
+    if (!_currentPageData)
+        reinit();     
+ 
+    std::unordered_map<unsigned int, unsigned int> codeMapOfNewChar;
+    findNewCharacters(utf32Text, codeMapOfNewChar);
+    if (codeMapOfNewChar.empty())
+    {
+        return false;
+    }
+
+    int adjustForDistanceMap = _letterPadding / 2;
+    int adjustForExtend = _letterEdgeExtend / 2;
+    long bitmapWidth;
+    long bitmapHeight;
+    int glyphHeight;
+    Rect tempRect;
+    FontLetterDefinition tempDef;
+
+    auto scaleFactor = CC_CONTENT_SCALE_FACTOR();
+    auto  pixelFormat = _fontFreeType->getOutlineSize() > 0 ? Urho3D::Graphics::GetLuminanceAlphaFormat() : Urho3D::Graphics::GetAlphaFormat();// Texture2D::PixelFormat::AI88 : Texture2D::PixelFormat::A8;
+
+    float startY = _currentPageOrigY;
+
+    for (auto&& it : codeMapOfNewChar)
+    {
+        auto bitmap = _fontFreeType->getGlyphBitmap(it.second, bitmapWidth, bitmapHeight, tempRect, tempDef.xAdvance);
+        if (bitmap && bitmapWidth > 0 && bitmapHeight > 0)
+        {
+            tempDef.validDefinition = true;
+            tempDef.width = tempRect.size.width + _letterPadding + _letterEdgeExtend;
+            tempDef.height = tempRect.size.height + _letterPadding + _letterEdgeExtend;
+            tempDef.offsetX = tempRect.origin.x - adjustForDistanceMap - adjustForExtend;
+            tempDef.offsetY = _fontAscender + tempRect.origin.y - adjustForDistanceMap - adjustForExtend;
+
+            if (_currentPageOrigX + tempDef.width > CacheTextureWidth)
+            {
+                _currentPageOrigY += _currLineHeight;
+                _currLineHeight = 0;
+                _currentPageOrigX = 0;
+                if (_currentPageOrigY + _lineHeight + _letterPadding + _letterEdgeExtend >= CacheTextureHeight)
+                {
+                    unsigned char *data = nullptr;
+                    if (pixelFormat == Urho3D::Graphics::GetLuminanceAlphaFormat()/*Texture2D::PixelFormat::AI88*/)
+                    {
+                        data = _currentPageData + CacheTextureWidth * (int)startY * 2;
+                    }
+                    else
+                    {
+                        data = _currentPageData + CacheTextureWidth * (int)startY;
+                    }
 //                     _atlasTextures[_currentPage]->updateWithData(data, 0, startY,
 //                         CacheTextureWidth, CacheTextureHeight - startY);
-// 
-//                     startY = 0.0f;
-// 
-//                     _currentPageOrigY = 0;
-//                     memset(_currentPageData, 0, _currentPageDataSize);
-//                     _currentPage++;
-//                     auto tex = new (std::nothrow) Texture2D;
+					_atlasTextures[_currentPage]->SetData(0, 0, startY,
+						CacheTextureWidth, CacheTextureHeight - startY, data);
+                    startY = 0.0f;
+
+                    _currentPageOrigY = 0;
+                    memset(_currentPageData, 0, _currentPageDataSize);
+                    _currentPage++;
+                    auto tex = new (std::nothrow) Urho3D::Texture2D(GetUrho3DContext());
 //                     if (_antialiasEnabled)
 //                     {
 //                         tex->setAntiAliasTexParameters();
@@ -409,68 +413,72 @@ bool FontAtlas::prepareLetterDefinitions(const std::u32string& utf32Text)
 //                     {
 //                         tex->setAliasTexParameters();
 //                     }
+                    tex->SetSize(CacheTextureWidth, CacheTextureHeight, pixelFormat);
+                    tex->SetData(0, 0, 0, CacheTextureWidth, CacheTextureHeight, _currentPageData);
 //                     tex->initWithData(_currentPageData, _currentPageDataSize,
 //                         pixelFormat, CacheTextureWidth, CacheTextureHeight, Size(CacheTextureWidth, CacheTextureHeight));
-//                     addTexture(tex, _currentPage);
-//                     tex->release();
-//                 }
-//             }
-//             glyphHeight = static_cast<int>(bitmapHeight) + _letterPadding + _letterEdgeExtend;
-//             if (glyphHeight > _currLineHeight)
-//             {
-//                 _currLineHeight = glyphHeight;
-//             }
-//             _fontFreeType->renderCharAt(_currentPageData, _currentPageOrigX + adjustForExtend, _currentPageOrigY + adjustForExtend, bitmap, bitmapWidth, bitmapHeight);
-// 
-//             tempDef.U = _currentPageOrigX;
-//             tempDef.V = _currentPageOrigY;
-//             tempDef.textureID = _currentPage;
-//             _currentPageOrigX += tempDef.width + 1;
-//             // take from pixels to points
-//             tempDef.width = tempDef.width / scaleFactor;
-//             tempDef.height = tempDef.height / scaleFactor;
-//             tempDef.U = tempDef.U / scaleFactor;
-//             tempDef.V = tempDef.V / scaleFactor;
-//         }
-//         else{
-//             if(bitmap)
-//                 delete[] bitmap;
-//             if (tempDef.xAdvance)
-//                 tempDef.validDefinition = true;
-//             else
-//                 tempDef.validDefinition = false;
-// 
-//             tempDef.width = 0;
-//             tempDef.height = 0;
-//             tempDef.U = 0;
-//             tempDef.V = 0;
-//             tempDef.offsetX = 0;
-//             tempDef.offsetY = 0;
-//             tempDef.textureID = 0;
-//             _currentPageOrigX += 1;
-//         }
-// 
-//         _letterDefinitions[it.first] = tempDef;
-//     }
-// 
-//     unsigned char *data = nullptr;
-//     if (pixelFormat == Texture2D::PixelFormat::AI88)
-//     {
-//         data = _currentPageData + CacheTextureWidth * (int)startY * 2;
-//     }
-//     else
-//     {
-//         data = _currentPageData + CacheTextureWidth * (int)startY;
-//     }
-//     _atlasTextures[_currentPage]->updateWithData(data, 0, startY, CacheTextureWidth, _currentPageOrigY - startY + _currLineHeight);
+                    addTexture(tex, _currentPage);
+                    //tex->release();
+                }
+            }
+            glyphHeight = static_cast<int>(bitmapHeight) + _letterPadding + _letterEdgeExtend;
+            if (glyphHeight > _currLineHeight)
+            {
+                _currLineHeight = glyphHeight;
+            }
+            _fontFreeType->renderCharAt(_currentPageData, _currentPageOrigX + adjustForExtend, _currentPageOrigY + adjustForExtend, bitmap, bitmapWidth, bitmapHeight);
+
+            tempDef.U = _currentPageOrigX;
+            tempDef.V = _currentPageOrigY;
+            tempDef.textureID = _currentPage;
+            _currentPageOrigX += tempDef.width + 1;
+            // take from pixels to points
+            tempDef.width = tempDef.width / scaleFactor;
+            tempDef.height = tempDef.height / scaleFactor;
+            tempDef.U = tempDef.U / scaleFactor;
+            tempDef.V = tempDef.V / scaleFactor;
+        }
+        else{
+            if(bitmap)
+                delete[] bitmap;
+            if (tempDef.xAdvance)
+                tempDef.validDefinition = true;
+            else
+                tempDef.validDefinition = false;
+
+            tempDef.width = 0;
+            tempDef.height = 0;
+            tempDef.U = 0;
+            tempDef.V = 0;
+            tempDef.offsetX = 0;
+            tempDef.offsetY = 0;
+            tempDef.textureID = 0;
+            _currentPageOrigX += 1;
+        }
+
+        _letterDefinitions[it.first] = tempDef;
+    }
+
+    unsigned char *data = nullptr;
+    if (pixelFormat == Urho3D::Graphics::GetLuminanceAlphaFormat()/*Texture2D::PixelFormat::AI88*/)
+    {
+        data = _currentPageData + CacheTextureWidth * (int)startY * 2;
+    }
+    else
+    {
+        data = _currentPageData + CacheTextureWidth * (int)startY;
+    }
+    //_atlasTextures[_currentPage]->SetSize(CacheTextureWidth, _currentPageOrigY - startY + _currLineHeight, pixelFormat);
+    _atlasTextures[_currentPage]->SetData(0, 0, startY, CacheTextureWidth, _currentPageOrigY - startY + _currLineHeight, data);
+    //_atlasTextures[_currentPage]->updateWithData(data, 0, startY, CacheTextureWidth, _currentPageOrigY - startY + _currLineHeight);
 
     return true;
 }
 
 void FontAtlas::addTexture(Urho3D::Texture2D *texture, int slot)
 {
-//     texture->retain();
-//     _atlasTextures[slot] = texture;
+    //texture->retain();
+    _atlasTextures[slot] = texture;
 }
 
 Urho3D::Texture2D* FontAtlas::getTexture(int slot)

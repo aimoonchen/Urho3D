@@ -28,7 +28,7 @@
 #include <vector> // because its based on windows 8 build :P
 
 #include "platform/CCFileUtils.h"
-#include "tinyxml2.h"
+#include "tinyxml2/tinyxml2.h"
 //#include "rapidxml/rapidxml_sax3.hpp"
 
 NS_CC_BEGIN
@@ -87,8 +87,8 @@ bool XmlSaxHander::Visit( const tinyxml2::XMLText& text )
     SAXParser::textHandler(_ccsaxParserImp, (const CC_XML_CHAR *)text.Value(), strlen(text.Value()));
     return true;
 }
-// 
-// /// rapidxml SAX handler
+
+/// rapidxml SAX handler
 // class RapidXmlSaxHander : public rapidxml::xml_sax2_handler
 // {
 // 

@@ -33,28 +33,28 @@
 #include "renderer/CCGroupCommand.h"
 // #include "renderer/CCPrimitiveCommand.h"
 // #include "renderer/CCMeshCommand.h"
-// #include "renderer/CCGLProgramCache.h"
-// #include "renderer/CCMaterial.h"
+// //#include "renderer/CCGLProgramCache.h"
+// //#include "renderer/CCMaterial.h"
 // #include "renderer/CCTechnique.h"
 // #include "renderer/CCPass.h"
-// #include "renderer/CCRenderState.h"
-// #include "renderer/ccGLStateCache.h"
+// //#include "renderer/CCRenderState.h"
+// //#include "renderer/ccGLStateCache.h"
 
 #include "base/CCConfiguration.h"
 #include "base/CCDirector.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventType.h"
-#include "2d/CCCamera.h"
+//#include "2d/CCCamera.h"
 #include "2d/CCScene.h"
 
 #include "Urho3DContext.h"
-#include "Core/Context.h"
-#include "Core/Timer.h"
-#include "Graphics/Graphics.h"
-#include "Graphics/VertexBuffer.h"
-#include "Graphics/IndexBuffer.h"
-#include "Graphics/Texture2D.h"
+#include "../Core/Context.h"
+#include "../Core/Timer.h"
+#include "../Graphics/Graphics.h"
+#include "../Graphics/VertexBuffer.h"
+#include "../Graphics/IndexBuffer.h"
+#include "../Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 // helper
@@ -1083,34 +1083,35 @@ void Renderer::flushTriangles()
 // helpers
 bool Renderer::checkVisibility(const Mat4 &transform, const Size &size)
 {
-    auto director = Director::getInstance();
-    auto scene = director->getRunningScene();
-    
-    //If draw to Rendertexture, return true directly.
-    // only cull the default camera. The culling algorithm is valid for default camera.
-    if (!scene || (scene && scene->_defaultCamera != Camera::getVisitingCamera()))
-        return true;
-
-    Rect visibleRect(director->getVisibleOrigin(), director->getVisibleSize());
-    
-    // transform center point to screen space
-    float hSizeX = size.width/2;
-    float hSizeY = size.height/2;
-    Vec3 v3p(hSizeX, hSizeY, 0);
-    transform.transformPoint(&v3p);
-    Vec2 v2p = Camera::getVisitingCamera()->projectGL(v3p);
-
-    // convert content size to world coordinates
-    float wshw = std::max(fabsf(hSizeX * transform.m[0] + hSizeY * transform.m[4]), fabsf(hSizeX * transform.m[0] - hSizeY * transform.m[4]));
-    float wshh = std::max(fabsf(hSizeX * transform.m[1] + hSizeY * transform.m[5]), fabsf(hSizeX * transform.m[1] - hSizeY * transform.m[5]));
-    
-    // enlarge visible rect half size in screen coord
-    visibleRect.origin.x -= wshw;
-    visibleRect.origin.y -= wshh;
-    visibleRect.size.width += wshw * 2;
-    visibleRect.size.height += wshh * 2;
-    bool ret = visibleRect.containsPoint(v2p);
-    return ret;
+    return true;
+//     auto director = Director::getInstance();
+//     auto scene = director->getRunningScene();
+//     
+//     //If draw to Rendertexture, return true directly.
+//     // only cull the default camera. The culling algorithm is valid for default camera.
+//     if (!scene || (scene && scene->_defaultCamera != Camera::getVisitingCamera()))
+//         return true;
+// 
+//     Rect visibleRect(director->getVisibleOrigin(), director->getVisibleSize());
+//     
+//     // transform center point to screen space
+//     float hSizeX = size.width/2;
+//     float hSizeY = size.height/2;
+//     Vec3 v3p(hSizeX, hSizeY, 0);
+//     transform.transformPoint(&v3p);
+//     Vec2 v2p = Camera::getVisitingCamera()->projectGL(v3p);
+// 
+//     // convert content size to world coordinates
+//     float wshw = std::max(fabsf(hSizeX * transform.m[0] + hSizeY * transform.m[4]), fabsf(hSizeX * transform.m[0] - hSizeY * transform.m[4]));
+//     float wshh = std::max(fabsf(hSizeX * transform.m[1] + hSizeY * transform.m[5]), fabsf(hSizeX * transform.m[1] - hSizeY * transform.m[5]));
+//     
+//     // enlarge visible rect half size in screen coord
+//     visibleRect.origin.x -= wshw;
+//     visibleRect.origin.y -= wshh;
+//     visibleRect.size.width += wshw * 2;
+//     visibleRect.size.height += wshh * 2;
+//     bool ret = visibleRect.containsPoint(v2p);
+//     return ret;
 }
 
 

@@ -53,15 +53,15 @@ namespace ui {
 
     void EditBoxImplWin::lazyInit()
     {
-//         s_hwndCocos = cocos2d::Director::getInstance()->getOpenGLView()->getWin32Window();
-//         LONG style = ::GetWindowLongW(s_hwndCocos, GWL_STYLE);
-//         ::SetWindowLongW(s_hwndCocos, GWL_STYLE, style | WS_CLIPCHILDREN);
-//         s_isInitialized = true;
-//         s_previousFocusWnd = s_hwndCocos;
-// 
-//         s_hInstance = ::GetModuleHandleW(nullptr);
-// 
-//         s_prevCocosWndProc = (WNDPROC)SetWindowLongPtrW(s_hwndCocos, GWL_WNDPROC, (LONG_PTR)hookGLFWWindowProc);
+        s_hwndCocos = cocos2d::Director::getInstance()->getOpenGLView()->getWin32Window();
+        LONG style = ::GetWindowLongW(s_hwndCocos, GWL_STYLE);
+        ::SetWindowLongW(s_hwndCocos, GWL_STYLE, style | WS_CLIPCHILDREN);
+        s_isInitialized = true;
+        s_previousFocusWnd = s_hwndCocos;
+
+        s_hInstance = ::GetModuleHandleW(nullptr);
+
+        s_prevCocosWndProc = (WNDPROC)SetWindowLongPtrW(s_hwndCocos, GWL_WNDPROC, (LONG_PTR)hookGLFWWindowProc);
     }
 
     EditBoxImpl* __createSystemEditBox(EditBox* pEditBox)
@@ -98,41 +98,41 @@ namespace ui {
     {
         if (_hwndEdit)
         {
-//             SetWindowLongPtrW(_hwndEdit, GWL_WNDPROC, (LONG_PTR)_prevWndProc);
-//             ::DestroyWindow(_hwndEdit);
-//             _hasFocus = false;
-//             _changedTextManually = false;
-//             _editingMode = false;
-//             _hwndEdit = NULL;
+            SetWindowLongPtrW(_hwndEdit, GWL_WNDPROC, (LONG_PTR)_prevWndProc);
+            ::DestroyWindow(_hwndEdit);
+            _hasFocus = false;
+            _changedTextManually = false;
+            _editingMode = false;
+            _hwndEdit = NULL;
         }
     }
 
     void EditBoxImplWin::createEditCtrl(bool singleLine)
     {
         this->cleanupEditCtrl();
-//         if (!_hwndEdit)
-//         {
-//             _hwndEdit = ::CreateWindowExW(
-//                 WS_EX_CLIENTEDGE, L"EDIT",   // predefined class 
-//                 NULL,         // no window title 
-//                 WS_CHILD | ES_LEFT | WS_BORDER | WS_EX_TRANSPARENT | WS_TABSTOP | ES_AUTOHSCROLL | (singleLine ? 0 : ES_MULTILINE),
-//                 0,
-//                 0,
-//                 0,
-//                 0,   // set size in WM_SIZE message 
-//                 s_hwndCocos,         // parent window 
-//                 (HMENU)s_editboxChildID,   // edit control ID 
-//                 s_hInstance,
-//                 this);        // pointer not needed 
-// 
-//             SetWindowLongPtrW(_hwndEdit, GWL_USERDATA, (LONG_PTR)this);
-//             _prevWndProc = (WNDPROC)SetWindowLongPtrW(_hwndEdit, GWL_WNDPROC, (LONG_PTR)WindowProc);
-// 
-//             ::SendMessageW(_hwndEdit, EM_LIMITTEXT, this->_maxLength, 0);
-//             s_previousFocusWnd = s_hwndCocos;
-//             this->setNativeFont(this->getNativeDefaultFontName(), this->_fontSize);
-//             this->setNativeText(this->_text.c_str());
-//         }
+        if (!_hwndEdit)
+        {
+            _hwndEdit = ::CreateWindowExW(
+                WS_EX_CLIENTEDGE, L"EDIT",   // predefined class 
+                NULL,         // no window title 
+                WS_CHILD | ES_LEFT | WS_BORDER | WS_EX_TRANSPARENT | WS_TABSTOP | ES_AUTOHSCROLL | (singleLine ? 0 : ES_MULTILINE),
+                0,
+                0,
+                0,
+                0,   // set size in WM_SIZE message 
+                s_hwndCocos,         // parent window 
+                (HMENU)s_editboxChildID,   // edit control ID 
+                s_hInstance,
+                this);        // pointer not needed 
+
+            SetWindowLongPtrW(_hwndEdit, GWL_USERDATA, (LONG_PTR)this);
+            _prevWndProc = (WNDPROC)SetWindowLongPtrW(_hwndEdit, GWL_WNDPROC, (LONG_PTR)WindowProc);
+
+            ::SendMessageW(_hwndEdit, EM_LIMITTEXT, this->_maxLength, 0);
+            s_previousFocusWnd = s_hwndCocos;
+            this->setNativeFont(this->getNativeDefaultFontName(), this->_fontSize);
+            this->setNativeText(this->_text.c_str());
+        }
     }
 
     void EditBoxImplWin::createNativeControl(const Rect& frame)
@@ -142,15 +142,15 @@ namespace ui {
 
     void EditBoxImplWin::setNativeFont(const char* pFontName, int fontSize)
     {
-//         auto glView = Director::getInstance()->getOpenGLView();
-//         HFONT hFont = ::CreateFontW(static_cast<int>(fontSize * glView->getScaleX()), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
-//             CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, VARIABLE_PITCH, L"Arial");
-// 
-//         ::SendMessageW(_hwndEdit,             // Handle of edit control
-//             WM_SETFONT,         // Message to change the font
-//             (WPARAM)hFont,     // handle of the font
-//             MAKELPARAM(TRUE, 0) // Redraw text
-//         );
+        auto glView = Director::getInstance()->getOpenGLView();
+        HFONT hFont = ::CreateFontW(static_cast<int>(fontSize * glView->getScaleX()), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+            CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, VARIABLE_PITCH, L"Arial");
+
+        ::SendMessageW(_hwndEdit,             // Handle of edit control
+            WM_SETFONT,         // Message to change the font
+            (WPARAM)hFont,     // handle of the font
+            MAKELPARAM(TRUE, 0) // Redraw text
+        );
     }
 
     void EditBoxImplWin::setNativeFontColor(const Color4B& color)

@@ -142,7 +142,7 @@ protected:
     bool _active;
     int  _reuseGrid;
     Size _gridSize;
-	Urho3D::Texture2D *_texture;
+    Urho3D::Texture2D *_texture;
     Vec2 _step;
     Grabber *_grabber;
     bool _isTextureFlipped;

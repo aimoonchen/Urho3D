@@ -28,8 +28,8 @@ THE SOFTWARE.
 
 #include "ui/UIWidget.h"
 #include "ui/GUIExport.h"
-// #include "renderer/CCCustomCommand.h"
-// #include "renderer/CCGroupCommand.h"
+#include "renderer/CCCustomCommand.h"
+#include "renderer/CCGroupCommand.h"
 
 /**
  * @addtogroup ui
@@ -637,12 +637,12 @@ protected:
     //clipping
     StencilStateManager *_stencilStateManager;
 
-//     GroupCommand _groupCommand;
-//     CustomCommand _beforeVisitCmdStencil;
-//     CustomCommand _afterDrawStencilCmd;
-//     CustomCommand _afterVisitCmdStencil;
-//     CustomCommand _beforeVisitCmdScissor;
-//     CustomCommand _afterVisitCmdScissor;
+    GroupCommand _groupCommand;
+    CustomCommand _beforeVisitCmdStencil;
+    CustomCommand _afterDrawStencilCmd;
+    CustomCommand _afterVisitCmdStencil;
+    CustomCommand _beforeVisitCmdScissor;
+    CustomCommand _afterVisitCmdScissor;
     
     bool _doLayoutDirty;
     bool _isInterceptTouch;

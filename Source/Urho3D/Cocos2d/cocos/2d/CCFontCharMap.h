@@ -61,7 +61,7 @@ protected:
     virtual ~FontCharMap();
     
 private:
-	Urho3D::Texture2D* _texture;
+    Urho3D::Texture2D* _texture;
     int _mapStartChar;
     int _itemWidth;
     int _itemHeight;

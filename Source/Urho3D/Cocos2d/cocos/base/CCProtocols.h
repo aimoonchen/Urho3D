@@ -32,13 +32,14 @@ THE SOFTWARE.
 #include <string>
 
 #include "base/ccTypes.h"
-//#include "renderer/CCTexture2D.h"
+
 namespace Urho3D
 {
-	class Texture2D;
+    class Texture2D;
 }
+
 NS_CC_BEGIN
-//class Texture2D;
+
 /**
  * RGBA protocol that affects Node's color and opacity
  */

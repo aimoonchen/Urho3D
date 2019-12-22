@@ -35,9 +35,9 @@ THE SOFTWARE.
 #include "base/CCEventDispatcher.h"
 #include "base/base64.h"
 #include "base/ccUTF8.h"
-// #include "renderer/CCCustomCommand.h"
-// #include "renderer/CCRenderer.h"
-// #include "renderer/CCTextureCache.h"
+#include "renderer/CCCustomCommand.h"
+#include "renderer/CCRenderer.h"
+//#include "renderer/CCTextureCache.h"
 
 #include "platform/CCImage.h"
 #include "platform/CCFileUtils.h"
@@ -64,8 +64,8 @@ namespace utils
 */
 void onCaptureScreen(const std::function<void(bool, const std::string&)>& afterCaptured, const std::string& filename)
 {
-    static bool startedCapture = false;
-
+//     static bool startedCapture = false;
+// 
 //     if (startedCapture)
 //     {
 //         CCLOG("Screen capture is already working");
@@ -162,7 +162,7 @@ void onCaptureScreen(const std::function<void(bool, const std::string&)>& afterC
  * Capture screen interface
  */
 static EventListenerCustom* s_captureScreenListener;
-//static CustomCommand s_captureScreenCommand;
+static CustomCommand s_captureScreenCommand;
 void captureScreen(const std::function<void(bool, const std::string&)>& afterCaptured, const std::string& filename)
 {
     if (s_captureScreenListener)
@@ -170,21 +170,21 @@ void captureScreen(const std::function<void(bool, const std::string&)>& afterCap
         CCLOG("Warning: CaptureScreen has been called already, don't call more than once in one frame.");
         return;
     }
-//     s_captureScreenCommand.init(std::numeric_limits<float>::max());
-//     s_captureScreenCommand.func = std::bind(onCaptureScreen, afterCaptured, filename);
-//     s_captureScreenListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(Director::EVENT_AFTER_DRAW, [](EventCustom* /*event*/) {
-//         auto director = Director::getInstance();
-//         director->getEventDispatcher()->removeEventListener((EventListener*)(s_captureScreenListener));
-//         s_captureScreenListener = nullptr;
-//         director->getRenderer()->addCommand(&s_captureScreenCommand);
-//         director->getRenderer()->render();
-//     });
+    s_captureScreenCommand.init(std::numeric_limits<float>::max());
+    s_captureScreenCommand.func = std::bind(onCaptureScreen, afterCaptured, filename);
+    s_captureScreenListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(Director::EVENT_AFTER_DRAW, [](EventCustom* /*event*/) {
+        auto director = Director::getInstance();
+        director->getEventDispatcher()->removeEventListener((EventListener*)(s_captureScreenListener));
+        s_captureScreenListener = nullptr;
+        director->getRenderer()->addCommand(&s_captureScreenCommand);
+        director->getRenderer()->render();
+    });
 }
 
 Image* captureNode(Node* startNode, float scale)
 { // The best snapshot API, support Scene and any Node
-    auto& size = startNode->getContentSize();
-
+//     auto& size = startNode->getContentSize();
+// 
 //     Director::getInstance()->setNextDeltaTimeZero(true);
 // 
 //     RenderTexture* finalRtx = nullptr;
@@ -222,7 +222,7 @@ Image* captureNode(Node* startNode, float scale)
 //     Director::getInstance()->getRenderer()->render();
 // 
 //     return finalRtx->newImage();
-	return {};
+    return nullptr;
 }
 
 std::vector<Node*> findChildren(const Node &node, const std::string &name)
@@ -319,7 +319,7 @@ Rect getCascadeBoundingBox(Node *node)
 
 Sprite* createSpriteFromBase64Cached(const char* base64String, const char* key)
 {
-//     Texture2D* texture = Director::getInstance()->getTextureCache()->getTextureForKey(key);
+//     Urho3D::Texture2D* texture = Director::getInstance()->getTextureCache()->getTextureForKey(key);
 // 
 //     if (texture == nullptr)
 //     {
@@ -336,14 +336,14 @@ Sprite* createSpriteFromBase64Cached(const char* base64String, const char* key)
 //             return nullptr;
 //         }
 // 
-//         texture = Director::getInstance()->getTextureCache()->addImage(image, key);
+//         texture = GetUrho3DTexture(image, key);
 //         image->release();
 //     }
 // 
 //     Sprite* sprite = Sprite::createWithTexture(texture);
 //     
 //     return sprite;
-	return {};
+    return nullptr;
 }
 
 Sprite* createSpriteFromBase64(const char* base64String)
@@ -361,7 +361,7 @@ Sprite* createSpriteFromBase64(const char* base64String)
 //         return nullptr;
 //     }
 // 
-//     Texture2D *texture = new (std::nothrow) Texture2D();
+//     Urho3D::Texture2D *texture = new (std::nothrow) Urho3D::Texture2D();
 //     texture->initWithImage(image);
 //     texture->setAliasTexParameters();
 //     image->release();
@@ -370,7 +370,7 @@ Sprite* createSpriteFromBase64(const char* base64String)
 //     texture->release();
 // 
 //     return sprite;
-	return {};
+    return {};
 }
 
 Node* findChild(Node* levelRoot, const std::string& name)

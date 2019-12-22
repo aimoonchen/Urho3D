@@ -29,8 +29,8 @@ THE SOFTWARE.
 #include "2d/CCAutoPolygon.h"
 #include "poly2tri/poly2tri.h"
 #include "base/CCDirector.h"
-// #include "renderer/CCTextureCache.h"
-// #include "clipper/clipper.hpp"
+//#include "renderer/CCTextureCache.h"
+#include "clipper/clipper.hpp"
 #include <algorithm>
 #include <math.h>
 
@@ -190,12 +190,12 @@ AutoPolygon::AutoPolygon(const std::string &filename)
 ,_scaleFactor(0)
 {
     _filename = filename;
-//     _image = new (std::nothrow) Image();
-//     _image->initWithImageFile(filename);
-//     CCASSERT(_image->getRenderFormat()==Texture2D::PixelFormat::RGBA8888, "unsupported format, currently only supports rgba8888");
-//     _data = _image->getData();
-//     _width = _image->getWidth();
-//     _height = _image->getHeight();
+    _image = new (std::nothrow) Image();
+    _image->initWithImageFile(filename);
+    //CCASSERT(_image->getRenderFormat()==Texture2D::PixelFormat::RGBA8888, "unsupported format, currently only supports rgba8888");
+    _data = _image->getData();
+    _width = _image->getWidth();
+    _height = _image->getHeight();
     _scaleFactor = Director::getInstance()->getContentScaleFactor();
 }
 
@@ -519,60 +519,59 @@ std::vector<Vec2> AutoPolygon::reduce(const std::vector<Vec2>& points, const Rec
 
 std::vector<Vec2> AutoPolygon::expand(const std::vector<Vec2>& points, const cocos2d::Rect &rect, float epsilon)
 {
-//     auto size = points.size();
-//     // if there are less than 3 points, then we have nothing
-//     if(size<3)
-//     {
-//         log("AUTOPOLYGON: cannot expand points for %s with less than 3 points, e: %f", _filename.c_str(), epsilon);
-//         return std::vector<Vec2>();
-//     }
-//     ClipperLib::Path subj;
-//     ClipperLib::PolyTree solution;
-//     ClipperLib::PolyTree out;
-//     for(const auto& pt : points)
-//     {
-//         subj << ClipperLib::IntPoint(pt.x* PRECISION, pt.y * PRECISION);
-//     }
-//     ClipperLib::ClipperOffset co;
-//     co.AddPath(subj, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
-//     co.Execute(solution, epsilon * PRECISION);
-//     
-//     ClipperLib::PolyNode* p = solution.GetFirst();
-//     if(!p)
-//     {
-//         log("AUTOPOLYGON: Clipper failed to expand the points");
-//         return points;
-//     }
-//     while(p->IsHole()){
-//         p = p->GetNext();
-//     }
-// 
-//     //turn the result into simply polygon (AKA, fix overlap)
-//     
-//     //clamp into the specified rect
-//     ClipperLib::Clipper cl;
-//     cl.StrictlySimple(true);
-//     cl.AddPath(p->Contour, ClipperLib::ptSubject, true);
-//     //create the clipping rect
-//     ClipperLib::Path clamp;
-//     clamp.push_back(ClipperLib::IntPoint(0, 0));
-//     clamp.push_back(ClipperLib::IntPoint(rect.size.width/_scaleFactor * PRECISION, 0));
-//     clamp.push_back(ClipperLib::IntPoint(rect.size.width/_scaleFactor * PRECISION, rect.size.height/_scaleFactor * PRECISION));
-//     clamp.push_back(ClipperLib::IntPoint(0, rect.size.height/_scaleFactor * PRECISION));
-//     cl.AddPath(clamp, ClipperLib::ptClip, true);
-//     cl.Execute(ClipperLib::ctIntersection, out);
-//     
-//     std::vector<Vec2> outPoints;
-//     ClipperLib::PolyNode* p2 = out.GetFirst();
-//     while(p2->IsHole()){
-//         p2 = p2->GetNext();
-//     }
-//     for(const auto& pt : p2->Contour)
-//     {
-//         outPoints.push_back(Vec2(pt.X/PRECISION, pt.Y/PRECISION));
-//     }
-//     return outPoints;
-	return {};
+    auto size = points.size();
+    // if there are less than 3 points, then we have nothing
+    if(size<3)
+    {
+        log("AUTOPOLYGON: cannot expand points for %s with less than 3 points, e: %f", _filename.c_str(), epsilon);
+        return std::vector<Vec2>();
+    }
+    ClipperLib::Path subj;
+    ClipperLib::PolyTree solution;
+    ClipperLib::PolyTree out;
+    for(const auto& pt : points)
+    {
+        subj << ClipperLib::IntPoint(pt.x* PRECISION, pt.y * PRECISION);
+    }
+    ClipperLib::ClipperOffset co;
+    co.AddPath(subj, ClipperLib::jtMiter, ClipperLib::etClosedPolygon);
+    co.Execute(solution, epsilon * PRECISION);
+    
+    ClipperLib::PolyNode* p = solution.GetFirst();
+    if(!p)
+    {
+        log("AUTOPOLYGON: Clipper failed to expand the points");
+        return points;
+    }
+    while(p->IsHole()){
+        p = p->GetNext();
+    }
+
+    //turn the result into simply polygon (AKA, fix overlap)
+    
+    //clamp into the specified rect
+    ClipperLib::Clipper cl;
+    cl.StrictlySimple(true);
+    cl.AddPath(p->Contour, ClipperLib::ptSubject, true);
+    //create the clipping rect
+    ClipperLib::Path clamp;
+    clamp.push_back(ClipperLib::IntPoint(0, 0));
+    clamp.push_back(ClipperLib::IntPoint(rect.size.width/_scaleFactor * PRECISION, 0));
+    clamp.push_back(ClipperLib::IntPoint(rect.size.width/_scaleFactor * PRECISION, rect.size.height/_scaleFactor * PRECISION));
+    clamp.push_back(ClipperLib::IntPoint(0, rect.size.height/_scaleFactor * PRECISION));
+    cl.AddPath(clamp, ClipperLib::ptClip, true);
+    cl.Execute(ClipperLib::ctIntersection, out);
+    
+    std::vector<Vec2> outPoints;
+    ClipperLib::PolyNode* p2 = out.GetFirst();
+    while(p2->IsHole()){
+        p2 = p2->GetNext();
+    }
+    for(const auto& pt : p2->Contour)
+    {
+        outPoints.push_back(Vec2(pt.X/PRECISION, pt.Y/PRECISION));
+    }
+    return outPoints;
 }
 
 TrianglesCommand::Triangles AutoPolygon::triangulate(const std::vector<Vec2>& points)
@@ -580,7 +579,7 @@ TrianglesCommand::Triangles AutoPolygon::triangulate(const std::vector<Vec2>& po
     // if there are less than 3 points, then we can't triangulate
     if(points.size()<3)
     {
-        //log("AUTOPOLYGON: cannot triangulate %s with less than 3 points", _filename.c_str());
+        log("AUTOPOLYGON: cannot triangulate %s with less than 3 points", _filename.c_str());
         return TrianglesCommand::Triangles();
     }
     std::vector<p2t::Point*> p2points;

@@ -37,8 +37,8 @@
 //#include "base/CCScriptSupport.h"
 #include "math/CCAffineTransform.h"
 #include "math/CCMath.h"
-// #include "2d/CCComponentContainer.h"
-// #include "2d/CCComponent.h"
+//#include "2d/CCComponentContainer.h"
+//#include "2d/CCComponent.h"
 
 #if CC_USE_PHYSICS
 #include "physics/CCPhysicsBody.h"

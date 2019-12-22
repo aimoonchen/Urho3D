@@ -26,7 +26,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 
-//#include "renderer/CCTextureCache.h"
+////#include "renderer/CCTextureCache.h"
 #include "2d/CCSpriteFrame.h"
 #include "base/CCDirector.h"
 #include "platform/CCFileUtils.h"
@@ -226,7 +226,6 @@ Urho3D::Texture2D* SpriteFrame::getTexture()
     }
 
     if( !_textureFilename.empty()) {
-        //return Director::getInstance()->getTextureCache()->addImage(_textureFilename);
         return GetUrho3DTexture(_textureFilename);
     }
     // no texture or texture filename

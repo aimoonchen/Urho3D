@@ -26,13 +26,14 @@ THE SOFTWARE.
  ****************************************************************************/
 
 #include "base/CCController.h"
-#include <map>
+
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_LINUX || CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 #include <functional>
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "base/CCScheduler.h"
 #include "base/CCEventController.h"
+#include <map>
 //#include "glfw3.h"
 
 NS_CC_BEGIN
@@ -4811,28 +4812,28 @@ class CC_DLL ControllerImpl
 
 		static void onButtonEvent(int deviceId, int keyCode, bool isPressed, float value, bool isAnalog)
 		{
-			auto iter = findController(deviceId);
-			if (iter == Controller::s_allController.end())
-			{
-				CCLOG("ControllerImpl::onButtonEvent: new controller detected. Registering...");
-				//onConnected(glfwGetJoystickName(deviceId), deviceId);
-				iter = findController(deviceId);
-			}
-
-			(*iter)->onButtonEvent(keyCode, isPressed, value, isAnalog);
+// 			auto iter = findController(deviceId);
+// 			if (iter == Controller::s_allController.end())
+// 			{
+// 				CCLOG("ControllerImpl::onButtonEvent: new controller detected. Registering...");
+// 				onConnected(glfwGetJoystickName(deviceId), deviceId);
+// 				iter = findController(deviceId);
+// 			}
+// 
+// 			(*iter)->onButtonEvent(keyCode, isPressed, value, isAnalog);
 		}
 
 		static void onAxisEvent(int deviceId, int axisCode, float value, bool isAnalog)
 		{
-			auto iter = findController(deviceId);
-			if (iter == Controller::s_allController.end())
-			{
-				CCLOG("ControllerImpl::onAxisEvent: new controller detected. Registering...");
-				//onConnected(glfwGetJoystickName(deviceId), deviceId);
-				iter = findController(deviceId);
-			}
-
-			(*iter)->onAxisEvent(axisCode, value, isAnalog);
+// 			auto iter = findController(deviceId);
+// 			if (iter == Controller::s_allController.end())
+// 			{
+// 				CCLOG("ControllerImpl::onAxisEvent: new controller detected. Registering...");
+// 				onConnected(glfwGetJoystickName(deviceId), deviceId);
+// 				iter = findController(deviceId);
+// 			}
+// 
+// 			(*iter)->onAxisEvent(axisCode, value, isAnalog);
 		}
 
 		static void handleConnectionsAndDisconnections(int deviceId, int event)
@@ -4920,10 +4921,10 @@ void Controller::startDiscoveryController()
 // 			ControllerImpl::onConnected(name, deviceId);
 // 		}
 // 	}
-
-	// GFLW sends events when a joystick is connected and disconnected only.
-	// These events need to be filtered:
-	//glfwSetJoystickCallback(ControllerImpl::handleConnectionsAndDisconnections);
+// 
+// 	// GFLW sends events when a joystick is connected and disconnected only.
+// 	// These events need to be filtered:
+// 	glfwSetJoystickCallback(ControllerImpl::handleConnectionsAndDisconnections);
 
 	// Poll the joystick axis and buttons
 	Director::getInstance()->getScheduler()->scheduleUpdate(ControllerImpl::getInstance(), 0, false);

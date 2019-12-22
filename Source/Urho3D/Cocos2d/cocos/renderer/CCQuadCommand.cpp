@@ -26,14 +26,14 @@
 
 #include "renderer/CCQuadCommand.h"
 
-// #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCGLProgram.h"
-// #include "renderer/CCMaterial.h"
-// #include "renderer/CCTechnique.h"
+//#include "renderer/ccGLStateCache.h"
+//#include "renderer/CCGLProgram.h"
+//#include "renderer/CCMaterial.h"
+//#include "renderer/CCTechnique.h"
 #include "renderer/CCRenderer.h"
 //#include "renderer/CCPass.h"
-#include "renderer/CCTexture2D.h"
-#include "Graphics/Texture2D.h"
+#include "../Graphics/Texture2D.h"
+
 NS_CC_BEGIN
 
 int QuadCommand::__indexCapacity = -1;
@@ -56,8 +56,8 @@ QuadCommand::~QuadCommand()
 void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* glProgramState, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
                        const Mat4& mv, uint32_t flags)
 {
-//     CCASSERT(glProgramState, "Invalid GLProgramState");
-//     CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
+    CCASSERT(glProgramState, "Invalid GLProgramState");
+    CCASSERT(glProgramState->getVertexAttribsFlags() == 0, "No custom attributes are supported in QuadCommand");
 
     if (quadCount * 6 > _indexSize)
         reIndex((int)quadCount*6);
@@ -112,8 +112,8 @@ void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* shad
 void QuadCommand::init(float globalOrder, Urho3D::Texture2D* texture, GLProgramState* glProgramState, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
     const Mat4& mv, uint32_t flags)
 {
-    init(globalOrder, texture->GetGPUObjectName(), glProgramState, blendType, quads, quadCount, mv, flags);
-    //_alphaTextureID = texture->getAlphaTextureName();
+    init(globalOrder, texture->getName(), glProgramState, blendType, quads, quadCount, mv, flags);
+    _alphaTextureID = texture->getAlphaTextureName();
 }
 
 NS_CC_END

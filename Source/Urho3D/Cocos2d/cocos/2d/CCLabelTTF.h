@@ -31,9 +31,7 @@ THE SOFTWARE.
 /// @cond DO_NOT_SHOW
 
 #include "2d/CCNode.h"
-namespace Urho3D {
-	class Context;
-}
+
 NS_CC_BEGIN
 
 #if defined(__GNUC__) && ((__GNUC__ >= 4) || ((__GNUC__ == 3) && (__GNUC_MINOR__ >= 1)))

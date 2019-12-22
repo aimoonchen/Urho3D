@@ -34,19 +34,16 @@ THE SOFTWARE.
 #include "2d/CCAnimationCache.h"
 #include "2d/CCSpriteFrame.h"
 #include "2d/CCSpriteFrameCache.h"
-// #include "renderer/CCTextureCache.h"
-#include "Graphics/Texture2D.h"
+//#include "renderer/CCTextureCache.h"
+
 #include "renderer/CCRenderer.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
-#include "2d/CCCamera.h"
-
+//#include "2d/CCCamera.h"
 #include "Urho3DContext.h"
-#include "Core/Context.h"
 #include "renderer/Texture2DUtils.h"
-#include "Graphics/Graphics.h"
-#include "Graphics/Texture2D.h"
-
+#include "../Graphics/Graphics.h"
+#include "../Graphics/Texture2D.h"
 NS_CC_BEGIN
 
 // MARK: create, init, dealloc
@@ -160,7 +157,7 @@ bool Sprite::initWithTexture(Urho3D::Texture2D *texture)
 
     Rect rect = Rect::ZERO;
     if (texture) {
-		rect.size = Vec2{ static_cast<float>(texture->GetWidth()), static_cast<float>(texture->GetHeight()) };
+        rect.size = Size(texture->GetWidth(), texture->GetHeight());
     }
 
     return initWithTexture(texture, rect, false);
@@ -182,12 +179,11 @@ bool Sprite::initWithFile(const std::string& filename)
     _fileName = filename;
     _fileType = 0;
 
-//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
-    auto texture = GetUrho3DTexture(filename);
+    Urho3D::Texture2D *texture = GetUrho3DTexture(filename);
     if (texture)
     {
         Rect rect = Rect::ZERO;
-        rect.size = Size{ (float)texture->GetWidth(), (float)texture->GetHeight() };// texture->getContentSize();
+        rect.size = Size(texture->GetWidth(), texture->GetHeight());
         return initWithTexture(texture, rect);
     }
 
@@ -208,8 +204,7 @@ bool Sprite::initWithFile(const std::string &filename, const Rect& rect)
     _fileName = filename;
     _fileType = 0;
 
-//     Urho3D::Texture2D *texture = _director->getTextureCache()->addImage(filename);
-    auto texture = GetUrho3DTexture(filename);
+    Urho3D::Texture2D *texture = GetUrho3DTexture(filename);
     if (texture)
     {
         return initWithTexture(texture, rect);
@@ -253,7 +248,8 @@ bool Sprite::initWithSpriteFrame(SpriteFrame *spriteFrame)
 bool Sprite::initWithPolygon(const cocos2d::PolygonInfo &info)
 {
     bool ret = false;
-	auto texture = GetUrho3DTexture(info.getFilename().c_str());//_director->getTextureCache()->addImage(info.getFilename());
+
+    Urho3D::Texture2D *texture = GetUrho3DTexture(info.getFilename());
     if(texture && initWithTexture(texture))
     {
         _polyInfo = info;
@@ -369,13 +365,12 @@ static unsigned char cc_2x2_white_image[] = {
 // MARK: texture
 void Sprite::setTexture(const std::string &filename)
 {
-    //Urho3D::Texture2D *texture = Director::getInstance()->getTextureCache()->addImage(filename);
-    auto texture = GetUrho3DTexture(filename);
+    Urho3D::Texture2D *texture = GetUrho3DTexture(filename);
     setTexture(texture);
     _unflippedOffsetPositionFromCenter = Vec2::ZERO;
     Rect rect = Rect::ZERO;
     if (texture)
-        rect.size = Size{(float)texture->GetWidth(), (float)texture->GetHeight()};// texture->getContentSize();
+        rect.size = Size(texture->GetWidth(), texture->GetHeight());
     setTextureRect(rect);
 }
 
@@ -388,21 +383,21 @@ void Sprite::setTexture(Urho3D::Texture2D *texture)
     // If batchnode, then texture id should be the same
     CCASSERT(! _batchNode || (texture &&  texture->getName() == _batchNode->getTexture()->getName()), "CCSprite: Batched sprites should use the same texture as the batchnode");
     // accept texture==nil as argument
-    CCASSERT( !texture/* || dynamic_cast<Texture2D*>(texture)*/, "setTexture expects a Texture2D. Invalid argument");
+    CCASSERT( !texture || dynamic_cast<Urho3D::Texture2D*>(texture), "setTexture expects a Texture2D. Invalid argument");
 
     if (texture == nullptr)
     {
         // Gets the texture by key firstly.
 //         texture = _director->getTextureCache()->getTextureForKey(CC_2x2_WHITE_IMAGE_KEY);
-
-        // If texture wasn't in cache, create it from RAW data.
+// 
+//         // If texture wasn't in cache, create it from RAW data.
 //         if (texture == nullptr)
 //         {
 //             Image* image = new (std::nothrow) Image();
 //             bool CC_UNUSED isOK = image->initWithRawData(cc_2x2_white_image, sizeof(cc_2x2_white_image), 2, 2, 8);
 //             CCASSERT(isOK, "The 2x2 empty texture was created unsuccessfully.");
 // 
-//             texture = _director->getTextureCache()->addImage(image, CC_2x2_WHITE_IMAGE_KEY);
+//             texture = GetUrho3DTexture(image, CC_2x2_WHITE_IMAGE_KEY);
 //             CC_SAFE_RELEASE(image);
 //         }
         texture = new Urho3D::Texture2D(GetUrho3DContext());
@@ -786,16 +781,16 @@ void Sprite::setTextureCoords(const Rect& rectInPoints)
 
 void Sprite::setTextureCoords(const Rect& rectInPoints, V3F_C4B_T2F_Quad* outQuad)
 {
-//     Urho3D::Texture2D *tex = (_renderMode == RenderMode::QUAD_BATCHNODE) ? _textureAtlas->getTexture() : _texture;
-//     if (tex == nullptr)
-//     {
-//         return;
-//     }
+    Urho3D::Texture2D *tex = (_renderMode == RenderMode::QUAD_BATCHNODE) ? _textureAtlas->getTexture() : _texture;
+    if (tex == nullptr)
+    {
+        return;
+    }
 
     const auto rectInPixels = CC_RECT_POINTS_TO_PIXELS(rectInPoints);
 
-	const float atlasWidth = 0.0f;// = (float)tex->getPixelsWide();
-	const float atlasHeight = 0.0f;// = (float)tex->getPixelsHigh();
+    const float atlasWidth = (float)tex->GetWidth();
+    const float atlasHeight = (float)tex->GetHeight();
 
     float rw = rectInPixels.size.width;
     float rh = rectInPixels.size.height;
@@ -1038,10 +1033,10 @@ void Sprite::updateTransform(void)
         }
 
         // MARMALADE CHANGE: ADDED CHECK FOR nullptr, TO PERMIT SPRITES WITH NO BATCH NODE / TEXTURE ATLAS
-//         if (_textureAtlas)
-//         {
-//             _textureAtlas->updateQuad(&_quad, _atlasIndex);
-//         }
+        if (_textureAtlas)
+        {
+            _textureAtlas->updateQuad(&_quad, _atlasIndex);
+        }
 
         _recursiveDirty = false;
         setDirty(false);
@@ -1069,7 +1064,7 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 
 #if CC_USE_CULLING
     // Don't calculate the culling if the transform was not updated
-    auto visitingCamera = Camera::getVisitingCamera();
+    auto visitingCamera = nullptr;// Camera::getVisitingCamera();
     auto defaultCamera = Camera::getDefaultCamera();
     if (visitingCamera == nullptr) {
         _insideBounds = true;
@@ -1537,16 +1532,16 @@ void Sprite::updateColor(void)
     // renders using batch node
     if (_renderMode == RenderMode::QUAD_BATCHNODE)
     {
-//         if (_atlasIndex != INDEX_NOT_INITIALIZED)
-//         {
-//             _textureAtlas->updateQuad(&_quad, _atlasIndex);
-//         }
-//         else
-//         {
-//             // no need to set it recursively
-//             // update dirty_, don't update recursiveDirty_
-//             setDirty(true);
-//         }
+        if (_atlasIndex != INDEX_NOT_INITIALIZED)
+        {
+            _textureAtlas->updateQuad(&_quad, _atlasIndex);
+        }
+        else
+        {
+            // no need to set it recursively
+            // update dirty_, don't update recursiveDirty_
+            setDirty(true);
+        }
     }
 
     // self render
@@ -1597,7 +1592,7 @@ void Sprite::setSpriteFrame(SpriteFrame *spriteFrame)
     }
     _unflippedOffsetPositionFromCenter = spriteFrame->getOffset();
 
-	Urho3D::Texture2D *texture = spriteFrame->getTexture();
+    Urho3D::Texture2D *texture = spriteFrame->getTexture();
     // update texture before updating texture rect
     if (texture != _texture)
     {
@@ -1649,10 +1644,9 @@ bool Sprite::isFrameDisplayed(SpriteFrame *frame) const
 {
     Rect r = frame->getRect();
 
-//     return (r.equals(_rect) &&
-//             frame->getTexture()->getName() == _texture->getName() &&
-//             frame->getOffset().equals(_unflippedOffsetPositionFromCenter));
-	return false;
+    return (r.equals(_rect) &&
+            frame->getTexture()->GetGPUObjectName() == _texture->GetGPUObjectName() &&
+            frame->getOffset().equals(_unflippedOffsetPositionFromCenter));
 }
 
 SpriteFrame* Sprite::getSpriteFrame() const
@@ -1711,25 +1705,25 @@ void Sprite::updateBlendFunc(void)
     CCASSERT(_renderMode != RenderMode::QUAD_BATCHNODE, "CCSprite: updateBlendFunc doesn't work when the sprite is rendered using a SpriteBatchNode");
 
     // it is possible to have an untextured sprite
-//     if (! _texture || ! _texture->hasPremultipliedAlpha())
-//     {
-//         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
-//         setOpacityModifyRGB(false);
-//     }
-//     else
-//     {
-//         _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
-//         setOpacityModifyRGB(true);
-//     }
+    if (! _texture /*|| ! _texture->hasPremultipliedAlpha()*/)
+    {
+        _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
+        setOpacityModifyRGB(false);
+    }
+    else
+    {
+        _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
+        setOpacityModifyRGB(true);
+    }
 }
 
 std::string Sprite::getDescription() const
 {
     int texture_id = -1;
-//     if (_renderMode == RenderMode::QUAD_BATCHNODE)
-//         texture_id = _batchNode->getTextureAtlas()->getTexture()->getName();
-//     else
-//         texture_id = _texture->getName();
+    if (_renderMode == RenderMode::QUAD_BATCHNODE)
+        texture_id = _batchNode->getTextureAtlas()->getTexture()->GetGPUObjectName();
+    else
+        texture_id = _texture->GetGPUObjectName();
     return StringUtils::format("<Sprite | Tag = %d, TextureID = %d>", _tag, texture_id );
 }
 
