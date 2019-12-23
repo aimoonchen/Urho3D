@@ -34,7 +34,9 @@
 #include "base/CCEventDispatcher.h"
 #include "2d/CCActionCatmullRom.h"
 #include "platform/CCGL.h"
-
+#ifndef M_PI
+#define M_PI      3.14159265358
+#endif
 NS_CC_BEGIN
 
 // Vec2 == CGPoint in 32-bits, but not in 64-bits (OS X)

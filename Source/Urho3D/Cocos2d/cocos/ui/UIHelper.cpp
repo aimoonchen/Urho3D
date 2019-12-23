@@ -25,7 +25,7 @@ THE SOFTWARE.
 
 #include "ui/UIHelper.h"
 #include "ui/UIWidget.h"
-#include "ui/UILayoutComponent.h"
+//#include "ui/UILayoutComponent.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
 
@@ -145,16 +145,16 @@ void Helper::doLayout(cocos2d::Node *rootNode)
         return;
     }
 
-    for(auto& node : rootNode->getChildren())
-    {
-        auto com = node->getComponent(__LAYOUT_COMPONENT_NAME);
-        Node *parent = node->getParent();
-        if (nullptr != com && nullptr != parent) {
-            LayoutComponent* layoutComponent = (LayoutComponent*)com;
-
-            layoutComponent->refreshLayout();
-        }
-    }
+//     for(auto& node : rootNode->getChildren())
+//     {
+//         auto com = node->getComponent(__LAYOUT_COMPONENT_NAME);
+//         Node *parent = node->getParent();
+//         if (nullptr != com && nullptr != parent) {
+//             LayoutComponent* layoutComponent = (LayoutComponent*)com;
+// 
+//             layoutComponent->refreshLayout();
+//         }
+//     }
 }
     
 Rect Helper::restrictCapInsetRect(const cocos2d::Rect &capInsets, const Size& textureSize )
@@ -179,22 +179,23 @@ Rect Helper::restrictCapInsetRect(const cocos2d::Rect &capInsets, const Size& te
 
 Rect Helper::convertBoundingBoxToScreen(Node* node)
 {
-    auto director = Director::getInstance();
-    auto glView = director->getOpenGLView();
-    auto frameSize = glView->getFrameSize();
-
-    auto winSize = director->getWinSize();
-    auto leftBottom = node->convertToWorldSpace(Point::ZERO);
-
-    auto contentSize = node->getContentSize();
-    auto rightTop = node->convertToWorldSpace(Point(contentSize.width, contentSize.height));
-
-    auto uiLeft = frameSize.width / 2 + (leftBottom.x - winSize.width / 2 ) * glView->getScaleX();
-    auto uiTop = frameSize.height /2 - (rightTop.y - winSize.height / 2) * glView->getScaleY();
-    auto uiWidth = (rightTop.x - leftBottom.x) * glView->getScaleX();
-    auto uiHeight = (rightTop.y - leftBottom.y) * glView->getScaleY();
-    
-    return Rect(uiLeft, uiTop, uiWidth, uiHeight);
+//     auto director = Director::getInstance();
+//     auto glView = director->getOpenGLView();
+//     auto frameSize = glView->getFrameSize();
+// 
+//     auto winSize = director->getWinSize();
+//     auto leftBottom = node->convertToWorldSpace(Point::ZERO);
+// 
+//     auto contentSize = node->getContentSize();
+//     auto rightTop = node->convertToWorldSpace(Point(contentSize.width, contentSize.height));
+// 
+//     auto uiLeft = frameSize.width / 2 + (leftBottom.x - winSize.width / 2 ) * glView->getScaleX();
+//     auto uiTop = frameSize.height /2 - (rightTop.y - winSize.height / 2) * glView->getScaleY();
+//     auto uiWidth = (rightTop.x - leftBottom.x) * glView->getScaleX();
+//     auto uiHeight = (rightTop.y - leftBottom.y) * glView->getScaleY();
+//     
+//     return Rect(uiLeft, uiTop, uiWidth, uiHeight);
+    return {};
 }
 }
 

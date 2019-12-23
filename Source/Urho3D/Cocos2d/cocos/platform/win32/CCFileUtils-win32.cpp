@@ -113,7 +113,7 @@ bool FileUtilsWin32::init()
 
 bool FileUtilsWin32::isDirectoryExistInternal(const std::string& dirPath) const
 {
-    unsigned long fAttrib = GetFileAttributes(StringUtf8ToWideChar(dirPath).c_str());
+    unsigned long fAttrib = GetFileAttributesW(StringUtf8ToWideChar(dirPath).c_str());
     if (fAttrib != INVALID_FILE_ATTRIBUTES &&
         (fAttrib & FILE_ATTRIBUTE_DIRECTORY))
     {
@@ -130,7 +130,7 @@ std::string FileUtilsWin32::getSuitableFOpen(const std::string& filenameUtf8) co
 long FileUtilsWin32::getFileSize(const std::string &filepath)
 {
     WIN32_FILE_ATTRIBUTE_DATA fad;
-    if (!GetFileAttributesEx(StringUtf8ToWideChar(filepath).c_str(), GetFileExInfoStandard, &fad))
+    if (!GetFileAttributesExW(StringUtf8ToWideChar(filepath).c_str(), GetFileExInfoStandard, &fad))
     {
         return 0; // error condition, could call GetLastError to find out more
     }
@@ -180,7 +180,7 @@ FileUtils::Status FileUtilsWin32::getContents(const std::string& filename, Resiz
     // read the file from hardware
     std::string fullPath = FileUtils::getInstance()->fullPathForFilename(filename);
 
-    HANDLE fileHandle = ::CreateFile(StringUtf8ToWideChar(fullPath).c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, nullptr);
+    HANDLE fileHandle = ::CreateFileW(StringUtf8ToWideChar(fullPath).c_str(), GENERIC_READ, FILE_SHARE_READ | FILE_SHARE_WRITE, NULL, OPEN_EXISTING, NULL, nullptr);
     if (fileHandle == INVALID_HANDLE_VALUE)
         return FileUtils::Status::OpenFailed;
 
@@ -230,48 +230,48 @@ std::string FileUtilsWin32::getFullPathForFilenameWithinDirectory(const std::str
 
 void FileUtilsWin32::listFilesRecursively(const std::string& dirPath, std::vector<std::string> *files) const
 {
-    std::string fullpath = fullPathForFilename(dirPath);
-    if (isDirectoryExist(fullpath))
-    {
-        tinydir_dir dir;
-        std::wstring fullpathstr = StringUtf8ToWideChar(fullpath);
-
-        if (tinydir_open(&dir, &fullpathstr[0]) != -1)
-        {
-            while (dir.has_next)
-            {
-                tinydir_file file;
-                if (tinydir_readfile(&dir, &file) == -1)
-                {
-                    // Error getting file
-                    break;
-                }
-                std::string fileName = StringWideCharToUtf8(file.name);
-
-                if (fileName != "." && fileName != "..")
-                {
-                    std::string filepath = StringWideCharToUtf8(file.path);
-                    if (file.is_dir)
-                    {
-                        filepath.append("/");
-                        files->push_back(filepath);
-                        listFilesRecursively(filepath, files);
-                    }
-                    else
-                    {
-                        files->push_back(filepath);
-                    }
-                }
-
-                if (tinydir_next(&dir) == -1)
-                {
-                    // Error getting next file
-                    break;
-                }
-            }
-        }
-        tinydir_close(&dir);
-    }
+//     std::string fullpath = fullPathForFilename(dirPath);
+//     if (isDirectoryExist(fullpath))
+//     {
+//         tinydir_dir dir;
+//         std::wstring fullpathstr = StringUtf8ToWideChar(fullpath);
+// 
+//         if (tinydir_open(&dir, &fullpathstr[0]) != -1)
+//         {
+//             while (dir.has_next)
+//             {
+//                 tinydir_file file;
+//                 if (tinydir_readfile(&dir, &file) == -1)
+//                 {
+//                     // Error getting file
+//                     break;
+//                 }
+//                 std::string fileName = StringWideCharToUtf8(file.name);
+// 
+//                 if (fileName != "." && fileName != "..")
+//                 {
+//                     std::string filepath = StringWideCharToUtf8(file.path);
+//                     if (file.is_dir)
+//                     {
+//                         filepath.append("/");
+//                         files->push_back(filepath);
+//                         listFilesRecursively(filepath, files);
+//                     }
+//                     else
+//                     {
+//                         files->push_back(filepath);
+//                     }
+//                 }
+// 
+//                 if (tinydir_next(&dir) == -1)
+//                 {
+//                     // Error getting next file
+//                     break;
+//                 }
+//             }
+//         }
+//         tinydir_close(&dir);
+//     }
 }
 
 long FileUtilsWin32::getFileSize(const std::string &filepath) const
@@ -288,38 +288,38 @@ std::vector<std::string> FileUtilsWin32::listFiles(const std::string& dirPath) c
 {
     std::string fullpath = fullPathForDirectory(dirPath);
     std::vector<std::string> files;
-    if (isDirectoryExist(fullpath))
-    {
-        tinydir_dir dir;
-        std::wstring fullpathstr = StringUtf8ToWideChar(fullpath);
-
-        if (tinydir_open(&dir, &fullpathstr[0]) != -1)
-        {
-            while (dir.has_next)
-            {
-                tinydir_file file;
-                if (tinydir_readfile(&dir, &file) == -1)
-                {
-                    // Error getting file
-                    break;
-                }
-
-                std::string filepath = StringWideCharToUtf8(file.path);
-                if (file.is_dir)
-                {
-                    filepath.append("/");
-                }
-                files.push_back(filepath);
-
-                if (tinydir_next(&dir) == -1)
-                {
-                    // Error getting next file
-                    break;
-                }
-            }
-        }
-        tinydir_close(&dir);
-    }
+//     if (isDirectoryExist(fullpath))
+//     {
+//         tinydir_dir dir;
+//         std::wstring fullpathstr = StringUtf8ToWideChar(fullpath);
+// 
+//         if (tinydir_open(&dir, &fullpathstr[0]) != -1)
+//         {
+//             while (dir.has_next)
+//             {
+//                 tinydir_file file;
+//                 if (tinydir_readfile(&dir, &file) == -1)
+//                 {
+//                     // Error getting file
+//                     break;
+//                 }
+// 
+//                 std::string filepath = StringWideCharToUtf8(file.path);
+//                 if (file.is_dir)
+//                 {
+//                     filepath.append("/");
+//                 }
+//                 files.push_back(filepath);
+// 
+//                 if (tinydir_next(&dir) == -1)
+//                 {
+//                     // Error getting next file
+//                     break;
+//                 }
+//             }
+//         }
+//         tinydir_close(&dir);
+//     }
     return files;
 }
 
@@ -333,7 +333,7 @@ string FileUtilsWin32::getWritablePath() const
 
     // Get full path of executable, e.g. c:\Program Files (x86)\My Game Folder\MyGame.exe
     WCHAR full_path[CC_MAX_PATH + 1] = { 0 };
-    ::GetModuleFileName(nullptr, full_path, CC_MAX_PATH + 1);
+    ::GetModuleFileNameW(nullptr, full_path, CC_MAX_PATH + 1);
 
     // Debug app uses executable directory; Non-debug app uses local app data directory
 //#ifndef _DEBUG
@@ -345,7 +345,7 @@ string FileUtilsWin32::getWritablePath() const
         WCHAR app_data_path[CC_MAX_PATH + 1];
 
         // Get local app data directory, e.g. C:\Documents and Settings\username\Local Settings\Application Data
-        if (SUCCEEDED(SHGetFolderPath(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, app_data_path)))
+        if (SUCCEEDED(SHGetFolderPathW(nullptr, CSIDL_LOCAL_APPDATA, nullptr, SHGFP_TYPE_CURRENT, app_data_path)))
         {
             wstring ret(app_data_path);
 
@@ -358,7 +358,7 @@ string FileUtilsWin32::getWritablePath() const
             ret += L"\\";
 
             // Create directory
-            if (SUCCEEDED(SHCreateDirectoryEx(nullptr, ret.c_str(), nullptr)))
+            if (SUCCEEDED(SHCreateDirectoryExW(nullptr, ret.c_str(), nullptr)))
             {
                 retPath = ret;
             }
@@ -387,13 +387,13 @@ bool FileUtilsWin32::renameFile(const std::string &oldfullpath, const std::strin
 
     if (FileUtils::getInstance()->isFileExist(newfullpath))
     {
-        if (!DeleteFile(_wNew.c_str()))
+        if (!DeleteFileW(_wNew.c_str()))
         {
             CCLOGERROR("Fail to delete file %s !Error code is 0x%x", newfullpath.c_str(), GetLastError());
         }
     }
 
-    if (MoveFile(_wOld.c_str(), _wNew.c_str()))
+    if (MoveFileW(_wOld.c_str(), _wNew.c_str()))
     {
         return true;
     }
@@ -452,7 +452,7 @@ bool FileUtilsWin32::createDirectory(const std::string& dirPath) const
         }
     }
 
-    if ((GetFileAttributes(path.c_str())) == INVALID_FILE_ATTRIBUTES)
+    if ((GetFileAttributesW(path.c_str())) == INVALID_FILE_ATTRIBUTES)
     {
         subpath = L"";
         for (unsigned int i = 0, size = dirs.size(); i < size; ++i)
@@ -462,7 +462,7 @@ bool FileUtilsWin32::createDirectory(const std::string& dirPath) const
             std::string utf8Path = StringWideCharToUtf8(subpath);
             if (!isDirectoryExist(utf8Path))
             {
-                BOOL ret = CreateDirectory(subpath.c_str(), NULL);
+                BOOL ret = CreateDirectoryW(subpath.c_str(), NULL);
                 if (!ret && ERROR_ALREADY_EXISTS != GetLastError())
                 {
                     CCLOGERROR("Fail create directory %s !Error code is 0x%x", utf8Path.c_str(), GetLastError());
@@ -479,7 +479,7 @@ bool FileUtilsWin32::removeFile(const std::string &filepath) const
     std::regex pat("\\/");
     std::string win32path = std::regex_replace(filepath, pat, "\\");
 
-    if (DeleteFile(StringUtf8ToWideChar(win32path).c_str()))
+    if (DeleteFileW(StringUtf8ToWideChar(win32path).c_str()))
     {
         return true;
     }
@@ -500,37 +500,37 @@ bool FileUtilsWin32::removeDirectory(const std::string& dirPath) const
     std::wstring wpath = StringUtf8ToWideChar(dirPathCopy);
     std::wstring files = wpath + L"*.*";
     WIN32_FIND_DATA wfd;
-    HANDLE  search = FindFirstFileEx(files.c_str(), FindExInfoStandard, &wfd, FindExSearchNameMatch, NULL, 0);
+    HANDLE  search = FindFirstFileExW(files.c_str(), FindExInfoStandard, &wfd, FindExSearchNameMatch, NULL, 0);
     bool ret = true;
-    if (search != INVALID_HANDLE_VALUE)
-    {
-        BOOL find = true;
-        while (find)
-        {
-            // Need check string . and .. for delete folders and files begin name.
-            std::wstring fileName = wfd.cFileName;
-            if (fileName != L"." && fileName != L"..")
-            {
-                std::wstring temp = wpath + wfd.cFileName;
-                if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
-                {
-                    temp += '/';
-                    ret = ret && this->removeDirectory(StringWideCharToUtf8(temp));
-                }
-                else
-                {
-                    SetFileAttributes(temp.c_str(), FILE_ATTRIBUTE_NORMAL);
-                    ret = ret && DeleteFile(temp.c_str());
-                }
-            }
-            find = FindNextFile(search, &wfd);
-        }
-        FindClose(search);
-    }
-    if (ret && RemoveDirectory(wpath.c_str()))
-    {
-        return true;
-    }
+//     if (search != INVALID_HANDLE_VALUE)
+//     {
+//         BOOL find = true;
+//         while (find)
+//         {
+//             // Need check string . and .. for delete folders and files begin name.
+//             std::wstring fileName = wfd.cFileName;
+//             if (fileName != L"." && fileName != L"..")
+//             {
+//                 std::wstring temp = wpath + wfd.cFileName;
+//                 if (wfd.dwFileAttributes & FILE_ATTRIBUTE_DIRECTORY)
+//                 {
+//                     temp += '/';
+//                     ret = ret && this->removeDirectory(StringWideCharToUtf8(temp));
+//                 }
+//                 else
+//                 {
+//                     SetFileAttributesW(temp.c_str(), FILE_ATTRIBUTE_NORMAL);
+//                     ret = ret && DeleteFileW(temp.c_str());
+//                 }
+//             }
+//             find = FindNextFile(search, &wfd);
+//         }
+//         FindClose(search);
+//     }
+//     if (ret && RemoveDirectoryW(wpath.c_str()))
+//     {
+//         return true;
+//     }
     return false;
 }
 

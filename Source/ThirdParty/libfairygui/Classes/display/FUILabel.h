@@ -13,7 +13,7 @@ public:
     FUILabel();
     virtual ~FUILabel();
 
-	CREATE_FUNC(FUILabel);
+    CREATE_FUNC(FUILabel);
 
     const std::string& getText() const { return getString(); }
     void setText(const std::string& value);

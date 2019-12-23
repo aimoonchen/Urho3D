@@ -30,13 +30,13 @@
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
 //#include "renderer/CCGLProgram.h"
-#include "renderer/ccShaders.h"
+//#include "renderer/ccShaders.h"
 #include "platform/CCImage.h"
 #include "base/CCNinePatchImageParser.h"
 #include "2d/CCDrawNode.h"
 //#include "2d/CCCamera.h"
 #include "renderer/CCRenderer.h"
-
+#include "../Graphics/Texture2D.h"
 using namespace cocos2d;
 using namespace cocos2d::ui;
 
@@ -330,16 +330,16 @@ void Scale9Sprite::setState(Scale9Sprite::State state)
         _brightState = state;
 
         GLProgramState *glState = nullptr;
-        switch (state)
-        {
-            case State::NORMAL:
-                glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
-                break;
-            case State::GRAY:
-                glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
-            default:
-                break;
-        }
+//         switch (state)
+//         {
+//             case State::NORMAL:
+//                 glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
+//                 break;
+//             case State::GRAY:
+//                 glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
+//             default:
+//                 break;
+//         }
 
         setGLProgramState(glState);
         _brightState = state;
@@ -528,25 +528,25 @@ void Scale9Sprite::resetRender()
 
 void Scale9Sprite::setupSlice9(Urho3D::Texture2D* texture, const Rect& capInsets)
 {
-    if (texture && texture->isContain9PatchInfo()) {
-        auto& parsedCapInset = texture->getSpriteFrameCapInset(getSpriteFrame());
-
-        if(!parsedCapInset.equals(Rect::ZERO))
-        {
-            // adjust texture rect. 1.3f seems to be the magic number
-            // to avoid artifacts
-            auto rect = getTextureRect();
-            rect.origin.x += 1.3f;
-            rect.origin.y += 1.3f;
-            rect.size.width -= 2.0f;
-            rect.size.height -= 2.0f;
-            setTextureRect(rect);
-
-            // and after adjusting the texture, set the new cap insets
-            _isPatch9 = true;
-            setCapInsets(parsedCapInset);
-        }
-    }
+//     if (texture && texture->isContain9PatchInfo()) {
+//         auto& parsedCapInset = texture->getSpriteFrameCapInset(getSpriteFrame());
+// 
+//         if(!parsedCapInset.equals(Rect::ZERO))
+//         {
+//             // adjust texture rect. 1.3f seems to be the magic number
+//             // to avoid artifacts
+//             auto rect = getTextureRect();
+//             rect.origin.x += 1.3f;
+//             rect.origin.y += 1.3f;
+//             rect.size.width -= 2.0f;
+//             rect.size.height -= 2.0f;
+//             setTextureRect(rect);
+// 
+//             // and after adjusting the texture, set the new cap insets
+//             _isPatch9 = true;
+//             setCapInsets(parsedCapInset);
+//         }
+//     }
 
     if (!_isPatch9)
     {

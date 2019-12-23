@@ -77,8 +77,8 @@ void TrianglesCommand::init(float globalOrder, GLuint textureID, GLProgramState*
 
 void TrianglesCommand::init(float globalOrder, Urho3D::Texture2D* texture, GLProgramState* glProgramState, BlendFunc blendType, const Triangles& triangles, const Mat4& mv, uint32_t flags)
 {
-    init(globalOrder, texture->getName(), glProgramState, blendType, triangles, mv, flags);
-    _alphaTextureID = texture->getAlphaTextureName();
+    init(globalOrder, texture->GetGPUObjectName(), glProgramState, blendType, triangles, mv, flags);
+    //_alphaTextureID = texture->getAlphaTextureName();
     _texture = texture;
 }
 

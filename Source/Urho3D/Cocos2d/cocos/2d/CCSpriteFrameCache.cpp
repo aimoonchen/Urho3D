@@ -261,12 +261,12 @@ void SpriteFrameCache::addSpriteFramesWithDictionary(ValueMap& dictionary, Urho3
         bool flag = NinePatchImageParser::isNinePatchImage(spriteFrameName);
         if(flag)
         {
-            if (image == nullptr) {
-                image = new (std::nothrow) Image();
-                image->initWithImageFile(textureFileName);
-            }
-            parser.setSpriteFrameInfo(image, spriteFrame->getRectInPixels(), spriteFrame->isRotated());
-            //texture->addSpriteFrameCapInset(spriteFrame, parser.parseCapInset());
+//             if (image == nullptr) {
+//                 image = new (std::nothrow) Image();
+//                 image->initWithImageFile(textureFileName);
+//             }
+//             parser.setSpriteFrameInfo(image, spriteFrame->getRectInPixels(), spriteFrame->isRotated());
+//             texture->addSpriteFrameCapInset(spriteFrame, parser.parseCapInset());
         }
         // add sprite frame
         _spriteFramesCache.insertFrame(plist, spriteFrameName, spriteFrame);

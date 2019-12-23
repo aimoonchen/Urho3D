@@ -1,12 +1,14 @@
 #include "GRoot.h"
-//#include "AudioEngine.h"
+#include "AudioEngine.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
-#include "Urho3DContext.h"
-#include "Urho3D/Core/Context.h"
-#include "Urho3D/Graphics/Graphics.h"
+
 NS_FGUI_BEGIN
 USING_NS_CC;
+
+#if COCOS2D_VERSION < 0x00040000
+using namespace cocos2d::experimental;
+#endif
 
 GRoot* GRoot::_inst = nullptr;
 bool GRoot::_soundEnabled = true;
@@ -463,9 +465,9 @@ void GRoot::playSound(const std::string& url, float volumnScale)
     if (!_soundEnabled)
         return;
 
-//     PackageItem* pi = UIPackage::getItemByURL(url);
-//     if (pi)
-//         experimental::AudioEngine::play2d(pi->file, false, _soundVolumeScale * volumnScale);
+    PackageItem* pi = UIPackage::getItemByURL(url);
+    if (pi)
+        AudioEngine::play2d(pi->file, false, _soundVolumeScale * volumnScale);
 }
 
 void GRoot::setSoundEnabled(bool value)
@@ -515,9 +517,9 @@ bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
     _inputProcessor = new InputProcessor(this);
     _inputProcessor->setCaptureCallback(CC_CALLBACK_1(GRoot::onTouchEvent, this));
 
-// #ifdef CC_PLATFORM_PC
-//     _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
-// #endif
+#ifdef CC_PLATFORM_PC
+    _windowSizeListener = Director::getInstance()->getEventDispatcher()->addCustomEventListener(GLViewImpl::EVENT_WINDOW_RESIZED, CC_CALLBACK_0(GRoot::onWindowSizeChanged, this));
+#endif
     onWindowSizeChanged();
 
     scene->addChild(_displayObject, zOrder);
@@ -527,9 +529,8 @@ bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
 
 void GRoot::onWindowSizeChanged()
 {
-    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
-    //const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-    setSize(graphics->GetWidth(), graphics->GetHeight());
+    const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+    setSize(rs.width, rs.height);
 
     updateContentScaleLevel();
 }

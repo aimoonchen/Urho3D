@@ -31,11 +31,12 @@ THE SOFTWARE.
 #include "base/CCDirector.h"
 #include "base/CCEventFocus.h"
 #include "base/CCEventDispatcher.h"
-#include "ui/UILayoutComponent.h"
+//#include "ui/UILayoutComponent.h"
 //#include "renderer/CCGLProgram.h"
 //#include "renderer/CCGLProgramState.h"
-#include "renderer/ccShaders.h"
+//#include "renderer/ccShaders.h"
 //#include "2d/CCCamera.h"
+#include "base/CCTouch.h"
 #include "2d/CCSprite.h"
 #include "ui/UIScale9Sprite.h"
 
@@ -280,12 +281,12 @@ void Widget::initRenderer()
 LayoutComponent* Widget::getOrCreateLayoutComponent()
 {
     auto layoutComponent = this->getComponent(__LAYOUT_COMPONENT_NAME);
-    if (nullptr == layoutComponent)
-    {
-        LayoutComponent *component = LayoutComponent::create();
-        this->addComponent(component);
-        layoutComponent = component;
-    }
+//     if (nullptr == layoutComponent)
+//     {
+//         LayoutComponent *component = LayoutComponent::create();
+//         this->addComponent(component);
+//         layoutComponent = component;
+//     }
 
     return (LayoutComponent*)layoutComponent;
 }
@@ -344,10 +345,10 @@ void Widget::setSizePercent(const Vec2 &percent)
 {
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        component->setUsingPercentContentSize(true);
-        component->setPercentContentSize(percent);
-        component->refreshLayout();
+//         auto component = this->getOrCreateLayoutComponent();
+//         component->setUsingPercentContentSize(true);
+//         component->setPercentContentSize(percent);
+//         component->refreshLayout();
     }
     else
     {
@@ -460,19 +461,19 @@ void Widget::setSizeType(SizeType type)
 {
     _sizeType = type;
 
-    if (_usingLayoutComponent)
-    {
-        auto component = this->getOrCreateLayoutComponent();
-
-        if (_sizeType == Widget::SizeType::PERCENT)
-        {
-            component->setUsingPercentContentSize(true);
-        }
-        else
-        {
-            component->setUsingPercentContentSize(false);
-        }
-    }
+//     if (_usingLayoutComponent)
+//     {
+//         auto component = this->getOrCreateLayoutComponent();
+// 
+//         if (_sizeType == Widget::SizeType::PERCENT)
+//         {
+//             component->setUsingPercentContentSize(true);
+//         }
+//         else
+//         {
+//             component->setUsingPercentContentSize(false);
+//         }
+//     }
 }
 Widget::SizeType Widget::getSizeType() const
 {
@@ -519,11 +520,11 @@ const Size& Widget::getCustomSize() const
 
 const Vec2& Widget::getSizePercent()
 {
-    if (_usingLayoutComponent)
-    {
-        auto component = this->getOrCreateLayoutComponent();
-        _sizePercent = component->getPercentContentSize();
-    }
+//     if (_usingLayoutComponent)
+//     {
+//         auto component = this->getOrCreateLayoutComponent();
+//         _sizePercent = component->getPercentContentSize();
+//     }
 
     return _sizePercent;
 }
@@ -782,14 +783,14 @@ bool Widget::onTouchBegan(Touch *touch, Event* /*unusedEvent*/)
     if (isVisible() && isEnabled() && isAncestorsEnabled() && isAncestorsVisible(this) )
     {
         _touchBeganPosition = touch->getLocation();
-        auto camera = Camera::getVisitingCamera();
-        if(hitTest(_touchBeganPosition, camera, nullptr))
-        {
-            if (isClippingParentContainsPoint(_touchBeganPosition)) {
-                _hittedByCamera = camera;
-                _hitted = true;
-            }
-        }
+//         auto camera = Camera::getVisitingCamera();
+//         if(hitTest(_touchBeganPosition, camera, nullptr))
+//         {
+//             if (isClippingParentContainsPoint(_touchBeganPosition)) {
+//                 _hittedByCamera = camera;
+//                 _hitted = true;
+//             }
+//         }
     }
     if (!_hitted)
     {
@@ -1000,21 +1001,21 @@ bool Widget::isClippingParentContainsPoint(const Vec2 &pt)
     }
 
 
-    if (clippingParent)
-    {
-        bool bRet = false;
-        auto camera = Camera::getVisitingCamera();
-        // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
-        if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
-        {
-            bRet = true;
-        }
-        if (bRet)
-        {
-            return clippingParent->isClippingParentContainsPoint(pt);
-        }
-        return false;
-    }
+//     if (clippingParent)
+//     {
+//         bool bRet = false;
+//         auto camera = Camera::getVisitingCamera();
+//         // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
+//         if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
+//         {
+//             bRet = true;
+//         }
+//         if (bRet)
+//         {
+//             return clippingParent->isClippingParentContainsPoint(pt);
+//         }
+//         return false;
+//     }
     return true;
 }
 
@@ -1055,10 +1056,10 @@ void Widget::setPositionPercent(const Vec2 &percent)
 {
     if (_usingLayoutComponent)
     {
-        auto component = this->getOrCreateLayoutComponent();
-        component->setPositionPercentX(percent.x);
-        component->setPositionPercentY(percent.y);
-        component->refreshLayout();
+//         auto component = this->getOrCreateLayoutComponent();
+//         component->setPositionPercentX(percent.x);
+//         component->setPositionPercentY(percent.y);
+//         component->refreshLayout();
     }
     else
     {
@@ -1078,14 +1079,14 @@ void Widget::setPositionPercent(const Vec2 &percent)
 
 const Vec2& Widget::getPositionPercent(){
 
-    if (_usingLayoutComponent)
-    {
-        auto component = this->getOrCreateLayoutComponent();
-        float percentX = component->getPositionPercentX();
-        float percentY = component->getPositionPercentY();
-
-        _positionPercent.set(percentX, percentY);
-    }
+//     if (_usingLayoutComponent)
+//     {
+//         auto component = this->getOrCreateLayoutComponent();
+//         float percentX = component->getPositionPercentX();
+//         float percentY = component->getPositionPercentY();
+// 
+//         _positionPercent.set(percentX, percentY);
+//     }
     return _positionPercent;
 }
 
@@ -1093,20 +1094,20 @@ void Widget::setPositionType(PositionType type)
 {
     _positionType = type;
 
-    if (_usingLayoutComponent)
-    {
-        auto component = this->getOrCreateLayoutComponent();
-        if (type == Widget::PositionType::ABSOLUTE)
-        {
-            component->setPositionPercentXEnabled(false);
-            component->setPositionPercentYEnabled(false);
-        }
-        else
-        {
-            component->setPositionPercentXEnabled(true);
-            component->setPositionPercentYEnabled(true);
-        }
-    }
+//     if (_usingLayoutComponent)
+//     {
+//         auto component = this->getOrCreateLayoutComponent();
+//         if (type == Widget::PositionType::ABSOLUTE)
+//         {
+//             component->setPositionPercentXEnabled(false);
+//             component->setPositionPercentYEnabled(false);
+//         }
+//         else
+//         {
+//             component->setPositionPercentXEnabled(true);
+//             component->setPositionPercentYEnabled(true);
+//         }
+//     }
 }
 
 Widget::PositionType Widget::getPositionType() const
@@ -1213,12 +1214,12 @@ void Widget::copyClonedWidgetChildren(Widget* model)
 
 GLProgramState* Widget::getNormalGLProgramState(Urho3D::Texture2D* texture)const
 {
-    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
+    return {};// GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
 }
 
 GLProgramState* Widget::getGrayGLProgramState(Urho3D::Texture2D* texture)const
 {
-    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
+    return {};// GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
 }
 
 void Widget::copySpecialProperties(Widget* /*model*/)

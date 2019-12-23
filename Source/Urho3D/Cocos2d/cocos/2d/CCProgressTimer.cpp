@@ -33,7 +33,9 @@ THE SOFTWARE.
 #include "2d/CCSprite.h"
 //#include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
-
+#ifndef M_PI
+#define M_PI      3.14159265358
+#endif
 NS_CC_BEGIN
 
 #define kProgressTextureCoordsCount 4

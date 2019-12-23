@@ -112,8 +112,8 @@ void QuadCommand::init(float globalOrder, GLuint textureID, GLProgramState* shad
 void QuadCommand::init(float globalOrder, Urho3D::Texture2D* texture, GLProgramState* glProgramState, const BlendFunc& blendType, V3F_C4B_T2F_Quad* quads, ssize_t quadCount,
     const Mat4& mv, uint32_t flags)
 {
-    init(globalOrder, texture->getName(), glProgramState, blendType, quads, quadCount, mv, flags);
-    _alphaTextureID = texture->getAlphaTextureName();
+    init(globalOrder, texture->GetGPUObjectName(), glProgramState, blendType, quads, quadCount, mv, flags);
+    //_alphaTextureID = texture->getAlphaTextureName();
 }
 
 NS_CC_END

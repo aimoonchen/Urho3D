@@ -1,6 +1,8 @@
 #ifndef __FAIRYGUIMACROS_H__
 #define __FAIRYGUIMACROS_H__
 
+#include "cocos2d.h"
+
 #define NS_FGUI_BEGIN                     namespace fairygui {
 #define NS_FGUI_END                       }
 #define USING_NS_FGUI                     using namespace fairygui
@@ -8,7 +10,7 @@
 #define CALL_LATER_FUNC(__TYPE__,__FUNC__) \
 void __selector_##__FUNC__(float dt) \
 {\
-    cocos2d::Director::getInstance()->getScheduler()->unschedule(schedule_selector(__TYPE__::__selector_##__FUNC__), this);\
+    cocos2d::Director::getInstance()->getScheduler()->unschedule(CC_SCHEDULE_SELECTOR(__TYPE__::__selector_##__FUNC__), this);\
     __FUNC__(); \
 }\
 void __FUNC__()

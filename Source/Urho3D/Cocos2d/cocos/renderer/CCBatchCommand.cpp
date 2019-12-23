@@ -47,7 +47,7 @@ void BatchCommand::init(float globalOrder, GLProgram* shader, BlendFunc blendTyp
     CCASSERT(textureAtlas, "textureAtlas cannot be null");
     
     RenderCommand::init(globalOrder, modelViewTransform, flags);
-    _textureID = textureAtlas->getTexture()->getName();
+    _textureID = textureAtlas->getTexture()->GetGPUObjectName();
     _blendType = blendType;
     _shader = shader;
     
@@ -68,10 +68,10 @@ BatchCommand::~BatchCommand()
 void BatchCommand::execute()
 {
     // Set material
-    _shader->use();
-    _shader->setUniformsForBuiltins(_mv);
-    GL::bindTexture2D(_textureID);
-    GL::blendFunc(_blendType.src, _blendType.dst);
+//     _shader->use();
+//     _shader->setUniformsForBuiltins(_mv);
+//     GL::bindTexture2D(_textureID);
+//     GL::blendFunc(_blendType.src, _blendType.dst);
 
     // Draw
     _textureAtlas->drawQuads();
