@@ -4,7 +4,9 @@
 #include "event/HitTest.h"
 #include "utils/ByteBuffer.h"
 #include "utils/ToolSet.h"
-#include "Urho3D/Graphics/Texture2D.h"
+#include "../Graphics/Graphics.h"
+#include "../Graphics/Texture2D.h"
+#include "renderer/Texture2DUtils.h"
 #include "Urho3DContext.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
@@ -98,11 +100,13 @@ UIPackage* UIPackage::addPackage(const string& assetPath)
 
     if (_emptyTexture == nullptr)
     {
-        Image* emptyImage = new Image();
-        emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
+//         Image* emptyImage = new Image();
+//         emptyImage->initWithRawData(emptyTextureData, 16, 2, 2, 4, false);
         _emptyTexture = new Urho3D::Texture2D(GetUrho3DContext());
-        _emptyTexture->initWithImage(emptyImage);
-        delete emptyImage;
+        _emptyTexture->SetSize(2, 2, Urho3D::Graphics::GetRGBAFormat());
+        _emptyTexture->SetData(0, 0, 0, 2, 2, emptyTextureData);
+//         _emptyTexture->initWithImage(emptyImage);
+//         delete emptyImage;
     }
 
     Data data;
@@ -588,29 +592,29 @@ void* UIPackage::getItemAsset(PackageItem* item)
 
 void UIPackage::loadAtlas(PackageItem* item)
 {
-    Image* image = new Image();
-#if COCOS2D_VERSION < 0x00031702
-    Image::setPNGPremultipliedAlphaEnabled(false);
-#endif
-    if (!image->initWithImageFile(item->file))
-    {
-        item->texture = _emptyTexture;
-        _emptyTexture->retain();
-        delete image;
-#if COCOS2D_VERSION < 0x00031702
-        Image::setPNGPremultipliedAlphaEnabled(true);
-#endif
-        CCLOGWARN("FairyGUI: texture '%s' not found in %s", item->file.c_str(), _name.c_str());
-        return;
-    }
-#if COCOS2D_VERSION < 0x00031702
-    Image::setPNGPremultipliedAlphaEnabled(true);
-#endif
+//     Image* image = new Image();
+// #if COCOS2D_VERSION < 0x00031702
+//     Image::setPNGPremultipliedAlphaEnabled(false);
+// #endif
+//     if (!image->initWithImageFile(item->file))
+//     {
+//         item->texture = _emptyTexture;
+//         //_emptyTexture->retain();
+//         delete image;
+// #if COCOS2D_VERSION < 0x00031702
+//         Image::setPNGPremultipliedAlphaEnabled(true);
+// #endif
+//         CCLOGWARN("FairyGUI: texture '%s' not found in %s", item->file.c_str(), _name.c_str());
+//         return;
+//     }
+// #if COCOS2D_VERSION < 0x00031702
+//     Image::setPNGPremultipliedAlphaEnabled(true);
+// #endif
 
-    Urho3D::Texture2D* tex = new Urho3D::Texture2D();
-    tex->initWithImage(image);
-    item->texture = tex;
-    delete image;
+//     Urho3D::Texture2D* tex = new Urho3D::Texture2D(GetUrho3DContext());
+//     tex->initWithImage(image);
+    item->texture = GetUrho3DTexture(item->file);
+//    delete image;
 
     string alphaFilePath;
     string ext = FileUtils::getInstance()->getFileExtension(item->file);
@@ -624,21 +628,21 @@ void UIPackage::loadAtlas(PackageItem* item)
     FileUtils::getInstance()->setPopupNotify(false);
     bool hasAlphaTexture = FileUtils::getInstance()->isFileExist(alphaFilePath);
     FileUtils::getInstance()->setPopupNotify(tmp);
-    if (hasAlphaTexture)
-    {
-        image = new Image();
-        if (!image->initWithImageFile(alphaFilePath))
-        {
-            delete image;
-            return;
-        }
-
-        tex = new Urho3D::Texture2D();
-        tex->initWithImage(image);
-        item->texture->setAlphaTexture(tex);
-        tex->release();
-        delete image;
-    }
+//     if (hasAlphaTexture)
+//     {
+//         image = new Image();
+//         if (!image->initWithImageFile(alphaFilePath))
+//         {
+//             delete image;
+//             return;
+//         }
+// 
+//         tex = new Urho3D::Texture2D(GetUrho3DContext());
+//         tex->initWithImage(image);
+//         item->texture->setAlphaTexture(tex);
+//         tex->release();
+//         delete image;
+//     }
 }
 
 AtlasSprite* UIPackage::getSprite(const std::string& spriteId)
@@ -674,13 +678,16 @@ void UIPackage::loadImage(PackageItem* item)
     }
     if (item->scaleByTile)
     {
-#if COCOS2D_VERSION >= 0x00040000
-        Texture2D::TexParams tp(backend::SamplerFilter::LINEAR, backend::SamplerFilter::LINEAR,
-            backend::SamplerAddressMode::REPEAT, backend::SamplerAddressMode::REPEAT);
-#else
-        Urho3D::Texture2D::TexParams tp = {GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT};
-#endif
-        item->spriteFrame->getTexture()->setTexParameters(tp);
+// #if COCOS2D_VERSION >= 0x00040000
+//         Texture2D::TexParams tp(backend::SamplerFilter::LINEAR, backend::SamplerFilter::LINEAR,
+//             backend::SamplerAddressMode::REPEAT, backend::SamplerAddressMode::REPEAT);
+// #else
+//         Urho3D::Texture2D::TexParams tp = {GL_LINEAR, GL_LINEAR, GL_REPEAT, GL_REPEAT};
+// #endif
+//         item->spriteFrame->getTexture()->setTexParameters(tp);
+        item->spriteFrame->getTexture()->SetFilterMode(Urho3D::FILTER_BILINEAR);
+        item->spriteFrame->getTexture()->SetAddressMode(Urho3D::COORD_U, Urho3D::ADDRESS_WRAP);
+        item->spriteFrame->getTexture()->SetAddressMode(Urho3D::COORD_U, Urho3D::ADDRESS_WRAP);
     }
 }
 

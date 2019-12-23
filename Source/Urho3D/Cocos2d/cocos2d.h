@@ -302,4 +302,8 @@ CC_DLL const char* cocos2dVersion();
 
 NS_CC_END
 
+#ifndef M_PI
+#define M_PI      3.14159265358
+#endif
+
 #endif // __COCOS2D_H__

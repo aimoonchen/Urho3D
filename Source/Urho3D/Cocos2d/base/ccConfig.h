@@ -352,14 +352,14 @@ THE SOFTWARE.
  * If value equals to public, these functions are public,
  * protected by default.
  */
-#ifndef CC_CONSTRUCTOR_ACCESS
-  #ifdef CC_ENABLE_SCRIPT_BINDING
-    #define CC_CONSTRUCTOR_ACCESS public
-  #else
-    #define CC_CONSTRUCTOR_ACCESS protected
-  #endif
-#endif
-
+// #ifndef CC_CONSTRUCTOR_ACCESS
+//   #ifdef CC_ENABLE_SCRIPT_BINDING
+//     #define CC_CONSTRUCTOR_ACCESS public
+//   #else
+//     #define CC_CONSTRUCTOR_ACCESS protected
+//   #endif
+// #endif
+#define CC_CONSTRUCTOR_ACCESS public
 /** @def CC_ENABLE_ALLOCATOR
  * Turn on creation of global allocator and pool allocators
  * as specified by CC_ALLOCATOR_GLOBAL below.
