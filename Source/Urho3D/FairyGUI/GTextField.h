@@ -8,7 +8,7 @@
 
 NS_FGUI_BEGIN
 
-class GTextField : public GObject
+class CC_DLL GTextField : public GObject
 {
 public:
     GTextField();

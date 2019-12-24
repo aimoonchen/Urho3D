@@ -17,7 +17,7 @@ class EventContext;
 class ByteBuffer;
 class GTweener;
 
-class ScrollPane : public cocos2d::Ref
+class CC_DLL ScrollPane : public cocos2d::Ref
 {
 public:
     ScrollPane(GComponent* owner);

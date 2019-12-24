@@ -11,7 +11,7 @@ class GComponent;
 class ActionMovieClip;
 class FUISprite;
 
-class GLoader : public GObject
+class CC_DLL GLoader : public GObject
 {
 public:
     GLoader();

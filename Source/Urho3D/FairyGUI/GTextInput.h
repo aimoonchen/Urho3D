@@ -8,7 +8,7 @@
 
 NS_FGUI_BEGIN
 
-class GTextInput : public GTextField, cocos2d::ui::EditBoxDelegate
+class CC_DLL GTextInput : public GTextField, cocos2d::ui::EditBoxDelegate
 {
 public:
     GTextInput();

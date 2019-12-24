@@ -7,7 +7,7 @@
 
 NS_FGUI_BEGIN
 
-class GGraph : public GObject
+class CC_DLL GGraph : public GObject
 {
 public:
     GGraph();

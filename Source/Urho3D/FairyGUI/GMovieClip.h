@@ -9,7 +9,7 @@ NS_FGUI_BEGIN
 
 class ActionMovieClip;
 
-class GMovieClip : public GObject
+class CC_DLL GMovieClip : public GObject
 {
 public:
     GMovieClip();

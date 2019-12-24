@@ -9,7 +9,7 @@ NS_FGUI_BEGIN
 class GTree;
 class GComponent;
 
-class GTreeNode : public cocos2d::Ref
+class CC_DLL GTreeNode : public cocos2d::Ref
 {
 public:
     static GTreeNode* create(bool isFolder = false, const std::string& resURL = cocos2d::STD_STRING_EMPTY);

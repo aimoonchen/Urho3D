@@ -10,7 +10,7 @@ NS_FGUI_BEGIN
 
 class FUISprite;
 
-class GImage : public GObject
+class CC_DLL GImage : public GObject
 {
 public:
     GImage();

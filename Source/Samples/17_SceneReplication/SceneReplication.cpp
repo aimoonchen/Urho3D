@@ -21,9 +21,10 @@
 //
 
 // fairygui
-#include "UIPackage.h"
-#include "GComponent.h"
-
+#include "Urho3D/FairyGUI/UIPackage.h"
+#include "Urho3D/FairyGUI/GComponent.h"
+#include "Urho3D/FairyGUI/GRoot.h"
+//
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/Camera.h>
@@ -59,15 +60,15 @@
 #include "SceneReplication.h"
 
 #include <Urho3D/DebugNew.h>
-#include "Cocos2d/cocos/Urho3DContext.h"
-#include "Cocos2d/cocos/platform/CCFileUtils.h"
-#include "Cocos2d/cocos/2d/CCScene.h"
-#include "Cocos2d/cocos/renderer/CCRenderer.h"
+#include "Urho3D/Cocos2d/Urho3DContext.h"
+#include "Urho3D/Cocos2d/platform/CCFileUtils.h"
+#include "Urho3D/Cocos2d/2d/CCScene.h"
+#include "Urho3D/Cocos2d/renderer/CCRenderer.h"
 #include "Race.h"
 //#include "Character.h"
 #include "RaceRoom.h"
 #include "Avatar.h"
-#include "GRoot.h"
+
 
 // UDP port we will use
 static const unsigned short SERVER_PORT = 2345;
@@ -109,7 +110,7 @@ void SceneReplication::Start()
 
 void SceneReplication::CreateScene()
 {
-    scene_ = new Scene(context_);
+    scene_ = new Urho3D::Scene(context_);
 
     auto* cache = GetSubsystem<ResourceCache>();
 
@@ -217,14 +218,14 @@ void SceneReplication::CreateUI()
 void SceneReplication::InitFairyGUI()
 {
 	SetUrho3DContext(GetContext());
-    ui_scene_ = cocos2d::Scene::create();
-    ui_renderder_ = new cocos2d::Renderer;
-	groot_ = fairygui::GRoot::create(ui_scene_);
+    fairy_scene_ = cocos2d::Scene::create();
+    fairy_renderder_ = new cocos2d::Renderer;
+    fairy_root_ = fairygui::GRoot::create(fairy_scene_);
 	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
     GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
 	fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
-    groot_->addChild(_view);
+    fairy_root_->addChild(_view);
 	_view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
 	{
 // 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
@@ -250,7 +251,7 @@ void SceneReplication::SubscribeToEvents()
     // of the usual Update so that physics simulation has already proceeded for the frame, and can
     // accurately follow the object with the camera
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(SceneReplication, HandlePostUpdate));
-
+    SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(SceneReplication, RenderFairyGUI));
     // Subscribe to button actions
     SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(SceneReplication, HandleConnect));
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(SceneReplication, HandleDisconnect));
@@ -497,7 +498,6 @@ void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventD
 {
     // We only rotate the camera according to mouse movement since last frame, so do not need the time step
     MoveCamera();
-    ui_scene_->render(ui_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
 }
 
 void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -657,4 +657,9 @@ void SceneReplication::HandleClientDisconnected(StringHash eventType, VariantMap
 void SceneReplication::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
     clientObjectID_ = eventData[P_ID].GetUInt();
+}
+
+void SceneReplication::RenderFairyGUI(StringHash eventType, VariantMap& eventData)
+{
+    fairy_scene_->render(fairy_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
 }

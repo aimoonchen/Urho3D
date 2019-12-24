@@ -11,7 +11,7 @@ NS_FGUI_BEGIN
 class GList;
 class GComponent;
 
-class GTree : public GList
+class CC_DLL GTree : public GList
 {
 public:
     typedef std::function<void(GTreeNode* node, GComponent* obj)> TreeNodeRenderFunction;

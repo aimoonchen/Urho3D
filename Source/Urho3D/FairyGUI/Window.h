@@ -16,7 +16,7 @@ public:
     virtual void load(std::function<void()> callback) = 0;
 };
 
-class Window : public GComponent
+class CC_DLL Window : public GComponent
 {
 public:
     Window();
