@@ -41,11 +41,14 @@
 #include "../IO/Log.h"
 #include "../Math/Matrix3x4.h"
 #include "../Resource/ResourceCache.h"
-
-#include "CEGUI/InputEvent.h"
-
 #include "Gui.h"
+
+#if URHO3D_GUI == URHO3D_CEGUI
+#include "CEGUI/InputEvent.h"
 #include "GuiImpl.h"
+#elif URHO3D_GUI == URHO3D_FARYGUI
+#include "FairyGUI/FairyGUI.h"
+#endif
 
 // #include "../Gui/UIEvents.h"
 // #include "../Gui/Window.h"
@@ -76,7 +79,7 @@ namespace Urho3D
 	const int DEFAULT_FONT_TEXTURE_MAX_SIZE = 2048;
 // 
 // 	const char* UI_CATEGORY = "Gui";
-
+#if URHO3D_GUI == URHO3D_CEGUI
 	static CEGUI::Key::Scan urho3DKeyToCeguiKey(unsigned key)
 	{
 		switch (key)
@@ -147,7 +150,7 @@ namespace Urho3D
 		default: return CEGUI::Key::Scan::Unknown;
 		}
 	}
-
+#endif
 	Gui::Gui(Context* context) :
 		Object(context),
 // 		rootElement_(new UIElement(context)),
@@ -204,9 +207,11 @@ namespace Urho3D
 		SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(Gui, HandleKeyUp));
 		SubscribeToEvent(E_TEXTINPUT, URHO3D_HANDLER(Gui, HandleTextInput));
 //		SubscribeToEvent(E_DROPFILE, URHO3D_HANDLER(Gui, HandleDropFile));
-
+#if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_ = std::make_unique<CEGui>();
-
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_ = std::make_unique<FairyGUIImpl>();
+#endif
 		// Try to initialize right now, but skip if screen mode is not yet set
 		Initialize();
 	}
@@ -990,7 +995,6 @@ namespace Urho3D
 			return;
 
 		URHO3D_PROFILE(InitUI);
-
 		gui_impl_->Initialize(graphics);
 
 // 		graphics_ = graphics;
@@ -1580,11 +1584,9 @@ namespace Urho3D
 
 			return;
 		}
-#ifdef DISABLE_CEGUI
-		return;
-#endif
+#if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectKeyDown(urho3DKeyToCeguiKey(key));
-
+#endif
 // 		// Dismiss modal element if any when ESC key is pressed
 // 		if (key == KEY_ESCAPE && HasModalElement())
 // 		{
@@ -1646,9 +1648,7 @@ namespace Urho3D
 	
 	void Gui::HandleKeyUp(StringHash eventType, VariantMap& eventData)
 	{
-#ifdef DISABLE_CEGUI
-		return;
-#endif
+#if URHO3D_GUI == URHO3D_CEGUI
 		using namespace KeyUp;
 
 		mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
@@ -1656,6 +1656,7 @@ namespace Urho3D
 		auto key = (Key)eventData[P_KEY].GetUInt();
 
 		gui_impl_->injectKeyUp(urho3DKeyToCeguiKey(key));
+#endif
 	}
 
 	void Gui::HandleTextInput(StringHash eventType, VariantMap& eventData)
@@ -1819,7 +1820,11 @@ namespace Urho3D
 	
 	CEGUI::Window* Gui::GetRootWindow()
 	{
+#if URHO3D_GUI == URHO3D_CEGUI
 		return gui_impl_->getRootWindow();
+#else
+		return nullptr;
+#endif
 	}
 
 // 	void Gui::SetElementRenderTexture(UIElement* element, Texture2D* texture)
@@ -1881,9 +1886,7 @@ namespace Urho3D
 
 	void Gui::OnMouseButtonDown(MouseButton mouseButtons)
 	{
-#ifdef DISABLE_CEGUI
-		return;
-#endif
+#if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
 		if (mouseButtons == MOUSEB_LEFT) {
 			mb = CEGUI::MouseButton::Left;
@@ -1895,13 +1898,12 @@ namespace Urho3D
 			mb = CEGUI::MouseButton::Middle;
 		}
 		gui_impl_->injectMouseButtonDown(mb);
+#endif
 	}
 
 	void Gui::OnMouseButtonUp(MouseButton mouseButtons)
 	{
-#ifdef DISABLE_CEGUI
-		return;
-#endif
+#if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
 		if (mouseButtons == MOUSEB_LEFT) {
 			mb = CEGUI::MouseButton::Left;
@@ -1913,13 +1915,13 @@ namespace Urho3D
 			mb = CEGUI::MouseButton::Middle;
 		}
 		gui_impl_->injectMouseButtonUp(mb);
+#endif
 	}
 
 	void Gui::OnMouseMove(float x, float y)
 	{
-#ifdef DISABLE_CEGUI
-		return;
-#endif
+#if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectMousePosition(x, y);
+#endif
 	}
 }

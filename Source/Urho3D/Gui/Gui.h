@@ -28,6 +28,12 @@
 
 // #include "../Gui/Cursor.h"
 // #include "../Gui/UIBatch.h"
+
+#define URHO3D_CEGUI 1
+#define URHO3D_FARYGUI 2
+
+#define URHO3D_GUI URHO3D_FARYGUI
+
 namespace CEGUI
 {
 	class Window;
@@ -35,7 +41,7 @@ namespace CEGUI
 
 namespace Urho3D
 {
-
+class FairyGUIImpl;
 class CEGui;
 	/// Font hinting level (only used for FreeType fonts)
 // 	enum FontHintLevel
@@ -439,7 +445,11 @@ class CEGui;
 		IntVector2 customSize_;
 		/// Elements that should be rendered to textures.
 		//HashMap<UIElement*, RenderToTextureData> renderToTexture_;
+#if URHO3D_GUI == URHO3D_CEGUI
 		std::unique_ptr<CEGui> gui_impl_;
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		std::unique_ptr<FairyGUIImpl> gui_impl_;
+#endif
 	};
 
 	/// Register Gui library objects.
