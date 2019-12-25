@@ -38,7 +38,10 @@ namespace CEGUI
 {
 	class Window;
 }
-
+namespace fairygui
+{
+	class GRoot;
+}
 namespace Urho3D
 {
 class FairyGUIImpl;
@@ -68,15 +71,15 @@ class CEGui;
 // 	class UIComponent;
 
 	/// %Gui subsystem. Manages the graphical user interface.
-	class URHO3D_API Gui : public Object
+	class URHO3D_API GUI : public Object
 	{
-		URHO3D_OBJECT(Gui, Object);
+		URHO3D_OBJECT(GUI, Object);
 
 	public:
 		/// Construct.
-		explicit Gui(Context* context);
+		explicit GUI(Context* context);
 		/// Destruct.
-		~Gui() override;
+		~GUI() override;
 
 // 		/// Set cursor Gui element.
 // 		void SetCursor(Cursor* cursor);
@@ -230,7 +233,8 @@ class CEGui;
 		/// Return root element custom size. Returns 0,0 when custom size is not being used and automatic resizing according to window size is in use instead (default.)
 		const IntVector2& GetCustomSize() const { return customSize_; }
 
-		CEGUI::Window* GetRootWindow();
+		CEGUI::Window* GetCEGUIRoot();
+		fairygui::GRoot* GetFairyGUIRoot();
 		/// Set texture to which element will be rendered.
 		//void SetElementRenderTexture(UIElement* element, Texture2D* texture);
 
@@ -348,7 +352,7 @@ class CEGui;
 		/// Handle clean up on a drag cancel.
 		void ProcessDragCancel();
 		/// Sum touch positions and return the begin position ready to send.
-		IntVector2 SumTouchPositions(Gui::DragData* dragData, const IntVector2& oldSendPos);
+		IntVector2 SumTouchPositions(GUI::DragData* dragData, const IntVector2& oldSendPos);
 		/// Resize root element to effective size.
 		void ResizeRootElement();
 		/// Return effective size of the root element, according to Gui scale and resolution / custom size.

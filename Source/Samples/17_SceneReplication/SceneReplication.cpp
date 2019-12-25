@@ -64,6 +64,7 @@
 #include "Urho3D/Cocos2d/platform/CCFileUtils.h"
 #include "Urho3D/Cocos2d/2d/CCScene.h"
 #include "Urho3D/Cocos2d/renderer/CCRenderer.h"
+#include "Urho3D/GUI/Gui.h"
 #include "Race.h"
 //#include "Character.h"
 #include "RaceRoom.h"
@@ -217,16 +218,11 @@ void SceneReplication::CreateUI()
 }
 void SceneReplication::InitFairyGUI()
 {
-	SetUrho3DContext(GetContext());
-    fairy_scene_ = cocos2d::Scene::create();
-    fairy_renderder_ = new cocos2d::Renderer;
-    fairy_root_ = fairygui::GRoot::create(fairy_scene_);
-	cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
-    GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/Build/bin/Data/FairyGUI/Resources");
+    auto fairy_root = GetSubsystem<GUI>()->GetFairyGUIRoot();
 	fairygui::UIPackage::addPackage("UI/MainMenu");
-	auto _view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
-    fairy_root_->addChild(_view);
-	_view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
+	auto view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
+    fairy_root->addChild(view);
+    view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
 	{
 // 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
 // 		Director::getInstance()->replaceScene(scene);
@@ -251,7 +247,6 @@ void SceneReplication::SubscribeToEvents()
     // of the usual Update so that physics simulation has already proceeded for the frame, and can
     // accurately follow the object with the camera
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(SceneReplication, HandlePostUpdate));
-    SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(SceneReplication, RenderFairyGUI));
     // Subscribe to button actions
     SubscribeToEvent(connectButton_, E_RELEASED, URHO3D_HANDLER(SceneReplication, HandleConnect));
     SubscribeToEvent(disconnectButton_, E_RELEASED, URHO3D_HANDLER(SceneReplication, HandleDisconnect));
@@ -657,9 +652,4 @@ void SceneReplication::HandleClientDisconnected(StringHash eventType, VariantMap
 void SceneReplication::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
     clientObjectID_ = eventData[P_ID].GetUInt();
-}
-
-void SceneReplication::RenderFairyGUI(StringHash eventType, VariantMap& eventData)
-{
-    fairy_scene_->render(fairy_renderder_, cocos2d::Mat4::IDENTITY, nullptr);
 }

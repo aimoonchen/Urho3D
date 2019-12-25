@@ -27,15 +27,7 @@
 
 #include "Sample.h"
 #include "Race.h"
-namespace fairygui
-{
-	class GRoot;
-}
-namespace cocos2d
-{
-    class Scene;
-    class Renderer;
-}
+
 namespace Urho3D
 {
 
@@ -115,8 +107,6 @@ private:
     void HandleClientDisconnected(StringHash eventType, VariantMap& eventData);
     /// Handle remote event from server which tells our controlled object node ID.
     void HandleClientObjectID(StringHash eventType, VariantMap& eventData);
-    //
-    void RenderFairyGUI(StringHash eventType, VariantMap& eventData);
 	//void ApplyContrlToNode(Node* node, const Controls& ctrl, int role_id = 0);
     /// Mapping from client connections to controllable objects.
     //HashMap<Connection*, WeakPtr<Node> > serverObjects_;
@@ -138,8 +128,4 @@ private:
 	//
 	std::vector<std::unique_ptr<server::Player>> players_;
 	int current_player_id_{ 0 };
-
-	fairygui::GRoot* fairy_root_{ nullptr };
-    cocos2d::Scene* fairy_scene_{ nullptr };
-    cocos2d::Renderer* fairy_renderder_{ nullptr };
 };

@@ -41,13 +41,14 @@
 #include "../IO/Log.h"
 #include "../Math/Matrix3x4.h"
 #include "../Resource/ResourceCache.h"
-#include "Gui.h"
+#include "GUI.h"
 
 #if URHO3D_GUI == URHO3D_CEGUI
 #include "CEGUI/InputEvent.h"
 #include "GuiImpl.h"
 #elif URHO3D_GUI == URHO3D_FARYGUI
 #include "FairyGUI/FairyGUI.h"
+#include "FairyGUIImpl.h"
 #endif
 
 // #include "../Gui/UIEvents.h"
@@ -151,7 +152,7 @@ namespace Urho3D
 		}
 	}
 #endif
-	Gui::Gui(Context* context) :
+	GUI::GUI(Context* context) :
 		Object(context),
 // 		rootElement_(new UIElement(context)),
 // 		rootModalElement_(new UIElement(context)),
@@ -195,17 +196,17 @@ namespace Urho3D
 		// Register Gui library object factories
 		//RegisterUILibrary(context_);
 
-		SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(Gui, HandleScreenMode));
-		SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(Gui, HandleMouseButtonDown));
-		SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(Gui, HandleMouseButtonUp));
-		SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(Gui, HandleMouseMove));
-		SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(Gui, HandleMouseWheel));
-		SubscribeToEvent(E_TOUCHBEGIN, URHO3D_HANDLER(Gui, HandleTouchBegin));
-		SubscribeToEvent(E_TOUCHEND, URHO3D_HANDLER(Gui, HandleTouchEnd));
-		SubscribeToEvent(E_TOUCHMOVE, URHO3D_HANDLER(Gui, HandleTouchMove));
-		SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(Gui, HandleKeyDown));
-		SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(Gui, HandleKeyUp));
-		SubscribeToEvent(E_TEXTINPUT, URHO3D_HANDLER(Gui, HandleTextInput));
+		SubscribeToEvent(E_SCREENMODE, URHO3D_HANDLER(GUI, HandleScreenMode));
+		SubscribeToEvent(E_MOUSEBUTTONDOWN, URHO3D_HANDLER(GUI, HandleMouseButtonDown));
+		SubscribeToEvent(E_MOUSEBUTTONUP, URHO3D_HANDLER(GUI, HandleMouseButtonUp));
+		SubscribeToEvent(E_MOUSEMOVE, URHO3D_HANDLER(GUI, HandleMouseMove));
+		SubscribeToEvent(E_MOUSEWHEEL, URHO3D_HANDLER(GUI, HandleMouseWheel));
+		SubscribeToEvent(E_TOUCHBEGIN, URHO3D_HANDLER(GUI, HandleTouchBegin));
+		SubscribeToEvent(E_TOUCHEND, URHO3D_HANDLER(GUI, HandleTouchEnd));
+		SubscribeToEvent(E_TOUCHMOVE, URHO3D_HANDLER(GUI, HandleTouchMove));
+		SubscribeToEvent(E_KEYDOWN, URHO3D_HANDLER(GUI, HandleKeyDown));
+		SubscribeToEvent(E_KEYUP, URHO3D_HANDLER(GUI, HandleKeyUp));
+		SubscribeToEvent(E_TEXTINPUT, URHO3D_HANDLER(GUI, HandleTextInput));
 //		SubscribeToEvent(E_DROPFILE, URHO3D_HANDLER(Gui, HandleDropFile));
 #if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_ = std::make_unique<CEGui>();
@@ -216,7 +217,7 @@ namespace Urho3D
 		Initialize();
 	}
 
-	Gui::~Gui() = default;
+	GUI::~GUI() = default;
 
 // 	void Gui::SetCursor(Cursor* cursor)
 // 	{
@@ -370,7 +371,7 @@ namespace Urho3D
 // 		}
 // 	}
 
-	void Gui::Clear()
+	void GUI::Clear()
 	{
 // 		rootElement_->RemoveAllChildren();
 // 		rootModalElement_->RemoveAllChildren();
@@ -378,7 +379,7 @@ namespace Urho3D
 // 			rootElement_->AddChild(cursor_);
 	}
 
-	void Gui::Update(float timeStep)
+	void GUI::Update(float timeStep)
 	{
 		//assert(rootElement_ && rootModalElement_);
 
@@ -476,7 +477,7 @@ namespace Urho3D
 // 		Update(timeStep, rootModalElement_);
 	}
 
-	void Gui::RenderUpdate()
+	void GUI::RenderUpdate()
 	{
 		//assert(rootElement_ && rootModalElement_ && graphics_);
 
@@ -545,7 +546,7 @@ namespace Urho3D
 // 		}
 	}
 
-	void Gui::Render(bool renderUICommand)
+	void GUI::Render(bool renderUICommand)
 	{
 		URHO3D_PROFILE(RenderUI);
 		gui_impl_->Render();
@@ -694,39 +695,39 @@ namespace Urho3D
 // 		return element && element->SaveXML(dest);
 // 	}
 
-	void Gui::SetClipboardText(const String& text)
+	void GUI::SetClipboardText(const String& text)
 	{
 		clipBoard_ = text;
 		if (useSystemClipboard_)
 			SDL_SetClipboardText(text.CString());
 	}
 
-	void Gui::SetDoubleClickInterval(float interval)
+	void GUI::SetDoubleClickInterval(float interval)
 	{
 		doubleClickInterval_ = Max(interval, 0.0f);
 	}
 
-	void Gui::SetMaxDoubleClickDistance(float distPixels)
+	void GUI::SetMaxDoubleClickDistance(float distPixels)
 	{
 		maxDoubleClickDist_ = distPixels;
 	}
 
-	void Gui::SetDragBeginInterval(float interval)
+	void GUI::SetDragBeginInterval(float interval)
 	{
 		dragBeginInterval_ = Max(interval, 0.0f);
 	}
 
-	void Gui::SetDragBeginDistance(int pixels)
+	void GUI::SetDragBeginDistance(int pixels)
 	{
 		dragBeginDistance_ = Max(pixels, 0);
 	}
 
-	void Gui::SetDefaultToolTipDelay(float delay)
+	void GUI::SetDefaultToolTipDelay(float delay)
 	{
 		defaultToolTipDelay_ = Max(delay, 0.0f);
 	}
 
-	void Gui::SetMaxFontTextureSize(int size)
+	void GUI::SetMaxFontTextureSize(int size)
 	{
 // 		if (IsPowerOfTwo((unsigned)size) && size >= FONT_TEXTURE_MIN_SIZE)
 // 		{
@@ -738,22 +739,22 @@ namespace Urho3D
 // 		}
 	}
 
-	void Gui::SetNonFocusedMouseWheel(bool nonFocusedMouseWheel)
+	void GUI::SetNonFocusedMouseWheel(bool nonFocusedMouseWheel)
 	{
 		nonFocusedMouseWheel_ = nonFocusedMouseWheel;
 	}
 
-	void Gui::SetUseSystemClipboard(bool enable)
+	void GUI::SetUseSystemClipboard(bool enable)
 	{
 		useSystemClipboard_ = enable;
 	}
 
-	void Gui::SetUseScreenKeyboard(bool enable)
+	void GUI::SetUseScreenKeyboard(bool enable)
 	{
 		useScreenKeyboard_ = enable;
 	}
 
-	void Gui::SetUseMutableGlyphs(bool enable)
+	void GUI::SetUseMutableGlyphs(bool enable)
 	{
 		if (enable != useMutableGlyphs_)
 		{
@@ -762,7 +763,7 @@ namespace Urho3D
 		}
 	}
 
-	void Gui::SetForceAutoHint(bool enable)
+	void GUI::SetForceAutoHint(bool enable)
 	{
 		if (enable != forceAutoHint_)
 		{
@@ -780,7 +781,7 @@ namespace Urho3D
 // 		}
 // 	}
 
-	void Gui::SetFontSubpixelThreshold(float threshold)
+	void GUI::SetFontSubpixelThreshold(float threshold)
 	{
 		assert(threshold >= 0);
 		if (threshold != fontSubpixelThreshold_)
@@ -790,7 +791,7 @@ namespace Urho3D
 		}
 	}
 
-	void Gui::SetFontOversampling(int oversampling)
+	void GUI::SetFontOversampling(int oversampling)
 	{
 		assert(oversampling >= 1);
 		oversampling = Clamp(oversampling, 1, 8);
@@ -801,37 +802,37 @@ namespace Urho3D
 		}
 	}
 
-	void Gui::SetScale(float scale)
+	void GUI::SetScale(float scale)
 	{
 		uiScale_ = Max(scale, M_EPSILON);
 		ResizeRootElement();
 	}
 
-	void Gui::SetWidth(float width)
+	void GUI::SetWidth(float width)
 	{
 		IntVector2 size = GetEffectiveRootElementSize(false);
 		SetScale((float)size.x_ / width);
 	}
 
-	void Gui::SetHeight(float height)
+	void GUI::SetHeight(float height)
 	{
 		IntVector2 size = GetEffectiveRootElementSize(false);
 		SetScale((float)size.y_ / height);
 	}
 
-	void Gui::SetCustomSize(const IntVector2& size)
+	void GUI::SetCustomSize(const IntVector2& size)
 	{
 		customSize_ = IntVector2(Max(0, size.x_), Max(0, size.y_));
 		ResizeRootElement();
 	}
 
-	void Gui::SetCustomSize(int width, int height)
+	void GUI::SetCustomSize(int width, int height)
 	{
 		customSize_ = IntVector2(Max(0, width), Max(0, height));
 		ResizeRootElement();
 	}
 
-	IntVector2 Gui::GetCursorPosition() const
+	IntVector2 GUI::GetCursorPosition() const
 	{
 		return /*cursor_ ? cursor_->GetPosition() : */GetSubsystem<Input>()->GetMousePosition();
 	}
@@ -969,7 +970,7 @@ namespace Urho3D
 // 		return dragElementsConfirmed_[index];
 // 	}
 
-	const String& Gui::GetClipboardText() const
+	const String& GUI::GetClipboardText() const
 	{
 		if (useSystemClipboard_)
 		{
@@ -982,12 +983,12 @@ namespace Urho3D
 		return clipBoard_;
 	}
 
-	bool Gui::HasModalElement() const
+	bool GUI::HasModalElement() const
 	{
 		return false;// return rootModalElement_->GetNumChildren() > 0;
 	}
 
-	void Gui::Initialize()
+	void GUI::Initialize()
 	{
 		auto* graphics = GetSubsystem<Graphics>();
 
@@ -995,7 +996,7 @@ namespace Urho3D
 			return;
 
 		URHO3D_PROFILE(InitUI);
-		gui_impl_->Initialize(graphics);
+		gui_impl_->Initialize(context_);
 
 // 		graphics_ = graphics;
 // 		UIBatch::posAdjust = Vector3(Graphics::GetPixelUVOffset(), 0.0f);
@@ -1008,9 +1009,9 @@ namespace Urho3D
 
 		initialized_ = true;
 
-		SubscribeToEvent(E_BEGINFRAME, URHO3D_HANDLER(Gui, HandleBeginFrame));
-		SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(Gui, HandlePostUpdate));
-		SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(Gui, HandleRenderUpdate));
+		SubscribeToEvent(E_BEGINFRAME, URHO3D_HANDLER(GUI, HandleBeginFrame));
+		SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(GUI, HandlePostUpdate));
+		SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(GUI, HandleRenderUpdate));
 
 		URHO3D_LOGINFO("Initialized user interface");
 	}
@@ -1302,7 +1303,7 @@ namespace Urho3D
 // 		return element;
 // 	}
 
-	void Gui::GetCursorPositionAndVisible(IntVector2& pos, bool& visible)
+	void GUI::GetCursorPositionAndVisible(IntVector2& pos, bool& visible)
 	{
 		// Prefer software cursor then OS-specific cursor
 // 		if (cursor_ && cursor_->IsVisible())
@@ -1327,13 +1328,13 @@ namespace Urho3D
 		pos.y_ = (int)(pos.y_ / uiScale_);
 	}
 
-	void Gui::SetCursorShape(CursorShape shape)
+	void GUI::SetCursorShape(CursorShape shape)
 	{
 // 		if (cursor_)
 // 			cursor_->SetShape(shape);
 	}
 
-	void Gui::ReleaseFontFaces()
+	void GUI::ReleaseFontFaces()
 	{
 // 		URHO3D_LOGDEBUG("Reloading font faces");
 // 
@@ -1344,26 +1345,26 @@ namespace Urho3D
 // 			fonts[i]->ReleaseFaces();
 	}
 
-	void Gui::ProcessHover(const IntVector2& windowCursorPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor*/)
+	void GUI::ProcessHover(const IntVector2& windowCursorPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor*/)
 	{
 	}
 
-	void Gui::ProcessClickBegin(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
+	void GUI::ProcessClickBegin(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
 		OnMouseButtonDown(button);
 	}
 
-	void Gui::ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
+	void GUI::ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
 		OnMouseButtonUp(button);
 	}
 
-	void Gui::ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
+	void GUI::ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
 		OnMouseMove(windowCursorPos.x_, windowCursorPos.y_);
 	}
 
-	void Gui::HandleScreenMode(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleScreenMode(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace ScreenMode;
 
@@ -1373,7 +1374,7 @@ namespace Urho3D
 			ResizeRootElement();
 	}
 
-	void Gui::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleMouseButtonDown(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace MouseButtonDown;
 
@@ -1394,7 +1395,7 @@ namespace Urho3D
 			ProcessClickBegin(cursorPos, MouseButton(eventData[P_BUTTON].GetUInt()), mouseButtons_, qualifiers_/*, cursor_, cursorVisible*/);
 	}
 
-	void Gui::HandleMouseButtonUp(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleMouseButtonUp(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace MouseButtonUp;
 
@@ -1408,7 +1409,7 @@ namespace Urho3D
 		ProcessClickEnd(cursorPos, (MouseButton)eventData[P_BUTTON].GetUInt(), mouseButtons_, qualifiers_/*, cursor_, cursorVisible*/);
 	}
 
-	void Gui::HandleMouseMove(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleMouseMove(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace MouseMove;
 
@@ -1453,7 +1454,7 @@ namespace Urho3D
 		ProcessMove(cursorPos, DeltaP, mouseButtons_, qualifiers_/*, cursor_, cursorVisible*/);
 	}
 
-	void Gui::HandleMouseWheel(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleMouseWheel(StringHash eventType, VariantMap& eventData)
 	{
 		auto* input = GetSubsystem<Input>();
 		if (input->IsMouseGrabbed())
@@ -1497,7 +1498,7 @@ namespace Urho3D
 // 		}
 	}
 
-	void Gui::HandleTouchBegin(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleTouchBegin(StringHash eventType, VariantMap& eventData)
 	{
 		auto* input = GetSubsystem<Input>();
 		if (input->IsMouseGrabbed())
@@ -1522,7 +1523,7 @@ namespace Urho3D
 			ProcessClickBegin(pos, touchId, touchId, QUAL_NONE/*, nullptr, true*/);
 	}
 
-	void Gui::HandleTouchEnd(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleTouchEnd(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace TouchEnd;
 
@@ -1552,7 +1553,7 @@ namespace Urho3D
 		ProcessClickEnd(pos, touchId, MOUSEB_NONE, QUAL_NONE/*, nullptr, true*/);
 	}
 
-	void Gui::HandleTouchMove(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleTouchMove(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace TouchMove;
 
@@ -1569,7 +1570,7 @@ namespace Urho3D
 		ProcessMove(pos, deltaPos, touchId, QUAL_NONE/*, nullptr, true*/);
 	}
 
-	void Gui::HandleKeyDown(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleKeyDown(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace KeyDown;
 
@@ -1646,7 +1647,7 @@ namespace Urho3D
 // 		}
 	}
 	
-	void Gui::HandleKeyUp(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleKeyUp(StringHash eventType, VariantMap& eventData)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		using namespace KeyUp;
@@ -1659,7 +1660,7 @@ namespace Urho3D
 #endif
 	}
 
-	void Gui::HandleTextInput(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleTextInput(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace TextInput;
 
@@ -1668,7 +1669,7 @@ namespace Urho3D
 // 			element->OnTextInput(eventData[P_TEXT].GetString());
 	}
 
-	void Gui::HandleBeginFrame(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleBeginFrame(StringHash eventType, VariantMap& eventData)
 	{
 		// If have a cursor, and a drag is not going on, reset the cursor shape. Application logic that wants to apply
 		// custom shapes can do it after this, but needs to do it each frame
@@ -1676,14 +1677,14 @@ namespace Urho3D
 // 			cursor_->SetShape(CS_NORMAL);
 	}
 
-	void Gui::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
+	void GUI::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 	{
 		using namespace PostUpdate;
 
 		Update(eventData[P_TIMESTEP].GetFloat());
 	}
 
-	void Gui::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
+	void GUI::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
 	{
 		RenderUpdate();
 	}
@@ -1739,7 +1740,7 @@ namespace Urho3D
 // 		return i;
 // 	}
 
-	void Gui::ProcessDragCancel()
+	void GUI::ProcessDragCancel()
 	{
 		// How to tell difference between drag cancel and new selection on multi-touch?
 		if (usingTouchInput_)
@@ -1766,7 +1767,7 @@ namespace Urho3D
 // 		}
 	}
 
-	IntVector2 Gui::SumTouchPositions(Gui::DragData* dragData, const IntVector2& oldSendPos)
+	IntVector2 GUI::SumTouchPositions(GUI::DragData* dragData, const IntVector2& oldSendPos)
 	{
 		IntVector2 sendPos = oldSendPos;
 		if (usingTouchInput_)
@@ -1793,14 +1794,18 @@ namespace Urho3D
 		return sendPos;
 	}
 
-	void Gui::ResizeRootElement()
+	void GUI::ResizeRootElement()
 	{
 // 		IntVector2 effectiveSize = GetEffectiveRootElementSize();
 // 		rootElement_->SetSize(effectiveSize);
 // 		rootModalElement_->SetSize(effectiveSize);
+#if URHO3D_GUI == URHO3D_CEGUI
+#elif URHO3D_GUI == URHO3D_FARYGUI
+
+#endif
 	}
 
-	IntVector2 Gui::GetEffectiveRootElementSize(bool applyScale) const
+	IntVector2 GUI::GetEffectiveRootElementSize(bool applyScale) const
 	{
 		// Use a fake size in headless mode
 // 		IntVector2 size = graphics_ ? IntVector2(graphics_->GetWidth(), graphics_->GetHeight()) : IntVector2(1024, 768);
@@ -1818,7 +1823,7 @@ namespace Urho3D
 		return IntVector2(1024, 768);
 	}
 	
-	CEGUI::Window* Gui::GetRootWindow()
+	CEGUI::Window* GUI::GetCEGUIRoot()
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		return gui_impl_->getRootWindow();
@@ -1826,7 +1831,14 @@ namespace Urho3D
 		return nullptr;
 #endif
 	}
-
+	fairygui::GRoot* GUI::GetFairyGUIRoot()
+	{
+#if URHO3D_GUI == URHO3D_FARYGUI
+		return gui_impl_->GetRootWindow();
+#else
+		return nullptr;
+#endif
+	}
 // 	void Gui::SetElementRenderTexture(UIElement* element, Texture2D* texture)
 // 	{
 // 		if (element == nullptr)
@@ -1884,7 +1896,7 @@ namespace Urho3D
 // 	}
 
 
-	void Gui::OnMouseButtonDown(MouseButton mouseButtons)
+	void GUI::OnMouseButtonDown(MouseButton mouseButtons)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
@@ -1901,7 +1913,7 @@ namespace Urho3D
 #endif
 	}
 
-	void Gui::OnMouseButtonUp(MouseButton mouseButtons)
+	void GUI::OnMouseButtonUp(MouseButton mouseButtons)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
@@ -1918,7 +1930,7 @@ namespace Urho3D
 #endif
 	}
 
-	void Gui::OnMouseMove(float x, float y)
+	void GUI::OnMouseMove(float x, float y)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectMousePosition(x, y);
