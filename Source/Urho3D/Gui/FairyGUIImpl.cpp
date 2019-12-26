@@ -13,9 +13,10 @@ namespace Urho3D {
 	{
 		context_ = context;
 		SetUrho3DContext(context);
-		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
-		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
-
+// 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
+// 		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
+		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
+		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
 		cocos_scene_ = cocos2d::Scene::create();
 		cocos_renderder_ = new cocos2d::Renderer;
 		fairy_root_ = fairygui::GRoot::create(cocos_scene_);
