@@ -120,7 +120,7 @@ bool Director::init()
 {
     setDefaultValues();
 
-    _scenesStack.reserve(15);
+    //_scenesStack.reserve(15);
 
     // FPS
     _lastUpdate = std::chrono::steady_clock::now();
@@ -293,9 +293,9 @@ void Director::drawScene()
         _renderer->clearDrawStats();
 
         //render the scene
-        if (_openGLView)
-            _openGLView->renderScene(_runningScene, _renderer);
-
+//         if (_openGLView)
+//             _openGLView->renderScene(_runningScene, _renderer);
+        _runningScene->render(_renderer, Mat4::IDENTITY, nullptr);
         _eventDispatcher->dispatchEvent(_eventAfterVisit);
     }
 
@@ -765,7 +765,7 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
     float zClip = transform.m[14] / transform.m[15];
 
     auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
-    Size glSize = { urho3dSize.x_, urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
+    Size glSize = { (float)urho3dSize.x_, (float)urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
     Vec4 clipCoord(2.0f * uiPoint.x / glSize.width - 1.0f, 1.0f - 2.0f * uiPoint.y / glSize.height, zClip, 1);
 
     Vec4 glCoord;
@@ -798,7 +798,7 @@ Vec2 Director::convertToUI(const Vec2& glPoint)
     clipCoord.z = clipCoord.z / clipCoord.w;
 
     auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
-    Size glSize = { urho3dSize.x_, urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
+    Size glSize = { (float)urho3dSize.x_, (float)urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
     float factor = 1.0f / glCoord.w;
     return Vec2(glSize.width * (clipCoord.x * 0.5f + 0.5f) * factor, glSize.height * (-clipCoord.y * 0.5f + 0.5f) * factor);
 }
@@ -823,6 +823,8 @@ Size Director::getVisibleSize() const
 //     {
 //         return Size::ZERO;
 //     }
+    auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
+    return { (float)urho3dSize.x_, (float)urho3dSize.y_ };
 }
 
 Vec2 Director::getVisibleOrigin() const
@@ -833,8 +835,9 @@ Vec2 Director::getVisibleOrigin() const
 //     }
 //     else
 //     {
-        return Vec2::ZERO;
-//    }
+//         return Vec2::ZERO;
+//     }
+    return Vec2::ZERO;
 }
 
 Rect Director::getSafeAreaRect() const
@@ -845,8 +848,12 @@ Rect Director::getSafeAreaRect() const
 //     }
 //     else
 //     {
-        return Rect::ZERO;
+//        return Rect::ZERO;
 //    }
+	Rect ret;
+	ret.size = getVisibleSize();
+	ret.origin = getVisibleOrigin();
+	return ret;
 }
 
 // scene management
@@ -863,40 +870,40 @@ void Director::runWithScene(Scene* scene)
 void Director::replaceScene(Scene* scene)
 {
     //CCASSERT(_runningScene, "Use runWithScene: instead to start the director");
-    CCASSERT(scene != nullptr, "the scene should not be null");
-
-    if (_runningScene == nullptr) {
-        runWithScene(scene);
-        return;
-    }
-
-    if (scene == _nextScene)
-        return;
-
-    if (_nextScene)
-    {
-        if (_nextScene->isRunning())
-        {
-            _nextScene->onExit();
-        }
-        _nextScene->cleanup();
-        _nextScene = nullptr;
-    }
-
-    ssize_t index = _scenesStack.size() - 1;
-
-    _sendCleanupToScene = true;
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-    if (sEngine)
-    {
-        sEngine->retainScriptObject(this, scene);
-        sEngine->releaseScriptObject(this, _scenesStack.at(index));
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    _scenesStack.replace(index, scene);
-
-    _nextScene = scene;
+//     CCASSERT(scene != nullptr, "the scene should not be null");
+// 
+//     if (_runningScene == nullptr) {
+//         runWithScene(scene);
+//         return;
+//     }
+// 
+//     if (scene == _nextScene)
+//         return;
+// 
+//     if (_nextScene)
+//     {
+//         if (_nextScene->isRunning())
+//         {
+//             _nextScene->onExit();
+//         }
+//         _nextScene->cleanup();
+//         _nextScene = nullptr;
+//     }
+// 
+//     ssize_t index = _scenesStack.size() - 1;
+// 
+//     _sendCleanupToScene = true;
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//     if (sEngine)
+//     {
+//         sEngine->retainScriptObject(this, scene);
+//         sEngine->releaseScriptObject(this, _scenesStack.at(index));
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.replace(index, scene);
+// 
+//     _nextScene = scene;
 }
 
 void Director::pushScene(Scene* scene)
@@ -912,33 +919,33 @@ void Director::pushScene(Scene* scene)
         sEngine->retainScriptObject(this, scene);
     }
 #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    _scenesStack.pushBack(scene);
+    //_scenesStack.pushBack(scene);
     _nextScene = scene;
 }
 
 void Director::popScene(void)
 {
-    CCASSERT(_runningScene != nullptr, "running scene should not null");
-
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-    if (sEngine)
-    {
-        sEngine->releaseScriptObject(this, _scenesStack.back());
-    }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    _scenesStack.popBack();
-    ssize_t c = _scenesStack.size();
-
-    if (c == 0)
-    {
-        end();
-    }
-    else
-    {
-        _sendCleanupToScene = true;
-        _nextScene = _scenesStack.at(c - 1);
-    }
+//     CCASSERT(_runningScene != nullptr, "running scene should not null");
+// 
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//     if (sEngine)
+//     {
+//         sEngine->releaseScriptObject(this, _scenesStack.back());
+//     }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//     _scenesStack.popBack();
+//     ssize_t c = _scenesStack.size();
+// 
+//     if (c == 0)
+//     {
+//         end();
+//     }
+//     else
+//     {
+//         _sendCleanupToScene = true;
+//         _nextScene = _scenesStack.at(c - 1);
+//     }
 }
 
 void Director::popToRootScene(void)
@@ -948,60 +955,60 @@ void Director::popToRootScene(void)
 
 void Director::popToSceneStackLevel(int level)
 {
-    CCASSERT(_runningScene != nullptr, "A running Scene is needed");
-    ssize_t c = _scenesStack.size();
-
-    // level 0? -> end
-    if (level == 0)
-    {
-        end();
-        return;
-    }
-
-    // current level or lower -> nothing
-    if (level >= c)
-        return;
-
-    auto firstOnStackScene = _scenesStack.back();
-    if (firstOnStackScene == _runningScene)
-    {
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-        auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-        if (sEngine)
-        {
-            sEngine->releaseScriptObject(this, _scenesStack.back());
-        }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-        _scenesStack.popBack();
-        --c;
-    }
-
-    // pop stack until reaching desired level
-    while (c > level)
-    {
-        auto current = _scenesStack.back();
-
-        if (current->isRunning())
-        {
-            current->onExit();
-        }
-
-        current->cleanup();
-#if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-        auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
-        if (sEngine)
-        {
-            sEngine->releaseScriptObject(this, _scenesStack.back());
-        }
-#endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-        _scenesStack.popBack();
-        --c;
-    }
-
-    _nextScene = _scenesStack.back();
-
-    // cleanup running scene
-    _sendCleanupToScene = true;
+//     CCASSERT(_runningScene != nullptr, "A running Scene is needed");
+//     ssize_t c = _scenesStack.size();
+// 
+//     // level 0? -> end
+//     if (level == 0)
+//     {
+//         end();
+//         return;
+//     }
+// 
+//     // current level or lower -> nothing
+//     if (level >= c)
+//         return;
+// 
+//     auto firstOnStackScene = _scenesStack.back();
+//     if (firstOnStackScene == _runningScene)
+//     {
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//         auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//         if (sEngine)
+//         {
+//             sEngine->releaseScriptObject(this, _scenesStack.back());
+//         }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//         _scenesStack.popBack();
+//         --c;
+//     }
+// 
+//     // pop stack until reaching desired level
+//     while (c > level)
+//     {
+//         auto current = _scenesStack.back();
+// 
+//         if (current->isRunning())
+//         {
+//             current->onExit();
+//         }
+// 
+//         current->cleanup();
+// #if CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//         auto sEngine = ScriptEngineManager::getInstance()->getScriptEngine();
+//         if (sEngine)
+//         {
+//             sEngine->releaseScriptObject(this, _scenesStack.back());
+//         }
+// #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
+//         _scenesStack.popBack();
+//         --c;
+//     }
+// 
+//     _nextScene = _scenesStack.back();
+// 
+//     // cleanup running scene
+//     _sendCleanupToScene = true;
 }
 
 void Director::end()
@@ -1069,7 +1076,7 @@ void Director::reset()
         }
     }
 #endif // CC_ENABLE_GC_FOR_NATIVE_OBJECTS
-    _scenesStack.clear();
+    //_scenesStack.clear();
 
     stopAnimation();
 
@@ -1125,11 +1132,11 @@ void Director::purgeDirector()
     CHECK_GL_ERROR_DEBUG();
 
     // OpenGL view
-    if (_openGLView)
-    {
-        _openGLView->end();
-        _openGLView = nullptr;
-    }
+//     if (_openGLView)
+//     {
+//         _openGLView->end();
+//         _openGLView = nullptr;
+//     }
 
     // delete Director
     release();

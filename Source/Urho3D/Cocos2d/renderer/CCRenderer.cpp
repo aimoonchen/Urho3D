@@ -729,7 +729,6 @@ void Renderer::fillVerticesAndIndices(const TrianglesCommand* cmd)
 {
     memcpy(&_verts[_filledVertex], cmd->getVertices(), sizeof(V3F_C4B_T2F) * cmd->getVertexCount());
 
-    auto bsize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
     // fill vertex, and convert them to world coordinates
     const Mat4& modelView = cmd->getModelView();
     for(ssize_t i=0; i < cmd->getVertexCount(); ++i)

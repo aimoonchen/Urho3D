@@ -1801,7 +1801,7 @@ namespace Urho3D
 // 		rootModalElement_->SetSize(effectiveSize);
 #if URHO3D_GUI == URHO3D_CEGUI
 #elif URHO3D_GUI == URHO3D_FARYGUI
-
+		gui_impl_->OnWindowSizeChanged();
 #endif
 	}
 

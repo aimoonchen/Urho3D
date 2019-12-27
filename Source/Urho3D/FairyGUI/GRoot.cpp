@@ -533,7 +533,7 @@ void GRoot::onWindowSizeChanged()
 {
     auto ctx = GetUrho3DContext();
     auto graphics = ctx->GetSubsystem<Urho3D::Graphics>();
-    const cocos2d::Size& rs = Size(graphics->GetWidth(), graphics->GetWidth());// Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+    const cocos2d::Size& rs = Size(graphics->GetWidth(), graphics->GetHeight());// Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
     setSize(rs.width, rs.height);
 
     updateContentScaleLevel();
