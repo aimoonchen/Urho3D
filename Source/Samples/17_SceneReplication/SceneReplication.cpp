@@ -85,7 +85,12 @@ SceneReplication::SceneReplication(Context* context) :
 {
 	//Character::RegisterObject(context);
 }
-
+void SceneReplication::Setup()
+{
+    Sample::Setup();
+	engineParameters_[EP_WINDOW_WIDTH] = 1280;
+	engineParameters_[EP_WINDOW_HEIGHT] = 720;
+}
 void SceneReplication::Start()
 {
     // Execute base class startup
