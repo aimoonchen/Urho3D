@@ -688,7 +688,7 @@ protected:
     bool _sendCleanupToScene = false;
 
     /* scheduled scenes */
-    //Vector<Scene*> _scenesStack;
+    Vector<Scene*> _scenesStack;
 
     /* last time the main loop was updated */
     std::chrono::steady_clock::time_point _lastUpdate;
