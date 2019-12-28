@@ -225,8 +225,8 @@ void SceneReplication::InitFairyGUI()
 {
     auto fairy_root = GetSubsystem<GUI>()->GetFairyGUIRoot();
 	fairygui::UIPackage::addPackage("UI/MainMenu");
-    //auto view = fairygui::UIPackage::createObject("MainMenu", "Component1")->as<fairygui::GComponent>();
-	auto view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
+    auto view = fairygui::UIPackage::createObject("MainMenu", "Component1")->as<fairygui::GComponent>();
+	//auto view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
     //auto view = fairygui::UIPackage::createObject("MainMenu", "CloseButton")->as<fairygui::GComponent>();
     //view->setPosition(0.0f, 100.0f);
     fairy_root->addChild(view);

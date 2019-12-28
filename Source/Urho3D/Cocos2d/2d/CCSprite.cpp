@@ -1705,8 +1705,9 @@ void Sprite::updateBlendFunc(void)
     CCASSERT(_renderMode != RenderMode::QUAD_BATCHNODE, "CCSprite: updateBlendFunc doesn't work when the sprite is rendered using a SpriteBatchNode");
 
     // it is possible to have an untextured sprite
-    if (! _texture /*|| ! _texture->hasPremultipliedAlpha()*/)
+    if (! _texture || _texture->GetComponents() == 4/*|| ! _texture->hasPremultipliedAlpha()*/)
     {
+        // TODO : _texture->GetComponents() == 4 ?
         _blendFunc = BlendFunc::ALPHA_NON_PREMULTIPLIED;
         setOpacityModifyRGB(false);
     }
