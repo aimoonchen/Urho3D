@@ -35,7 +35,7 @@
 #include <Urho3D/Graphics/StaticModel.h>
 
 #include "HelloWorld.h"
-#include "Urho3D/CEGUIRenderer/debug_renderdoc.h"
+//#include "Urho3D/CEGUIRenderer/debug_renderdoc.h"
 
 #include <Urho3D/DebugNew.h>
 
@@ -48,7 +48,7 @@ HelloWorld::HelloWorld(Context* context) :
 }
 void HelloWorld::Setup()
 {
-	m_renderdocdll = bgfx::loadRenderDoc();
+	//m_renderdocdll = bgfx::loadRenderDoc();
 
 	engineParameters_[EP_WINDOW_WIDTH] = 1280;
 	engineParameters_[EP_WINDOW_HEIGHT] = 720;

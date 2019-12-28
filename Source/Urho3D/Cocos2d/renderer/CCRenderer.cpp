@@ -767,7 +767,7 @@ void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
 
 	// Update quad geometry into the vertex buffer
 	// Resize the vertex buffer first if too small or much too large
-	unsigned numIndices = _filledVertex;// vertexData.Size() / UI_VERTEX_SIZE;
+	unsigned numIndices = _filledIndex;// vertexData.Size() / UI_VERTEX_SIZE;
 	if (dest->GetIndexCount() < numIndices || dest->GetIndexCount() > numIndices * 2)
 		dest->SetSize(numIndices, false, true);
 
@@ -837,81 +837,8 @@ void Renderer::drawBatchedTriangles()
 
     SetVertexData(vertexBuffer_);
     SetIndexData(indexBuffer_);
-    /************** 2: Copy vertices/indices to GL objects *************/
-//     auto conf = Configuration::getInstance();
-//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-//     {
-//         //Bind VAO
-//         GL::bindVAO(_buffersVAO);
-//         //Set VBO data
-//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-// 
-//         // option 1: subdata
-// //        glBufferSubData(GL_ARRAY_BUFFER, sizeof(_quads[0])*start, sizeof(_quads[0]) * n , &_quads[start] );
-// 
-//         // option 2: data
-// //        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, _verts, GL_STATIC_DRAW);
-// 
-//         // option 3: orphaning + glMapBuffer
-//         // FIXME: in order to work as fast as possible, it must "and the exact same size and usage hints it had before."
-//         //  source: https://www.opengl.org/wiki/Buffer_Object_Streaming#Explicit_multiple_buffering
-//         // so most probably we won't have any benefit of using it
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, nullptr, GL_STATIC_DRAW);
-//         void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-//         memcpy(buf, _verts, sizeof(_verts[0]) * _filledVertex);
-//         glUnmapBuffer(GL_ARRAY_BUFFER);
-// 
-//         glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-//     }
-//     else
-//     {
-//         // Client Side Arrays
-// #define kQuadSize sizeof(_verts[0])
-//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-// 
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex , _verts, GL_DYNAMIC_DRAW);
-// 
-//         GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
-// 
-//         // vertices
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, vertices));
-// 
-//         // colors
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, colors));
-// 
-//         // tex coords
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, texCoords));
-// 
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-//     }
-// 
-//     /************** 3: Draw *************/
-//     for (int i=0; i<batchesTotal; ++i)
-//     {
-//         CC_ASSERT(_triBatchesToDraw[i].cmd && "Invalid batch");
-//         _triBatchesToDraw[i].cmd->useMaterial();
-//         glDrawElements(GL_TRIANGLES, (GLsizei) _triBatchesToDraw[i].indicesToDraw, GL_UNSIGNED_SHORT, (GLvoid*) (_triBatchesToDraw[i].offset*sizeof(_indices[0])) );
-//         _drawnBatches++;
-//         _drawnVertices += _triBatchesToDraw[i].indicesToDraw;
-//     }
-// 
-//     /************** 4: Cleanup *************/
-//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-//     {
-//         //Unbind VAO
-//         GL::bindVAO(0);
-//     }
-//     else
-//     {
-//         glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//     }
 
-	// Engine does not render when window is closed or device is lost
+    // Engine does not render when window is closed or device is lost
 	assert(graphics_ && graphics_->IsInitialized() && !graphics_->IsDeviceLost());
 
 // 	if (batches.Empty())
@@ -921,9 +848,10 @@ void Renderer::drawBatchedTriangles()
 	Urho3D::RenderSurface* surface = graphics_->GetRenderTarget(0);
     Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
     Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
-    Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
-    Urho3D::Vector2 offset(-1.0f, 1.0f);
-
+//     Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
+//     Urho3D::Vector2 offset(-1.0f, 1.0f);
+	Urho3D::Vector2 scale(2.0f * invScreenSize.x_, 2.0f * invScreenSize.y_);
+	Urho3D::Vector2 offset(-1.0f, -1.0f);
 	if (surface)
 	{
 #ifdef URHO3D_OPENGL
@@ -951,7 +879,8 @@ void Renderer::drawBatchedTriangles()
 		graphics_->SetCullMode(Urho3D::CULL_CW);
 	else
 #endif
-		graphics_->SetCullMode(Urho3D::CULL_CCW);
+	//graphics_->SetCullMode(Urho3D::CULL_CCW);
+    graphics_->SetCullMode(Urho3D::CULL_CW);
 	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
 	graphics_->SetDepthWrite(false);
 	graphics_->SetFillMode(Urho3D::FILL_SOLID);

@@ -155,6 +155,7 @@ void Sample::SetLogoVisible(bool enable)
 
 void Sample::CreateLogo()
 {
+    return;
     // Get logo texture
     ResourceCache* cache = GetSubsystem<ResourceCache>();
     Texture2D* logoTexture = cache->GetResource<Texture2D>("Textures/FishBoneLogo.png");
