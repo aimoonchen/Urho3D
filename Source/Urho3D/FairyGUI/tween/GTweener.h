@@ -11,7 +11,7 @@ NS_FGUI_BEGIN
 
 class GPath;
 
-class GTweener : public cocos2d::Ref
+class CC_DLL GTweener : public cocos2d::Ref
 {
 public:
     typedef std::function<void(GTweener* tweener)> GTweenCallback;

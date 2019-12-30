@@ -80,7 +80,7 @@ private:
     void HandleClosePressed(StringHash eventType, VariantMap& eventData);
 
     /// The Window.
-    SharedPtr<Window> window_;
+    SharedPtr<Urho3D::Window> window_;
     /// The UI's root UIElement.
     SharedPtr<UIElement> uiRoot_;
 	SharedPtr<UIComponent> uiCom_;

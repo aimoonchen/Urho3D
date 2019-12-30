@@ -20,6 +20,8 @@
 // THE SOFTWARE.
 //
 
+#include "FairyGUIExamples/MenuScene.h"
+
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/Graphics.h>
@@ -188,6 +190,16 @@ void HelloGUI::Start()
 	// Create a draggable Fish
 	CreateDraggableFish();
 
+#ifdef CC_PLATFORM_PC
+    //fairygui::UIConfig::registerFont(fairygui::UIConfig::defaultFont, "fonts/DroidSansFallback.ttf");
+#endif
+
+	// create a scene. it's an autorelease object
+	auto scene = MenuScene::create();
+
+	// run
+	cocos2d::Director::getInstance()->runWithScene(scene);
+
     // Set the mouse mode to use in the sample
     Sample::InitMouseMode(MM_FREE);
 }
@@ -224,7 +236,7 @@ void HelloGUI::InitWindow()
 {
     return;
     // Create the Window and add it to the UI's root node
-    window_ = new Window(context_);
+    window_ = new Urho3D::Window(context_);
     uiRoot_->AddChild(window_);
 	//uiCom_->GetRoot()->AddChild(window_);
     // Set Window size and layout settings
@@ -269,6 +281,7 @@ void HelloGUI::InitWindow()
 
 void HelloGUI::CreateDraggableFish()
 {
+    return;
     auto* cache = GetSubsystem<ResourceCache>();
     auto* graphics = GetSubsystem<Graphics>();
 
@@ -283,22 +296,22 @@ void HelloGUI::CreateDraggableFish()
     uiRoot_->AddChild(draggableFish);
 
     // Add a tooltip to Fish button
-//     auto* toolTip = new ToolTip(context_);
-//     draggableFish->AddChild(toolTip);
-//     toolTip->SetPosition(IntVector2(draggableFish->GetWidth() + 5, draggableFish->GetWidth() / 2)); // slightly offset from close button
-//     auto* textHolder = new BorderImage(context_);
-//     toolTip->AddChild(textHolder);
-//     textHolder->SetStyle("ToolTipBorderImage");
-//     auto* toolTipText = new Text(context_);
-//     textHolder->AddChild(toolTipText);
-//     toolTipText->SetStyle("ToolTipText");
-//     toolTipText->SetText("Please drag me!");
-// 
-//     // Subscribe draggableFish to Drag Events (in order to make it draggable)
-//     // See "Event list" in documentation's Main Page for reference on available Events and their eventData
-//     SubscribeToEvent(draggableFish, E_DRAGBEGIN, URHO3D_HANDLER(HelloGUI, HandleDragBegin));
-//     SubscribeToEvent(draggableFish, E_DRAGMOVE, URHO3D_HANDLER(HelloGUI, HandleDragMove));
-//     SubscribeToEvent(draggableFish, E_DRAGEND, URHO3D_HANDLER(HelloGUI, HandleDragEnd));
+    auto* toolTip = new ToolTip(context_);
+    draggableFish->AddChild(toolTip);
+    toolTip->SetPosition(IntVector2(draggableFish->GetWidth() + 5, draggableFish->GetWidth() / 2)); // slightly offset from close button
+    auto* textHolder = new BorderImage(context_);
+    toolTip->AddChild(textHolder);
+    textHolder->SetStyle("ToolTipBorderImage");
+    auto* toolTipText = new Text(context_);
+    textHolder->AddChild(toolTipText);
+    toolTipText->SetStyle("ToolTipText");
+    toolTipText->SetText("Please drag me!");
+
+    // Subscribe draggableFish to Drag Events (in order to make it draggable)
+    // See "Event list" in documentation's Main Page for reference on available Events and their eventData
+    SubscribeToEvent(draggableFish, E_DRAGBEGIN, URHO3D_HANDLER(HelloGUI, HandleDragBegin));
+    SubscribeToEvent(draggableFish, E_DRAGMOVE, URHO3D_HANDLER(HelloGUI, HandleDragMove));
+    SubscribeToEvent(draggableFish, E_DRAGEND, URHO3D_HANDLER(HelloGUI, HandleDragEnd));
 }
 
 void HelloGUI::HandleDragBegin(StringHash eventType, VariantMap& eventData)

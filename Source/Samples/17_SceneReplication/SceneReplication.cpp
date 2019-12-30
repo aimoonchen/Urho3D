@@ -24,6 +24,7 @@
 #include "Urho3D/FairyGUI/UIPackage.h"
 #include "Urho3D/FairyGUI/GComponent.h"
 #include "Urho3D/FairyGUI/GRoot.h"
+
 //
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
@@ -224,11 +225,8 @@ void SceneReplication::CreateUI()
 void SceneReplication::InitFairyGUI()
 {
     auto fairy_root = GetSubsystem<GUI>()->GetFairyGUIRoot();
-	fairygui::UIPackage::addPackage("UI/MainMenu");
-    //auto view = fairygui::UIPackage::createObject("MainMenu", "Component1")->as<fairygui::GComponent>();
+    fairygui::UIPackage::addPackage("UI/MainMenu");
 	auto view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
-    //auto view = fairygui::UIPackage::createObject("MainMenu", "CloseButton")->as<fairygui::GComponent>();
-    //view->setPosition(0.0f, 100.0f);
     fairy_root->addChild(view);
 //     view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
 // 	{
@@ -236,6 +234,16 @@ void SceneReplication::InitFairyGUI()
 // 		Director::getInstance()->replaceScene(scene);
 // 	});
     
+// #ifdef CC_PLATFORM_PC
+//     fairygui::UIConfig::registerFont(fairygui::UIConfig::defaultFont, "fonts/DroidSansFallback.ttf");
+// #endif
+// 
+// 	// create a scene. it's an autorelease object
+// 	auto scene = MenuScene::create();
+// 
+// 	// run
+// 	cocos2d::Director::getInstance()->runWithScene(scene);
+
 }
 void SceneReplication::SetupViewport()
 {
