@@ -18,6 +18,9 @@ namespace Urho3D {
 		void Render();
 		fairygui::GRoot* GetRootWindow() { return fairy_root_; }
 		void OnWindowSizeChanged();
+		void OnMouseButtonDown(const IntVector2& windowCursorPos, MouseButton mouseButtons);
+		void OnMouseButtonUp(const IntVector2& windowCursorPos, MouseButton mouseButtons);
+		void OnMouseMove(float x, float y);
 	private:
 		fairygui::GRoot* fairy_root_{ nullptr };
 		cocos2d::Scene* cocos_scene_{ nullptr };

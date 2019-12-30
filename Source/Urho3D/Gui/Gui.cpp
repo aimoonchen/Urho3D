@@ -1351,12 +1351,12 @@ namespace Urho3D
 
 	void GUI::ProcessClickBegin(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
-		OnMouseButtonDown(button);
+		OnMouseButtonDown(windowCursorPos, button);
 	}
 
 	void GUI::ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
-		OnMouseButtonUp(button);
+		OnMouseButtonUp(windowCursorPos, button);
 	}
 
 	void GUI::ProcessMove(const IntVector2& windowCursorPos, const IntVector2& cursorDeltaPos, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
@@ -1896,7 +1896,7 @@ namespace Urho3D
 // 	}
 
 
-	void GUI::OnMouseButtonDown(MouseButton mouseButtons)
+	void GUI::OnMouseButtonDown(const IntVector2& windowCursorPos, MouseButton mouseButtons)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
@@ -1910,10 +1910,12 @@ namespace Urho3D
 			mb = CEGUI::MouseButton::Middle;
 		}
 		gui_impl_->injectMouseButtonDown(mb);
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_->OnMouseButtonDown(windowCursorPos, mouseButtons);
 #endif
 	}
 
-	void GUI::OnMouseButtonUp(MouseButton mouseButtons)
+	void GUI::OnMouseButtonUp(const IntVector2& windowCursorPos, MouseButton mouseButtons)
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		CEGUI::MouseButton mb{ CEGUI::MouseButton::Invalid };
@@ -1927,6 +1929,8 @@ namespace Urho3D
 			mb = CEGUI::MouseButton::Middle;
 		}
 		gui_impl_->injectMouseButtonUp(mb);
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_->OnMouseButtonUp(windowCursorPos, mouseButtons);
 #endif
 	}
 

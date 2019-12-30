@@ -8,6 +8,7 @@
 #include "../Cocos2d/renderer/CCRenderer.h"
 #include "../Core/Context.h"
 #include "../Resource/ResourceCache.h"
+#include "../Input/InputConstants.h"
 namespace Urho3D {
 	void FairyGUIImpl::Initialize(Context* context)
 	{
@@ -35,5 +36,23 @@ namespace Urho3D {
 	void FairyGUIImpl::OnWindowSizeChanged()
 	{
 		fairy_root_->onWindowSizeChanged();
+	}
+	void FairyGUIImpl::OnMouseButtonDown(const IntVector2& windowCursorPos, MouseButton mouseButtons)
+	{
+		cocos2d::EventMouse event(cocos2d::EventMouse::MouseEventType::MOUSE_DOWN);
+		event.setCursorPosition(windowCursorPos.x_, windowCursorPos.y_);
+		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>((mouseButtons == MOUSEB_LEFT) ? 0 : (mouseButtons == MOUSEB_RIGHT) ? 1 : 2));
+		cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
+	}
+	void FairyGUIImpl::OnMouseButtonUp(const IntVector2& windowCursorPos, MouseButton mouseButtons)
+	{
+		cocos2d::EventMouse event(cocos2d::EventMouse::MouseEventType::MOUSE_UP);
+		event.setCursorPosition(windowCursorPos.x_, windowCursorPos.y_);
+		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>((mouseButtons == MOUSEB_LEFT) ? 0 : (mouseButtons == MOUSEB_RIGHT) ? 1 : 2));
+		cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
+	}
+	void FairyGUIImpl::OnMouseMove(float x, float y)
+	{
+
 	}
 }
