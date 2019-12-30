@@ -14,13 +14,14 @@ namespace Urho3D {
 	{
 		context_ = context;
 		SetUrho3DContext(context);
-//  		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
-//  		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
-		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
-		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
+ 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
+ 		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/build/bin/Data/FairyGUI/Resources");
+// 		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
+// 		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
 		cocos_scene_ = cocos2d::Scene::create();
 		cocos_renderder_ = new cocos2d::Renderer;
 		fairy_root_ = fairygui::GRoot::create(cocos_scene_);
+		cocos2d::Director::getInstance()->setOpenGLView(nullptr);
 		cocos2d::Director::getInstance()->runWithScene(cocos_scene_);
 	}
 	void FairyGUIImpl::Update(float timeStep)
@@ -37,20 +38,23 @@ namespace Urho3D {
 	{
 		fairy_root_->onWindowSizeChanged();
 	}
+
 	void FairyGUIImpl::OnMouseButtonDown(const IntVector2& windowCursorPos, MouseButton mouseButtons)
 	{
 		cocos2d::EventMouse event(cocos2d::EventMouse::MouseEventType::MOUSE_DOWN);
-		event.setCursorPosition(windowCursorPos.x_, windowCursorPos.y_);
+		event.setCursorPosition(static_cast<float>(windowCursorPos.x_), static_cast<float>(windowCursorPos.y_));
 		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>((mouseButtons == MOUSEB_LEFT) ? 0 : (mouseButtons == MOUSEB_RIGHT) ? 1 : 2));
 		cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
 	}
+
 	void FairyGUIImpl::OnMouseButtonUp(const IntVector2& windowCursorPos, MouseButton mouseButtons)
 	{
 		cocos2d::EventMouse event(cocos2d::EventMouse::MouseEventType::MOUSE_UP);
-		event.setCursorPosition(windowCursorPos.x_, windowCursorPos.y_);
+		event.setCursorPosition(static_cast<float>(windowCursorPos.x_), static_cast<float>(windowCursorPos.y_));
 		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>((mouseButtons == MOUSEB_LEFT) ? 0 : (mouseButtons == MOUSEB_RIGHT) ? 1 : 2));
 		cocos2d::Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
 	}
+
 	void FairyGUIImpl::OnMouseMove(float x, float y)
 	{
 

@@ -370,10 +370,10 @@ float Director::getDeltaTime() const
 {
     return _deltaTime;
 }
-// void Director::setOpenGLView(GLView* openGLView)
-// {
-//     CCASSERT(openGLView, "opengl view should not be null");
-// 
+void Director::setOpenGLView(GLView* openGLView)
+{
+//    CCASSERT(openGLView, "opengl view should not be null");
+
 //     if (_openGLView != openGLView)
 //     {
 //         // Configuration. Gather GPU info
@@ -399,13 +399,13 @@ float Director::getDeltaTime() const
 //         _renderer->initGLView();
 // 
 //         CHECK_GL_ERROR_DEBUG();
-// 
-//         if (_eventDispatcher)
-//         {
-//             _eventDispatcher->setEnabled(true);
-//         }
-//     }
-// }
+
+        if (_eventDispatcher)
+        {
+            _eventDispatcher->setEnabled(true);
+        }
+//    }
+}
 
 TextureCache* Director::getTextureCache() const
 {

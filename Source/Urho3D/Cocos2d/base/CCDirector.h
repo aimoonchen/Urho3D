@@ -49,8 +49,8 @@ NS_CC_BEGIN
  */
 
  /* Forward declarations. */
-    class LabelAtlas;
-//class GLView;
+class LabelAtlas;
+class GLView;
 class DirectorDelegate;
 class Node;
 class Scheduler;
@@ -187,7 +187,7 @@ public:
      * Sets the GLView.
      * @lua NA
      */
-    //void setOpenGLView(GLView* openGLView);
+    void setOpenGLView(GLView* openGLView);
 
     /*
      * Gets singleton of TextureCache.

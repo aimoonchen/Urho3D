@@ -1,4 +1,6 @@
 #pragma once
+#include "../Input/InputConstants.h"
+
 namespace fairygui
 {
 	class GRoot;
@@ -10,6 +12,7 @@ namespace cocos2d
 }
 namespace Urho3D {
 	class Context;
+	class IntVector2;
 	class FairyGUIImpl
 	{
 	public:
