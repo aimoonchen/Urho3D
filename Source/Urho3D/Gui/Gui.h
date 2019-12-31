@@ -454,6 +454,7 @@ class CEGui;
 #elif URHO3D_GUI == URHO3D_FARYGUI
 		std::unique_ptr<FairyGUIImpl> gui_impl_;
 #endif
+		bool captured_{ false };
 	};
 
 	/// Register Gui library objects.

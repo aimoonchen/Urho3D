@@ -1351,11 +1351,16 @@ namespace Urho3D
 
 	void GUI::ProcessClickBegin(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
+		captured_ = true;
 		OnMouseButtonDown(windowCursorPos, button);
 	}
 
 	void GUI::ProcessClickEnd(const IntVector2& windowCursorPos, MouseButton button, MouseButtonFlags buttons, QualifierFlags qualifiers/*, Cursor* cursor, bool cursorVisible*/)
 	{
+		if (captured_)
+		{
+			captured_ = false;
+		}
 		OnMouseButtonUp(windowCursorPos, button);
 	}
 
