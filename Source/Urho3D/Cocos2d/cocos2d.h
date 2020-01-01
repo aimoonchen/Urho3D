@@ -141,7 +141,7 @@ THE SOFTWARE.
 // #include "2d/CCTransitionProgress.h"
 
 // 2d utils
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 // #include "2d/CCCameraBackgroundBrush.h"
 // //#include "2d/CCGrabber.h"
 #include "2d/CCGrid.h"

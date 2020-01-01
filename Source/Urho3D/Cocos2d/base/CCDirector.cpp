@@ -50,7 +50,7 @@ THE SOFTWARE.
 #include "renderer/CCRenderer.h"
 //#include "renderer/CCRenderState.h"
 //#include "renderer/CCFrameBuffer.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 // #include "base/CCUserDefault.h"
 // #include "base/ccFPSImages.h"
 #include "base/CCScheduler.h"
@@ -63,6 +63,7 @@ THE SOFTWARE.
 //#include "base/CCAsyncTaskPool.h"
 #include "base/ObjectFactory.h"
 //#include "platform/CCApplication.h"
+#include "platform/CCGLView.h"
 #include "Urho3DContext.h"
 #include "../Core/Context.h"
 #include "../Graphics/Graphics.h"
@@ -245,8 +246,8 @@ void Director::setGLDefaultValues()
     // This method SHOULD be called only after openGLView_ was initialized
     CCASSERT(_openGLView, "opengl view should not be null");
 
-    setAlphaBlending(true);
-    setDepthTest(false);
+//     setAlphaBlending(true);
+//     setDepthTest(false);
     setProjection(_projection);
 }
 
@@ -293,8 +294,8 @@ void Director::drawScene()
         _renderer->clearDrawStats();
 
         //render the scene
-//         if (_openGLView)
-//             _openGLView->renderScene(_runningScene, _renderer);
+        if (_openGLView)
+            _openGLView->renderScene(_runningScene, _renderer);
         _runningScene->render(_renderer, Mat4::IDENTITY, nullptr);
         _eventDispatcher->dispatchEvent(_eventAfterVisit);
     }
@@ -374,8 +375,8 @@ void Director::setOpenGLView(GLView* openGLView)
 {
 //    CCASSERT(openGLView, "opengl view should not be null");
 
-//     if (_openGLView != openGLView)
-//     {
+    if (_openGLView != openGLView)
+    {
 //         // Configuration. Gather GPU info
 //         Configuration* conf = Configuration::getInstance();
 //         conf->gatherGPUInfo();
@@ -383,18 +384,18 @@ void Director::setOpenGLView(GLView* openGLView)
 // 
 //         if (_openGLView)
 //             _openGLView->release();
-//         _openGLView = openGLView;
+         _openGLView = openGLView;
 //         _openGLView->retain();
+
+        // set size
+        _winSizeInPoints = _openGLView->getDesignResolutionSize();
+
+        _isStatusLabelUpdated = true;
 // 
-//         // set size
-//         _winSizeInPoints = _openGLView->getDesignResolutionSize();
-// 
-//         _isStatusLabelUpdated = true;
-// 
-//         if (_openGLView)
-//         {
-//             setGLDefaultValues();
-//         }
+        if (_openGLView)
+        {
+            setGLDefaultValues();
+        }
 // 
 //         _renderer->initGLView();
 // 
@@ -404,7 +405,7 @@ void Director::setOpenGLView(GLView* openGLView)
         {
             _eventDispatcher->setEnabled(true);
         }
-//    }
+    }
 }
 
 TextureCache* Director::getTextureCache() const
@@ -428,10 +429,10 @@ void Director::destroyTextureCache()
 
 void Director::setViewport()
 {
-//     if (_openGLView)
-//     {
-//         _openGLView->setViewPortInPoints(0, 0, _winSizeInPoints.width, _winSizeInPoints.height);
-//     }
+    if (_openGLView)
+    {
+        _openGLView->setViewPortInPoints(0, 0, _winSizeInPoints.width, _winSizeInPoints.height);
+    }
 }
 
 void Director::setNextDeltaTimeZero(bool nextDeltaTimeZero)
@@ -764,8 +765,7 @@ Vec2 Director::convertToGL(const Vec2& uiPoint)
     // Calculate z=0 using -> transform*[0, 0, 0, 1]/w
     float zClip = transform.m[14] / transform.m[15];
 
-    auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
-    Size glSize = { (float)urho3dSize.x_, (float)urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
+    Size glSize = _openGLView->getDesignResolutionSize();
     Vec4 clipCoord(2.0f * uiPoint.x / glSize.width - 1.0f, 1.0f - 2.0f * uiPoint.y / glSize.height, zClip, 1);
 
     Vec4 glCoord;
@@ -797,10 +797,9 @@ Vec2 Director::convertToUI(const Vec2& glPoint)
     clipCoord.y = clipCoord.y / clipCoord.w;
     clipCoord.z = clipCoord.z / clipCoord.w;
 
-    auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
-    Size glSize = { (float)urho3dSize.x_, (float)urho3dSize.y_ };// _openGLView->getDesignResolutionSize();
-    float factor = 1.0f / glCoord.w;
-    return Vec2(glSize.width * (clipCoord.x * 0.5f + 0.5f) * factor, glSize.height * (-clipCoord.y * 0.5f + 0.5f) * factor);
+	Size glSize = _openGLView->getDesignResolutionSize();
+	float factor = 1.0f / glCoord.w;
+	return Vec2(glSize.width * (clipCoord.x * 0.5f + 0.5f) * factor, glSize.height * (-clipCoord.y * 0.5f + 0.5f) * factor);
 }
 
 const Size& Director::getWinSize(void) const
@@ -815,45 +814,38 @@ Size Director::getWinSizeInPixels() const
 
 Size Director::getVisibleSize() const
 {
-//     if (_openGLView)
-//     {
-//         return _openGLView->getVisibleSize();
-//     }
-//     else
-//     {
-//         return Size::ZERO;
-//     }
-    auto urho3dSize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetSize();
-    return { (float)urho3dSize.x_, (float)urho3dSize.y_ };
+    if (_openGLView)
+    {
+        return _openGLView->getVisibleSize();
+    }
+    else
+    {
+        return Size::ZERO;
+    }
 }
 
 Vec2 Director::getVisibleOrigin() const
 {
-//     if (_openGLView)
-//     {
-//         return _openGLView->getVisibleOrigin();
-//     }
-//     else
-//     {
-//         return Vec2::ZERO;
-//     }
-    return Vec2::ZERO;
+    if (_openGLView)
+    {
+        return _openGLView->getVisibleOrigin();
+    }
+    else
+    {
+        return Vec2::ZERO;
+    }
 }
 
 Rect Director::getSafeAreaRect() const
 {
-//     if (_openGLView)
-//     {
-//         return _openGLView->getSafeAreaRect();
-//     }
-//     else
-//     {
-//        return Rect::ZERO;
-//    }
-	Rect ret;
-	ret.size = getVisibleSize();
-	ret.origin = getVisibleOrigin();
-	return ret;
+    if (_openGLView)
+    {
+        return _openGLView->getSafeAreaRect();
+    }
+    else
+    {
+       return Rect::ZERO;
+   }
 }
 
 // scene management

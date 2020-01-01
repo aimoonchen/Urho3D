@@ -34,7 +34,7 @@
 #include "platform/CCImage.h"
 #include "base/CCNinePatchImageParser.h"
 #include "2d/CCDrawNode.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "renderer/CCRenderer.h"
 #include "../Graphics/Texture2D.h"
 using namespace cocos2d;

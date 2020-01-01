@@ -182,7 +182,7 @@ public:
      * Get the GLView.
      * @lua NA
      */
-    //GLView* getOpenGLView() { return _openGLView; }
+    GLView* getOpenGLView() { return _openGLView; }
     /**
      * Sets the GLView.
      * @lua NA
@@ -653,7 +653,7 @@ protected:
 
     /* The _openGLView, where everything is rendered, GLView is a abstract class,cocos2d-x provide GLViewImpl
      which inherit from it as default renderer context,you can have your own by inherit from it*/
-    //GLView* _openGLView = nullptr;
+    GLView* _openGLView = nullptr;
 
     //texture cache belongs to this director
     TextureCache* _textureCache = nullptr;

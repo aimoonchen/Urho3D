@@ -1592,6 +1592,8 @@ namespace Urho3D
 		}
 #if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectKeyDown(urho3DKeyToCeguiKey(key));
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_->OnKey(key, true);
 #endif
 // 		// Dismiss modal element if any when ESC key is pressed
 // 		if (key == KEY_ESCAPE && HasModalElement())
@@ -1654,14 +1656,14 @@ namespace Urho3D
 	
 	void GUI::HandleKeyUp(StringHash eventType, VariantMap& eventData)
 	{
-#if URHO3D_GUI == URHO3D_CEGUI
 		using namespace KeyUp;
-
 		mouseButtons_ = MouseButtonFlags(eventData[P_BUTTONS].GetUInt());
 		qualifiers_ = QualifierFlags(eventData[P_QUALIFIERS].GetUInt());
 		auto key = (Key)eventData[P_KEY].GetUInt();
-
+#if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectKeyUp(urho3DKeyToCeguiKey(key));
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_->OnKey(key, false);
 #endif
 	}
 
@@ -1943,6 +1945,8 @@ namespace Urho3D
 	{
 #if URHO3D_GUI == URHO3D_CEGUI
 		gui_impl_->injectMousePosition(x, y);
+#elif URHO3D_GUI == URHO3D_FARYGUI
+		gui_impl_->OnMouseMove(x, y);
 #endif
 	}
 }

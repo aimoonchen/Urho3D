@@ -38,7 +38,7 @@
 #include "2d/CCScene.h"
 #include "base/CCDirector.h"
 #include "base/CCEventType.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "base/CCEventTouch.h"
 #define DUMP_LISTENER_ITEM_PRIORITY_INFO 0
 
@@ -830,52 +830,52 @@ void EventDispatcher::dispatchTouchEventToListeners(EventListenerVector* listene
     auto scene = Director::getInstance()->getRunningScene();
     if (scene && sceneGraphPriorityListeners)
     {
-//         if (!shouldStopPropagation)
-//         {
-//             // priority == 0, scene graph priority
-//             
-//             // first, get all enabled, unPaused and registered listeners
-//             std::vector<EventListener*> sceneListeners;
-//             for (auto& l : *sceneGraphPriorityListeners)
-//             {
-//                 if (l->isEnabled() && !l->isPaused() && l->isRegistered())
-//                 {
-//                     sceneListeners.push_back(l);
-//                 }
-//             }
-//             // second, for all camera call all listeners
-//             // get a copy of cameras, prevent it's been modified in listener callback
-//             // if camera's depth is greater, process it earlier
-//             auto cameras = scene->getCameras();
-//             for (auto rit = cameras.rbegin(), ritRend = cameras.rend(); rit != ritRend; ++rit)
-//             {
-//                 Camera* camera = *rit;
-//                 if (camera->isVisible() == false)
-//                 {
-//                     continue;
-//                 }
-//                 
-//                 Camera::_visitingCamera = camera;
-//                 auto cameraFlag = (unsigned short)camera->getCameraFlag();
-//                 for (auto& l : sceneListeners)
-//                 {
-//                     if (nullptr == l->getAssociatedNode() || 0 == (l->getAssociatedNode()->getCameraMask() & cameraFlag))
-//                     {
-//                         continue;
-//                     }
-//                     if (onEvent(l))
-//                     {
-//                         shouldStopPropagation = true;
-//                         break;
-//                     }
-//                 }
-//                 if (shouldStopPropagation)
-//                 {
-//                     break;
-//                 }
-//             }
-//             Camera::_visitingCamera = nullptr;
-//         }
+        if (!shouldStopPropagation)
+        {
+            // priority == 0, scene graph priority
+            
+            // first, get all enabled, unPaused and registered listeners
+            std::vector<EventListener*> sceneListeners;
+            for (auto& l : *sceneGraphPriorityListeners)
+            {
+                if (l->isEnabled() && !l->isPaused() && l->isRegistered())
+                {
+                    sceneListeners.push_back(l);
+                }
+            }
+            // second, for all camera call all listeners
+            // get a copy of cameras, prevent it's been modified in listener callback
+            // if camera's depth is greater, process it earlier
+            auto cameras = scene->getCameras();
+            for (auto rit = cameras.rbegin(), ritRend = cameras.rend(); rit != ritRend; ++rit)
+            {
+                Camera* camera = *rit;
+                if (camera->isVisible() == false)
+                {
+                    continue;
+                }
+                
+                Camera::_visitingCamera = camera;
+                auto cameraFlag = (unsigned short)camera->getCameraFlag();
+                for (auto& l : sceneListeners)
+                {
+                    if (nullptr == l->getAssociatedNode() || 0 == (l->getAssociatedNode()->getCameraMask() & cameraFlag))
+                    {
+                        continue;
+                    }
+                    if (onEvent(l))
+                    {
+                        shouldStopPropagation = true;
+                        break;
+                    }
+                }
+                if (shouldStopPropagation)
+                {
+                    break;
+                }
+            }
+            Camera::_visitingCamera = nullptr;
+        }
     }
     
     if (fixedPriorityListeners)

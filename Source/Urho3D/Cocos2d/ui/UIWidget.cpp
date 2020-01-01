@@ -35,7 +35,7 @@ THE SOFTWARE.
 //#include "renderer/CCGLProgram.h"
 //#include "renderer/CCGLProgramState.h"
 //#include "renderer/ccShaders.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "base/CCTouch.h"
 #include "2d/CCSprite.h"
 #include "ui/UIScale9Sprite.h"
@@ -1001,21 +1001,21 @@ bool Widget::isClippingParentContainsPoint(const Vec2 &pt)
     }
 
 
-//     if (clippingParent)
-//     {
-//         bool bRet = false;
-//         auto camera = Camera::getVisitingCamera();
-//         // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
-//         if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
-//         {
-//             bRet = true;
-//         }
-//         if (bRet)
-//         {
-//             return clippingParent->isClippingParentContainsPoint(pt);
-//         }
-//         return false;
-//     }
+    if (clippingParent)
+    {
+        bool bRet = false;
+        auto camera = Camera::getVisitingCamera();
+        // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
+        if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
+        {
+            bRet = true;
+        }
+        if (bRet)
+        {
+            return clippingParent->isClippingParentContainsPoint(pt);
+        }
+        return false;
+    }
     return true;
 }
 

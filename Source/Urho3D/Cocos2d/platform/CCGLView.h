@@ -94,7 +94,7 @@ NS_CC_BEGIN
 
 class Scene;
 class Renderer;
-class VRIRenderer;
+//class VRIRenderer;
 
 /**
  * @addtogroup platform
@@ -120,19 +120,19 @@ public:
      *
      * @lua endToLua
      */
-    virtual void end() = 0;
-
-    /** Get whether opengl render system is ready, subclass must implement this method. */
-    virtual bool isOpenGLReady() = 0;
-
-    /** Exchanges the front and back buffers, subclass must implement this method. */
-    virtual void swapBuffers() = 0;
-
-    /** Open or close IME keyboard , subclass must implement this method. 
-     *
-     * @param open Open or close IME keyboard.
-     */
-    virtual void setIMEKeyboardState(bool open) = 0;
+//     virtual void end() = 0;
+// 
+//     /** Get whether opengl render system is ready, subclass must implement this method. */
+//     virtual bool isOpenGLReady() = 0;
+// 
+//     /** Exchanges the front and back buffers, subclass must implement this method. */
+//     virtual void swapBuffers() = 0;
+// 
+//     /** Open or close IME keyboard , subclass must implement this method. 
+//      *
+//      * @param open Open or close IME keyboard.
+//      */
+//     virtual void setIMEKeyboardState(bool open) = 0;
     
     /** When the window is closed, it will return false if the platforms is Ios or Android.
      * If the platforms is windows or Mac,it will return true.
@@ -145,16 +145,16 @@ public:
      *
      * @param glContextAttrs The OpenGL context attrs.
      */
-    static void setGLContextAttrs(GLContextAttrs& glContextAttrs);
-    
-    /** Return the OpenGL context attrs. 
-     *
-     * @return Return the OpenGL context attrs.
-     */
-    static GLContextAttrs getGLContextAttrs();
-    
-    /** The OpenGL context attrs. */
-    static GLContextAttrs _glContextAttrs;
+//     static void setGLContextAttrs(GLContextAttrs& glContextAttrs);
+//     
+//     /** Return the OpenGL context attrs. 
+//      *
+//      * @return Return the OpenGL context attrs.
+//      */
+//     static GLContextAttrs getGLContextAttrs();
+//     
+//     /** The OpenGL context attrs. */
+//     static GLContextAttrs _glContextAttrs;
 
     /** @deprecated
      * Polls input events. Subclass must implement methods if platform
@@ -427,14 +427,14 @@ public:
      */
     ResolutionPolicy getResolutionPolicy() const { return _resolutionPolicy; }
 
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-    virtual HWND getWin32Window() = 0;
-#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
-    virtual id getCocoaWindow() = 0;
-    virtual id getNSGLContext() = 0; // stevetranby: added
-#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) */
+// #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+//     virtual HWND getWin32Window() = 0;
+// #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
+// 
+// #if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+//     virtual id getCocoaWindow() = 0;
+//     virtual id getNSGLContext() = 0; // stevetranby: added
+// #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) */
 
     /**
      * Renders a Scene with a Renderer
@@ -446,8 +446,8 @@ public:
      * Sets a VR renderer. 
      * if `vrrenderer` is `nullptr` VR will be disabled
      */
-    void setVR(VRIRenderer* vrrenderer);
-    VRIRenderer* getVR() const;
+//     void setVR(VRIRenderer* vrrenderer);
+//     VRIRenderer* getVR() const;
 
 protected:
     void updateDesignResolutionSize();
@@ -468,7 +468,7 @@ protected:
     ResolutionPolicy _resolutionPolicy;
 
     // VR stuff
-    VRIRenderer* _vrImpl;
+    //VRIRenderer* _vrImpl;
 };
 
 // end of platform group

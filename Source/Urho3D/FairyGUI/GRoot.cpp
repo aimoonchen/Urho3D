@@ -1,5 +1,6 @@
 #include "GRoot.h"
 //#include "AudioEngine.h"
+#include "platform/CCGLView.h"
 #include "UIConfig.h"
 #include "UIPackage.h"
 #include "Urho3DContext.h"
@@ -546,10 +547,8 @@ bool GRoot::initWithScene(cocos2d::Scene* scene, int zOrder)
 
 void GRoot::onWindowSizeChanged()
 {
-    auto ctx = GetUrho3DContext();
-    auto graphics = ctx->GetSubsystem<Urho3D::Graphics>();
-    const cocos2d::Size& rs = Size(graphics->GetWidth(), graphics->GetHeight());// Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-    setSize(rs.width, rs.height);
+	const cocos2d::Size& rs = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+	setSize(rs.width, rs.height);
 
     updateContentScaleLevel();
 }

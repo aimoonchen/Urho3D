@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 #include "2d/CCScene.h"
 #include "base/CCDirector.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/ccUTF8.h"
@@ -70,13 +70,13 @@ Scene::Scene()
     _cameraOrderDirty = true;
     
     //create default camera
-//     _defaultCamera = Camera::create();
-//     addChild(_defaultCamera);
+    _defaultCamera = Camera::create();
+    addChild(_defaultCamera);
     
     _event = Director::getInstance()->getEventDispatcher()->addCustomEventListener(Director::EVENT_PROJECTION_CHANGED, std::bind(&Scene::onProjectionChanged, this, std::placeholders::_1));
     _event->retain();
     
-    //Camera::_visitingCamera = nullptr;
+    Camera::_visitingCamera = nullptr;
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
     DataManager::onSceneLoaderBegin();
@@ -178,24 +178,24 @@ std::string Scene::getDescription() const
 
 void Scene::onProjectionChanged(EventCustom* /*event*/)
 {
-//     if (_defaultCamera)
-//     {
-//         _defaultCamera->initDefault();
-//     }
+    if (_defaultCamera)
+    {
+        _defaultCamera->initDefault();
+    }
 }
 
-// static bool camera_cmp(const Camera* a, const Camera* b)
-// {
-//     return a->getRenderOrder() < b->getRenderOrder();
-// }
+static bool camera_cmp(const Camera* a, const Camera* b)
+{
+    return a->getRenderOrder() < b->getRenderOrder();
+}
 
 const std::vector<Camera*>& Scene::getCameras()
 {
-//     if (_cameraOrderDirty)
-//     {
-//         stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
-//         _cameraOrderDirty = false;
-//     }
+    if (_cameraOrderDirty)
+    {
+        stable_sort(_cameras.begin(), _cameras.end(), camera_cmp);
+        _cameraOrderDirty = false;
+    }
     return _cameras;
 }
 
@@ -209,40 +209,40 @@ void Scene::render(Renderer* renderer, const Mat4* eyeTransforms, const Mat4* ey
     auto director = Director::getInstance();
     Camera* defaultCamera = nullptr;
     const auto& transform = getNodeToParentTransform();
-    visit(renderer, transform, 0);
-    renderer->render();
-//     for (const auto& camera : getCameras())
-//     {
-//         if (!camera->isVisible())
-//             continue;
-// 
-//         Camera::_visitingCamera = camera;
-//         if (Camera::_visitingCamera->getCameraFlag() == CameraFlag::DEFAULT)
-//         {
-//             defaultCamera = Camera::_visitingCamera;
-//         }
-// 
-//         // There are two ways to modify the "default camera" with the eye Transform:
-//         // a) modify the "nodeToParentTransform" matrix
-//         // b) modify the "additional transform" matrix
-//         // both alternatives are correct, if the user manually modifies the camera with a camera->setPosition()
-//         // then the "nodeToParent transform" will be lost.
-//         // And it is important that the change is "permanent", because the matrix might be used for calculate
-//         // culling and other stuff.
-//         for (unsigned int i = 0; i < multiViewCount; ++i) {
-//             if (eyeProjections)
-//                 camera->setAdditionalProjection(eyeProjections[i] * camera->getProjectionMatrix().getInversed());
-//             if (eyeTransforms)
-//                 camera->setAdditionalTransform(eyeTransforms[i].getInversed());
-//             director->pushProjectionMatrix(i);
-//             director->loadProjectionMatrix(Camera::_visitingCamera->getViewProjectionMatrix(), i);
-//         }
-// 
-//         camera->apply();
-//         //clear background with max depth
-//         camera->clearBackground();
+//     visit(renderer, transform, 0);
+//     renderer->render();
+    for (const auto& camera : getCameras())
+    {
+        if (!camera->isVisible())
+            continue;
+
+        Camera::_visitingCamera = camera;
+        if (Camera::_visitingCamera->getCameraFlag() == CameraFlag::DEFAULT)
+        {
+            defaultCamera = Camera::_visitingCamera;
+        }
+
+        // There are two ways to modify the "default camera" with the eye Transform:
+        // a) modify the "nodeToParentTransform" matrix
+        // b) modify the "additional transform" matrix
+        // both alternatives are correct, if the user manually modifies the camera with a camera->setPosition()
+        // then the "nodeToParent transform" will be lost.
+        // And it is important that the change is "permanent", because the matrix might be used for calculate
+        // culling and other stuff.
+        for (unsigned int i = 0; i < multiViewCount; ++i) {
+            if (eyeProjections)
+                camera->setAdditionalProjection(eyeProjections[i] * camera->getProjectionMatrix().getInversed());
+            if (eyeTransforms)
+                camera->setAdditionalTransform(eyeTransforms[i].getInversed());
+            director->pushProjectionMatrix(i);
+            director->loadProjectionMatrix(Camera::_visitingCamera->getViewProjectionMatrix(), i);
+        }
+
+        camera->apply();
+        //clear background with max depth
+        camera->clearBackground();
 //         //visit the scene
-//         visit(renderer, transform, 0);
+        visit(renderer, transform, 0);
 // #if CC_USE_NAVMESH
 //         if (_navMesh && _navMeshDebugCamera == camera)
 //         {
@@ -250,8 +250,8 @@ void Scene::render(Renderer* renderer, const Mat4* eyeTransforms, const Mat4* ey
 //         }
 // #endif
 // 
-//         renderer->render();
-//         camera->restore();
+         renderer->render();
+         camera->restore();
 // 
 //         for (unsigned int i = 0; i < multiViewCount; ++i)
 //             director->popProjectionMatrix(i);
@@ -259,7 +259,7 @@ void Scene::render(Renderer* renderer, const Mat4* eyeTransforms, const Mat4* ey
 //         // we shouldn't restore the transform matrix since it could be used
 //         // from "update" or other parts of the game to calculate culling or something else.
 // //        camera->setNodeToParentTransform(eyeCopy);
-//     }
+     }
 // 
 // #if CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION
 //     if (_physics3DWorld && _physics3DWorld->isDebugDrawEnabled())
@@ -288,7 +288,7 @@ void Scene::render(Renderer* renderer, const Mat4* eyeTransforms, const Mat4* ey
 //     }
 // #endif
 // 
-//     Camera::_visitingCamera = nullptr;
+    Camera::_visitingCamera = nullptr;
 //    experimental::FrameBuffer::applyDefaultFBO();
 }
 
@@ -299,11 +299,11 @@ void Scene::removeAllChildren()
 
     Node::removeAllChildren();
 
-//     if (_defaultCamera)
-//     {
-//         addChild(_defaultCamera);
-//         _defaultCamera->release();
-//     }
+    if (_defaultCamera)
+    {
+        addChild(_defaultCamera);
+        //_defaultCamera->release();
+    }
 }
 
 #if CC_USE_3D_PHYSICS && CC_ENABLE_BULLET_INTEGRATION

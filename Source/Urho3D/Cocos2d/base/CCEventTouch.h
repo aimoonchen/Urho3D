@@ -33,10 +33,7 @@
  * @addtogroup base
  * @{
  */
-namespace Urho3D
-{
-    class FairyGUIImpl;
-}
+
 NS_CC_BEGIN
 
 class Touch;
@@ -95,7 +92,7 @@ private:
     EventCode _eventCode;
     std::vector<Touch*> _touches;
 
-    friend class Urho3D::FairyGUIImpl;
+    friend class GLView;
 };
 
 

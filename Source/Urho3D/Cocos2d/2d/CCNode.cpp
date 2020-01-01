@@ -37,7 +37,7 @@ THE SOFTWARE.
 #include "base/CCScheduler.h"
 #include "base/CCEventDispatcher.h"
 #include "base/ccUTF8.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "2d/CCActionManager.h"
 #include "2d/CCScene.h"
 #include "base/CCTouch.h"
@@ -1240,10 +1240,9 @@ uint32_t Node::processParentFlags(const Mat4& parentTransform, uint32_t parentFl
 
 bool Node::isVisitableByVisitingCamera() const
 {
-//     auto camera = Camera::getVisitingCamera();
-//     bool visibleByCamera = camera ? ((unsigned short)camera->getCameraFlag() & _cameraMask) != 0 : true;
-//     return visibleByCamera;
-    return true;
+    auto camera = Camera::getVisitingCamera();
+    bool visibleByCamera = camera ? ((unsigned short)camera->getCameraFlag() & _cameraMask) != 0 : true;
+    return visibleByCamera;
 }
 
 void Node::visit(Renderer* renderer, const Mat4 &parentTransform, uint32_t parentFlags)

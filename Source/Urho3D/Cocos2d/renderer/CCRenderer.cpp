@@ -45,8 +45,9 @@
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventType.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "2d/CCScene.h"
+#include "platform/CCGLView.h"
 
 #include "Urho3DContext.h"
 #include "../Core/Context.h"
@@ -826,7 +827,7 @@ void Renderer::drawBatchedTriangles()
 
         // capacity full ?
         if (batchesTotal + 1 >= _triBatchesToDrawCapacity) {
-            _triBatchesToDrawCapacity *= 1.4;
+            _triBatchesToDrawCapacity *= 1.4f;
             _triBatchesToDraw = (TriBatchToDraw*) realloc(_triBatchesToDraw, sizeof(_triBatchesToDraw[0]) * _triBatchesToDrawCapacity);
         }
 
@@ -846,7 +847,11 @@ void Renderer::drawBatchedTriangles()
     float uiScale_ = 1.0f;
 	unsigned alphaFormat = Urho3D::Graphics::GetAlphaFormat();
 	Urho3D::RenderSurface* surface = graphics_->GetRenderTarget(0);
-    Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
+    //Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
+	cocos2d::Size design = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+    Urho3D::IntVector2 viewSize{ (int)design.width, (int)design.height };
+    //auto vp = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetViewport();
+    //Urho3D::IntVector2 viewSize{ vp.Width(), vp.Height() };
     Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
 //     Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
 //     Urho3D::Vector2 offset(-1.0f, 1.0f);
@@ -1012,35 +1017,34 @@ void Renderer::flushTriangles()
 // helpers
 bool Renderer::checkVisibility(const Mat4 &transform, const Size &size)
 {
-    return true;
-//     auto director = Director::getInstance();
-//     auto scene = director->getRunningScene();
-//     
-//     //If draw to Rendertexture, return true directly.
-//     // only cull the default camera. The culling algorithm is valid for default camera.
-//     if (!scene || (scene && scene->_defaultCamera != Camera::getVisitingCamera()))
-//         return true;
-// 
-//     Rect visibleRect(director->getVisibleOrigin(), director->getVisibleSize());
-//     
-//     // transform center point to screen space
-//     float hSizeX = size.width/2;
-//     float hSizeY = size.height/2;
-//     Vec3 v3p(hSizeX, hSizeY, 0);
-//     transform.transformPoint(&v3p);
-//     Vec2 v2p = Camera::getVisitingCamera()->projectGL(v3p);
-// 
-//     // convert content size to world coordinates
-//     float wshw = std::max(fabsf(hSizeX * transform.m[0] + hSizeY * transform.m[4]), fabsf(hSizeX * transform.m[0] - hSizeY * transform.m[4]));
-//     float wshh = std::max(fabsf(hSizeX * transform.m[1] + hSizeY * transform.m[5]), fabsf(hSizeX * transform.m[1] - hSizeY * transform.m[5]));
-//     
-//     // enlarge visible rect half size in screen coord
-//     visibleRect.origin.x -= wshw;
-//     visibleRect.origin.y -= wshh;
-//     visibleRect.size.width += wshw * 2;
-//     visibleRect.size.height += wshh * 2;
-//     bool ret = visibleRect.containsPoint(v2p);
-//     return ret;
+    auto director = Director::getInstance();
+    auto scene = director->getRunningScene();
+    
+    //If draw to Rendertexture, return true directly.
+    // only cull the default camera. The culling algorithm is valid for default camera.
+    if (!scene || (scene && scene->_defaultCamera != Camera::getVisitingCamera()))
+        return true;
+
+    Rect visibleRect(director->getVisibleOrigin(), director->getVisibleSize());
+    
+    // transform center point to screen space
+    float hSizeX = size.width/2;
+    float hSizeY = size.height/2;
+    Vec3 v3p(hSizeX, hSizeY, 0);
+    transform.transformPoint(&v3p);
+    Vec2 v2p = Camera::getVisitingCamera()->projectGL(v3p);
+
+    // convert content size to world coordinates
+    float wshw = std::max(fabsf(hSizeX * transform.m[0] + hSizeY * transform.m[4]), fabsf(hSizeX * transform.m[0] - hSizeY * transform.m[4]));
+    float wshh = std::max(fabsf(hSizeX * transform.m[1] + hSizeY * transform.m[5]), fabsf(hSizeX * transform.m[1] - hSizeY * transform.m[5]));
+    
+    // enlarge visible rect half size in screen coord
+    visibleRect.origin.x -= wshw;
+    visibleRect.origin.y -= wshh;
+    visibleRect.size.width += wshw * 2;
+    visibleRect.size.height += wshh * 2;
+    bool ret = visibleRect.containsPoint(v2p);
+    return ret;
 }
 
 

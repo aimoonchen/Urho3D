@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "../Graphics/Texture2D.h"
 #include "Urho3DContext.h"
 #include "platform/CCGL.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 
 NS_CC_BEGIN
 // implementation of GridBase

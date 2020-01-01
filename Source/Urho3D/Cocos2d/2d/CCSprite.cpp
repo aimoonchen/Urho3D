@@ -39,7 +39,7 @@ THE SOFTWARE.
 #include "renderer/CCRenderer.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"
-//#include "2d/CCCamera.h"
+#include "2d/CCCamera.h"
 #include "Urho3DContext.h"
 #include "renderer/Texture2DUtils.h"
 #include "../Graphics/Graphics.h"
@@ -1064,7 +1064,7 @@ void Sprite::draw(Renderer *renderer, const Mat4 &transform, uint32_t flags)
 
 #if CC_USE_CULLING
     // Don't calculate the culling if the transform was not updated
-    auto visitingCamera = nullptr;// Camera::getVisitingCamera();
+    auto visitingCamera = Camera::getVisitingCamera();
     auto defaultCamera = Camera::getDefaultCamera();
     if (visitingCamera == nullptr) {
         _insideBounds = true;
