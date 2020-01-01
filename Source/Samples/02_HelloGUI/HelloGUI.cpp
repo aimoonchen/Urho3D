@@ -189,7 +189,7 @@ void HelloGUI::Start()
 
 	// Create a draggable Fish
 	CreateDraggableFish();
-
+    //GetSubsystem<Graphics>()->SetViewport
 #ifdef CC_PLATFORM_PC
     //fairygui::UIConfig::registerFont(fairygui::UIConfig::defaultFont, "fonts/DroidSansFallback.ttf");
 #endif

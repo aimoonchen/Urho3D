@@ -333,7 +333,12 @@ struct CC_DLL V2F_C4B_T2F_Triangle
     V2F_C4B_T2F b;
     V2F_C4B_T2F c;
 };
-
+struct CC_DLL V3F_C4B_T2F_Triangle
+{
+	V3F_C4B_T2F a;
+	V3F_C4B_T2F b;
+	V3F_C4B_T2F c;
+};
 /** @struct V2F_C4B_T2F_Quad
  * A Quad of V2F_C4B_T2F.
  */

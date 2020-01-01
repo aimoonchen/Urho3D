@@ -25,6 +25,7 @@
 #include "2d/CCDrawNode.h"
 #include "base/CCEventType.h"
 #include "base/CCConfiguration.h"
+#include "base/CCDirector.h"
 #include "renderer/CCRenderer.h"
 //#include "renderer/ccGLStateCache.h"
 //#include "renderer/CCGLProgramState.h"
@@ -34,6 +35,11 @@
 #include "base/CCEventDispatcher.h"
 #include "2d/CCActionCatmullRom.h"
 #include "platform/CCGL.h"
+#include "platform/CCGLView.h"
+#include "Urho3DContext.h"
+#include "../Core/Context.h"
+#include "../Core/Timer.h"
+#include "../Graphics/Graphics.h"
 #ifndef M_PI
 #define M_PI      3.14159265358
 #endif
@@ -116,6 +122,7 @@ DrawNode::DrawNode(GLfloat lineWidth)
 
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 #endif
+    vertexBuffer_ = new Urho3D::VertexBuffer(GetUrho3DContext());
 }
 
 DrawNode::~DrawNode()
@@ -166,7 +173,7 @@ void DrawNode::ensureCapacity(int count)
     if(_bufferCount + count > _bufferCapacity)
     {
         _bufferCapacity += MAX(_bufferCapacity, count);
-        _buffer = (V2F_C4B_T2F*)realloc(_buffer, _bufferCapacity*sizeof(V2F_C4B_T2F));
+        _buffer = (V3F_C4B_T2F*)realloc(_buffer, _bufferCapacity*sizeof(V3F_C4B_T2F));
     }
 }
 
@@ -177,7 +184,7 @@ void DrawNode::ensureCapacityGLPoint(int count)
     if(_bufferCountGLPoint + count > _bufferCapacityGLPoint)
     {
         _bufferCapacityGLPoint += MAX(_bufferCapacityGLPoint, count);
-        _bufferGLPoint = (V2F_C4B_T2F*)realloc(_bufferGLPoint, _bufferCapacityGLPoint*sizeof(V2F_C4B_T2F));
+        _bufferGLPoint = (V3F_C4B_T2F*)realloc(_bufferGLPoint, _bufferCapacityGLPoint*sizeof(V3F_C4B_T2F));
     }
 }
 
@@ -188,7 +195,7 @@ void DrawNode::ensureCapacityGLLine(int count)
     if(_bufferCountGLLine + count > _bufferCapacityGLLine)
     {
         _bufferCapacityGLLine += MAX(_bufferCapacityGLLine, count);
-        _bufferGLLine = (V2F_C4B_T2F*)realloc(_bufferGLLine, _bufferCapacityGLLine*sizeof(V2F_C4B_T2F));
+        _bufferGLLine = (V3F_C4B_T2F*)realloc(_bufferGLLine, _bufferCapacityGLLine*sizeof(V3F_C4B_T2F));
     }
 }
 
@@ -200,46 +207,46 @@ void DrawNode::setupBuffer()
 //         GL::bindVAO(_vao);
 //         glGenBuffers(1, &_vbo);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)* _bufferCapacity, _buffer, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)* _bufferCapacity, _buffer, GL_STREAM_DRAW);
 //         // vertex
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
 //         // color
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
 //         // texcoord
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 // 
 //         glGenVertexArrays(1, &_vaoGLLine);
 //         GL::bindVAO(_vaoGLLine);
 //         glGenBuffers(1, &_vboGLLine);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
 //         // vertex
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
 //         // color
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
 //         // texcoord
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 // 
 //         glGenVertexArrays(1, &_vaoGLPoint);
 //         GL::bindVAO(_vaoGLPoint);
 //         glGenBuffers(1, &_vboGLPoint);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLPoint);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
 //         // vertex
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_POSITION);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
 //         // color
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_COLOR);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
 //         // Texture coord as pointsize
 //         glEnableVertexAttribArray(GLProgram::VERTEX_ATTRIB_TEX_COORD);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 // 
 //         GL::bindVAO(0);
 //         glBindBuffer(GL_ARRAY_BUFFER, 0);
@@ -249,15 +256,15 @@ void DrawNode::setupBuffer()
 //     {
 //         glGenBuffers(1, &_vbo);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)* _bufferCapacity, _buffer, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)* _bufferCapacity, _buffer, GL_STREAM_DRAW);
 // 
 //         glGenBuffers(1, &_vboGLLine);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
 // 
 //         glGenBuffers(1, &_vboGLPoint);
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLPoint);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
 // 
 //         glBindBuffer(GL_ARRAY_BUFFER, 0);
 //     }
@@ -314,13 +321,17 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 //     glProgram->setUniformLocationWith1f(glProgram->getUniformLocation("u_alpha"), _displayedOpacity / 255.0);
 //     GL::blendFunc(_blendFunc.src, _blendFunc.dst);
 // 
-//     if (_dirty)
-//     {
+    if (_dirty)
+    {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacity, _buffer, GL_STREAM_DRAW);
-//         
-//         _dirty = false;
-//     }
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacity, _buffer, GL_STREAM_DRAW);
+		unsigned numVertices = _bufferCount;// vertexData.Size() / UI_VERTEX_SIZE;
+		if (vertexBuffer_->GetVertexCount() < numVertices || vertexBuffer_->GetVertexCount() > numVertices * 2)
+            vertexBuffer_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+
+        vertexBuffer_->SetData(_buffer);
+        _dirty = false;
+    }
 //     if (Configuration::getInstance()->supportsShareableVAO())
 //     {
 //         GL::bindVAO(_vao);
@@ -331,11 +342,11 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 // 
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 //         // vertex
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
 //         // color
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
 //         // texcoord
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 //     }
 // 
 //     glDrawArrays(GL_TRIANGLES, 0, _bufferCount);
@@ -348,6 +359,149 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 //     
 //     CC_INCREMENT_GL_DRAWN_BATCHES_AND_VERTICES(1, _bufferCount);
 //     CHECK_GL_ERROR_DEBUG();
+		// Engine does not render when window is closed or device is lost
+//	assert(graphics_ && graphics_->IsInitialized() && !graphics_->IsDeviceLost());
+    auto graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+	// 	if (batches.Empty())
+	// 		return;
+	float uiScale_ = 1.0f;
+	unsigned alphaFormat = Urho3D::Graphics::GetAlphaFormat();
+	Urho3D::RenderSurface* surface = graphics_->GetRenderTarget(0);
+	//Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
+	cocos2d::Size design = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+	Urho3D::IntVector2 viewSize{ (int)design.width, (int)design.height };
+	//auto vp = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetViewport();
+	//Urho3D::IntVector2 viewSize{ vp.Width(), vp.Height() };
+	Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
+	//     Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
+	//     Urho3D::Vector2 offset(-1.0f, 1.0f);
+	Urho3D::Vector2 scale(2.0f * invScreenSize.x_, 2.0f * invScreenSize.y_);
+	Urho3D::Vector2 offset(-1.0f, -1.0f);
+	if (surface)
+	{
+#ifdef URHO3D_OPENGL
+		// On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the
+		// same way as a render texture produced on Direct3D.
+		offset.y_ = -offset.y_;
+		scale.y_ = -scale.y_;
+#endif
+	}
+
+	Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
+	projection.m00_ = scale.x_ * uiScale_;
+	projection.m03_ = offset.x_;
+	projection.m11_ = scale.y_ * uiScale_;
+	projection.m13_ = offset.y_;
+	projection.m22_ = 1.0f;
+	projection.m23_ = 0.0f;
+	projection.m33_ = 1.0f;
+
+	graphics_->ClearParameterSources();
+	graphics_->SetColorWrite(true);
+#ifdef URHO3D_OPENGL
+	// Reverse winding if rendering to texture on OpenGL
+	if (surface)
+		graphics_->SetCullMode(Urho3D::CULL_CW);
+	else
+#endif
+		//graphics_->SetCullMode(Urho3D::CULL_CCW);
+		graphics_->SetCullMode(Urho3D::CULL_CW);
+	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
+	graphics_->SetDepthWrite(false);
+	graphics_->SetFillMode(Urho3D::FILL_SOLID);
+	graphics_->SetStencilTest(false);
+	graphics_->SetVertexBuffer(vertexBuffer_);
+	//graphics_->SetIndexBuffer(indexBuffer_);
+
+	Urho3D::ShaderVariation* noTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR");
+	Urho3D::ShaderVariation* diffTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "DIFFMAP VERTEXCOLOR");
+	Urho3D::ShaderVariation* noTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR");
+	Urho3D::ShaderVariation* diffTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP VERTEXCOLOR");
+	Urho3D::ShaderVariation* diffMaskTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP ALPHAMASK VERTEXCOLOR");
+	Urho3D::ShaderVariation* alphaTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "ALPHAMAP VERTEXCOLOR");
+
+
+	//for (unsigned i = batchStart; i < batchEnd; ++i)
+	for (int i = 0; i < 1/*batchesTotal*/; ++i)
+	{
+		// 		const UIBatch& batch = batches[i];
+		// 		if (batch.vertexStart_ == batch.vertexEnd_)
+		// 			continue;
+
+		Urho3D::ShaderVariation* ps;
+		Urho3D::ShaderVariation* vs;
+
+        auto texture = nullptr;// _triBatchesToDraw[i].cmd->GetTexture();
+        auto blendType = _blendFunc;// _triBatchesToDraw[i].cmd->getBlendType();
+		Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
+		if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
+		{
+			blendMode = Urho3D::BLEND_PREMULALPHA;
+		}
+		else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
+		{
+			blendMode = Urho3D::BLEND_ALPHA;
+		}
+		else if (blendType == BlendFunc::ADDITIVE)
+		{
+			blendMode = Urho3D::BLEND_ADD;
+		}
+
+		if (!texture)
+		{
+			ps = noTexturePS;
+			vs = noTextureVS;
+		}
+// 		else
+// 		{
+// 			// If texture contains only an alpha channel, use alpha shader (for fonts)
+// 			vs = diffTextureVS;
+// 
+// 			if (texture->GetFormat() == alphaFormat)
+// 				ps = alphaTexturePS;
+// 			// 			else if (batch.blendMode_ != Urho3D::BLEND_ALPHA && batch.blendMode_ != Urho3D::BLEND_ADDALPHA && batch.blendMode_ != Urho3D::BLEND_PREMULALPHA)
+// 			// 				ps = diffMaskTexturePS;
+// 			else
+// 				ps = diffTexturePS;
+// 		}
+
+		graphics_->SetShaders(vs, ps);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
+			graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
+
+		float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+		graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+		graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
+
+		//         Urho3D::IntRect scissor = batch.scissor_;
+		// 		scissor.left_ = (int)(scissor.left_ * uiScale_);
+		// 		scissor.top_ = (int)(scissor.top_ * uiScale_);
+		// 		scissor.right_ = (int)(scissor.right_ * uiScale_);
+		// 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
+
+				// Flip scissor vertically if using OpenGL texture rendering
+#ifdef URHO3D_OPENGL
+		if (surface)
+		{
+			// 			int top = scissor.top_;
+			// 			int bottom = scissor.bottom_;
+			// 			scissor.top_ = viewSize.y_ - bottom;
+			// 			scissor.bottom_ = viewSize.y_ - top;
+		}
+#endif
+
+		graphics_->SetBlendMode(blendMode);
+		//		graphics_->SetScissorTest(true, scissor);
+		//graphics_->SetTexture(0, texture);
+		// 		graphics_->Draw(Urho3D::TRIANGLE_LIST, batch.vertexStart_ / UI_VERTEX_SIZE,
+		// 			(batch.vertexEnd_ - batch.vertexStart_) / UI_VERTEX_SIZE);
+        graphics_->Draw(Urho3D::TRIANGLE_LIST, 0, _bufferCount);
+		//graphics_->Draw(Urho3D::TRIANGLE_LIST, _triBatchesToDraw[i].offset, _triBatchesToDraw[i].indicesToDraw, 0, 0);
+	}
 }
 
 void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
@@ -362,7 +516,7 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 //     if (_dirtyGLLine)
 //     {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
 //         _dirtyGLLine = false;
 //     }
 //     if (Configuration::getInstance()->supportsShareableVAO())
@@ -374,11 +528,11 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
 //         GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
 //         // vertex
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
 //         // color
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
 //         // texcoord
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 //     }
 // 
 //     glLineWidth(_lineWidth);
@@ -407,7 +561,7 @@ void DrawNode::onDrawGLPoint(const Mat4 &transform, uint32_t /*flags*/)
 //     if (_dirtyGLPoint)
 //     {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLPoint);
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(V2F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
+//         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLPoint, _bufferGLPoint, GL_STREAM_DRAW);
 //         
 //         _dirtyGLPoint = false;
 //     }
@@ -420,9 +574,9 @@ void DrawNode::onDrawGLPoint(const Mat4 &transform, uint32_t /*flags*/)
 //     {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLPoint);
 //         GL::enableVertexAttribs( GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, vertices));
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, colors));
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V2F_C4B_T2F), (GLvoid *)offsetof(V2F_C4B_T2F, texCoords));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, vertices));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, colors));
+//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, sizeof(V3F_C4B_T2F), (GLvoid *)offsetof(V3F_C4B_T2F, texCoords));
 //     }
 //     
 //     glDrawArrays(GL_POINTS, 0, _bufferCountGLPoint);
@@ -442,8 +596,8 @@ void DrawNode::drawPoint(const Vec2& position, const float pointSize, const Colo
 {
     ensureCapacityGLPoint(1);
     
-    V2F_C4B_T2F *point = (V2F_C4B_T2F*)(_bufferGLPoint + _bufferCountGLPoint);
-    V2F_C4B_T2F a = {position, Color4B(color), Tex2F(pointSize,0)};
+    V3F_C4B_T2F *point = (V3F_C4B_T2F*)(_bufferGLPoint + _bufferCountGLPoint);
+    V3F_C4B_T2F a = { Vec3(position.x, position.y, 0), Color4B(color), Tex2F(pointSize,0)};
     *point = a;
     
     _bufferCountGLPoint += 1;
@@ -459,11 +613,11 @@ void DrawNode::drawPoints(const Vec2 *position, unsigned int numberOfPoints, con
 {
     ensureCapacityGLPoint(numberOfPoints);
     
-    V2F_C4B_T2F *point = (V2F_C4B_T2F*)(_bufferGLPoint + _bufferCountGLPoint);
+    V3F_C4B_T2F *point = (V3F_C4B_T2F*)(_bufferGLPoint + _bufferCountGLPoint);
     
     for(unsigned int i=0; i < numberOfPoints; i++,point++)
     {
-        V2F_C4B_T2F a = {position[i], Color4B(color), Tex2F(pointSize,0)};
+        V3F_C4B_T2F a = { Vec3(position[i].x, position[i].y, 0), Color4B(color), Tex2F(pointSize,0)};
         *point = a;
     }
     
@@ -475,10 +629,10 @@ void DrawNode::drawLine(const Vec2 &origin, const Vec2 &destination, const Color
 {
     ensureCapacityGLLine(2);
     
-    V2F_C4B_T2F *point = (V2F_C4B_T2F*)(_bufferGLLine + _bufferCountGLLine);
+    V3F_C4B_T2F *point = (V3F_C4B_T2F*)(_bufferGLLine + _bufferCountGLLine);
     
-    V2F_C4B_T2F a = {origin, Color4B(color), Tex2F(0.0, 0.0)};
-    V2F_C4B_T2F b = {destination, Color4B(color), Tex2F(0.0, 0.0)};
+    V3F_C4B_T2F a = { Vec3(origin.x, origin.y, 0), Color4B(color), Tex2F(0.0, 0.0)};
+    V3F_C4B_T2F b = { Vec3(destination.x, destination.y, 0), Color4B(color), Tex2F(0.0, 0.0)};
     
     *point = a;
     *(point+1) = b;
@@ -509,13 +663,13 @@ void DrawNode::drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool clos
         ensureCapacityGLLine(vertex_count);
     }
     
-    V2F_C4B_T2F *point = (V2F_C4B_T2F*)(_bufferGLLine + _bufferCountGLLine);
+    V3F_C4B_T2F *point = (V3F_C4B_T2F*)(_bufferGLLine + _bufferCountGLLine);
  
     unsigned int i = 0;
     for(; i<numberOfPoints-1; i++)
     {
-        V2F_C4B_T2F a = {poli[i], Color4B(color), Tex2F(0.0, 0.0)};
-        V2F_C4B_T2F b = {poli[i+1], Color4B(color), Tex2F(0.0, 0.0)};
+        V3F_C4B_T2F a = { Vec3(poli[i].x, poli[i].y, 0), Color4B(color), Tex2F(0.0, 0.0)};
+        V3F_C4B_T2F b = { Vec3(poli[i+1].x, poli[i + 1].y, 0), Color4B(color), Tex2F(0.0, 0.0)};
         
         *point = a;
         *(point+1) = b;
@@ -523,8 +677,8 @@ void DrawNode::drawPoly(const Vec2 *poli, unsigned int numberOfPoints, bool clos
     }
     if(closePolygon)
     {
-        V2F_C4B_T2F a = {poli[i], Color4B(color), Tex2F(0.0, 0.0)};
-        V2F_C4B_T2F b = {poli[0], Color4B(color), Tex2F(0.0, 0.0)};
+        V3F_C4B_T2F a = { Vec3(poli[i].x, poli[i].y, 0), Color4B(color), Tex2F(0.0, 0.0)};
+        V3F_C4B_T2F b = { Vec3(poli[0].x, poli[0].y, 0), Color4B(color), Tex2F(0.0, 0.0)};
         *point = a;
         *(point+1) = b;
     }
@@ -656,14 +810,14 @@ void DrawNode::drawDot(const Vec2 &pos, float radius, const Color4F &color)
     unsigned int vertex_count = 2*3;
     ensureCapacity(vertex_count);
     
-    V2F_C4B_T2F a = {Vec2(pos.x - radius, pos.y - radius), Color4B(color), Tex2F(-1.0, -1.0) };
-    V2F_C4B_T2F b = {Vec2(pos.x - radius, pos.y + radius), Color4B(color), Tex2F(-1.0,  1.0) };
-    V2F_C4B_T2F c = {Vec2(pos.x + radius, pos.y + radius), Color4B(color), Tex2F( 1.0,  1.0) };
-    V2F_C4B_T2F d = {Vec2(pos.x + radius, pos.y - radius), Color4B(color), Tex2F( 1.0, -1.0) };
+    V3F_C4B_T2F a = {Vec3(pos.x - radius, pos.y - radius, 0), Color4B(color), Tex2F(-1.0, -1.0) };
+    V3F_C4B_T2F b = {Vec3(pos.x - radius, pos.y + radius, 0), Color4B(color), Tex2F(-1.0,  1.0) };
+    V3F_C4B_T2F c = {Vec3(pos.x + radius, pos.y + radius, 0), Color4B(color), Tex2F( 1.0,  1.0) };
+    V3F_C4B_T2F d = {Vec3(pos.x + radius, pos.y - radius, 0), Color4B(color), Tex2F( 1.0, -1.0) };
     
-    V2F_C4B_T2F_Triangle *triangles = (V2F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
-    V2F_C4B_T2F_Triangle triangle0 = {a, b, c};
-    V2F_C4B_T2F_Triangle triangle1 = {a, c, d};
+    V3F_C4B_T2F_Triangle *triangles = (V3F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
+    V3F_C4B_T2F_Triangle triangle0 = {a, b, c};
+    V3F_C4B_T2F_Triangle triangle1 = {a, c, d};
     triangles[0] = triangle0;
     triangles[1] = triangle1;
     
@@ -704,47 +858,47 @@ void DrawNode::drawSegment(const Vec2 &from, const Vec2 &to, float radius, const
     Vec2 v7 = v2fadd(a, v2fadd(nw, tw));
     
     
-    V2F_C4B_T2F_Triangle *triangles = (V2F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
+    V3F_C4B_T2F_Triangle *triangles = (V3F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
     
-    V2F_C4B_T2F_Triangle triangles0 = {
-        {v0, Color4B(color), __t(v2fneg(v2fadd(n, t)))},
-        {v1, Color4B(color), __t(v2fsub(n, t))},
-        {v2, Color4B(color), __t(v2fneg(n))},
+    V3F_C4B_T2F_Triangle triangles0 = {
+        {Vec3(v0.x,v0.y,0), Color4B(color), __t(v2fneg(v2fadd(n, t)))},
+        {Vec3(v1.x,v1.y,0), Color4B(color), __t(v2fsub(n, t))},
+        {Vec3(v2.x,v2.y,0), Color4B(color), __t(v2fneg(n))},
     };
     triangles[0] = triangles0;
     
-    V2F_C4B_T2F_Triangle triangles1 = {
-        {v3, Color4B(color), __t(n)},
-        {v1, Color4B(color), __t(v2fsub(n, t))},
-        {v2, Color4B(color), __t(v2fneg(n))},
+    V3F_C4B_T2F_Triangle triangles1 = {
+        {Vec3(v3.x,v3.y,0), Color4B(color), __t(n)},
+        {Vec3(v1.x,v1.y,0), Color4B(color), __t(v2fsub(n, t))},
+        {Vec3(v2.x,v2.y,0), Color4B(color), __t(v2fneg(n))},
     };
     triangles[1] = triangles1;
     
-    V2F_C4B_T2F_Triangle triangles2 = {
-        {v3, Color4B(color), __t(n)},
-        {v4, Color4B(color), __t(v2fneg(n))},
-        {v2, Color4B(color), __t(v2fneg(n))},
+    V3F_C4B_T2F_Triangle triangles2 = {
+        {Vec3(v3.x,v3.y,0), Color4B(color), __t(n)},
+        {Vec3(v4.x,v4.y,0), Color4B(color), __t(v2fneg(n))},
+        {Vec3(v2.x,v2.y,0), Color4B(color), __t(v2fneg(n))},
     };
     triangles[2] = triangles2;
 
-    V2F_C4B_T2F_Triangle triangles3 = {
-        {v3, Color4B(color), __t(n)},
-        {v4, Color4B(color), __t(v2fneg(n))},
-        {v5, Color4B(color), __t(n) },
+    V3F_C4B_T2F_Triangle triangles3 = {
+        {Vec3(v3.x,v3.y,0), Color4B(color), __t(n)},
+        {Vec3(v4.x,v4.y,0), Color4B(color), __t(v2fneg(n))},
+        {Vec3(v5.x,v5.y,0), Color4B(color), __t(n) },
     };
     triangles[3] = triangles3;
 
-    V2F_C4B_T2F_Triangle triangles4 = {
-        {v6, Color4B(color), __t(v2fsub(t, n))},
-        {v4, Color4B(color), __t(v2fneg(n)) },
-        {v5, Color4B(color), __t(n)},
+    V3F_C4B_T2F_Triangle triangles4 = {
+        {Vec3(v6.x,v6.y,0), Color4B(color), __t(v2fsub(t, n))},
+        {Vec3(v4.x,v4.y,0), Color4B(color), __t(v2fneg(n)) },
+        {Vec3(v5.x,v5.y,0), Color4B(color), __t(n)},
     };
     triangles[4] = triangles4;
 
-    V2F_C4B_T2F_Triangle triangles5 = {
-        {v6, Color4B(color), __t(v2fsub(t, n))},
-        {v7, Color4B(color), __t(v2fadd(n, t))},
-        {v5, Color4B(color), __t(n)},
+    V3F_C4B_T2F_Triangle triangles5 = {
+        {Vec3(v6.x,v6.y,0), Color4B(color), __t(v2fsub(t, n))},
+        {Vec3(v7.x,v7.y,0), Color4B(color), __t(v2fadd(n, t))},
+        {Vec3(v5.x,v5.y,0), Color4B(color), __t(n)},
     };
     triangles[5] = triangles5;
     
@@ -763,15 +917,15 @@ void DrawNode::drawPolygon(const Vec2 *verts, int count, const Color4F &fillColo
     auto vertex_count = 3*triangle_count;
     ensureCapacity(vertex_count);
     
-    V2F_C4B_T2F_Triangle *triangles = (V2F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
-    V2F_C4B_T2F_Triangle *cursor = triangles;
+    V3F_C4B_T2F_Triangle *triangles = (V3F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
+    V3F_C4B_T2F_Triangle *cursor = triangles;
     
     for (int i = 0; i < count-2; i++)
     {
-        V2F_C4B_T2F_Triangle tmp = {
-            {verts[0], Color4B(fillColor), __t(v2fzero)},
-            {verts[i+1], Color4B(fillColor), __t(v2fzero)},
-            {verts[i+2], Color4B(fillColor), __t(v2fzero)},
+        V3F_C4B_T2F_Triangle tmp = {
+            {Vec3(verts[0].x, verts[0].y, 0), Color4B(fillColor), __t(v2fzero)},
+            {Vec3(verts[i+1].x, verts[i + 1].y, 0), Color4B(fillColor), __t(v2fzero)},
+            {Vec3(verts[i+2].x, verts[i + 2].y, 0), Color4B(fillColor), __t(v2fzero)},
         };
         
         *cursor++ = tmp;
@@ -813,17 +967,17 @@ void DrawNode::drawPolygon(const Vec2 *verts, int count, const Color4F &fillColo
             Vec2 outer0 = v2fadd(v0, v2fmult(offset0, borderWidth));
             Vec2 outer1 = v2fadd(v1, v2fmult(offset1, borderWidth));
             
-            V2F_C4B_T2F_Triangle tmp1 = {
-                {inner0, Color4B(borderColor), __t(v2fneg(n0))},
-                {inner1, Color4B(borderColor), __t(v2fneg(n0))},
-                {outer1, Color4B(borderColor), __t(n0)}
+            V3F_C4B_T2F_Triangle tmp1 = {
+                {Vec3(inner0.x, inner0.y, 0), Color4B(borderColor), __t(v2fneg(n0))},
+                {Vec3(inner1.x, inner1.y, 0), Color4B(borderColor), __t(v2fneg(n0))},
+                {Vec3(outer1.x, outer1.y, 0), Color4B(borderColor), __t(n0)}
             };
             *cursor++ = tmp1;
             
-            V2F_C4B_T2F_Triangle tmp2 = {
-                {inner0, Color4B(borderColor), __t(v2fneg(n0))},
-                {outer0, Color4B(borderColor), __t(n0)},
-                {outer1, Color4B(borderColor), __t(n0)}
+            V3F_C4B_T2F_Triangle tmp2 = {
+                {Vec3(inner0.x, inner0.y, 0), Color4B(borderColor), __t(v2fneg(n0))},
+                {Vec3(outer0.x, outer0.y, 0), Color4B(borderColor), __t(n0)},
+                {Vec3(outer1.x, outer1.y, 0), Color4B(borderColor), __t(n0)}
             };
             *cursor++ = tmp2;
         }
@@ -887,12 +1041,20 @@ void DrawNode::drawTriangle(const Vec2 &p1, const Vec2 &p2, const Vec2 &p3, cons
     ensureCapacity(vertex_count);
 
     Color4B col = Color4B(color);
-    V2F_C4B_T2F a = {Vec2(p1.x, p1.y), col, Tex2F(0.0, 0.0) };
-    V2F_C4B_T2F b = {Vec2(p2.x, p2.y), col, Tex2F(0.0,  0.0) };
-    V2F_C4B_T2F c = {Vec2(p3.x, p3.y), col, Tex2F(0.0,  0.0) };
+//     V3F_C4B_T2F a = {Vec2(p1.x, p1.y), col, Tex2F(0.0, 0.0) };
+//     V3F_C4B_T2F b = {Vec2(p2.x, p2.y), col, Tex2F(0.0,  0.0) };
+//     V3F_C4B_T2F c = {Vec2(p3.x, p3.y), col, Tex2F(0.0,  0.0) };
+// 
+//     V3F_C4B_T2F_Triangle *triangles = (V3F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
+//     V3F_C4B_T2F_Triangle triangle = {a, b, c};
+//     triangles[0] = triangle;
 
-    V2F_C4B_T2F_Triangle *triangles = (V2F_C4B_T2F_Triangle *)(_buffer + _bufferCount);
-    V2F_C4B_T2F_Triangle triangle = {a, b, c};
+	V3F_C4B_T2F a = { Vec3(p1.x, p1.y, 0), col, Tex2F(0.0, 0.0) };
+    V3F_C4B_T2F b = { Vec3(p2.x, p2.y, 0), col, Tex2F(0.0,  0.0) };
+    V3F_C4B_T2F c = { Vec3(p3.x, p3.y, 0), col, Tex2F(0.0,  0.0) };
+
+    V3F_C4B_T2F_Triangle *triangles = (V3F_C4B_T2F_Triangle*)(_buffer + _bufferCount);
+    V3F_C4B_T2F_Triangle triangle = {a, b, c};
     triangles[0] = triangle;
 
     _bufferCount += vertex_count;

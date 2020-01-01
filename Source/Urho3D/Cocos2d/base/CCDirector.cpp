@@ -296,7 +296,6 @@ void Director::drawScene()
         //render the scene
         if (_openGLView)
             _openGLView->renderScene(_runningScene, _renderer);
-        _runningScene->render(_renderer, Mat4::IDENTITY, nullptr);
         _eventDispatcher->dispatchEvent(_eventAfterVisit);
     }
 

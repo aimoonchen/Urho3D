@@ -36,7 +36,8 @@
 #include "base/ccTypes.h"
 #include "renderer/CCCustomCommand.h"
 #include "math/CCMath.h"
-
+#include "../Core/Object.h"
+#include "../Graphics/VertexBuffer.h"
 NS_CC_BEGIN
 
 static const int DEFAULT_LINE_WIDTH = 2;
@@ -350,17 +351,17 @@ protected:
 
     int         _bufferCapacity = 0;
     GLsizei     _bufferCount = 0;
-    V2F_C4B_T2F *_buffer = nullptr;
+    V3F_C4B_T2F *_buffer = nullptr;
     
     int         _bufferCapacityGLPoint = 0;
     GLsizei     _bufferCountGLPoint = 0;
-    V2F_C4B_T2F *_bufferGLPoint = nullptr;
+    V3F_C4B_T2F *_bufferGLPoint = nullptr;
     Color4F     _pointColor;
     int         _pointSize = 0;
     
     int         _bufferCapacityGLLine = 0;
     GLsizei     _bufferCountGLLine = 0;
-    V2F_C4B_T2F *_bufferGLLine = nullptr;
+    V3F_C4B_T2F *_bufferGLLine = nullptr;
 
     BlendFunc   _blendFunc;
     CustomCommand _customCommand;
@@ -375,6 +376,7 @@ protected:
     GLfloat         _lineWidth = 0.0f;
 
     GLfloat  _defaultLineWidth = 0.0f;
+    Urho3D::SharedPtr<Urho3D::VertexBuffer> vertexBuffer_;
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(DrawNode);
 };
