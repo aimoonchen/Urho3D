@@ -867,14 +867,17 @@ void Renderer::drawBatchedTriangles()
 #endif
 	}
 
-    Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
-	projection.m00_ = scale.x_ * uiScale_;
-	projection.m03_ = offset.x_;
-	projection.m11_ = scale.y_ * uiScale_;
-	projection.m13_ = offset.y_;
-	projection.m22_ = 1.0f;
-	projection.m23_ = 0.0f;
-	projection.m33_ = 1.0f;
+//     Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
+// 	projection.m00_ = scale.x_ * uiScale_;
+// 	projection.m03_ = offset.x_;
+// 	projection.m11_ = scale.y_ * uiScale_;
+// 	projection.m13_ = offset.y_;
+// 	projection.m22_ = 1.0f;
+// 	projection.m23_ = 0.0f;
+// 	projection.m33_ = 1.0f;
+	auto matrixP = Director::getInstance()->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    matrixP.transpose();
+    Urho3D::Matrix4 projection(matrixP.m);
 
 	graphics_->ClearParameterSources();
 	graphics_->SetColorWrite(true);

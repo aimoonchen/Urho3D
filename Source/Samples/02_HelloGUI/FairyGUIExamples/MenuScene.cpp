@@ -19,6 +19,7 @@ USING_NS_CC;
 
 void MenuScene::continueInit()
 {
+	UIPackage::addPackage("UI/MainMenu");
 	UIPackage::addPackage("UI/Basics");
 	_view = UIPackage::createObject("Basics", "Demo_Graph")->as<GComponent>();
 	_groot->addChild(_view);

@@ -123,6 +123,8 @@ DrawNode::DrawNode(GLfloat lineWidth)
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 #endif
     vertexBuffer_ = new Urho3D::VertexBuffer(GetUrho3DContext());
+    vertexBufferPoint_ = new Urho3D::VertexBuffer(GetUrho3DContext());
+    vertexBufferLine_ = new Urho3D::VertexBuffer(GetUrho3DContext());
 }
 
 DrawNode::~DrawNode()
@@ -321,6 +323,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 //     glProgram->setUniformLocationWith1f(glProgram->getUniformLocation("u_alpha"), _displayedOpacity / 255.0);
 //     GL::blendFunc(_blendFunc.src, _blendFunc.dst);
 // 
+
     if (_dirty)
     {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
@@ -367,16 +370,16 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 	float uiScale_ = 1.0f;
 	unsigned alphaFormat = Urho3D::Graphics::GetAlphaFormat();
 	Urho3D::RenderSurface* surface = graphics_->GetRenderTarget(0);
-	//Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
-	cocos2d::Size design = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
-	Urho3D::IntVector2 viewSize{ (int)design.width, (int)design.height };
-	//auto vp = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetViewport();
-	//Urho3D::IntVector2 viewSize{ vp.Width(), vp.Height() };
+    Urho3D::IntVector2 viewSize = graphics_->GetViewport().Size();
+// 	cocos2d::Size design = Director::getInstance()->getOpenGLView()->getDesignResolutionSize();
+// 	Urho3D::IntVector2 viewSize{ (int)design.width, (int)design.height };
+// 	//auto vp = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetViewport();
+// 	//Urho3D::IntVector2 viewSize{ vp.Width(), vp.Height() };
 	Urho3D::Vector2 invScreenSize(1.0f / (float)viewSize.x_, 1.0f / (float)viewSize.y_);
 	//     Urho3D::Vector2 scale(2.0f * invScreenSize.x_, -2.0f * invScreenSize.y_);
 	//     Urho3D::Vector2 offset(-1.0f, 1.0f);
-	Urho3D::Vector2 scale(2.0f * invScreenSize.x_, 2.0f * invScreenSize.y_);
-	Urho3D::Vector2 offset(-1.0f, -1.0f);
+ 	Urho3D::Vector2 scale(2.0f * invScreenSize.x_, 2.0f * invScreenSize.y_);
+ 	Urho3D::Vector2 offset(-1.0f, -1.0f);
 	if (surface)
 	{
 #ifdef URHO3D_OPENGL
@@ -386,15 +389,18 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 		scale.y_ = -scale.y_;
 #endif
 	}
-
-	Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
-	projection.m00_ = scale.x_ * uiScale_;
-	projection.m03_ = offset.x_;
-	projection.m11_ = scale.y_ * uiScale_;
-	projection.m13_ = offset.y_;
-	projection.m22_ = 1.0f;
-	projection.m23_ = 0.0f;
-	projection.m33_ = 1.0f;
+	const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+	Mat4 matrixMVP = matrixP * transform;
+	matrixMVP.transpose();
+    Urho3D::Matrix4 projection(matrixMVP.m);
+// 	Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);
+// 	projection.m00_ = scale.x_ * uiScale_;
+// 	projection.m03_ = offset.x_;
+// 	projection.m11_ = scale.y_ * uiScale_;
+// 	projection.m13_ = offset.y_;
+// 	projection.m22_ = 1.0f;
+// 	projection.m23_ = 0.0f;
+// 	projection.m33_ = 1.0f;
 
 	graphics_->ClearParameterSources();
 	graphics_->SetColorWrite(true);
@@ -513,12 +519,87 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 // 
 //     GL::blendFunc(_blendFunc.src, _blendFunc.dst);
 // 
-//     if (_dirtyGLLine)
-//     {
+    if (_dirtyGLLine)
+    {
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
 //         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
-//         _dirtyGLLine = false;
-//     }
+		unsigned numVertices = _bufferCountGLLine;// vertexData.Size() / UI_VERTEX_SIZE;
+		if (vertexBufferLine_->GetVertexCount() < numVertices || vertexBufferLine_->GetVertexCount() > numVertices * 2)
+            vertexBufferLine_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+
+		vertexBufferLine_->SetData(vertexBufferLine_);
+        _dirtyGLLine = false;
+     }
+
+	const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+	Mat4 matrixMVP = matrixP * transform;
+	matrixMVP.transpose();
+	Urho3D::Matrix4 projection(matrixMVP.m);
+    auto graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+	graphics_->ClearParameterSources();
+	graphics_->SetColorWrite(true);
+#ifdef URHO3D_OPENGL
+	// Reverse winding if rendering to texture on OpenGL
+	if (false/*surface*/)
+		graphics_->SetCullMode(Urho3D::CULL_CW);
+	else
+#endif
+		//graphics_->SetCullMode(Urho3D::CULL_CCW);
+		graphics_->SetCullMode(Urho3D::CULL_CW);
+	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
+	graphics_->SetDepthWrite(false);
+	graphics_->SetFillMode(Urho3D::FILL_SOLID);
+	graphics_->SetStencilTest(false);
+	graphics_->SetVertexBuffer(vertexBufferLine_);
+
+		auto blendType = _blendFunc;// _triBatchesToDraw[i].cmd->getBlendType();
+		Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
+		if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
+		{
+			blendMode = Urho3D::BLEND_PREMULALPHA;
+		}
+		else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
+		{
+			blendMode = Urho3D::BLEND_ALPHA;
+		}
+		else if (blendType == BlendFunc::ADDITIVE)
+		{
+			blendMode = Urho3D::BLEND_ADD;
+		}
+		
+		graphics_->SetShaders(graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR"), graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR"));
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
+			graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
+		if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
+			graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
+
+		float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+		graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+		graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
+
+		//         Urho3D::IntRect scissor = batch.scissor_;
+		// 		scissor.left_ = (int)(scissor.left_ * uiScale_);
+		// 		scissor.top_ = (int)(scissor.top_ * uiScale_);
+		// 		scissor.right_ = (int)(scissor.right_ * uiScale_);
+		// 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
+
+				// Flip scissor vertically if using OpenGL texture rendering
+#ifdef URHO3D_OPENGL
+// 		if (surface)
+// 		{
+// 			int top = scissor.top_;
+// 			int bottom = scissor.bottom_;
+// 			scissor.top_ = viewSize.y_ - bottom;
+// 			scissor.bottom_ = viewSize.y_ - top;
+// 		}
+#endif
+
+		graphics_->SetBlendMode(blendMode);
+		//		graphics_->SetScissorTest(true, scissor);
+		graphics_->Draw(Urho3D::LINE_LIST, 0, _bufferCount);
+
 //     if (Configuration::getInstance()->supportsShareableVAO())
 //     {
 //         GL::bindVAO(_vaoGLLine);

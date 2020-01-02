@@ -16,13 +16,13 @@ bool DemoScene::init()
     continueInit();
 
     //add a closebutton to scene
-//     GObject* closeButton = UIPackage::createObject("MainMenu", "CloseButton");
-//     closeButton->setPosition(_groot->getWidth() - closeButton->getWidth() - 10, _groot->getHeight() - closeButton->getHeight() - 10);
-//     closeButton->addRelation(_groot, RelationType::Right_Right);
-//     closeButton->addRelation(_groot, RelationType::Bottom_Bottom);
-//     closeButton->setSortingOrder(100000);
-//     closeButton->addClickListener(CC_CALLBACK_1(DemoScene::onClose, this));
-//     _groot->addChild(closeButton);
+    GObject* closeButton = UIPackage::createObject("MainMenu", "CloseButton");
+    closeButton->setPosition(200,200/*_groot->getWidth() - closeButton->getWidth() - 10, _groot->getHeight() - closeButton->getHeight() - 10*/);
+    closeButton->addRelation(_groot, RelationType::Right_Right);
+    closeButton->addRelation(_groot, RelationType::Bottom_Bottom);
+    closeButton->setSortingOrder(100000);
+    closeButton->addClickListener(CC_CALLBACK_1(DemoScene::onClose, this));
+    _groot->addChild(closeButton);
 
     return true;
 }

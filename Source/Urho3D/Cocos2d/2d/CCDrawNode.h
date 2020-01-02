@@ -377,6 +377,8 @@ protected:
 
     GLfloat  _defaultLineWidth = 0.0f;
     Urho3D::SharedPtr<Urho3D::VertexBuffer> vertexBuffer_;
+    Urho3D::SharedPtr<Urho3D::VertexBuffer> vertexBufferPoint_;
+    Urho3D::SharedPtr<Urho3D::VertexBuffer> vertexBufferLine_;
 private:
     CC_DISALLOW_COPY_AND_ASSIGN(DrawNode);
 };
