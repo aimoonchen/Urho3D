@@ -411,7 +411,8 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 	else
 #endif
 		//graphics_->SetCullMode(Urho3D::CULL_CCW);
-		graphics_->SetCullMode(Urho3D::CULL_CW);
+		//graphics_->SetCullMode(Urho3D::CULL_CW);
+        graphics_->SetCullMode(Urho3D::CULL_NONE);
 	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
 	graphics_->SetDepthWrite(false);
 	graphics_->SetFillMode(Urho3D::FILL_SOLID);
@@ -527,7 +528,7 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 		if (vertexBufferLine_->GetVertexCount() < numVertices || vertexBufferLine_->GetVertexCount() > numVertices * 2)
             vertexBufferLine_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
 
-		vertexBufferLine_->SetData(vertexBufferLine_);
+		vertexBufferLine_->SetData(_bufferGLLine);
         _dirtyGLLine = false;
      }
 
@@ -540,12 +541,13 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 	graphics_->SetColorWrite(true);
 #ifdef URHO3D_OPENGL
 	// Reverse winding if rendering to texture on OpenGL
-	if (false/*surface*/)
-		graphics_->SetCullMode(Urho3D::CULL_CW);
-	else
+    if (false/*surface*/)
+        graphics_->SetCullMode(Urho3D::CULL_CW);
+    else
 #endif
-		//graphics_->SetCullMode(Urho3D::CULL_CCW);
-		graphics_->SetCullMode(Urho3D::CULL_CW);
+        //graphics_->SetCullMode(Urho3D::CULL_CCW);
+        //graphics_->SetCullMode(Urho3D::CULL_CW);
+        graphics_->SetCullMode(Urho3D::CULL_NONE);
 	graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
 	graphics_->SetDepthWrite(false);
 	graphics_->SetFillMode(Urho3D::FILL_SOLID);
@@ -598,7 +600,8 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 
 		graphics_->SetBlendMode(blendMode);
 		//		graphics_->SetScissorTest(true, scissor);
-		graphics_->Draw(Urho3D::LINE_LIST, 0, _bufferCount);
+        glLineWidth(_lineWidth);
+		graphics_->Draw(Urho3D::LINE_LIST, 0, _bufferCountGLLine);
 
 //     if (Configuration::getInstance()->supportsShareableVAO())
 //     {

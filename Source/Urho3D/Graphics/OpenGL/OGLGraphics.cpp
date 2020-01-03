@@ -683,7 +683,8 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     if (flags & CLEAR_COLOR)
     {
         glFlags |= GL_COLOR_BUFFER_BIT;
-        glClearColor(color.r_, color.g_, color.b_, color.a_);
+        //glClearColor(color.r_, color.g_, color.b_, color.a_);
+        glClearColor(0.211764, 0.231372, 0.266666, 1.0f);
     }
     if (flags & CLEAR_DEPTH)
     {

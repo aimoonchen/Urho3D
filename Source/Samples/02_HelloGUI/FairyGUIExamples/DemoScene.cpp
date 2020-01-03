@@ -17,7 +17,7 @@ bool DemoScene::init()
 
     //add a closebutton to scene
     GObject* closeButton = UIPackage::createObject("MainMenu", "CloseButton");
-    closeButton->setPosition(200,200/*_groot->getWidth() - closeButton->getWidth() - 10, _groot->getHeight() - closeButton->getHeight() - 10*/);
+    closeButton->setPosition(_groot->getWidth() - closeButton->getWidth() - 10, _groot->getHeight() - closeButton->getHeight() - 10);
     closeButton->addRelation(_groot, RelationType::Right_Right);
     closeButton->addRelation(_groot, RelationType::Bottom_Bottom);
     closeButton->setSortingOrder(100000);
