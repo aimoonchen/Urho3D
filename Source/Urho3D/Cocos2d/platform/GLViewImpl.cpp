@@ -235,18 +235,19 @@ void GLViewImpl::onGLFWMouseCallBack(Urho3D::MouseButton button, bool isPressed,
 	float cursorX = (_mouseX - _viewPortRect.origin.x) / _scaleX;
 	float cursorY = (_viewPortRect.origin.y + _viewPortRect.size.height - _mouseY) / _scaleY;
 
+	auto cocosButton = static_cast<cocos2d::EventMouse::MouseButton>((button == Urho3D::MOUSEB_LEFT) ? 0 : (button == Urho3D::MOUSEB_RIGHT) ? 1 : 2);
 	if (isPressed)
 	{
 		EventMouse event(EventMouse::MouseEventType::MOUSE_DOWN);
 		event.setCursorPosition(cursorX, cursorY);
-		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>(button));
+		event.setMouseButton(cocosButton);
 		Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
 	}
 	else
 	{
 		EventMouse event(EventMouse::MouseEventType::MOUSE_UP);
 		event.setCursorPosition(cursorX, cursorY);
-		event.setMouseButton(static_cast<cocos2d::EventMouse::MouseButton>(button));
+		event.setMouseButton(cocosButton);
 		Director::getInstance()->getEventDispatcher()->dispatchEvent(&event);
 	}
 }

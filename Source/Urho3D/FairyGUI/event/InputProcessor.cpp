@@ -312,8 +312,7 @@ bool InputProcessor::isTouchOnUI()
 
 bool InputProcessor::onTouchBegan(Touch *touch, Event* /*unusedEvent*/)
 {
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt = touch->getLocation();
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -345,8 +344,7 @@ bool InputProcessor::onTouchBegan(Touch *touch, Event* /*unusedEvent*/)
 
 void InputProcessor::onTouchMoved(Touch *touch, Event* /*unusedEvent*/)
 {
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt = touch->getLocation();
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -391,8 +389,7 @@ void InputProcessor::onTouchMoved(Touch *touch, Event* /*unusedEvent*/)
 
 void InputProcessor::onTouchEnded(Touch *touch, Event* /*unusedEvent*/)
 {
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt = touch->getLocation();
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -507,8 +504,7 @@ void InputProcessor::onMouseDown(cocos2d::EventMouse * event)
     if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT)
         return;
 
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt(event->getCursorX(), event->getCursorY());
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -538,8 +534,7 @@ void InputProcessor::onMouseUp(cocos2d::EventMouse * event)
     if (event->getMouseButton() == EventMouse::MouseButton::BUTTON_LEFT)
         return;
 
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt(event->getCursorX(), event->getCursorY());
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -605,8 +600,7 @@ void InputProcessor::onMouseMove(cocos2d::EventMouse * event)
         && std::abs(ti->pos.y - (UIRoot->getHeight() - event->getCursorY())) < 1)
         return;
 
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt(event->getCursorX(), event->getCursorY());
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
@@ -649,8 +643,7 @@ void InputProcessor::onMouseMove(cocos2d::EventMouse * event)
 
 void InputProcessor::onMouseScroll(cocos2d::EventMouse * event)
 {
-    //auto camera = Camera::getVisitingCamera();
-    Camera* camera = nullptr;
+    auto camera = Camera::getVisitingCamera();
     Vec2 pt(event->getCursorX(), event->getCursorY());
     GObject* target = _owner->hitTest(pt, camera);
     if (!target)
