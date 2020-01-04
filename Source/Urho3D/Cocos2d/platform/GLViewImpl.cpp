@@ -183,7 +183,9 @@ void GLViewImpl::setScissorInPoints(float x, float y, float w, float h)
 	int bottom = (int)(y * _scaleY * _retinaFactor * _frameZoomFactor + _viewPortRect.origin.y * _retinaFactor * _frameZoomFactor);
 	int top = bottom + (int)(h * _scaleY * _retinaFactor * _frameZoomFactor);
 	int right = left + (int)(w * _scaleX * _retinaFactor * _frameZoomFactor);
-
+	auto rtsize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetRenderTargetDimensions();
+ 	top = rtsize.y_ - top;
+ 	bottom = rtsize.y_ - bottom;
 	GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->SetScissorTest(true, Urho3D::IntRect{ left, top, right, bottom });
 }
 
@@ -191,9 +193,11 @@ Rect GLViewImpl::getScissorRect() const
 {
 	GLfloat params[4];
 	//glGetFloatv(GL_SCISSOR_BOX, params);
+	auto rtsize = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetRenderTargetDimensions();
 	auto urho3dRect = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetScissorRect();
+
 	params[0] = urho3dRect.Left();
-	params[1] = urho3dRect.Bottom();
+	params[1] = rtsize.y_ - urho3dRect.Bottom();
 	params[2] = urho3dRect.Width();
 	params[3] = urho3dRect.Height();
 	float x = (params[0] - _viewPortRect.origin.x * _retinaFactor * _frameZoomFactor) / (_scaleX * _retinaFactor * _frameZoomFactor);

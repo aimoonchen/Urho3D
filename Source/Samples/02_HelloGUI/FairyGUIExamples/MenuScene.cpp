@@ -22,7 +22,7 @@ void MenuScene::continueInit()
 //     UIPackage::addPackage("UI/MainMenu");
 //     _view = UIPackage::createObject("MainMenu", "Main")->as<GComponent>();
 	UIPackage::addPackage("UI/Basics");
-	_view = UIPackage::createObject("Basics", "Demo_Text")->as<GComponent>();
+	_view = UIPackage::createObject("Basics", "Demo_ComboBox")->as<GComponent>();
     _groot->addChild(_view);
 
 //     _view->getChild("n1")->addClickListener([this](EventContext*) {

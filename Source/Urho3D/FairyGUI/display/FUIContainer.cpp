@@ -1,8 +1,11 @@
 #include "FUIContainer.h"
 //#include "base/CCStencilStateManager.h"
+#include "platform/CCGLView.h"
 #include "utils/ToolSet.h"
 #include "GComponent.h"
-
+#include "../Core/Context.h"
+#include "../Graphics/Graphics.h"
+#include "Urho3DContext.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -318,48 +321,50 @@ void FUIContainer::restoreAllProgramStates()
 
 void FUIContainer::onBeforeVisitScissor()
 {
-//     auto glview = Director::getInstance()->getOpenGLView();
-//     _rectClippingSupport->_scissorOldState = glview->isScissorEnabled();
-//     Rect clippingRect = getClippingRect();
-//     if (false == _rectClippingSupport->_scissorOldState)
-//     {
-// #if COCOS2D_VERSION >= 0x00040000
-//         Director::getInstance()->getRenderer()->setScissorTest(true);
-// #else
-//         glEnable(GL_SCISSOR_TEST);
-// #endif
-//     }
-//     else
-//     {
-//         _rectClippingSupport->_clippingOldRect = glview->getScissorRect();
-//         clippingRect = ToolSet::intersection(clippingRect, _rectClippingSupport->_clippingOldRect);
-//     }
-// 
-//     glview->setScissorInPoints(clippingRect.origin.x,
-//         clippingRect.origin.y,
-//         clippingRect.size.width,
-//         clippingRect.size.height);
+    auto glview = Director::getInstance()->getOpenGLView();
+    _rectClippingSupport->_scissorOldState = glview->isScissorEnabled();
+    Rect clippingRect = getClippingRect();
+    if (false == _rectClippingSupport->_scissorOldState)
+    {
+#if COCOS2D_VERSION >= 0x00040000
+        Director::getInstance()->getRenderer()->setScissorTest(true);
+#else
+        //glEnable(GL_SCISSOR_TEST);
+        GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->SetScissorTest(true, Urho3D::IntRect{0,0,1,1});
+#endif
+    }
+    else
+    {
+        _rectClippingSupport->_clippingOldRect = glview->getScissorRect();
+        clippingRect = ToolSet::intersection(clippingRect, _rectClippingSupport->_clippingOldRect);
+    }
+
+    glview->setScissorInPoints(clippingRect.origin.x,
+        clippingRect.origin.y,
+        clippingRect.size.width,
+        clippingRect.size.height);
 }
 
 void FUIContainer::onAfterVisitScissor()
 {
-//     if (_rectClippingSupport->_scissorOldState)
-//     {
-//         auto glview = Director::getInstance()->getOpenGLView();
-//         glview->setScissorInPoints(_rectClippingSupport->_clippingOldRect.origin.x,
-//             _rectClippingSupport->_clippingOldRect.origin.y,
-//             _rectClippingSupport->_clippingOldRect.size.width,
-//             _rectClippingSupport->_clippingOldRect.size.height);
-//     }
-//     else
-//     {
-//         // revert scissor test
-// #if COCOS2D_VERSION >= 0x00040000
-//         Director::getInstance()->getRenderer()->setScissorTest(false);
-// #else
-//         glDisable(GL_SCISSOR_TEST);
-// #endif
-//     }
+    if (_rectClippingSupport->_scissorOldState)
+    {
+        auto glview = Director::getInstance()->getOpenGLView();
+        glview->setScissorInPoints(_rectClippingSupport->_clippingOldRect.origin.x,
+            _rectClippingSupport->_clippingOldRect.origin.y,
+            _rectClippingSupport->_clippingOldRect.size.width,
+            _rectClippingSupport->_clippingOldRect.size.height);
+    }
+    else
+    {
+        // revert scissor test
+#if COCOS2D_VERSION >= 0x00040000
+        Director::getInstance()->getRenderer()->setScissorTest(false);
+#else
+        //glDisable(GL_SCISSOR_TEST);
+        GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->SetScissorTest(false, Urho3D::IntRect{});
+#endif
+    }
 }
 
 const Rect& FUIContainer::getClippingRect()
