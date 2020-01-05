@@ -6,11 +6,12 @@
 #include "base/CCIMEDispatcher.h"
 #include "base/CCEventDispatcher.h"
 #include "2d/CCCamera.h"
-//#include "../../SDL/src/video/windows/SDL_windowsvideo.h"
 #include "../Input/InputConstants.h"
 #include "../Core/Context.h"
 #include "../Graphics/Graphics.h"
 #include "Urho3DContext.h"
+//#include "../../Source/ThirdParty/SDL/src/video/SDL_sysvideo.h"
+
 NS_CC_BEGIN
 
 struct keyCodeItem
@@ -378,7 +379,8 @@ void GLViewImpl::onGLFWCharCallback(unsigned int character)
 HWND GLViewImpl::getWin32Window()
 {
 	SDL_Window* sdl_win = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetWindow();
-	//(SDL_VideoData*)sdl_win->driverdata;
+//	(SDL_Window*)(sdl_win->driverdata);
+// 	sdl_win->driverdata += 1;
 	return (HWND)0;
 }
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
