@@ -21,6 +21,14 @@ public:
 	void onGLFWMouseScrollCallback(double x, double y);
 	void onGLFWKeyCallback(int key, int scancode, bool isPressed, int mods);
 	void onGLFWCharCallback(unsigned int character);
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+	HWND getWin32Window() override;
+#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+	id getCocoaWindow() override { return glfwGetCocoaWindow(_mainWindow); }
+	id getNSGLContext() override { return glfwGetNSGLContext(_mainWindow); } // stevetranby: added
+#endif // #if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
 private:
 	bool _captured;
 	bool _supportTouch;

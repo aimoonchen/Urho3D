@@ -427,14 +427,14 @@ public:
      */
     ResolutionPolicy getResolutionPolicy() const { return _resolutionPolicy; }
 
-// #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
-//     virtual HWND getWin32Window() = 0;
-// #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
-// 
-// #if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
-//     virtual id getCocoaWindow() = 0;
-//     virtual id getNSGLContext() = 0; // stevetranby: added
-// #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) */
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+    virtual HWND getWin32Window() = 0;
+#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_MAC)
+    virtual id getCocoaWindow() = 0;
+    virtual id getNSGLContext() = 0; // stevetranby: added
+#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_MAC) */
 
     /**
      * Renders a Scene with a Renderer

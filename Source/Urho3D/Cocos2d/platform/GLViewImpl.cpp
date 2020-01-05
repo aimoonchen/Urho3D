@@ -6,6 +6,7 @@
 #include "base/CCIMEDispatcher.h"
 #include "base/CCEventDispatcher.h"
 #include "2d/CCCamera.h"
+//#include "../../SDL/src/video/windows/SDL_windowsvideo.h"
 #include "../Input/InputConstants.h"
 #include "../Core/Context.h"
 #include "../Graphics/Graphics.h"
@@ -150,7 +151,11 @@ GLViewImpl::GLViewImpl(bool initglfw)
 	, _mouseX(0.0f)
 	, _mouseY(0.0f)
 {
-
+	g_keyCodeMap.clear();
+	for (auto& item : g_keyCodeStructArray)
+	{
+		g_keyCodeMap[item.glfwKeyCode] = item.keyCode;
+	}
 }
 
 GLViewImpl::~GLViewImpl()
@@ -368,5 +373,14 @@ void GLViewImpl::onGLFWCharCallback(unsigned int character)
 		IMEDispatcher::sharedDispatcher()->dispatchInsertText(utf8String.c_str(), utf8String.size());
 	}
 }
+
+#if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
+HWND GLViewImpl::getWin32Window()
+{
+	SDL_Window* sdl_win = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetWindow();
+	//(SDL_VideoData*)sdl_win->driverdata;
+	return (HWND)0;
+}
+#endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
 
 NS_CC_END

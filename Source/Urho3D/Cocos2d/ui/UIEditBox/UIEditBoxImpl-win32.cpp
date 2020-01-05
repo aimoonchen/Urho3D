@@ -27,6 +27,7 @@ THE SOFTWARE.
 #include "ui/UIEditBox/UIEditBoxImpl-win32.h"
 
 #include "platform/CCPlatformConfig.h"
+#include "platform/CCGLView.h"
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 
 #include "ui/UIEditBox/UIEditBox.h"
@@ -53,7 +54,7 @@ namespace ui {
 
     void EditBoxImplWin::lazyInit()
     {
-        s_hwndCocos = nullptr;// cocos2d::Director::getInstance()->getOpenGLView()->getWin32Window();
+        s_hwndCocos = cocos2d::Director::getInstance()->getOpenGLView()->getWin32Window();
         LONG style = ::GetWindowLongW(s_hwndCocos, GWL_STYLE);
         ::SetWindowLongW(s_hwndCocos, GWL_STYLE, style | WS_CLIPCHILDREN);
         s_isInitialized = true;
@@ -142,8 +143,8 @@ namespace ui {
 
     void EditBoxImplWin::setNativeFont(const char* pFontName, int fontSize)
     {
-        //auto glView = Director::getInstance()->getOpenGLView();
-        HFONT hFont = ::CreateFontW(static_cast<int>(fontSize /** glView->getScaleX()*/), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
+        auto glView = Director::getInstance()->getOpenGLView();
+        HFONT hFont = ::CreateFontW(static_cast<int>(fontSize * glView->getScaleX()), 0, 0, 0, FW_NORMAL, FALSE, FALSE, FALSE, DEFAULT_CHARSET, OUT_OUTLINE_PRECIS,
             CLIP_DEFAULT_PRECIS, ANTIALIASED_QUALITY, VARIABLE_PITCH, L"Arial");
 
         ::SendMessageW(_hwndEdit,             // Handle of edit control
