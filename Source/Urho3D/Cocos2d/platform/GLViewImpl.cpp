@@ -379,9 +379,11 @@ void GLViewImpl::onGLFWCharCallback(unsigned int character)
 HWND GLViewImpl::getWin32Window()
 {
 	SDL_Window* sdl_win = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->GetWindow();
-//	(SDL_Window*)(sdl_win->driverdata);
-// 	sdl_win->driverdata += 1;
-	return (HWND)0;
+	auto ptr_int = (long*)sdl_win;
+	//sizeof(SDL_Window) == 156
+	ptr_int += 36;
+	long* phwnd = (long*)(*ptr_int);
+	return (HWND)(*(++phwnd));
 }
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
 
