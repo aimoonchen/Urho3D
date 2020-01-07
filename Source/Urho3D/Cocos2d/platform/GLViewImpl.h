@@ -21,6 +21,7 @@ public:
 	void onGLFWMouseScrollCallback(double x, double y);
 	void onGLFWKeyCallback(int key, int scancode, bool isPressed, int mods);
 	void onGLFWCharCallback(unsigned int character);
+	virtual void setIMEKeyboardState(bool bOpen) override;
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32)
 	HWND getWin32Window() override;
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */

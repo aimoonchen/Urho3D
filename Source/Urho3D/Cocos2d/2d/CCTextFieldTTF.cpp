@@ -30,6 +30,7 @@ THE SOFTWARE.
 #include "platform/CCFileUtils.h"
 #include "base/ccUTF8.h"
 #include "2d/CCSprite.h"
+#include "platform/GLViewImpl.h"
 
 NS_CC_BEGIN
 
@@ -193,30 +194,30 @@ bool TextFieldTTF::initWithPlaceHolder(const std::string& placeholder, const std
 bool TextFieldTTF::attachWithIME()
 {
     bool ret = IMEDelegate::attachWithIME();
-//     if (ret)
-//     {
-//         // open keyboard
-//         auto pGlView = Director::getInstance()->getOpenGLView();
-//         if (pGlView)
-//         {
-//             pGlView->setIMEKeyboardState(true);
-//         }
-//     }
+    if (ret)
+    {
+        // open keyboard
+        auto pGlView = Director::getInstance()->getOpenGLView();
+        if (pGlView)
+        {
+            pGlView->setIMEKeyboardState(true);
+        }
+    }
     return ret;
 }
 
 bool TextFieldTTF::detachWithIME()
 {
     bool ret = IMEDelegate::detachWithIME();
-//     if (ret)
-//     {
-//         // close keyboard
-//         auto glView = Director::getInstance()->getOpenGLView();
-//         if (glView)
-//         {
-//             glView->setIMEKeyboardState(false);
-//         }
-//     }
+    if (ret)
+    {
+        // close keyboard
+        auto glView = Director::getInstance()->getOpenGLView();
+        if (glView)
+        {
+            glView->setIMEKeyboardState(false);
+        }
+    }
     return ret;
 }
 

@@ -132,7 +132,7 @@ public:
 //      *
 //      * @param open Open or close IME keyboard.
 //      */
-//     virtual void setIMEKeyboardState(bool open) = 0;
+    virtual void setIMEKeyboardState(bool open) = 0;
     
     /** When the window is closed, it will return false if the platforms is Ios or Android.
      * If the platforms is windows or Mac,it will return true.

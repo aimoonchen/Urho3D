@@ -387,4 +387,9 @@ HWND GLViewImpl::getWin32Window()
 }
 #endif /* (CC_TARGET_PLATFORM == CC_PLATFORM_WIN32) */
 
+void GLViewImpl::setIMEKeyboardState(bool bOpen)
+{
+
+}
+
 NS_CC_END
