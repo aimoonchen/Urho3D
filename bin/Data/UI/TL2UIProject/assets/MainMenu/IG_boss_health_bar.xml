@@ -1,0 +1,10 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="297,63" extention="ProgressBar">
+  <displayList>
+    <image id="n0_ivnp" name="n0" src="ivnp1a" fileName="images/IG_boss_health_base.png" xy="0,0" size="297,63">
+      <relation target="" sidePair="width-width,height-height"/>
+    </image>
+    <image id="n1_ivnp" name="bar" src="ivnp1c" fileName="images/IG_boss_health_bar.png" xy="51,25" size="195,22"/>
+  </displayList>
+  <ProgressBar/>
+</component>

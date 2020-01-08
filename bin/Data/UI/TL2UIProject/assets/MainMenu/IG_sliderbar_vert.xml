@@ -1,0 +1,13 @@
+<?xml version="1.0" encoding="utf-8"?>
+<component size="39,341" extention="Slider">
+  <Slider/>
+  <displayList>
+    <image id="n0_ivnp" src="ivnp6" name="n0" xy="0,0" size="39,341">
+      <relation target="" sidePair="width,height"/>
+    </image>
+    <graph id="n1_ivnp" name="bar_v" xy="17,16" size="4,300" type="rect" lineSize="0" fillColor="#3399FF"/>
+    <component id="n2_ivnp" name="grip" xy="3,300" src="ivnp5i">
+      <relation target="n1_ivnp" sidePair="bottom-bottom"/>
+    </component>
+  </displayList>
+</component>
