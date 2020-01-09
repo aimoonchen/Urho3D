@@ -2,7 +2,6 @@
 <component size="1280,720">
   <displayList>
     <image id="n0_ivnp" name="n0" src="ivnp2x" fileName="images/HUD_base.png" xy="128,643"/>
-    <image id="n14_ivnp" name="n14" src="ivnp26" fileName="images/HUD_experiencebar.png" xy="247,704"/>
     <component id="n1_ivnp" name="n1" src="ivnp56" fileName="HUD_hotkey_leftend.xml" xy="233,655"/>
     <component id="n2_ivnp" name="n2" src="ivnp55" fileName="HUD_hotkey_middle.xml" xy="280,655"/>
     <component id="n3_ivnp" name="n3" src="ivnp53" fileName="HUD_hotkey_rightend.xml" xy="568,655"/>
@@ -15,5 +14,6 @@
     <component id="n10_ivnp" name="n10" src="ivnp55" fileName="HUD_hotkey_middle.xml" xy="532,655"/>
     <image id="n12_ivnp" name="n12" src="ivnp1o" fileName="images/HUD_mana_overlay.png" xy="1057,643"/>
     <image id="n13_ivnp" name="n13" src="ivnp25" fileName="images/HUD_health_overlay.png" xy="143,643"/>
+    <image id="n14_ivnp" name="n14" src="ivnp26" fileName="images/HUD_experiencebar.png" xy="247,704"/>
   </displayList>
 </component>
