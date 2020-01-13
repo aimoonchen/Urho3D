@@ -75,7 +75,6 @@ private:
     void CreateScene();
     /// Construct instruction text and the login / start server UI.
     void CreateUI();
-	void InitFairyGUI();
     /// Set up viewport.
     void SetupViewport();
     /// Subscribe to update, UI and network events.

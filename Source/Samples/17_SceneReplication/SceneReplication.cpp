@@ -219,32 +219,8 @@ void SceneReplication::CreateUI()
     startServerButton_ = CreateButton("Start Server", 110);
 
     UpdateButtons();
-
-	InitFairyGUI();
 }
-void SceneReplication::InitFairyGUI()
-{
-    auto fairy_root = GetSubsystem<GUI>()->GetFairyGUIRoot();
-    fairygui::UIPackage::addPackage("UI/MainMenu");
-	auto view = fairygui::UIPackage::createObject("MainMenu", "Main")->as<fairygui::GComponent>();
-    fairy_root->addChild(view);
-//     view->getChild("n1")->addClickListener([this](fairygui::EventContext*)
-// 	{
-// 		TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
-// 		Director::getInstance()->replaceScene(scene);
-// 	});
-    
-// #ifdef CC_PLATFORM_PC
-//     fairygui::UIConfig::registerFont(fairygui::UIConfig::defaultFont, "fonts/DroidSansFallback.ttf");
-// #endif
-// 
-// 	// create a scene. it's an autorelease object
-// 	auto scene = MenuScene::create();
-// 
-// 	// run
-// 	cocos2d::Director::getInstance()->runWithScene(scene);
 
-}
 void SceneReplication::SetupViewport()
 {
     auto* renderer = GetSubsystem<Renderer>();
@@ -463,7 +439,8 @@ server::Player* SceneReplication::CreatePlayer(Connection* con)
 // 
 //     return ballNode;
 }
-
+const float CAMERA_MIN_DIST = 0.1f;
+const float CAMERA_MAX_DIST = 6.0f;
 void SceneReplication::MoveCamera()
 {
     // Right mouse button controls mouse cursor visibility: hide when pressed
@@ -501,6 +478,14 @@ void SceneReplication::MoveCamera()
             showInstructions = true;
         }
     }
+
+    auto camera = cameraNode_->GetComponent<Camera>();
+    float zoom_ = camera->GetZoom();
+	if (input->GetMouseMoveWheel() != 0)
+	{
+		zoom_ = Clamp(zoom_ + input->GetMouseMoveWheel() * 0.1f, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+		camera->SetZoom(zoom_);
+	}
 
     instructionsText_->SetVisible(showInstructions);
 }
