@@ -1,10 +1,14 @@
 // Urho3D editor view & camera functions
+#include <string>
+#include <vector>
 #include "Urho3D/Math/Vector3.h"
 #include "Urho3D/Math/Rect.h"
 #include "Urho3D/Math/Matrix4.h"
 #include "Urho3D/Math/Color.h"
 
 #include "Urho3D/Core/Context.h"
+
+#include "Urho3D/Container/ArrayPtr.h"
 
 #include "Urho3D/Audio/SoundListener.h"
 
@@ -19,6 +23,7 @@
 #include "Urho3D/Scene/Component.h"
 #include "Urho3D/Scene/Scene.h"
 
+#include "Urho3D/Graphics/Graphics.h"
 #include "Urho3D/Graphics/RenderPath.h"
 #include "Urho3D/Graphics/CustomGeometry.h"
 #include "Urho3D/Graphics/Viewport.h"
@@ -31,18 +36,19 @@ using uint = uint32_t;
 
 Context* context_;
 auto scene_ = new Scene(context_);
+Scene* editorScene = scene_;
 auto* cache = context_->GetSubsystem<ResourceCache>();
 auto* ui = context_->GetSubsystem<UI>();
 
 WeakHandle previewCamera;
 
-Node@ cameraLookAtNode;
-Node@ cameraNode;
-Camera@ camera;
+Node* cameraLookAtNode;
+Node* cameraNode;
+Camera* camera;
 
 float orthoCameraZoom = 1.0f;
 
-Node@ gridNode;
+Node* gridNode;
 CustomGeometry@ grid;
 
 UIElement* viewportUI; // holds the viewport ui, convienent for clearing and hiding
@@ -53,7 +59,7 @@ int  viewportBorderOffset = 2; // used to center borders over viewport seams,  s
 int  viewportBorderWidth = 4; // width of a viewport resize border
 IntRect viewportArea; // the area where the editor viewport is. if we ever want to have the viewport not take up the whole screen this abstracts that
 IntRect viewportUIClipBorder = IntRect(27, 60, 0, 0); // used to clip viewport borders, the borders are ugly when going behind the transparent toolbars
-RenderPath@ renderPath; // Renderpath to use on all views
+RenderPath* renderPath; // Renderpath to use on all views
 String renderPathName;
 bool gammaCorrection = false;
 bool HDR = false;
@@ -64,7 +70,7 @@ Vector3 lastSelectedNodesCenterPoint = Vector3(0, 0, 0); // for Blender mode to 
 WeakHandle lastSelectedNode = null;
 WeakHandle lastSelectedDrawable = null;
 WeakHandle lastSelectedComponent = null;
-Component@ coloringComponent = null;
+Component* coloringComponent = nullptr;
 String coloringTypeName;
 String coloringPropertyName;
 Color coloringOldColor;
@@ -137,6 +143,7 @@ enum SnapScaleMode
 // Holds info about a viewport such as camera settings and splits up shared resources
 class ViewportContext
 {
+public:
 	float cameraYaw = 0;
 	float cameraPitch = 0;
 	Camera* camera;
@@ -164,14 +171,14 @@ class ViewportContext
 
 	ViewportContext(IntRect viewRect, uint index_, uint viewportId_)
 	{
-		cameraNode = Node();
-		cameraLookAtNode = Node();
-		cameraLookAtNode.AddChild(cameraNode);
-		camera = cameraNode.CreateComponent("Camera");
-		orthoCameraZoom = camera.zoom;
-		camera.fillMode = fillMode;
-		soundListener = cameraNode.CreateComponent("SoundListener");
-		viewport = Viewport(editorScene, camera, viewRect, renderPath);
+		cameraLookAtNode = scene_->CreateChild("cameraLookAtNode");
+		cameraNode = cameraLookAtNode->CreateChild("cameraNode");
+		//cameraLookAtNode.AddChild(cameraNode);
+		camera = cameraNode->CreateComponent<Camera>();
+		orthoCameraZoom = camera->GetZoom();
+		camera->SetFillMode(fillMode);
+		soundListener = cameraNode->CreateComponent<SoundListener>();
+		viewport = new Viewport(context_, editorScene, camera, viewRect, renderPath);
 		index = index_;
 		viewportId = viewportId_;
 		camera->SetViewMask(0xffffffff); // It's easier to only have 1 gizmo active this viewport is shared with the gizmo
@@ -184,7 +191,7 @@ class ViewportContext
 		cameraLookAtNode->SetPosition(Vector3(0, 0, 0));
 		cameraLookAtNode->SetRotation(Quaternion());
 
-		cameraNode->SetPosition = Vector3(0, 5, -10);
+		cameraNode->SetPosition(Vector3(0, 5, -10));
 		// Look at the origin so user can see the scene.
 		cameraNode->SetRotation(Quaternion(Vector3(0, 0, 1), -cameraNode->GetPosition()));
 		ReacquireCameraYawPitch();
@@ -193,28 +200,30 @@ class ViewportContext
 
 	void ReacquireCameraYawPitch()
 	{
-		cameraYaw = cameraNode.rotation.yaw;
-		cameraPitch = cameraNode.rotation.pitch;
+		const auto& rotation = cameraNode->GetRotation();
+		cameraYaw = rotation.YawAngle();
+		cameraPitch = rotation.PitchAngle();
 	}
 
 	void CreateViewportContextUI()
 	{
-		Font@ font = cache.GetResource("Font", "Fonts/Anonymous Pro.ttf");
+		Font* font = cache->GetResource<Font>("Fonts/Anonymous Pro.ttf");
 
 		viewportContextUI = new UIElement(context_);
 		viewportUI->AddChild(viewportContextUI);
-		viewportContextUI->SetPosition(viewport.rect.left, viewport.rect.top);
-		viewportContextUI->SetFixedSize(viewport.rect.width, viewport.rect.height);
-		viewportContextUI->clipChildren = true;
+		auto rect = viewport->GetRect();
+		viewportContextUI->SetPosition(rect.left_, rect.top_);
+		viewportContextUI->SetFixedSize(rect.Width(), rect.Height());
+		viewportContextUI->SetClipChildren(true);
 
-		statusBar = BorderImage("ToolBar");
-		statusBar.style = "EditorToolBar";
-		viewportContextUI.AddChild(statusBar);
+		statusBar = new BorderImage(context_);
+		statusBar->SetStyle("EditorToolBar");
+		viewportContextUI->AddChild(statusBar);
 
-		statusBar.SetLayout(LM_HORIZONTAL);
-		statusBar.SetAlignment(HA_LEFT, VA_BOTTOM);
-		statusBar.layoutSpacing = 4;
-		statusBar.opacity = uiMaxOpacity;
+		statusBar->SetLayout(LM_HORIZONTAL);
+		statusBar->SetAlignment(HA_LEFT, VA_BOTTOM);
+		statusBar->SetLayoutSpacing(4);
+		statusBar->SetOpacity(uiMaxOpacity);
 
 		Button@ settingsButton = CreateSmallToolBarButton("Settings");
 		statusBar.AddChild(settingsButton);
@@ -262,38 +271,39 @@ class ViewportContext
 
 	void HandleResize()
 	{
-		viewportContextUI.SetPosition(viewport.rect.left, viewport.rect.top);
-		viewportContextUI.SetFixedSize(viewport.rect.width, viewport.rect.height);
-		if (viewport.rect.left < 34)
+		auto rect = viewport->GetRect();
+		viewportContextUI->SetPosition(rect.left_, rect.top_);
+		viewportContextUI->SetFixedSize(rect.Width(), rect.Height());
+		if (rect.left_ < 34)
 		{
-			statusBar.layoutBorder = IntRect(34 - viewport.rect.left, 4, 4, 8);
-			IntVector2 pos = settingsWindow.position;
-			pos.x = 32 - viewport.rect.left;
-			settingsWindow.position = pos;
+			statusBar->SetLayoutBorder(IntRect(34 - rect.left_, 4, 4, 8));
+			IntVector2 pos = settingsWindow->GetPosition();
+			pos.x_ = 32 - rect.left_;
+			settingsWindow->SetPosition(pos);
 		}
 		else
 		{
-			statusBar.layoutBorder = IntRect(8, 4, 4, 8);
-			IntVector2 pos = settingsWindow.position;
-			pos.x = 5;
-			settingsWindow.position = pos;
+			statusBar->SetLayoutBorder(IntRect(8, 4, 4, 8));
+			IntVector2 pos = settingsWindow->GetPosition();
+			pos.x_ = 5;
+			settingsWindow->SetPosition(pos);
 		}
 
-		statusBar.SetFixedSize(viewport.rect.width, 22);
+		statusBar->SetFixedSize(rect.Width(), 22);
 	}
 
 	void ToggleOrthographic()
 	{
-		SetOrthographic(!camera.orthographic);
+		SetOrthographic(!camera->IsOrthographic());
 	}
 
 	void SetOrthographic(bool orthographic)
 	{
-		camera.orthographic = orthographic;
-		if (camera.orthographic)
-			camera.zoom = orthoCameraZoom;
+		camera->SetOrthographic(orthographic);
+		if (camera->IsOrthographic())
+			camera->SetZoom(orthoCameraZoom);
 		else
-			camera.zoom = 1.0f;
+			camera->SetZoom(1.0f);
 
 		UpdateSettingsUI();
 	}
@@ -306,24 +316,24 @@ class ViewportContext
 			cameraSmoothInterpolate.Update(timeStep);
 		}
 
-		Vector3 cameraPos = cameraNode.position;
-		String xText(cameraPos.x);
-		String yText(cameraPos.y);
-		String zText(cameraPos.z);
+		Vector3 cameraPos = cameraNode->GetPosition();
+		String xText(cameraPos.x_);
+		String yText(cameraPos.y_);
+		String zText(cameraPos.z_);
 		xText.Resize(8);
 		yText.Resize(8);
 		zText.Resize(8);
 
-		cameraPosText.text = String(
+		cameraPosText->SetText(String(
 			"Pos: " + xText + " " + yText + " " + zText +
-			" Zoom: " + camera.zoom);
+			" Zoom: " + std::to_string(camera->GetZoom()).c_str()));
 
-		cameraPosText.size = cameraPosText.minSize;
+		cameraPosText->SetSize(cameraPosText->GetMinSize());
 	}
 
 	void ToggleViewportSettingsWindow()
 	{
-		if (settingsWindow.visible)
+		if (settingsWindow->IsVisible())
 			CloseViewportSettingsWindow();
 		else
 			OpenViewportSettingsWindow();
@@ -403,14 +413,15 @@ class ViewportContext
 			editNode.rotation = cameraNode.rotation;
 		}
 	}
-}
+};
 
-Array<ViewportContext@> viewports;
-ViewportContext@ activeViewport;
+std::vector<ViewportContext*> viewports;
 
-Text@ editorModeText;
-Text@ renderStatsText;
-Text@ modelInfoText;
+ViewportContext* activeViewport;
+
+Text* editorModeText;
+Text* renderStatsText;
+Text* modelInfoText;
 
 EditMode editMode = EDIT_MOVE;
 AxisMode axisMode = AXIS_WORLD;
@@ -471,13 +482,13 @@ Color gridXColor(0.5, 0.1, 0.1);
 Color gridYColor(0.1, 0.5, 0.1);
 Color gridZColor(0.1, 0.1, 0.5);
 
-Array<int> pickModeDrawableFlags = {
+std::vector<int> pickModeDrawableFlags = {
 	DRAWABLE_GEOMETRY,
 	DRAWABLE_LIGHT,
 	DRAWABLE_ZONE
 };
 
-Array<String> editModeText = {
+std::vector<String> editModeText = {
 	"Move",
 	"Rotate",
 	"Scale",
@@ -485,12 +496,12 @@ Array<String> editModeText = {
 	"Spawn"
 };
 
-Array<String> axisModeText = {
+std::vector<String> axisModeText = {
 	"World",
 	"Local"
 };
 
-Array<String> pickModeText = {
+std::vector<String> pickModeText = {
 	"Geometries",
 	"Lights",
 	"Zones",
@@ -498,7 +509,7 @@ Array<String> pickModeText = {
 	"UI-elements"
 };
 
-Array<String> fillModeText = {
+std::vector<String> fillModeText = {
 	"Solid",
 	"Wire",
 	"Point"
@@ -507,6 +518,7 @@ Array<String> fillModeText = {
 // This class provides smooth translation/rotation/zoom interpolation for the editor camera
 class CameraSmoothInterpolate
 {
+public:
 	Vector3 lookAtNodeBeginPos;
 	Vector3 cameraNodeBeginPos;
 
@@ -562,7 +574,7 @@ class CameraSmoothInterpolate
 
 	void Start(float duration_)
 	{
-		if (cameraLookAtNode is null || cameraNode is null || camera is null)
+		if (!cameraLookAtNode || !cameraNode || !camera)
 			return;
 
 		duration = duration_;
@@ -585,25 +597,25 @@ class CameraSmoothInterpolate
 		if (!isRunning)
 			return;
 
-		if (cameraLookAtNode is null || cameraNode is null || camera is null)
+		if (!cameraLookAtNode || !cameraNode || !camera)
 			return;
 
 		if (interpLookAtNodePos)
-			cameraLookAtNode.worldPosition = lookAtNodeEndPos;
+			cameraLookAtNode->SetWorldPosition(lookAtNodeEndPos);
 
 		if (interpCameraNodePos)
-			cameraNode.position = cameraNodeEndPos;
+			cameraNode->SetPosition(cameraNodeEndPos);
 
 		if (interpCameraRot)
 		{
-			cameraNode.rotation = cameraNodeEndRot;
+			cameraNode->SetRotation(cameraNodeEndRot);
 			ReacquireCameraYawPitch();
 		}
 
 		if (interpCameraZoom)
 		{
 			orthoCameraZoom = cameraEndZoom;
-			camera.zoom = cameraEndZoom;
+			camera->SetZoom(cameraEndZoom);
 		}
 
 		interpLookAtNodePos = false;
@@ -631,7 +643,7 @@ class CameraSmoothInterpolate
 		if (!isRunning)
 			return;
 
-		if (cameraLookAtNode is null || cameraNode is null || camera is null)
+		if (!cameraLookAtNode || !cameraNode || !camera)
 			return;
 
 		elapsedTime += timeStep;
@@ -641,21 +653,21 @@ class CameraSmoothInterpolate
 			float factor = EaseOut(elapsedTime, 0.0f, 1.0f, duration);
 
 			if (interpLookAtNodePos)
-				cameraLookAtNode.worldPosition = lookAtNodeBeginPos + (lookAtNodeEndPos - lookAtNodeBeginPos) * factor;
+				cameraLookAtNode->SetWorldPosition(lookAtNodeBeginPos + (lookAtNodeEndPos - lookAtNodeBeginPos) * factor);
 
 			if (interpCameraNodePos)
-				cameraNode.position = cameraNodeBeginPos + (cameraNodeEndPos - cameraNodeBeginPos) * factor;
+				cameraNode->SetPosition(cameraNodeBeginPos + (cameraNodeEndPos - cameraNodeBeginPos) * factor);
 
 			if (interpCameraRot)
 			{
-				cameraNode.rotation = cameraNodeBeginRot.Slerp(cameraNodeEndRot, factor);
+				cameraNode->SetRotation(cameraNodeBeginRot.Slerp(cameraNodeEndRot, factor));
 				ReacquireCameraYawPitch();
 			}
 
 			if (interpCameraZoom)
 			{
 				orthoCameraZoom = cameraBeginZoom + (cameraEndZoom - cameraBeginZoom) * factor;
-				camera.zoom = orthoCameraZoom;
+				camera->SetZoom(orthoCameraZoom);
 			}
 		}
 		else
@@ -663,32 +675,32 @@ class CameraSmoothInterpolate
 			Finish();
 		}
 	}
-}
+};
 
 
 CameraSmoothInterpolate cameraSmoothInterpolate; // Camera smooth interpolation control
 
-void SetRenderPath(const String& in newRenderPathName)
+void SetRenderPath(const String& newRenderPathName)
 {
-	renderPath = null;
+	renderPath = nullptr;
 	renderPathName = newRenderPathName.Trimmed();
 
-	if (renderPathName.length > 0)
+	if (renderPathName.Length() > 0)
 	{
-		File@ file = cache.GetFile(renderPathName);
-		if (file !is null)
+		auto file = cache->GetFile(renderPathName);
+		if (file.NotNull())
 		{
-			XMLFile@ xml = XMLFile();
-			if (xml.Load(file))
+			XMLFile* xml = new XMLFile(context_);
+			if (xml->Load(*file))
 			{
-				renderPath = RenderPath();
-				if (!renderPath.Load(xml))
-					renderPath = null;
+				renderPath = new RenderPath();
+				if (!renderPath->Load(xml))
+					renderPath = nullptr;
 			}
 		}
 	}
 
-	if (renderPath is null)
+	if (!renderPath)
 		renderPath = renderer.defaultRenderPath.Clone();
 
 	// Append gamma correction postprocess and disable/enable it as requested
@@ -724,7 +736,8 @@ void SetHDR(bool enable)
 void CreateCamera()
 {
 	// Set the initial viewport rect
-	viewportArea = IntRect(0, 0, graphics.width, graphics.height);
+	auto graphics = context_->GetSubsystem<Graphics>();
+	viewportArea = IntRect(0, 0, graphics->GetWidth(), graphics.height);
 
 	// Set viewport single to store default hierarchy/inspector height/positions
 	if (viewportMode == VIEWPORT_COMPACT)
@@ -749,18 +762,21 @@ void CreateCamera()
 // Create any UI associated with changing the editor viewports
 void CreateViewportUI()
 {
-	if (viewportUI is null)
+	auto* ui = context_->GetSubsystem<UI>();
+	UIElement* root = ui->GetRoot();
+
+	if (!viewportUI)
 	{
-		viewportUI = UIElement();
-		ui.root.AddChild(viewportUI);
+		viewportUI = root->CreateChild<UIElement>();// UIElement();
+		//ui.root.AddChild(viewportUI);
 	}
 
-	viewportUI.SetFixedSize(viewportArea.width, viewportArea.height);
-	viewportUI.position = IntVector2(viewportArea.top, viewportArea.left);
+	viewportUI->SetFixedSize(viewportArea.width, viewportArea.height);
+	viewportUI->SetPosition(IntVector2(viewportArea.top, viewportArea.left));
 	viewportUI.clipChildren = true;
 	viewportUI.clipBorder = viewportUIClipBorder;
-	viewportUI.RemoveAllChildren();
-	viewportUI.priority = -2000;
+	viewportUI->RemoveAllChildren();
+	viewportUI->SetPriority(-2000);
 
 	Array<BorderImage@> borders;
 
@@ -773,9 +789,9 @@ void CreateViewportUI()
 	IntRect bottomLeft;
 	IntRect bottomRight;
 
-	for (uint i = 0; i < viewports.length; ++i)
+	for (uint i = 0; i < viewports.size(); ++i)
 	{
-		ViewportContext@ vc = viewports[i];
+		ViewportContext* vc = viewports[i];
 		vc.CreateViewportContextUI();
 
 		if (vc.viewportId & VIEWPORT_TOP > 0)
@@ -865,20 +881,20 @@ void SetFillMode(FillMode fillMode_)
 void SetViewportMode(uint mode = VIEWPORT_SINGLE)
 {
 	// Remember old viewport positions
-	Array<Vector3> cameralookAtPositions;
-	Array<Quaternion> cameraLookAtRotations;
-	Array<Vector3> cameraPositions;
-	Array<Quaternion> cameraRotations;
-	for (uint i = 0; i < viewports.length; ++i)
+	std::vector<Vector3> cameralookAtPositions;
+	std::vector<Quaternion> cameraLookAtRotations;
+	std::vector<Vector3> cameraPositions;
+	std::vector<Quaternion> cameraRotations;
+	for (uint i = 0; i < viewports.size(); ++i)
 	{
-		cameralookAtPositions.Push(viewports[i].cameraLookAtNode.position);
-		cameraLookAtRotations.Push(viewports[i].cameraLookAtNode.rotation);
+		cameralookAtPositions.push_back(viewports[i]->cameraLookAtNode->GetPosition());
+		cameraLookAtRotations.push_back(viewports[i]->cameraLookAtNode->GetRotation());
 
-		cameraPositions.Push(viewports[i].cameraNode.position);
-		cameraRotations.Push(viewports[i].cameraNode.rotation);
+		cameraPositions.push_back(viewports[i]->cameraNode->GetPosition());
+		cameraRotations.push_back(viewports[i]->cameraNode->GetRotation());
 	}
 
-	viewports.Clear();
+	viewports.clear();
 
 	if (mode == VIEWPORT_COMPACT)
 	{
@@ -1315,12 +1331,12 @@ void SetViewportCursor()
 		ui.cursor.shape = CS_RESIZEVERTICAL;
 }
 
-void SetActiveViewport(ViewportContext@ context)
+void SetActiveViewport(ViewportContext* context)
 {
 	// Sets the global variables to the current context
-	@cameraLookAtNode = context.cameraLookAtNode;
-	@cameraNode = context.cameraNode;
-	@camera = context.camera;
+	cameraLookAtNode = context->cameraLookAtNode;
+	cameraNode = context->cameraNode;
+	camera = context->camera;
 	@audio.listener = context.soundListener;
 
 	// Camera is created before gizmo, this gets called again after UI is created
@@ -1350,9 +1366,9 @@ void UpdateViewParameters()
 {
 	for (uint i = 0; i < viewports.length; ++i)
 	{
-		viewports[i].camera.nearClip = viewNearClip;
-		viewports[i].camera.farClip = viewFarClip;
-		viewports[i].camera.fov = viewFov;
+		viewports[i].camera->SetNearClip(viewNearClip);
+		viewports[i].camera->SetFarClip(viewFarClip);
+		viewports[i].camera->SetFov(viewFov);
 	}
 }
 
@@ -1566,45 +1582,45 @@ void CameraPan(Vector3 trans)
 {
 	cameraSmoothInterpolate.Stop();
 
-	cameraLookAtNode.Translate(trans);
+	cameraLookAtNode->Translate(trans);
 }
 
 void CameraMoveForward(Vector3 trans)
 {
 	cameraSmoothInterpolate.Stop();
 
-	cameraNode.Translate(trans, TS_PARENT);
+	cameraNode->Translate(trans, TS_PARENT);
 }
 
 void CameraRotateAroundLookAt(Quaternion rot)
 {
 	cameraSmoothInterpolate.Stop();
 
-	cameraNode.rotation = rot;
+	cameraNode->SetRotation(rot);
 
-	Vector3 dir = cameraNode.direction;
+	Vector3 dir = cameraNode->GetDirection();
 	dir.Normalize();
 
-	float dist = cameraNode.position.length;
+	float dist = cameraNode->GetPosition().Length();
 
-	cameraNode.position = -dir * dist;
+	cameraNode->SetPosition(-dir * dist);
 }
 
 void CameraRotateAroundCenter(Quaternion rot)
 {
 	cameraSmoothInterpolate.Stop();
 
-	cameraNode.rotation = rot;
+	cameraNode->SetRotation(rot);
 
-	Vector3 oldPos = cameraNode.worldPosition;
+	Vector3 oldPos = cameraNode->GetWorldPosition();
 
-	Vector3 dir = cameraNode.worldDirection;
+	Vector3 dir = cameraNode->GetWorldDirection();
 	dir.Normalize();
 
-	float dist = cameraNode.position.length;
+	float dist = cameraNode->GetPosition().Length();
 
-	cameraLookAtNode.worldPosition = cameraNode.worldPosition + dir * dist;
-	cameraNode.worldPosition = oldPos;
+	cameraLookAtNode->SetWorldPosition(cameraNode->GetWorldPosition() + dir * dist);
+	cameraNode->SetWorldPosition(oldPos);
 }
 
 void CameraRotateAroundSelect(Quaternion rot)
@@ -1634,7 +1650,7 @@ void CameraZoom(float zoom)
 {
 	cameraSmoothInterpolate.Stop();
 
-	camera.zoom = Clamp(zoom, .1, 30);
+	camera->SetZoom(Clamp(zoom, 0.1f, 30.0f));
 }
 
 void HandleStandardUserInput(float timeStep)
@@ -1731,7 +1747,7 @@ void HandleStandardUserInput(float timeStep)
 		SetMouseLock();
 
 		IntVector2 mouseMove = input.mouseMove;
-		if (mouseMove.x != 0 || mouseMove.y != 0)
+		if (mouseMove.x_ != 0 || mouseMove.y_ != 0)
 		{
 			bool panTheCamera = false;
 
@@ -1746,12 +1762,12 @@ void HandleStandardUserInput(float timeStep)
 			// Pan the camera
 			if (panTheCamera)
 			{
-				Vector3 right = -cameraNode.worldRight;
+				Vector3 right = -cameraNode->GetWorldRight();
 				right.Normalize();
-				right *= mouseMove.x;
-				Vector3 up = cameraNode.worldUp;
+				right *= mouseMove.x_;
+				Vector3 up = cameraNode->GetWorldUp();
 				up.Normalize();
-				up *= mouseMove.y;
+				up *= mouseMove.y_;
 
 				Vector3 trans = (right + up) * timeStep * cameraBaseSpeed * 0.5;
 
@@ -1759,13 +1775,13 @@ void HandleStandardUserInput(float timeStep)
 			}
 			else // Rotate the camera
 			{
-				activeViewport.cameraYaw += mouseMove.x * cameraBaseRotationSpeed;
-				activeViewport.cameraPitch += mouseMove.y * cameraBaseRotationSpeed;
+				activeViewport->cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
+				activeViewport->cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
 
 				if (limitRotation)
-					activeViewport.cameraPitch = Clamp(activeViewport.cameraPitch, -90.0, 90.0);
+					activeViewport->cameraPitch = Clamp(activeViewport->cameraPitch, -90.0f, 90.0f);
 
-				Quaternion rot = Quaternion(activeViewport.cameraPitch, activeViewport.cameraYaw, 0);
+				Quaternion rot = Quaternion(activeViewport->cameraPitch, activeViewport->cameraYaw, 0);
 
 				if (input.mouseButtonDown[MOUSEB_MIDDLE]) // Rotate around the camera center
 				{
@@ -1818,7 +1834,7 @@ void HandleBlenderUserInput(float timeStep)
 		{
 			if (input.keyDown[KEY_W] || input.keyDown[KEY_UP])
 			{
-				Vector3 dir = cameraNode.direction;
+				Vector3 dir = cameraNode->GetDirection();
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1826,7 +1842,7 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			if (input.keyDown[KEY_S] || input.keyDown[KEY_DOWN])
 			{
-				Vector3 dir = cameraNode.direction;
+				Vector3 dir = cameraNode->GetDirection();
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1834,7 +1850,7 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			if (input.keyDown[KEY_A] || input.keyDown[KEY_LEFT])
 			{
-				Vector3 dir = cameraNode.right;
+				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1842,7 +1858,7 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			if (input.keyDown[KEY_D] || input.keyDown[KEY_RIGHT])
 			{
-				Vector3 dir = cameraNode.right;
+				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1850,7 +1866,7 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			if (input.keyDown[KEY_E] || input.keyDown[KEY_PAGEUP])
 			{
-				Vector3 dir = cameraNode.up;
+				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1858,7 +1874,7 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			if (input.keyDown[KEY_Q] || input.keyDown[KEY_PAGEDOWN])
 			{
-				Vector3 dir = cameraNode.up;
+				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
@@ -1873,25 +1889,25 @@ void HandleBlenderUserInput(float timeStep)
 		{
 			if (input.keyDown[KEY_LSHIFT])
 			{
-				Vector3 dir = cameraNode.up;
+				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
 				CameraPan(dir * input.mouseMoveWheel * 5 * timeStep * cameraBaseSpeed * speedMultiplier);
 			}
 			else if (input.keyDown[KEY_LCTRL])
 			{
-				Vector3 dir = cameraNode.right;
+				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
 				CameraPan(dir * input.mouseMoveWheel * 5 * timeStep * cameraBaseSpeed * speedMultiplier);
 			}
 			else // Zoom in/out
 			{
-				float distance = cameraNode.position.length;
+				float distance = cameraNode->GetPosition().Length();
 				float ratio = distance / 40.0f;
 				float factor = ratio < 1.0f ? ratio : 1.0f;
 
-				Vector3 dir = cameraNode.direction;
+				Vector3 dir = cameraNode->GetDirection();
 				dir.Normalize();
 				dir *= input.mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
 
@@ -1902,21 +1918,21 @@ void HandleBlenderUserInput(float timeStep)
 		{
 			if (input.keyDown[KEY_LSHIFT])
 			{
-				Vector3 dir = cameraNode.up;
+				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
 				CameraPan(dir * input.mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
 			}
 			else if (input.keyDown[KEY_LCTRL])
 			{
-				Vector3 dir = cameraNode.right;
+				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
 				CameraPan(dir * input.mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
 			}
 			else
 			{
-				float zoom = camera.zoom + input.mouseMoveWheel * speedMultiplier * 0.5f;
+				float zoom = camera->GetZoom() + input.mouseMoveWheel * speedMultiplier * 0.5f;
 
 				CameraZoom(zoom);
 			}
@@ -1934,7 +1950,7 @@ void HandleBlenderUserInput(float timeStep)
 		SetMouseLock();
 
 		IntVector2 mouseMove = input.mouseMove;
-		if (mouseMove.x != 0 || mouseMove.y != 0)
+		if (mouseMove.x_ != 0 || mouseMove.y_ != 0)
 		{
 			bool panTheCamera = false;
 
@@ -1943,12 +1959,12 @@ void HandleBlenderUserInput(float timeStep)
 
 			if (panTheCamera)
 			{
-				Vector3 right = -cameraNode.worldRight;
+				Vector3 right = -cameraNode->GetWorldRight();
 				right.Normalize();
-				right *= mouseMove.x;
-				Vector3 up = cameraNode.worldUp;
+				right *= mouseMove.x_;
+				Vector3 up = cameraNode->GetWorldUp();
 				up.Normalize();
-				up *= mouseMove.y;
+				up *= mouseMove.y_;
 
 				Vector3 trans = (right + up) * timeStep * cameraBaseSpeed * 0.5;
 
@@ -1956,13 +1972,13 @@ void HandleBlenderUserInput(float timeStep)
 			}
 			else
 			{
-				activeViewport.cameraYaw += mouseMove.x * cameraBaseRotationSpeed;
-				activeViewport.cameraPitch += mouseMove.y * cameraBaseRotationSpeed;
+				activeViewport->cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
+				activeViewport->cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
 
 				if (limitRotation)
-					activeViewport.cameraPitch = Clamp(activeViewport.cameraPitch, -90.0, 90.0);
+					activeViewport->cameraPitch = Clamp(activeViewport->cameraPitch, -90.0f, 90.0f);
 
-				Quaternion rot = Quaternion(activeViewport.cameraPitch, activeViewport.cameraYaw, 0);
+				Quaternion rot = Quaternion(activeViewport->cameraPitch, activeViewport->cameraYaw, 0);
 
 				if (cameraFlyMode)
 				{
@@ -2487,7 +2503,7 @@ Vector3 GetNewNodePosition(bool raycastToMouse = false)
 		if (GetSpawnPosition(cameraRay, camera.farClip, position, normal, 0, false))
 			return position;
 	}
-	return cameraLookAtNode.worldPosition;
+	return cameraLookAtNode->GetWorldPosition();
 }
 
 int GetShadowResolution()
@@ -2611,14 +2627,14 @@ void LocateNodes(Array<Node@> nodes)
 	FitCamera(box, true);
 }
 
-void LocateComponents(Array<Component@> components)
+void LocateComponents(std::vector<Component*> components)
 {
 	if (components.empty || components.length == 1 && components[0].node is editorScene)
 		return;
 
 	// Calculate bounding box of all nodes
 	BoundingBox box;
-	Array<Component@> visitedComponents;
+	std::vector<Component*> visitedComponents;
 
 	for (uint i = 0; i < components.length; ++i)
 	{
@@ -2628,16 +2644,16 @@ void LocateComponents(Array<Component@> components)
 	FitCamera(box, true);
 }
 
-void LocateNodesAndComponents(Array<Node@> nodes, Array<Component@> components)
+void LocateNodesAndComponents(std::vector<Node*> nodes, std::vector<Component*> components)
 {
-	if (nodes.length == 0 && components.length == 0)
+	if (nodes.size() == 0 && components.size() == 0)
 		return;
 
 	// Calculate bounding box of all nodes
 	BoundingBox box;
-	Array<Component@> visitedComponents;
+	std::vector<Component*> visitedComponents;
 
-	if (!nodes.empty && !(nodes.length == 1 && nodes[0] is editorScene))
+	if (!nodes.empty() && !(nodes.size() == 1 && nodes[0] == editorScene))
 	{
 		for (uint i = 0; i < nodes.length; ++i)
 		{
@@ -2645,9 +2661,9 @@ void LocateNodesAndComponents(Array<Node@> nodes, Array<Component@> components)
 		}
 	}
 
-	if (!components.empty)
+	if (!components.empty())
 	{
-		for (uint i = 0; i < components.length; ++i)
+		for (uint i = 0; i < components.size(); ++i)
 		{
 			MergeComponentBoundingBox(box, visitedComponents, components[i]);
 		}
@@ -2699,8 +2715,8 @@ void FitCamera(BoundingBox box, bool smooth)
 
 	if (smooth)
 	{
-		cameraSmoothInterpolate.SetLookAtNodePosition(cameraLookAtNode.worldPosition, lookAtPos);
-		cameraSmoothInterpolate.SetCameraNodePosition(cameraNode.position, cameraPos);
+		cameraSmoothInterpolate.SetLookAtNodePosition(cameraLookAtNode->GetWorldPosition(), lookAtPos);
+		cameraSmoothInterpolate.SetCameraNodePosition(cameraNode->GetPosition(), cameraPos);
 
 		if (camera.orthographic)
 			cameraSmoothInterpolate.SetCameraZoom(camera.zoom, zoom);
@@ -2709,11 +2725,11 @@ void FitCamera(BoundingBox box, bool smooth)
 	}
 	else
 	{
-		cameraLookAtNode.worldPosition = lookAtPos;
-		cameraNode.position = cameraPos;
+		cameraLookAtNode->SetWorldPosition(lookAtPos);
+		cameraNode->SetPosition(cameraPos);
 
-		if (camera.orthographic)
-			camera.zoom = zoom;
+		if (camera->IsOrthographic())
+			camera->SetZoom(zoom);
 	}
 }
 
