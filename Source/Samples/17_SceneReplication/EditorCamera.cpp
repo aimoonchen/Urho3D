@@ -1,19 +1,42 @@
 #include "EditorCamera.h"
+#include "Urho3D/Math/Vector3.h"
+#include "Urho3D/Math/Quaternion.h"
 #include "Urho3D/Graphics/Camera.h"
 #include "Urho3D/Scene/Node.h"
 #include "Urho3D/Core/Context.h"
 #include "Urho3D/Input/Input.h"
+#include "Urho3D/UI/UI.h"
 
 using namespace Urho3D;
 
+float cameraBaseSpeed = 3.0f;
+float cameraBaseRotationSpeed = 0.2f;
+float cameraShiftSpeedMultiplier = 5.0f;
+float moveStep = 0.5f;
+float rotateStep = 5.0f;
+float scaleStep = 0.1f;
+bool toggledMouseLock = false;
+enum MouseOrbitMode
+{
+	ORBIT_RELATIVE = 0,
+	ORBIT_WRAP
+};
+int mouseOrbitMode = ORBIT_RELATIVE;
+bool mmbPanMode = false;
+bool rotateAroundSelect = false;
+bool orbiting = false;
+bool limitRotation = false;
+bool cameraFlyMode = true;
+Vector3 lastSelectedNodesCenterPoint = Vector3(0.0f, 0.0f, 0.0f);
+float orthoCameraZoom = 1.0f;
 
 class CameraSmoothInterpolate
 {
 public:
-	Camera* camera{ nullptr };
-	Node* cameraLookAtNode{ nullptr };
-	Node* cameraNode{ nullptr };
-
+// 	Camera* camera{ nullptr };
+// 	Node* cameraLookAtNode{ nullptr };
+// 	Node* cameraNode{ nullptr };
+	EditorCamera* editorCamera{nullptr};
 	Vector3 lookAtNodeBeginPos;
 	Vector3 cameraNodeBeginPos;
 
@@ -35,7 +58,8 @@ public:
 	bool interpCameraRot = false;
 	bool interpCameraZoom = false;
 
-	CameraSmoothInterpolate()
+	CameraSmoothInterpolate(EditorCamera* ecamera)
+		: editorCamera{ ecamera }
 	{
 	}
 
@@ -87,7 +111,7 @@ void CameraSmoothInterpolate::SetCameraZoom(float beginZoom, float endZoom)
 
 void CameraSmoothInterpolate::Start(float duration_)
 {
-	if (!cameraLookAtNode || !cameraNode || !camera)
+	if (!editorCamera)
 		return;
 
 	duration = duration_;
@@ -110,25 +134,25 @@ void CameraSmoothInterpolate::Finish()
 	if (!isRunning)
 		return;
 
-	if (!cameraLookAtNode || !cameraNode || !camera)
+	if (!editorCamera)
 		return;
 
 	if (interpLookAtNodePos)
-		cameraLookAtNode->SetWorldPosition(lookAtNodeEndPos);
+		editorCamera->cameraLookAtNode->SetWorldPosition(lookAtNodeEndPos);
 
 	if (interpCameraNodePos)
-		cameraNode->SetPosition(cameraNodeEndPos);
+		editorCamera->cameraNode->SetPosition(cameraNodeEndPos);
 
 	if (interpCameraRot)
 	{
-		cameraNode->SetRotation(cameraNodeEndRot);
-		ReacquireCameraYawPitch();
+		editorCamera->cameraNode->SetRotation(cameraNodeEndRot);
+		editorCamera->ReacquireCameraYawPitch();
 	}
 
 	if (interpCameraZoom)
 	{
 		orthoCameraZoom = cameraEndZoom;
-		camera->SetZoom(cameraEndZoom);
+		editorCamera->camera->SetZoom(cameraEndZoom);
 	}
 
 	interpLookAtNodePos = false;
@@ -143,7 +167,7 @@ void CameraSmoothInterpolate::Update(float timeStep)
 	if (!isRunning)
 		return;
 
-	if (!cameraLookAtNode || !cameraNode || !camera)
+	if (!editorCamera)
 		return;
 
 	elapsedTime += timeStep;
@@ -153,21 +177,21 @@ void CameraSmoothInterpolate::Update(float timeStep)
 		float factor = EaseOut(elapsedTime, 0.0f, 1.0f, duration);
 
 		if (interpLookAtNodePos)
-			cameraLookAtNode->SetWorldPosition(lookAtNodeBeginPos + (lookAtNodeEndPos - lookAtNodeBeginPos) * factor);
+			editorCamera->cameraLookAtNode->SetWorldPosition(lookAtNodeBeginPos + (lookAtNodeEndPos - lookAtNodeBeginPos) * factor);
 
 		if (interpCameraNodePos)
-			cameraNode->SetPosition(cameraNodeBeginPos + (cameraNodeEndPos - cameraNodeBeginPos) * factor);
+			editorCamera->cameraNode->SetPosition(cameraNodeBeginPos + (cameraNodeEndPos - cameraNodeBeginPos) * factor);
 
 		if (interpCameraRot)
 		{
-			cameraNode->SetRotation(cameraNodeBeginRot.Slerp(cameraNodeEndRot, factor));
-			ReacquireCameraYawPitch();
+			editorCamera->cameraNode->SetRotation(cameraNodeBeginRot.Slerp(cameraNodeEndRot, factor));
+			editorCamera->ReacquireCameraYawPitch();
 		}
 
 		if (interpCameraZoom)
 		{
 			orthoCameraZoom = cameraBeginZoom + (cameraEndZoom - cameraBeginZoom) * factor;
-			camera->SetZoom(orthoCameraZoom);
+			editorCamera->camera->SetZoom(orthoCameraZoom);
 		}
 	}
 	else
@@ -195,7 +219,7 @@ void EditorCamera::Start()
 	camera->SetFillMode(fillMode);
 	camera->SetViewMask(0xffffffff);
 	orthoCameraZoom = camera->GetZoom();
-	cameraSmoothInterpolate = std::make_unique<CameraSmoothInterpolate>();
+	cameraSmoothInterpolate = std::make_unique<CameraSmoothInterpolate>(this);
 }
 
 void EditorCamera::Update(float timeStep)
@@ -260,21 +284,21 @@ void EditorCamera::UpdateEx(float timeStep)
 // 	cameraPosText->SetSize(cameraPosText->GetMinSize());
 }
 
-void EditorCamera::CameraPan(Vector3 trans)
+void EditorCamera::CameraPan(const Vector3& trans)
 {
 	cameraSmoothInterpolate->Stop();
 
 	cameraLookAtNode->Translate(trans);
 }
 
-void EditorCamera::CameraMoveForward(Vector3 trans)
+void EditorCamera::CameraMoveForward(const Vector3& trans)
 {
 	cameraSmoothInterpolate->Stop();
 
 	cameraNode->Translate(trans, TS_PARENT);
 }
 
-void EditorCamera::CameraRotateAroundLookAt(Quaternion rot)
+void EditorCamera::CameraRotateAroundLookAt(const Quaternion& rot)
 {
 	cameraSmoothInterpolate->Stop();
 
@@ -288,7 +312,7 @@ void EditorCamera::CameraRotateAroundLookAt(Quaternion rot)
 	cameraNode->SetPosition(-dir * dist);
 }
 
-void EditorCamera::CameraRotateAroundCenter(Quaternion rot)
+void EditorCamera::CameraRotateAroundCenter(const Quaternion& rot)
 {
 	cameraSmoothInterpolate->Stop();
 
@@ -305,7 +329,7 @@ void EditorCamera::CameraRotateAroundCenter(Quaternion rot)
 	cameraNode->SetWorldPosition(oldPos);
 }
 
-void EditorCamera::CameraRotateAroundSelect(Quaternion rot)
+void EditorCamera::CameraRotateAroundSelect(const Quaternion& rot)
 {
 	cameraSmoothInterpolate->Stop();
 
@@ -319,9 +343,9 @@ void EditorCamera::CameraRotateAroundSelect(Quaternion rot)
 	cameraNode->SetPosition(-dir * dist);
 
 	Vector3 centerPoint;
-	if ((selectedNodes.length > 0 || selectedComponents.length > 0))
-		centerPoint = SelectedNodesCenterPoint();
-	else
+// 	if ((selectedNodes.length > 0 || selectedComponents.length > 0))
+// 		centerPoint = SelectedNodesCenterPoint();
+// 	else
 		centerPoint = lastSelectedNodesCenterPoint;
 
 	// legacy way, camera look-at will jump to the selection
@@ -339,80 +363,83 @@ void EditorCamera::HandleStandardUserInput(float timeStep)
 {
 	// Speedup camera move if Shift key is down
 	float speedMultiplier = 1.0;
-	if (input->GetKeyDown(KEY_LSHIFT])
+	auto input = GetSubsystem<Input>();
+	if (input->GetKeyDown(KEY_LSHIFT))
 		speedMultiplier = cameraShiftSpeedMultiplier;
 
 	// Handle FPS mode
-	if (!input->GetKeyDown(KEY_LCTRL] && !input->GetKeyDown(KEY_LALT])
+	if (!input->GetKeyDown(KEY_LCTRL) && !input->GetKeyDown(KEY_LALT))
 	{
-		if (input->GetKeyDown(KEY_W] || input->GetKeyDown(KEY_UP])
+		if (input->GetKeyDown(KEY_W) || input->GetKeyDown(KEY_UP))
 		{
-			Vector3 dir = cameraNode.direction;
+			Vector3 dir = cameraNode->GetDirection();
 			dir.Normalize();
 
 			CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
-		if (input->GetKeyDown(KEY_S] || input->GetKeyDown(KEY_DOWN])
+		if (input->GetKeyDown(KEY_S) || input->GetKeyDown(KEY_DOWN))
 		{
-			Vector3 dir = cameraNode.direction;
+			Vector3 dir = cameraNode->GetDirection();
 			dir.Normalize();
 
 			CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
-		if (input->GetKeyDown(KEY_A] || input->GetKeyDown(KEY_LEFT])
+		if (input->GetKeyDown(KEY_A) || input->GetKeyDown(KEY_LEFT))
 		{
-			Vector3 dir = cameraNode.right;
+			Vector3 dir = cameraNode->GetRight();
 			dir.Normalize();
 
 			CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
-		if (input->GetKeyDown(KEY_D] || input->GetKeyDown(KEY_RIGHT])
+		if (input->GetKeyDown(KEY_D) || input->GetKeyDown(KEY_RIGHT))
 		{
-			Vector3 dir = cameraNode.right;
+			Vector3 dir = cameraNode->GetRight();
 			dir.Normalize();
 
 			CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
-		if (input->GetKeyDown(KEY_E] || input->GetKeyDown(KEY_PAGEUP])
+		if (input->GetKeyDown(KEY_E) || input->GetKeyDown(KEY_PAGEUP))
 		{
-			Vector3 dir = cameraNode.up;
+			Vector3 dir = cameraNode->GetUp();
 			dir.Normalize();
 
 			CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
-		if (input->GetKeyDown(KEY_Q] || input->GetKeyDown(KEY_PAGEDOWN])
+		if (input->GetKeyDown(KEY_Q) || input->GetKeyDown(KEY_PAGEDOWN))
 		{
-			Vector3 dir = cameraNode.up;
+			Vector3 dir = cameraNode->GetUp();
 			dir.Normalize();
 
 			CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-			FadeUI();
+			//FadeUI();
 		}
 	}
 
 	// Zoom in/out
-	if (input.mouseMoveWheel != 0 && ui.GetElementAt(ui.cursor.position) is null)
+	auto ui = GetSubsystem<UI>();
+	auto mouseMoveWheel = input->GetMouseMoveWheel();
+	if (mouseMoveWheel != 0 && ui->GetElementAt(ui->GetCursor()->GetPosition(), true))
 	{
-		float distance = cameraNode.position.length;
+		float distance = cameraNode->GetPosition().Length();
 		float ratio = distance / 40.0f;
 		float factor = ratio < 1.0f ? ratio : 1.0f;
 
-		if (!camera.orthographic)
+		if (!camera->IsOrthographic())
 		{
-			Vector3 dir = cameraNode.direction;
+			Vector3 dir = cameraNode->GetDirection();
 			dir.Normalize();
-			dir *= input.mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
+			dir *= mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
 
 			CameraMoveForward(dir);
 		}
 		else
 		{
-			float zoom = camera.zoom + input.mouseMoveWheel * speedMultiplier * factor;
+			float zoom = camera->GetZoom() + mouseMoveWheel * speedMultiplier * factor;
 
 			CameraZoom(zoom);
 		}
@@ -422,23 +449,23 @@ void EditorCamera::HandleStandardUserInput(float timeStep)
 	// Rotate/orbit/pan camera
 	bool changeCamViewButton = false;
 
-	changeCamViewButton = input.mouseButtonDown[MOUSEB_RIGHT] || input.mouseButtonDown[MOUSEB_MIDDLE];
+	changeCamViewButton = input->GetMouseButtonDown(MOUSEB_RIGHT) || input->GetMouseButtonDown(MOUSEB_MIDDLE);
 
 	if (changeCamViewButton)
 	{
 		SetMouseLock();
 
-		IntVector2 mouseMove = input.mouseMove;
+		IntVector2 mouseMove = input->GetMouseMove();
 		if (mouseMove.x_ != 0 || mouseMove.y_ != 0)
 		{
 			bool panTheCamera = false;
 
-			if (input.mouseButtonDown[MOUSEB_MIDDLE])
+			if (input->GetMouseButtonDown(MOUSEB_MIDDLE))
 			{
 				if (mmbPanMode)
-					panTheCamera = !input->GetKeyDown(KEY_LSHIFT];
+					panTheCamera = !input->GetKeyDown(KEY_LSHIFT);
 				else
-					panTheCamera = input->GetKeyDown(KEY_LSHIFT];
+					panTheCamera = input->GetKeyDown(KEY_LSHIFT);
 			}
 
 			// Pan the camera
@@ -446,10 +473,10 @@ void EditorCamera::HandleStandardUserInput(float timeStep)
 			{
 				Vector3 right = -cameraNode->GetWorldRight();
 				right.Normalize();
-				right *= mouseMove.x_;
+				right *= (float)mouseMove.x_;
 				Vector3 up = cameraNode->GetWorldUp();
 				up.Normalize();
-				up *= mouseMove.y_;
+				up *= (float)mouseMove.y_;
 
 				Vector3 trans = (right + up) * timeStep * cameraBaseSpeed * 0.5;
 
@@ -457,15 +484,15 @@ void EditorCamera::HandleStandardUserInput(float timeStep)
 			}
 			else // Rotate the camera
 			{
-				activeViewport->cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
-				activeViewport->cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
+				cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
+				cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
 
 				if (limitRotation)
-					activeViewport->cameraPitch = Clamp(activeViewport->cameraPitch, -90.0f, 90.0f);
+					cameraPitch = Clamp(cameraPitch, -90.0f, 90.0f);
 
-				Quaternion rot = Quaternion(activeViewport->cameraPitch, activeViewport->cameraYaw, 0);
+				Quaternion rot = Quaternion(cameraPitch, cameraYaw, 0);
 
-				if (input.mouseButtonDown[MOUSEB_MIDDLE]) // Rotate around the camera center
+				if (input->GetMouseButtonDown(MOUSEB_MIDDLE)) // Rotate around the camera center
 				{
 					if (rotateAroundSelect)
 						CameraRotateAroundSelect(rot);
@@ -486,7 +513,7 @@ void EditorCamera::HandleStandardUserInput(float timeStep)
 	else
 		ReleaseMouseLock();
 
-	if (orbiting && !input.mouseButtonDown[MOUSEB_MIDDLE])
+	if (orbiting && !input->GetMouseButtonDown(MOUSEB_MIDDLE))
 		orbiting = false;
 }
 
@@ -499,7 +526,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 // 	}
 	Input* input = GetSubsystem<Input>();
 	// Check for camara fly mode
-	if (input->GetKeyDown(KEY_LSHIFT) && input.keyPress[KEY_F])
+	if (input->GetKeyDown(KEY_LSHIFT) && input->GetKeyPress(KEY_F))
 	{
 		cameraFlyMode = !cameraFlyMode;
 	}
@@ -520,7 +547,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 			if (input->GetKeyDown(KEY_S) || input->GetKeyDown(KEY_DOWN))
 			{
@@ -528,7 +555,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 			if (input->GetKeyDown(KEY_A) || input->GetKeyDown(KEY_LEFT))
 			{
@@ -536,7 +563,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 			if (input->GetKeyDown(KEY_D) || input->GetKeyDown(KEY_RIGHT))
 			{
@@ -544,7 +571,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 			if (input->GetKeyDown(KEY_E) || input->GetKeyDown(KEY_PAGEUP))
 			{
@@ -552,7 +579,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 			if (input->GetKeyDown(KEY_Q) || input->GetKeyDown(KEY_PAGEDOWN))
 			{
@@ -560,28 +587,29 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				dir.Normalize();
 
 				CameraPan(-dir * timeStep * cameraBaseSpeed * speedMultiplier);
-				FadeUI();
+				//FadeUI();
 			}
 		}
 	}
-
-	if (input.mouseMoveWheel != 0 && ui.GetElementAt(ui.cursor.position) is null)
+	auto mouseMoveWheel = input->GetMouseMoveWheel();
+	auto ui = GetSubsystem<UI>();
+	if (mouseMoveWheel != 0 && ui->GetElementAt(ui->GetCursor()->GetPosition(), true))
 	{
-		if (!camera.orthographic)
+		if (!camera->IsOrthographic())
 		{
 			if (input->GetKeyDown(KEY_LSHIFT))
 			{
 				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
-				CameraPan(dir * input.mouseMoveWheel * 5 * timeStep * cameraBaseSpeed * speedMultiplier);
+				CameraPan(dir * (float)mouseMoveWheel * 5.0f * timeStep * cameraBaseSpeed * speedMultiplier);
 			}
 			else if (input->GetKeyDown(KEY_LCTRL))
 			{
 				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
-				CameraPan(dir * input.mouseMoveWheel * 5 * timeStep * cameraBaseSpeed * speedMultiplier);
+				CameraPan(dir * (float)mouseMoveWheel * 5.0f * timeStep * cameraBaseSpeed * speedMultiplier);
 			}
 			else // Zoom in/out
 			{
@@ -591,7 +619,7 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 
 				Vector3 dir = cameraNode->GetDirection();
 				dir.Normalize();
-				dir *= input.mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
+				dir *= mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
 
 				CameraMoveForward(dir);
 			}
@@ -603,18 +631,18 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 				Vector3 dir = cameraNode->GetUp();
 				dir.Normalize();
 
-				CameraPan(dir * input.mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
+				CameraPan(dir * (float)mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
 			}
 			else if (input->GetKeyDown(KEY_LCTRL))
 			{
 				Vector3 dir = cameraNode->GetRight();
 				dir.Normalize();
 
-				CameraPan(dir * input.mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
+				CameraPan(dir * (float)mouseMoveWheel * timeStep * cameraBaseSpeed * speedMultiplier * 4.0f);
 			}
 			else
 			{
-				float zoom = camera->GetZoom() + input.mouseMoveWheel * speedMultiplier * 0.5f;
+				float zoom = camera->GetZoom() + mouseMoveWheel * speedMultiplier * 0.5f;
 
 				CameraZoom(zoom);
 			}
@@ -622,16 +650,16 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 	}
 
 	// Rotate/orbit/pan camera
-	bool changeCamViewButton = input.mouseButtonDown[MOUSEB_MIDDLE] || cameraFlyMode;
+	bool changeCamViewButton = input->GetMouseButtonDown(MOUSEB_MIDDLE) || cameraFlyMode;
 
-	if (input.mouseButtonPress[MOUSEB_RIGHT] || input->GetKeyDown(KEY_ESCAPE])
+	if (input->GetMouseButtonPress(MOUSEB_RIGHT) || input->GetKeyDown(KEY_ESCAPE))
 		cameraFlyMode = false;
 
 	if (changeCamViewButton)
 	{
 		SetMouseLock();
 
-		IntVector2 mouseMove = input.mouseMove;
+		IntVector2 mouseMove = input->GetMouseMove();
 		if (mouseMove.x_ != 0 || mouseMove.y_ != 0)
 		{
 			bool panTheCamera = false;
@@ -643,10 +671,10 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 			{
 				Vector3 right = -cameraNode->GetWorldRight();
 				right.Normalize();
-				right *= mouseMove.x_;
+				right *= (float)mouseMove.x_;
 				Vector3 up = cameraNode->GetWorldUp();
 				up.Normalize();
-				up *= mouseMove.y_;
+				up *= (float)mouseMove.y_;
 
 				Vector3 trans = (right + up) * timeStep * cameraBaseSpeed * 0.5;
 
@@ -654,20 +682,20 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 			}
 			else
 			{
-				activeViewport->cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
-				activeViewport->cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
+				cameraYaw += mouseMove.x_ * cameraBaseRotationSpeed;
+				cameraPitch += mouseMove.y_ * cameraBaseRotationSpeed;
 
 				if (limitRotation)
-					activeViewport->cameraPitch = Clamp(activeViewport->cameraPitch, -90.0f, 90.0f);
+					cameraPitch = Clamp(cameraPitch, -90.0f, 90.0f);
 
-				Quaternion rot = Quaternion(activeViewport->cameraPitch, activeViewport->cameraYaw, 0);
+				Quaternion rot = Quaternion(cameraPitch, cameraYaw, 0);
 
 				if (cameraFlyMode)
 				{
 					CameraRotateAroundCenter(rot);
 					orbiting = true;
 				}
-				else if (input.mouseButtonDown[MOUSEB_MIDDLE])
+				else if (input->GetMouseButtonDown(MOUSEB_MIDDLE))
 				{
 					if (rotateAroundSelect)
 						CameraRotateAroundSelect(rot);
@@ -682,18 +710,18 @@ void EditorCamera::HandleBlenderUserInput(float timeStep)
 	else
 		ReleaseMouseLock();
 
-	if (orbiting && !input.mouseButtonDown[MOUSEB_MIDDLE])
+	if (orbiting && !input->GetMouseButtonDown(MOUSEB_MIDDLE))
 		orbiting = false;
 
 	// force to select component node for manipulation if selected only component and not his node
-	if ((editMode != EDIT_SELECT && editNodes.empty) && lastSelectedComponent.Get() !is null)
-	{
-		if (lastSelectedComponent.Get() !is null)
-		{
-			Component@ component = lastSelectedComponent.Get();
-			SelectNode(component.node, false);
-		}
-	}
+// 	if ((editMode != EDIT_SELECT && editNodes.empty) && lastSelectedComponent.Get() !is null)
+// 	{
+// 		if (lastSelectedComponent.Get() !is null)
+// 		{
+// 			Component@ component = lastSelectedComponent.Get();
+// 			SelectNode(component.node, false);
+// 		}
+// 	}
 }
 
 void EditorCamera::ReacquireCameraYawPitch()
@@ -701,4 +729,42 @@ void EditorCamera::ReacquireCameraYawPitch()
 	const auto& rotation = cameraNode->GetRotation();
 	cameraYaw = rotation.YawAngle();
 	cameraPitch = rotation.PitchAngle();
+}
+
+
+void EditorCamera::SetMouseMode(bool enable)
+{
+	auto input = GetSubsystem<Input>();
+	auto ui = GetSubsystem<UI>();
+	if (enable)
+	{
+		if (mouseOrbitMode == ORBIT_RELATIVE)
+		{
+			input->SetMouseMode(MM_RELATIVE);
+			ui->GetCursor()->SetVisible(false);
+		}
+		else if (mouseOrbitMode == ORBIT_WRAP)
+			input->SetMouseMode(MM_WRAP);
+	}
+	else
+	{
+		input->SetMouseMode(MM_ABSOLUTE);
+		ui->GetCursor()->SetVisible(true);
+	}
+}
+
+void EditorCamera::SetMouseLock()
+{
+	toggledMouseLock = true;
+	SetMouseMode(true);
+	//FadeUI();
+}
+
+void EditorCamera::ReleaseMouseLock()
+{
+	if (toggledMouseLock)
+	{
+		toggledMouseLock = false;
+		SetMouseMode(false);
+	}
 }

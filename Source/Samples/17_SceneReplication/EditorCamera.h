@@ -1,10 +1,13 @@
 #pragma once
 #include <memory>
+#include "Urho3D/Container/Ptr.h"
 #include "Urho3D/Scene/LogicComponent.h"
 #include "Urho3D/Graphics/GraphicsDefs.h"
 
 namespace Urho3D {
 	class Camera;
+	class Vector3;
+	class Quaternion;
 }
 class CameraSmoothInterpolate;
 class EditorCamera : public Urho3D::LogicComponent
@@ -25,22 +28,27 @@ public:
 	void SetOrthographic(bool orthographic);
 	void ToggleOrthographic();
 	
-	void CameraPan(Vector3 trans);
-	void CameraMoveForward(Vector3 trans);
-	void CameraRotateAroundLookAt(Quaternion rot);
-	void CameraRotateAroundCenter(Quaternion rot);
-	void CameraRotateAroundSelect(Quaternion rot);
+	void CameraPan(const Urho3D::Vector3& trans);
+	void CameraMoveForward(const Urho3D::Vector3& trans);
+	void CameraRotateAroundLookAt(const Urho3D::Quaternion& rot);
+	void CameraRotateAroundCenter(const Urho3D::Quaternion& rot);
+	void CameraRotateAroundSelect(const Urho3D::Quaternion& rot);
 	void CameraZoom(float zoom);
 	void HandleStandardUserInput(float timeStep);
 	void HandleBlenderUserInput(float timeStep);
 protected:
 private:
-	SharedPtr<Camera> camera;
-	SharedPtr<Node> cameraLookAtNode;
-	SharedPtr<Node> cameraNode;
-	FillMode fillMode = FILL_SOLID;
+	void SetMouseMode(bool enable);
+	void SetMouseLock();
+	void ReleaseMouseLock();
+private:
+	Urho3D::SharedPtr<Urho3D::Node> cameraLookAtNode;
+	Urho3D::SharedPtr<Urho3D::Node> cameraNode;
+	Urho3D::SharedPtr<Urho3D::Camera> camera;
+	Urho3D::FillMode fillMode = Urho3D::FILL_SOLID;
 	float orthoCameraZoom = 1.0f;
 	float cameraYaw = 0;
 	float cameraPitch = 0;
 	std::unique_ptr<CameraSmoothInterpolate> cameraSmoothInterpolate; // Camera smooth interpolation control
+	friend class CameraSmoothInterpolate;
 };
