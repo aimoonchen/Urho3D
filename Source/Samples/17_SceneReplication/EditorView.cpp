@@ -737,7 +737,7 @@ void CreateCamera()
 {
 	// Set the initial viewport rect
 	auto graphics = context_->GetSubsystem<Graphics>();
-	viewportArea = IntRect(0, 0, graphics->GetWidth(), graphics.height);
+	viewportArea = IntRect(0, 0, graphics->GetWidth(), graphics->GetHeight());
 
 	// Set viewport single to store default hierarchy/inspector height/positions
 	if (viewportMode == VIEWPORT_COMPACT)
