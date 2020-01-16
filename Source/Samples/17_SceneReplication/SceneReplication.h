@@ -86,6 +86,7 @@ private:
     /// Create a controllable ball object and return its scene node.
     server::Player* CreatePlayer(Connection* con);
 	AnimatedModel* CreateCharactor(Node* modelNode, race::RoleId roleId);
+    void ResetCamera();
     /// Read input and move the camera.
     void MoveCamera(float timeStep);
     /// Handle the physics world pre-step event.

@@ -439,6 +439,14 @@ server::Player* SceneReplication::CreatePlayer(Connection* con)
 // 
 //     return ballNode;
 }
+
+void SceneReplication::ResetCamera()
+{
+    yaw_ = 0.0f;
+    pitch_ = 45.0f;
+    cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+}
+
 const float CAMERA_MIN_DIST = 0.1f;
 const float CAMERA_MAX_DIST = 6.0f;
 void SceneReplication::MoveCamera(float timeStep)
@@ -528,9 +536,7 @@ void SceneReplication::MoveCamera(float timeStep)
         freeCamera = !freeCamera;
         if (!freeCamera)
         {
-            yaw_ = 0.0f;
-            pitch_ = 45.0f;
-            cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+            ResetCamera();
         }
     }
 
@@ -707,4 +713,5 @@ void SceneReplication::HandleClientDisconnected(StringHash eventType, VariantMap
 void SceneReplication::HandleClientObjectID(StringHash eventType, VariantMap& eventData)
 {
     clientObjectID_ = eventData[P_ID].GetUInt();
+    ResetCamera();
 }
