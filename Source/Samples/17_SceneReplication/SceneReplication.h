@@ -87,7 +87,7 @@ private:
     server::Player* CreatePlayer(Connection* con);
 	AnimatedModel* CreateCharactor(Node* modelNode, race::RoleId roleId);
     /// Read input and move the camera.
-    void MoveCamera();
+    void MoveCamera(float timeStep);
     /// Handle the physics world pre-step event.
     void HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData);
     /// Handle the logic post-update event.
@@ -124,6 +124,8 @@ private:
     SharedPtr<Text> instructionsText_;
     /// ID of own controllable object (client only.)
     unsigned clientObjectID_{};
+    bool freeCamera{ false };
+    Vector3 currentCameraTranslate;
 	//
 	std::vector<std::unique_ptr<server::Player>> players_;
 	int current_player_id_{ 0 };

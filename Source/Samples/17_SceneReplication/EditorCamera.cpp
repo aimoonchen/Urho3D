@@ -33,9 +33,6 @@ float orthoCameraZoom = 1.0f;
 class CameraSmoothInterpolate
 {
 public:
-// 	Camera* camera{ nullptr };
-// 	Node* cameraLookAtNode{ nullptr };
-// 	Node* cameraNode{ nullptr };
 	EditorCamera* editorCamera{nullptr};
 	Vector3 lookAtNodeBeginPos;
 	Vector3 cameraNodeBeginPos;
@@ -46,8 +43,8 @@ public:
 	Quaternion cameraNodeBeginRot;
 	Quaternion cameraNodeEndRot;
 
-	float cameraBeginZoom;
-	float cameraEndZoom;
+	float cameraBeginZoom = 1.0f;
+	float cameraEndZoom = 1.0f;
 
 	bool isRunning = false;
 	float duration = 0.0f;

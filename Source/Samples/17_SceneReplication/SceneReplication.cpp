@@ -441,13 +441,15 @@ server::Player* SceneReplication::CreatePlayer(Connection* con)
 }
 const float CAMERA_MIN_DIST = 0.1f;
 const float CAMERA_MAX_DIST = 6.0f;
-void SceneReplication::MoveCamera()
+void SceneReplication::MoveCamera(float timeStep)
 {
     // Right mouse button controls mouse cursor visibility: hide when pressed
     auto* ui = GetSubsystem<UI>();
     auto* input = GetSubsystem<Input>();
     ui->GetCursor()->SetVisible(!input->GetMouseButtonDown(MOUSEB_RIGHT));
 
+	// Movement speed as world units per second
+	const float MOVE_SPEED = 20.0f;
     // Mouse sensitivity as degrees per pixel
     const float MOUSE_SENSITIVITY = 0.1f;
 
@@ -458,42 +460,95 @@ void SceneReplication::MoveCamera()
         IntVector2 mouseMove = input->GetMouseMove();
         yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
         pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-        pitch_ = Clamp(pitch_, 1.0f, 90.0f);
+        float minPitch = freeCamera ? -90.0f : 1.0f;
+        pitch_ = Clamp(pitch_, minPitch, 90.0f);
     }
+
+// 	auto camera = cameraNode_->GetComponent<Camera>();
+// 	float zoom_ = camera->GetZoom();
+// 	if (input->GetMouseMoveWheel() != 0)
+// 	{
+// 		zoom_ = Clamp(zoom_ + input->GetMouseMoveWheel() * 0.1f, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
+// 		camera->SetZoom(zoom_);
+// 	}
 
     // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
     cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 
     // Only move the camera / show instructions if we have a controllable object
     bool showInstructions = false;
-    if (clientObjectID_)
+    if (clientObjectID_ && !freeCamera)
     {
         Node* ballNode = scene_->GetNode(clientObjectID_);
         if (ballNode)
         {
-            const float CAMERA_DISTANCE = 5.0f;
+            const float CAMERA_DISTANCE = 8.0f;
 
             // Move camera some distance away from the ball
-            cameraNode_->SetPosition(ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE);
+            cameraNode_->SetPosition(ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE
+            + currentCameraTranslate);
             showInstructions = true;
         }
     }
-
-    auto camera = cameraNode_->GetComponent<Camera>();
-    float zoom_ = camera->GetZoom();
-	if (input->GetMouseMoveWheel() != 0)
+    else
+    {
+		// Read WASD keys and move the camera scene node to the corresponding direction if they are pressed
+		if (input->GetKeyDown(KEY_W))
+			cameraNode_->Translate(Vector3::FORWARD * MOVE_SPEED * timeStep);
+		if (input->GetKeyDown(KEY_S))
+			cameraNode_->Translate(Vector3::BACK * MOVE_SPEED * timeStep);
+		if (input->GetKeyDown(KEY_A))
+			cameraNode_->Translate(Vector3::LEFT * MOVE_SPEED * timeStep);
+		if (input->GetKeyDown(KEY_D))
+			cameraNode_->Translate(Vector3::RIGHT * MOVE_SPEED * timeStep);
+    }
+    
+    auto mouseMoveWheel = input->GetMouseMoveWheel();
+	if (mouseMoveWheel != 0 && !ui->GetElementAt(ui->GetCursor()->GetPosition(), true))
 	{
-		zoom_ = Clamp(zoom_ + input->GetMouseMoveWheel() * 0.1f, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
-		camera->SetZoom(zoom_);
+		float distance = cameraNode_->GetPosition().Length();
+		float ratio = distance / 40.0f;
+		float factor = ratio < 1.0f ? ratio : 1.0f;
+        float cameraBaseSpeed = 3.0f;
+        float speedMultiplier = 1.0;
+        auto camera = cameraNode_->GetComponent<Camera>();
+		if (!camera->IsOrthographic())
+		{
+			Vector3 dir = cameraNode_->GetDirection();
+			dir.Normalize();
+			dir *= mouseMoveWheel * 40 * timeStep * cameraBaseSpeed * speedMultiplier * factor;
+            if (freeCamera)
+            {
+                cameraNode_->Translate(dir, TS_PARENT);
+            }
+            else
+            {
+                currentCameraTranslate += dir;
+            }
+		}
+		else
+		{
+			float zoom = camera->GetZoom() + mouseMoveWheel * speedMultiplier * factor;
+            camera->SetZoom(Clamp(zoom, 0.1f, 30.0f));
+		}
 	}
+
+    if (input->GetKeyPress(KEY_TAB))
+    {
+        freeCamera = !freeCamera;
+    }
 
     instructionsText_->SetVisible(showInstructions);
 }
 
 void SceneReplication::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 {
+	using namespace Update;
+
+	// Take the frame time step, which is stored as a float
+	float timeStep = eventData[P_TIMESTEP].GetFloat();
     // We only rotate the camera according to mouse movement since last frame, so do not need the time step
-    MoveCamera();
+    MoveCamera(timeStep);
 }
 
 void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& eventData)
@@ -507,27 +562,30 @@ void SceneReplication::HandlePhysicsPreStep(StringHash eventType, VariantMap& ev
     // Client: collect controls
     if (serverConnection)
     {
-        auto* ui = GetSubsystem<UI>();
-        auto* input = GetSubsystem<Input>();
-        Controls controls;
+		if (!freeCamera)
+		{
+            auto* ui = GetSubsystem<UI>();
+            auto* input = GetSubsystem<Input>();
+            Controls controls;
 
-        // Copy mouse yaw
-        controls.yaw_ = yaw_;
+            // Copy mouse yaw
+            controls.yaw_ = yaw_;
 
-        // Only apply WASD controls if there is no focused UI element
-        if (!ui->GetFocusElement())
-        {
-            controls.Set(race::CTRL_FORWARD, input->GetKeyDown(KEY_W));
-            controls.Set(race::CTRL_BACK, input->GetKeyDown(KEY_S));
-            controls.Set(race::CTRL_LEFT, input->GetKeyDown(KEY_A));
-            controls.Set(race::CTRL_RIGHT, input->GetKeyDown(KEY_D));
-			controls.Set(race::CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
+            // Only apply WASD controls if there is no focused UI element
+            if (!ui->GetFocusElement())
+            {
+			    controls.Set(race::CTRL_FORWARD, input->GetKeyDown(KEY_W));
+			    controls.Set(race::CTRL_BACK, input->GetKeyDown(KEY_S));
+			    controls.Set(race::CTRL_LEFT, input->GetKeyDown(KEY_A));
+			    controls.Set(race::CTRL_RIGHT, input->GetKeyDown(KEY_D));
+			    controls.Set(race::CTRL_JUMP, input->GetKeyDown(KEY_SPACE));
+            }
+
+            serverConnection->SetControls(controls);
+            // In case the server wants to do position-based interest management using the NetworkPriority components, we should also
+            // tell it our observer (camera) position. In this sample it is not in use, but eg. the NinjaSnowWar game uses it
+            serverConnection->SetPosition(cameraNode_->GetPosition());
         }
-
-        serverConnection->SetControls(controls);
-        // In case the server wants to do position-based interest management using the NetworkPriority components, we should also
-        // tell it our observer (camera) position. In this sample it is not in use, but eg. the NinjaSnowWar game uses it
-        serverConnection->SetPosition(cameraNode_->GetPosition());
     }
     // Server: apply controls to client objects
     else if (network->IsServerRunning())
