@@ -455,25 +455,15 @@ void SceneReplication::MoveCamera(float timeStep)
 
     // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch and only move the camera
     // when the cursor is hidden
-    if (!ui->GetCursor()->IsVisible())
+    if (!ui->GetCursor()->IsVisible() && freeCamera)
     {
         IntVector2 mouseMove = input->GetMouseMove();
         yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
         pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-        float minPitch = freeCamera ? -90.0f : 1.0f;
-        pitch_ = Clamp(pitch_, minPitch, 90.0f);
+        pitch_ = Clamp(pitch_, -90.0f, 90.0f);
+		// Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+		cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
     }
-
-// 	auto camera = cameraNode_->GetComponent<Camera>();
-// 	float zoom_ = camera->GetZoom();
-// 	if (input->GetMouseMoveWheel() != 0)
-// 	{
-// 		zoom_ = Clamp(zoom_ + input->GetMouseMoveWheel() * 0.1f, CAMERA_MIN_DIST, CAMERA_MAX_DIST);
-// 		camera->SetZoom(zoom_);
-// 	}
-
-    // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-    cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
 
     // Only move the camera / show instructions if we have a controllable object
     bool showInstructions = false;
@@ -482,7 +472,7 @@ void SceneReplication::MoveCamera(float timeStep)
         Node* ballNode = scene_->GetNode(clientObjectID_);
         if (ballNode)
         {
-            const float CAMERA_DISTANCE = 8.0f;
+            const float CAMERA_DISTANCE = 15.0f;
 
             // Move camera some distance away from the ball
             cameraNode_->SetPosition(ballNode->GetPosition() + cameraNode_->GetRotation() * Vector3::BACK * CAMERA_DISTANCE
@@ -536,6 +526,12 @@ void SceneReplication::MoveCamera(float timeStep)
     if (input->GetKeyPress(KEY_TAB))
     {
         freeCamera = !freeCamera;
+        if (!freeCamera)
+        {
+            yaw_ = 0.0f;
+            pitch_ = 45.0f;
+            cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+        }
     }
 
     instructionsText_->SetVisible(showInstructions);

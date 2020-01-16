@@ -82,9 +82,9 @@ protected:
     /// Camera scene node.
     SharedPtr<Node> cameraNode_;
     /// Camera yaw angle.
-    float yaw_;
+    float yaw_{ 0.0f };
     /// Camera pitch angle.
-    float pitch_;
+    float pitch_{ -45.0f };
     /// Flag to indicate whether touch input has been enabled.
     bool touchEnabled_;
     /// Mouse mode option to use in the sample.
