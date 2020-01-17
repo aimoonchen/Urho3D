@@ -1,9 +1,9 @@
 <cubemap>
-    <face name="skybox/ely_hills/hills_rt.png" />
-    <face name="skybox/ely_hills/hills_lf.png" />
-    <face name="skybox/ely_hills/hills_up.png" />
-    <face name="skybox/ely_hills/hills_dn.png" />
-    <face name="skybox/ely_hills/hills_ft.png" />
-    <face name="skybox/ely_hills/hills_bk.png" />
+    <face name="hills_lf.png" />
+    <face name="hills_rt.png" />
+    <face name="hills_up.png" />
+    <face name="hills_dn.png" />
+    <face name="hills_ft.png" />
+    <face name="hills_bk.png" />
     <quality low="0" />
 </cubemap>

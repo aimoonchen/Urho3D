@@ -1,6 +1,6 @@
 <cubemap>
-    <face name="skybox/mp_tidepool/tidepool_rt.png" />
     <face name="skybox/mp_tidepool/tidepool_lf.png" />
+    <face name="skybox/mp_tidepool/tidepool_rt.png" />
     <face name="skybox/mp_tidepool/tidepool_up.png" />
     <face name="skybox/mp_tidepool/tidepool_dn.png" />
     <face name="skybox/mp_tidepool/tidepool_ft.png" />

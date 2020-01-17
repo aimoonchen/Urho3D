@@ -162,8 +162,10 @@ void SceneReplication::CreateScene()
 	skyNode->SetScale(500.0f); // The scale actually does not matter
 	auto* skybox = skyNode->CreateComponent<Skybox>();
 	skybox->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
-	skybox->SetMaterial(cache->GetResource<Material>("Materials/Skybox.xml"));
-
+// 	skybox->SetMaterial(cache->GetResource<Material>("Materials/Skybox.xml"));
+//    skybox->SetMaterial(cache->GetResource<Material>("Materials/SkyboxTidePool.xml"));
+    skybox->SetMaterial(cache->GetResource<Material>("Materials/SkyboxElyHills.xml"));
+    
     // Create a "floor" consisting of several tiles. Make the tiles physical but leave small cracks between them
     for (int y = -20; y <= 20; ++y)
     {
@@ -193,7 +195,7 @@ void SceneReplication::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 20.0f, 0.0f));
 }
 
 void SceneReplication::CreateUI()
@@ -551,8 +553,8 @@ void SceneReplication::MoveCamera(float timeStep)
             camera->SetZoom(Clamp(zoom, 0.1f, 30.0f));
 		}
 	}
-
-    if (input->GetKeyPress(KEY_TAB))
+    auto* network = GetSubsystem<Network>();
+    if (input->GetKeyPress(KEY_TAB) && !network->IsServerRunning())
     {
         freeCamera = !freeCamera;
         if (!freeCamera)
@@ -692,6 +694,9 @@ void SceneReplication::HandleStartServer(StringHash eventType, VariantMap& event
     network->StartServer(SERVER_PORT);
 
     UpdateButtons();
+
+    freeCamera = true;
+    ResetCamera();
 }
 
 void SceneReplication::HandleConnectionStatus(StringHash eventType, VariantMap& eventData)
