@@ -39,6 +39,7 @@
 #include <Urho3D/Graphics/AnimatedModel.h>
 #include <Urho3D/Graphics/AnimationController.h>
 #include <Urho3D/Graphics/Zone.h>
+#include <Urho3D/Graphics/Skybox.h>
 #include <Urho3D/Input/Controls.h>
 #include <Urho3D/Input/Input.h>
 #include <Urho3D/IO/Log.h>
@@ -136,12 +137,32 @@ void SceneReplication::CreateScene()
     zone->SetFogEnd(300.0f);
 
     // Create a directional light without shadows
-    Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
-    lightNode->SetDirection(Vector3(0.5f, -1.0f, 0.5f));
-    auto* light = lightNode->CreateComponent<Light>();
-    light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetColor(Color(0.2f, 0.2f, 0.2f));
-    light->SetSpecularIntensity(1.0f);
+//     Node* lightNode = scene_->CreateChild("DirectionalLight", LOCAL);
+//     lightNode->SetDirection(Vector3(0.5f, -1.0f, 0.5f));
+//     auto* light = lightNode->CreateComponent<Light>();
+//     light->SetLightType(LIGHT_DIRECTIONAL);
+//     light->SetColor(Color(0.2f, 0.2f, 0.2f));
+//     light->SetSpecularIntensity(1.0f);
+
+	// Create a directional light to the world. Enable cascaded shadows on it
+	Node* lightNode = scene_->CreateChild("DirectionalLight");
+	lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f));
+	auto* light = lightNode->CreateComponent<Light>();
+	light->SetLightType(LIGHT_DIRECTIONAL);
+	light->SetCastShadows(true);
+	light->SetColor(Color(0.8f, 0.8f, 0.8f));
+	light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+	// Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
+	light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+
+	// Create skybox. The Skybox component is used like StaticModel, but it will be always located at the camera, giving the
+	// illusion of the box planes being far away. Use just the ordinary Box model and a suitable material, whose shader will
+	// generate the necessary 3D texture coordinates for cube mapping
+	Node* skyNode = scene_->CreateChild("Sky");
+	skyNode->SetScale(500.0f); // The scale actually does not matter
+	auto* skybox = skyNode->CreateComponent<Skybox>();
+	skybox->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
+	skybox->SetMaterial(cache->GetResource<Material>("Materials/Skybox.xml"));
 
     // Create a "floor" consisting of several tiles. Make the tiles physical but leave small cracks between them
     for (int y = -20; y <= 20; ++y)
