@@ -1,7 +1,7 @@
 <?xml version="1.0"?>
 <material>
 	<technique name="Techniques/Diff.xml" />
-	<texture unit="diffuse" name="Models/Wow/World/Creature/wolfdraenor/Textures/wolfdraenormountshadow.png" />
+	<texture unit="diffuse" name="Textures/Wolfdraenor_Texture0.png" />
 	<parameter name="MatDiffColor" value="0.8 0.8 0.8 1" />
 	<parameter name="MatSpecColor" value="0.2 0.2 0.2 20" />
 	<parameter name="MatEmissiveColor" value="0 0 0 1" />
