@@ -28,6 +28,8 @@
 #include "../../Graphics/GraphicsDefs.h"
 #include "../../Graphics/ShaderVariation.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
@@ -112,6 +114,8 @@ private:
     static unsigned globalFrameNumber;
     /// Remembered global shader parameter sources for constant buffer mode.
     static const void* globalParameterSources[MAX_SHADER_PARAMETER_GROUPS];
+
+    bgfx::ProgramHandle program_{BGFX_INVALID_HANDLE};
 };
 
 }
