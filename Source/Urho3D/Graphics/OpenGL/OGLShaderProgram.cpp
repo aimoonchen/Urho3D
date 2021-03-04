@@ -120,6 +120,8 @@ bool ShaderProgram::Link()
     if (!vertexShader_ || !pixelShader_ || !vertexShader_->GetGPUObjectName() || !pixelShader_->GetGPUObjectName())
         return false;
 
+    program_ = bgfx::createProgram(vertexShader_->GetHandle(), pixelShader_->GetHandle());
+    
     object_.name_ = glCreateProgram();
     if (!object_.name_)
     {

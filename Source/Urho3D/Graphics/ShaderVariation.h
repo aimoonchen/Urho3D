@@ -140,6 +140,8 @@ public:
     /// D3D11 vertex semantic names. Used internally.
     static const char* elementSemanticNames[];
 
+    bgfx::ShaderHandle GetHandle() { return shader_; }
+
 private:
     /// Load bytecode from a file. Return true if successful.
     bool LoadByteCode(const String& binaryShaderName);
@@ -174,6 +176,7 @@ private:
     String definesClipPlane_;
     /// Shader compile error string.
     String compilerOutput_;
+    bgfx::ShaderHandle shader_{ BGFX_INVALID_HANDLE };
 };
 
 }

@@ -104,7 +104,7 @@ namespace bgfx
 		{  ShadingLang::HLSL,  500,    "s_5_0"      },
 		{  ShadingLang::Metal, 1000,   "metal"      },
 		{  ShadingLang::PSSL,  1000,   "pssl"       },
-		{  ShadingLang::SpirV, 1331,   "spirv13-11" },
+		{  ShadingLang::SpirV, 1311,   "spirv13-11" },
 		{  ShadingLang::SpirV, 1411,   "spirv14-11" },
 		{  ShadingLang::SpirV, 1512,   "spirv15-12" },
 		{  ShadingLang::SpirV, 1010,   "spirv10-10" },
@@ -2758,7 +2758,7 @@ namespace bgfx
 
 } // namespace bgfx
 
-// int main(int _argc, const char* _argv[])
-// {
-// 	return bgfx::compileShader(_argc, _argv);
-// }
+int main(int _argc, const char* _argv[])
+{
+	return bgfx::compileShader(_argc, _argv);
+}

@@ -87,6 +87,8 @@ public:
     static void ClearParameterSources();
     /// Clear a global parameter source when constant buffers change.
     static void ClearGlobalParameterSource(ShaderParameterGroup group);
+    
+    bgfx::ProgramHandle GetHandle() { return program_; }
 
 private:
     /// Vertex shader.
@@ -115,7 +117,7 @@ private:
     /// Remembered global shader parameter sources for constant buffer mode.
     static const void* globalParameterSources[MAX_SHADER_PARAMETER_GROUPS];
 
-    bgfx::ProgramHandle program_{BGFX_INVALID_HANDLE};
+    bgfx::ProgramHandle program_{ BGFX_INVALID_HANDLE };
 };
 
 }

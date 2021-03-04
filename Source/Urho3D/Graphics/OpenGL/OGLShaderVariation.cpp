@@ -170,6 +170,9 @@ bool ShaderVariation::Create()
         shaderCode += originalShaderCode;
 
     const char* shaderCStr = shaderCode.CString();
+    shader_ = bgfx::createShader(bgfx::copy(shaderCStr, shaderCode.Length()));
+    return bgfx::isValid(shader_);
+    /*
     glShaderSource(object_.name_, 1, &shaderCStr, nullptr);
     glCompileShader(object_.name_);
 
@@ -188,6 +191,7 @@ bool ShaderVariation::Create()
         compilerOutput_.Clear();
 
     return object_.name_ != 0;
+    */
 }
 
 void ShaderVariation::SetDefines(const String& defines)
