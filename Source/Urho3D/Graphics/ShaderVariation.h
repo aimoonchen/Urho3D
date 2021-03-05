@@ -28,6 +28,8 @@
 #include "../Graphics/GPUObject.h"
 #include "../Graphics/GraphicsDefs.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 

@@ -118,6 +118,7 @@ private:
     static const void* globalParameterSources[MAX_SHADER_PARAMETER_GROUPS];
 
     bgfx::ProgramHandle program_{ BGFX_INVALID_HANDLE };
+    HashMap<StringHash, bgfx::UniformHandle> uniforms_;
 };
 
 }

@@ -31,6 +31,8 @@
 
 #include "../../DebugNew.h"
 
+#include <vector>
+
 namespace Urho3D
 {
 
@@ -120,8 +122,23 @@ bool ShaderProgram::Link()
     if (!vertexShader_ || !pixelShader_ || !vertexShader_->GetGPUObjectName() || !pixelShader_->GetGPUObjectName())
         return false;
 
-    program_ = bgfx::createProgram(vertexShader_->GetHandle(), pixelShader_->GetHandle());
-    
+    auto vsHandle = vertexShader_->GetHandle();
+    auto psHandle = pixelShader_->GetHandle();
+    program_ = bgfx::createProgram(vsHandle, psHandle);
+    std::vector<bgfx::UniformHandle> uniforms;
+    auto uniformCount = bgfx::getShaderUniforms(vsHandle) + bgfx::getShaderUniforms(psHandle);
+    if (uniformCount > 0) {
+        uniforms.resize(uniformCount);
+        auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0]);
+        bgfx::getShaderUniforms(psHandle, &uniforms[psOffset]);
+        for (auto& uniform : uniforms) {
+            bgfx::UniformInfo info;
+            bgfx::getUniformInfo(uniform, info);
+            //shaderParameters_[StringHash(info.name)] = parameter;
+            uniforms_[StringHash(info.name)] = uniform;
+        }
+    }
+
     object_.name_ = glCreateProgram();
     if (!object_.name_)
     {
