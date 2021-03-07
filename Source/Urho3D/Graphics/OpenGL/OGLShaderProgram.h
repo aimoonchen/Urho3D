@@ -28,8 +28,6 @@
 #include "../../Graphics/GraphicsDefs.h"
 #include "../../Graphics/ShaderVariation.h"
 
-#include "bgfx/bgfx.h"
-
 namespace Urho3D
 {
 
@@ -88,7 +86,7 @@ public:
     /// Clear a global parameter source when constant buffers change.
     static void ClearGlobalParameterSource(ShaderParameterGroup group);
     
-    bgfx::ProgramHandle GetHandle() { return program_; }
+    uint16_t GetUniform(StringHash param);
 
 private:
     /// Vertex shader.
@@ -117,8 +115,7 @@ private:
     /// Remembered global shader parameter sources for constant buffer mode.
     static const void* globalParameterSources[MAX_SHADER_PARAMETER_GROUPS];
 
-    bgfx::ProgramHandle program_{ BGFX_INVALID_HANDLE };
-    HashMap<StringHash, bgfx::UniformHandle> uniforms_;
+    HashMap<StringHash, uint16_t> uniforms_;
 };
 
 }

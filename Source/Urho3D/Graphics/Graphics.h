@@ -919,6 +919,9 @@ private:
     static const Vector2 pixelUVOffset;
     /// OpenGL3 support flag.
     static bool gl3Support;
+    uint64_t render_state_;
+    uint64_t GetRendererState() const { return render_state_; }
+    void ResetRendererState() { render_state_ = 0; }
 };
 
 /// Register Graphics library objects.

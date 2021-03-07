@@ -154,6 +154,48 @@ namespace bgfx
 
 	const char* getPsslPreamble();
 
+    bool compileShader(const char* _varying, const char* _comment, char* _shader, uint32_t _shaderLen,
+                       Options& _options, bx::FileWriter* _writer);
+
+	class File
+    {
+    public:
+        File()
+            : m_data(NULL)
+            , m_size(0)
+        {
+        }
+
+        ~File() { delete[] m_data; }
+
+        void load(const bx::FilePath& _filePath)
+        {
+            bx::FileReader reader;
+            if (bx::open(&reader, _filePath))
+            {
+                m_size = (uint32_t)bx::getSize(&reader);
+                m_data = new char[m_size + 1];
+                m_size = (uint32_t)bx::read(&reader, m_data, m_size);
+                bx::close(&reader);
+
+                if (m_data[0] == '\xef' && m_data[1] == '\xbb' && m_data[2] == '\xbf')
+                {
+                    bx::memMove(m_data, &m_data[3], m_size - 3);
+                    m_size -= 3;
+                }
+
+                m_data[m_size] = '\0';
+            }
+        }
+
+        const char* getData() const { return m_data; }
+
+        uint32_t getSize() const { return m_size; }
+
+    private:
+        char* m_data;
+        uint32_t m_size;
+    };
 } // namespace bgfx
 
 #endif // SHADERC_H_HEADER_GUARD

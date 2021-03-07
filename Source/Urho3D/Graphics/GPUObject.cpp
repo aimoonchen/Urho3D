@@ -27,6 +27,8 @@
 
 #include "../DebugNew.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
@@ -38,7 +40,7 @@ GPUObject::GPUObject(Graphics* graphics) :
 #else
     object_.ptr_ = nullptr;
 #endif
-
+    object_.handle_ = bgfx::kInvalidHandle;
     if (graphics_)
         graphics->AddGPUObject(this);
 }

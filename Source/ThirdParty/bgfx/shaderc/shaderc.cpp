@@ -545,7 +545,7 @@ namespace bgfx
 	};
 
 	typedef std::unordered_map<std::string, Varying> VaryingMap;
-
+    /*
 	class File
 	{
 	public:
@@ -596,7 +596,7 @@ namespace bgfx
 		char* m_data;
 		uint32_t m_size;
 	};
-
+	*/
 	char* strInsert(char* _str, const char* _insert)
 	{
 		uint32_t len = bx::strLen(_insert);
@@ -2755,10 +2755,9 @@ namespace bgfx
 		bx::printf("Failed to build shader.\n");
 		return bx::kExitFailure;
 	}
-
 } // namespace bgfx
 
-int main(int _argc, const char* _argv[])
-{
-	return bgfx::compileShader(_argc, _argv);
-}
+// int main(int _argc, const char* _argv[])
+// {
+// 	return bgfx::compileShader(_argc, _argv);
+// }

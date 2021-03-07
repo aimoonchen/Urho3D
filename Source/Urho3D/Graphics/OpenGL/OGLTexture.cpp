@@ -32,6 +32,8 @@
 
 #include "../../DebugNew.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
@@ -57,7 +59,7 @@ static GLenum gl3WrapModes[] =
 };
 #endif
 
-static GLenum GetWrapMode(TextureAddressMode mode)
+static uint64_t GetWrapMode(TextureAddressMode mode, TextureCoordinate coord)
 {
 #ifndef GL_ES_VERSION_2_0
     return Graphics::GetGL3Support() ? gl3WrapModes[mode] : glWrapModes[mode];
@@ -86,6 +88,7 @@ void Texture::SetSRGB(bool enable)
 
 void Texture::UpdateParameters()
 {
+    /*
     if (!object_.name_ || !graphics_)
         return;
 
@@ -171,6 +174,7 @@ void Texture::UpdateParameters()
 #endif
 
     parametersDirty_ = false;
+    */
 }
 
 bool Texture::GetParametersDirty() const
@@ -347,6 +351,110 @@ void Texture::RegenerateLevels()
 #endif
 
     levelsDirty_ = false;
+}
+
+uint64_t Texture::GetCoordMode(TextureCoordinate coord) {
+    auto mode = addressModes_[coord];
+    if (coord == COORD_U)
+    {
+        if (mode == ADDRESS_MIRROR)
+        {
+            return BGFX_SAMPLER_U_MIRROR;
+        }
+        else if (mode == ADDRESS_CLAMP)
+        {
+            return BGFX_SAMPLER_U_CLAMP;
+        }
+        else if (mode == ADDRESS_BORDER)
+        {
+            return BGFX_SAMPLER_U_BORDER;
+        }
+    }
+    else if (coord == COORD_V)
+    {
+        if (mode == ADDRESS_MIRROR)
+        {
+            return BGFX_SAMPLER_V_MIRROR;
+        }
+        else if (mode == ADDRESS_CLAMP)
+        {
+            return BGFX_SAMPLER_V_CLAMP;
+        }
+        else if (mode == ADDRESS_BORDER)
+        {
+            return BGFX_SAMPLER_V_BORDER;
+        }
+    }
+    else if (coord == COORD_W)
+    {
+        if (mode == ADDRESS_MIRROR)
+        {
+            return BGFX_SAMPLER_W_MIRROR;
+        }
+        else if (mode == ADDRESS_CLAMP)
+        {
+            return BGFX_SAMPLER_W_CLAMP;
+        }
+        else if (mode == ADDRESS_BORDER)
+        {
+            return BGFX_SAMPLER_W_BORDER;
+        }
+    }
+    else
+    {
+        return 0;
+    }
+}
+
+uint64_t Texture::GetFilterMode()
+{
+    uint64_t flags = 0;
+    switch (filterMode_) {
+    case FILTER_NEAREST:
+        flags |= BGFX_SAMPLER_MIN_POINT;
+        flags |= BGFX_SAMPLER_MAG_POINT;
+//         if (levels_ < 2)
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//         else
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_NEAREST);
+        if (levels_ > 1) {
+            flags |= BGFX_SAMPLER_MIP_POINT;
+        }
+        glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        break;
+    case FILTER_BILINEAR:
+//         if (levels_ < 2)
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//         else
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_NEAREST);
+//         glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        if (levels_ > 1) {
+            flags = BGFX_SAMPLER_MIP_POINT;
+        }
+        break;
+    case FILTER_ANISOTROPIC:
+    case FILTER_TRILINEAR:
+//         if (levels_ < 2)
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_LINEAR);
+//         else
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_LINEAR_MIPMAP_LINEAR);
+//         glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_LINEAR);
+        flags |= BGFX_SAMPLER_MIN_ANISOTROPIC;
+        flags |= BGFX_SAMPLER_MAG_ANISOTROPIC;
+        break;
+    case FILTER_NEAREST_ANISOTROPIC:
+//         if (levels_ < 2)
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_NEAREST);
+//         else
+//             glTexParameteri(target_, GL_TEXTURE_MIN_FILTER, GL_NEAREST_MIPMAP_LINEAR);
+//         glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        flags |= BGFX_SAMPLER_MIN_POINT;
+        flags |= BGFX_SAMPLER_MAG_POINT;
+        break;
+    default:
+        break;
+    }
+    return flags;
 }
 
 }

@@ -83,11 +83,11 @@ void StaticScene::CreateScene()
     // Create a child scene node (at world origin) and a StaticModel component into it. Set the StaticModel to show a simple
     // plane mesh with a "stone" material. Note that naming the scene nodes is optional. Scale the scene node larger
     // (100 x 100 world units)
-    Node* planeNode = scene_->CreateChild("Plane");
-    planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
-    auto* planeObject = planeNode->CreateComponent<StaticModel>();
-    planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
-    planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
+//     Node* planeNode = scene_->CreateChild("Plane");
+//     planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+//     auto* planeObject = planeNode->CreateComponent<StaticModel>();
+//     planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
+//     planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
 
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.

@@ -43,9 +43,30 @@
 #include "../../IO/Log.h"
 #include "../../Resource/ResourceCache.h"
 
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+#if ENTRY_CONFIG_USE_WAYLAND
+#include <wayland-egl.h>
+#endif
+#elif BX_PLATFORM_WINDOWS
+#define SDL_MAIN_HANDLED
+#endif
+
+#include <bx/os.h>
 #include <SDL/SDL.h>
 
+BX_PRAGMA_DIAGNOSTIC_PUSH()
+BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG("-Wextern-c-compat")
+#include <SDL/SDL_syswm.h>
+BX_PRAGMA_DIAGNOSTIC_POP()
+
+#include <bgfx/platform.h>
+#if defined(None) // X11 defines this...
+#undef None
+#endif // defined(None)
+
 #include "../../DebugNew.h"
+
+#include "bgfx/bgfx.h"
 
 #ifdef GL_ES_VERSION_2_0
 #define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
@@ -301,8 +322,10 @@ Graphics::Graphics(Context* context) :
     position_(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED),
     shadowMapFormat_(GL_DEPTH_COMPONENT16),
     hiresShadowMapFormat_(GL_DEPTH_COMPONENT24),
-    shaderPath_("Shaders/GLSL/"),
-    shaderExtension_(".glsl"),
+//     shaderPath_("Shaders/GLSL/"),
+//     shaderExtension_(".glsl"),
+    shaderPath_("Shaders/BGFX/"),
+    shaderExtension_(".sc"),
     orientations_("LandscapeLeft LandscapeRight"),
 #ifndef GL_ES_VERSION_2_0
     apiName_("GL2")
@@ -331,6 +354,70 @@ Graphics::~Graphics()
     impl_ = nullptr;
 
     context_->ReleaseSDL();
+}
+
+static void* sdlNativeWindowHandle(SDL_Window* _window)
+{
+    SDL_SysWMinfo wmi;
+    SDL_VERSION(&wmi.version);
+    if (!SDL_GetWindowWMInfo(_window, &wmi))
+    {
+        return NULL;
+    }
+
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+#if ENTRY_CONFIG_USE_WAYLAND
+    wl_egl_window* win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
+    if (!win_impl)
+    {
+        int width, height;
+        SDL_GetWindowSize(_window, &width, &height);
+        struct wl_surface* surface = wmi.info.wl.surface;
+        if (!surface)
+            return nullptr;
+        win_impl = wl_egl_window_create(surface, width, height);
+        SDL_SetWindowData(_window, "wl_egl_window", win_impl);
+    }
+    return (void*)(uintptr_t)win_impl;
+#else
+    return (void*)wmi.info.x11.window;
+#endif
+#elif BX_PLATFORM_OSX
+    return wmi.info.cocoa.window;
+#elif BX_PLATFORM_WINDOWS
+    return wmi.info.win.window;
+#endif // BX_PLATFORM_
+}
+
+static bool sdlSetWindow(SDL_Window* _window)
+{
+    SDL_SysWMinfo wmi;
+    SDL_VERSION(&wmi.version);
+    if (!SDL_GetWindowWMInfo(_window, &wmi))
+    {
+        return false;
+    }
+
+    bgfx::PlatformData pd;
+#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
+#if ENTRY_CONFIG_USE_WAYLAND
+    pd.ndt = wmi.info.wl.display;
+#else
+    pd.ndt = wmi.info.x11.display;
+#endif
+#elif BX_PLATFORM_OSX
+    pd.ndt = NULL;
+#elif BX_PLATFORM_WINDOWS
+    pd.ndt = NULL;
+#endif // BX_PLATFORM_
+    pd.nwh = sdlNativeWindowHandle(_window);
+
+    pd.context = NULL;
+    pd.backBuffer = NULL;
+    pd.backBufferDS = NULL;
+    bgfx::setPlatformData(pd);
+
+    return true;
 }
 
 bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& params, bool maximize)
@@ -501,6 +588,23 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     SDL_GetWindowSize(window_, &logicalWidth, &logicalHeight);
     screenParams_.highDPI_ = (width_ != logicalWidth) || (height_ != logicalHeight);
 
+    sdlSetWindow(window_);
+    uint32_t m_debug;
+    uint32_t m_reset;
+    m_debug = BGFX_DEBUG_NONE;
+    m_reset = BGFX_RESET_VSYNC;
+
+    bgfx::Init init;
+    init.type = bgfx::RendererType::OpenGL; // args.m_type;
+    init.vendorId = 0;                      // args.m_pciId;
+    init.resolution.width = width;
+    init.resolution.height = height;
+    init.resolution.reset = m_reset;
+    bgfx::init(init);
+
+    // Enable debug text.
+    bgfx::setDebug(m_debug);
+
     // Reset rendertargets and viewport for the new screen mode
     ResetRenderTargets();
 
@@ -515,6 +619,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
 #endif
 
     OnScreenModeChanged();
+
     return true;
 }
 
@@ -531,10 +636,10 @@ void Graphics::SetSRGB(bool enable)
 
 void Graphics::SetDither(bool enable)
 {
-    if (enable)
-        glEnable(GL_DITHER);
-    else
-        glDisable(GL_DITHER);
+//     if (enable)
+//         glEnable(GL_DITHER);
+//     else
+//         glDisable(GL_DITHER);
 }
 
 void Graphics::SetFlushGPU(bool enable)
@@ -564,6 +669,7 @@ void Graphics::Close()
 
 bool Graphics::TakeScreenShot(Image& destImage)
 {
+    /*
     URHO3D_PROFILE(TakeScreenShot);
 
     if (!IsInitialized())
@@ -588,7 +694,7 @@ bool Graphics::TakeScreenShot(Image& destImage)
 
     // On OpenGL we need to flip the image vertically after reading
     destImage.FlipVertical();
-
+    */
     return true;
 }
 
@@ -608,8 +714,8 @@ bool Graphics::BeginFrame()
     }
 
     // Re-enable depth test and depth func in case a third party program has modified it
-    glEnable(GL_DEPTH_TEST);
-    glDepthFunc(glCmpFunc[depthTestMode_]);
+//     glEnable(GL_DEPTH_TEST);
+//     glDepthFunc(glCmpFunc[depthTestMode_]);
 
     // Set default rendertarget and depth buffer
     ResetRenderTargets();
@@ -664,21 +770,29 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         glStencilMask(M_MAX_UNSIGNED);
 
     unsigned glFlags = 0;
+    uint64_t clearFlag = 0;
     if (flags & CLEAR_COLOR)
     {
-        glFlags |= GL_COLOR_BUFFER_BIT;
-        glClearColor(color.r_, color.g_, color.b_, color.a_);
+        clearFlag |= BGFX_CLEAR_COLOR;
+
+//         glFlags |= GL_COLOR_BUFFER_BIT;
+//         glClearColor(color.r_, color.g_, color.b_, color.a_);
     }
     if (flags & CLEAR_DEPTH)
     {
-        glFlags |= GL_DEPTH_BUFFER_BIT;
-        glClearDepth(depth);
+        clearFlag |= BGFX_CLEAR_DEPTH;
+
+//         glFlags |= GL_DEPTH_BUFFER_BIT;
+//         glClearDepth(depth);
     }
     if (flags & CLEAR_STENCIL)
     {
-        glFlags |= GL_STENCIL_BUFFER_BIT;
-        glClearStencil(stencil);
+        clearFlag |= BGFX_CLEAR_STENCIL;
+
+//         glFlags |= GL_STENCIL_BUFFER_BIT;
+//         glClearStencil(stencil);
     }
+    bgfx::setViewClear(0, clearFlag, color.ToUInt(), depth, stencil);
 
     // If viewport is less than full screen, set a scissor to limit the clear
     /// \todo Any user-set scissor test will be lost
@@ -688,7 +802,7 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     else
         SetScissorTest(false);
 
-    glClear(glFlags);
+    //glClear(glFlags);
 
     SetScissorTest(false);
     SetColorWrite(oldColorWrite);
@@ -1013,7 +1127,9 @@ void Graphics::SetIndexBuffer(IndexBuffer* buffer)
     if (indexBuffer_ == buffer)
         return;
 
-    glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer ? buffer->GetGPUObjectName() : 0);
+    //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer ? buffer->GetGPUObjectName() : 0);
+    buffer->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{buffer->GetGPUObjectHandle()})
+                        : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{buffer->GetGPUObjectHandle()});
     indexBuffer_ = buffer;
 }
 
@@ -1023,7 +1139,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
         return;
 
     // Compile the shaders now if not yet compiled. If already attempted, do not retry
-    if (vs && !vs->GetGPUObjectName())
+    if (vs && vs->GetGPUObjectHandle() == bgfx::kInvalidHandle/*!vs->GetGPUObjectName()*/)
     {
         if (vs->GetCompilerOutput().Empty())
         {
@@ -1042,7 +1158,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
             vs = nullptr;
     }
 
-    if (ps && !ps->GetGPUObjectName())
+    if (ps && ps->GetGPUObjectHandle() == bgfx::kInvalidHandle /*!ps->GetGPUObjectName()*/)
     {
         if (ps->GetCompilerOutput().Empty())
         {
@@ -1160,6 +1276,11 @@ void Graphics::SetShaderParameter(StringHash param, const float* data, unsigned 
 {
     if (impl_->shaderProgram_)
     {
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle)) {
+            bgfx::setUniform(uniformHandle, data, count);
+        }
+        /*
         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
         if (info)
         {
@@ -1201,6 +1322,7 @@ void Graphics::SetShaderParameter(StringHash param, const float* data, unsigned 
             default: break;
             }
         }
+        */
     }
 }
 
@@ -1208,6 +1330,11 @@ void Graphics::SetShaderParameter(StringHash param, float value)
 {
     if (impl_->shaderProgram_)
     {
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle)) {
+            bgfx::setUniform(uniformHandle, &value);
+        }
+        /*
         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
         if (info)
         {
@@ -1222,11 +1349,13 @@ void Graphics::SetShaderParameter(StringHash param, float value)
 
             glUniform1fv(info->location_, 1, &value);
         }
+        */
     }
 }
 
 void Graphics::SetShaderParameter(StringHash param, int value)
 {
+    /*
     if (impl_->shaderProgram_)
     {
         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
@@ -1244,10 +1373,12 @@ void Graphics::SetShaderParameter(StringHash param, int value)
             glUniform1i(info->location_, value);
         }
     }
+    */
 }
 
 void Graphics::SetShaderParameter(StringHash param, bool value)
 {
+    /*
     // \todo Not tested
     if (impl_->shaderProgram_)
     {
@@ -1266,6 +1397,7 @@ void Graphics::SetShaderParameter(StringHash param, bool value)
             glUniform1i(info->location_, (int)value);
         }
     }
+    */
 }
 
 void Graphics::SetShaderParameter(StringHash param, const Color& color)
@@ -1277,32 +1409,37 @@ void Graphics::SetShaderParameter(StringHash param, const Vector2& vector)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetParameter(info->offset_, sizeof(Vector2), &vector);
-                return;
-            }
-
-            // Check the uniform type to avoid mismatch
-            switch (info->glType_)
-            {
-            case GL_FLOAT:
-                glUniform1fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC2:
-                glUniform2fv(info->location_, 1, vector.Data());
-                break;
-
-            default: break;
-            }
+            bgfx::setUniform(uniformHandle, vector.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetParameter(info->offset_, sizeof(Vector2), &vector);
+//                 return;
+//             }
+// 
+//             // Check the uniform type to avoid mismatch
+//             switch (info->glType_)
+//             {
+//             case GL_FLOAT:
+//                 glUniform1fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC2:
+//                 glUniform2fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             default: break;
+//             }
+//         }
     }
 }
 
@@ -1310,20 +1447,25 @@ void Graphics::SetShaderParameter(StringHash param, const Matrix3& matrix)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetVector3ArrayParameter(info->offset_, 3, &matrix);
-                return;
-            }
-
-            glUniformMatrix3fv(info->location_, 1, GL_FALSE, matrix.Data());
+            bgfx::setUniform(uniformHandle, matrix.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetVector3ArrayParameter(info->offset_, 3, &matrix);
+//                 return;
+//             }
+// 
+//             glUniformMatrix3fv(info->location_, 1, GL_FALSE, matrix.Data());
+//         }
     }
 }
 
@@ -1331,36 +1473,41 @@ void Graphics::SetShaderParameter(StringHash param, const Vector3& vector)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetParameter(info->offset_, sizeof(Vector3), &vector);
-                return;
-            }
-
-            // Check the uniform type to avoid mismatch
-            switch (info->glType_)
-            {
-            case GL_FLOAT:
-                glUniform1fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC2:
-                glUniform2fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC3:
-                glUniform3fv(info->location_, 1, vector.Data());
-                break;
-
-            default: break;
-            }
+            bgfx::setUniform(uniformHandle, vector.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetParameter(info->offset_, sizeof(Vector3), &vector);
+//                 return;
+//             }
+// 
+//             // Check the uniform type to avoid mismatch
+//             switch (info->glType_)
+//             {
+//             case GL_FLOAT:
+//                 glUniform1fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC2:
+//                 glUniform2fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC3:
+//                 glUniform3fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             default: break;
+//             }
+//         }
     }
 }
 
@@ -1368,20 +1515,25 @@ void Graphics::SetShaderParameter(StringHash param, const Matrix4& matrix)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetParameter(info->offset_, sizeof(Matrix4), &matrix);
-                return;
-            }
-
-            glUniformMatrix4fv(info->location_, 1, GL_FALSE, matrix.Data());
+            bgfx::setUniform(uniformHandle, matrix.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetParameter(info->offset_, sizeof(Matrix4), &matrix);
+//                 return;
+//             }
+// 
+//             glUniformMatrix4fv(info->location_, 1, GL_FALSE, matrix.Data());
+//         }
     }
 }
 
@@ -1389,40 +1541,45 @@ void Graphics::SetShaderParameter(StringHash param, const Vector4& vector)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetParameter(info->offset_, sizeof(Vector4), &vector);
-                return;
-            }
-
-            // Check the uniform type to avoid mismatch
-            switch (info->glType_)
-            {
-            case GL_FLOAT:
-                glUniform1fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC2:
-                glUniform2fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC3:
-                glUniform3fv(info->location_, 1, vector.Data());
-                break;
-
-            case GL_FLOAT_VEC4:
-                glUniform4fv(info->location_, 1, vector.Data());
-                break;
-
-            default: break;
-            }
+            bgfx::setUniform(uniformHandle, vector.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetParameter(info->offset_, sizeof(Vector4), &vector);
+//                 return;
+//             }
+// 
+//             // Check the uniform type to avoid mismatch
+//             switch (info->glType_)
+//             {
+//             case GL_FLOAT:
+//                 glUniform1fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC2:
+//                 glUniform2fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC3:
+//                 glUniform3fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             case GL_FLOAT_VEC4:
+//                 glUniform4fv(info->location_, 1, vector.Data());
+//                 break;
+// 
+//             default: break;
+//             }
+//         }
     }
 }
 
@@ -1430,35 +1587,40 @@ void Graphics::SetShaderParameter(StringHash param, const Matrix3x4& matrix)
 {
     if (impl_->shaderProgram_)
     {
-        const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
-        if (info)
+        bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
+        if (bgfx::isValid(uniformHandle))
         {
-            // Expand to a full Matrix4
-            static Matrix4 fullMatrix;
-            fullMatrix.m00_ = matrix.m00_;
-            fullMatrix.m01_ = matrix.m01_;
-            fullMatrix.m02_ = matrix.m02_;
-            fullMatrix.m03_ = matrix.m03_;
-            fullMatrix.m10_ = matrix.m10_;
-            fullMatrix.m11_ = matrix.m11_;
-            fullMatrix.m12_ = matrix.m12_;
-            fullMatrix.m13_ = matrix.m13_;
-            fullMatrix.m20_ = matrix.m20_;
-            fullMatrix.m21_ = matrix.m21_;
-            fullMatrix.m22_ = matrix.m22_;
-            fullMatrix.m23_ = matrix.m23_;
-
-            if (info->bufferPtr_)
-            {
-                ConstantBuffer* buffer = info->bufferPtr_;
-                if (!buffer->IsDirty())
-                    impl_->dirtyConstantBuffers_.Push(buffer);
-                buffer->SetParameter(info->offset_, sizeof(Matrix4), &fullMatrix);
-                return;
-            }
-
-            glUniformMatrix4fv(info->location_, 1, GL_FALSE, fullMatrix.Data());
+            bgfx::setUniform(uniformHandle, matrix.Data());
         }
+        //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
+//         if (info)
+//         {
+//             // Expand to a full Matrix4
+//             static Matrix4 fullMatrix;
+//             fullMatrix.m00_ = matrix.m00_;
+//             fullMatrix.m01_ = matrix.m01_;
+//             fullMatrix.m02_ = matrix.m02_;
+//             fullMatrix.m03_ = matrix.m03_;
+//             fullMatrix.m10_ = matrix.m10_;
+//             fullMatrix.m11_ = matrix.m11_;
+//             fullMatrix.m12_ = matrix.m12_;
+//             fullMatrix.m13_ = matrix.m13_;
+//             fullMatrix.m20_ = matrix.m20_;
+//             fullMatrix.m21_ = matrix.m21_;
+//             fullMatrix.m22_ = matrix.m22_;
+//             fullMatrix.m23_ = matrix.m23_;
+// 
+//             if (info->bufferPtr_)
+//             {
+//                 ConstantBuffer* buffer = info->bufferPtr_;
+//                 if (!buffer->IsDirty())
+//                     impl_->dirtyConstantBuffers_.Push(buffer);
+//                 buffer->SetParameter(info->offset_, sizeof(Matrix4), &fullMatrix);
+//                 return;
+//             }
+// 
+//             glUniformMatrix4fv(info->location_, 1, GL_FALSE, fullMatrix.Data());
+//         }
     }
 }
 
@@ -1520,6 +1682,11 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         }
     }
 
+    if (texture) {
+        bgfx::setTexture(index, {texture->GetSampler()}, {texture->GetGPUObjectHandle()});
+    }
+    
+    /*
     if (textures_[index] != texture)
     {
         if (impl_->activeTexture_ != index)
@@ -1567,10 +1734,12 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
                 texture->RegenerateLevels();
         }
     }
+    */
 }
 
 void Graphics::SetTextureForUpdate(Texture* texture)
 {
+    /*
     if (impl_->activeTexture_ != 0)
     {
         glActiveTexture(GL_TEXTURE0);
@@ -1584,6 +1753,7 @@ void Graphics::SetTextureForUpdate(Texture* texture)
     glBindTexture(glType, texture->GetGPUObjectName());
     impl_->textureTypes_[0] = glType;
     textures_[0] = texture;
+    */
 }
 
 void Graphics::SetDefaultTextureFilterMode(TextureFilterMode mode)
@@ -1744,7 +1914,8 @@ void Graphics::SetViewport(const IntRect& rect)
     rectCopy.bottom_ = Clamp(rectCopy.bottom_, 0, rtSize.y_);
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
-    glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
+    //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
+    bgfx::setViewRect(0, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
     viewport_ = rectCopy;
 
     // Disable scissor test, needs to be re-enabled by the user
@@ -1753,124 +1924,200 @@ void Graphics::SetViewport(const IntRect& rect)
 
 void Graphics::SetBlendMode(BlendMode mode, bool alphaToCoverage)
 {
-    if (mode != blendMode_)
-    {
-        if (mode == BLEND_REPLACE)
-            glDisable(GL_BLEND);
-        else
-        {
-            glEnable(GL_BLEND);
-            glBlendFunc(glSrcBlend[mode], glDestBlend[mode]);
-            glBlendEquation(glBlendOp[mode]);
-        }
+    if (mode == BLEND_REPLACE)
+        return;
 
-        blendMode_ = mode;
+    uint64_t flag = 0;
+    switch (mode) {
+    case Urho3D::BLEND_ADD:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_MULTIPLY:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_DST_COLOR, BGFX_STATE_BLEND_ZERO);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_ALPHA:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_ADDALPHA:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_PREMULALPHA:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_INVDESTALPHA:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_DST_ALPHA);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
+        break;
+    case Urho3D::BLEND_SUBTRACT:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_REVSUB);
+        break;
+    case Urho3D::BLEND_SUBTRACTALPHA:
+        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE);
+        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_REVSUB);
+        break;
+    default:
+        break;
     }
 
-    if (alphaToCoverage != alphaToCoverage_)
-    {
-        if (alphaToCoverage)
-            glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-        else
-            glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
-
-        alphaToCoverage_ = alphaToCoverage;
+    if (alphaToCoverage) {
+        flag |= BGFX_STATE_BLEND_ALPHA_TO_COVERAGE;
     }
+    render_state_ |= flag;
+
+//     if (mode != blendMode_)
+//     {
+//         if (mode == BLEND_REPLACE)
+//             glDisable(GL_BLEND);
+//         else
+//         {
+//             glEnable(GL_BLEND);
+//             glBlendFunc(glSrcBlend[mode], glDestBlend[mode]);
+//             glBlendEquation(glBlendOp[mode]);
+//         }
+// 
+//         blendMode_ = mode;
+//     }
+// 
+//     if (alphaToCoverage != alphaToCoverage_)
+//     {
+//         if (alphaToCoverage)
+//             glEnable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+//         else
+//             glDisable(GL_SAMPLE_ALPHA_TO_COVERAGE);
+// 
+//         alphaToCoverage_ = alphaToCoverage;
+//     }
 }
 
 void Graphics::SetColorWrite(bool enable)
 {
-    if (enable != colorWrite_)
-    {
-        if (enable)
-            glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
-        else
-            glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
-
-        colorWrite_ = enable;
-    }
+    render_state_ |= BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A;
+//     if (enable != colorWrite_)
+//     {
+//         if (enable)
+//             glColorMask(GL_TRUE, GL_TRUE, GL_TRUE, GL_TRUE);
+//         else
+//             glColorMask(GL_FALSE, GL_FALSE, GL_FALSE, GL_FALSE);
+// 
+//         colorWrite_ = enable;
+//     }
 }
 
 void Graphics::SetCullMode(CullMode mode)
 {
-    if (mode != cullMode_)
-    {
-        if (mode == CULL_NONE)
-            glDisable(GL_CULL_FACE);
-        else
-        {
-            // Use Direct3D convention, ie. clockwise vertices define a front face
-            glEnable(GL_CULL_FACE);
-            glCullFace(mode == CULL_CCW ? GL_FRONT : GL_BACK);
-        }
-
-        cullMode_ = mode;
-    }
+    if (mode == CULL_NONE)
+        return;
+    render_state_ |= ((mode == CULL_CCW) ? BGFX_STATE_CULL_CCW : BGFX_STATE_CULL_CW);
+    
+//     if (mode != cullMode_)
+//     {
+//         if (mode == CULL_NONE)
+//             glDisable(GL_CULL_FACE);
+//         else
+//         {
+//             // Use Direct3D convention, ie. clockwise vertices define a front face
+//             glEnable(GL_CULL_FACE);
+//             glCullFace(mode == CULL_CCW ? GL_FRONT : GL_BACK);
+//         }
+// 
+//         cullMode_ = mode;
+//     }
 }
 
 void Graphics::SetDepthBias(float constantBias, float slopeScaledBias)
 {
-    if (constantBias != constantDepthBias_ || slopeScaledBias != slopeScaledDepthBias_)
-    {
-#ifndef GL_ES_VERSION_2_0
-        if (slopeScaledBias != 0.0f)
-        {
-            // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
-            glEnable(GL_POLYGON_OFFSET_FILL);
-            glPolygonOffset(slopeScaledBias, 0.0f);
-        }
-        else
-            glDisable(GL_POLYGON_OFFSET_FILL);
-#endif
-
-        constantDepthBias_ = constantBias;
-        slopeScaledDepthBias_ = slopeScaledBias;
-        // Force update of the projection matrix shader parameter
-        ClearParameterSource(SP_CAMERA);
-    }
+//     if (constantBias != constantDepthBias_ || slopeScaledBias != slopeScaledDepthBias_)
+//     {
+// #ifndef GL_ES_VERSION_2_0
+//         if (slopeScaledBias != 0.0f)
+//         {
+//             // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
+//             glEnable(GL_POLYGON_OFFSET_FILL);
+//             glPolygonOffset(slopeScaledBias, 0.0f);
+//         }
+//         else
+//             glDisable(GL_POLYGON_OFFSET_FILL);
+// #endif
+// 
+//         constantDepthBias_ = constantBias;
+//         slopeScaledDepthBias_ = slopeScaledBias;
+//         // Force update of the projection matrix shader parameter
+//         ClearParameterSource(SP_CAMERA);
+//     }
 }
 
 void Graphics::SetDepthTest(CompareMode mode)
 {
-    if (mode != depthTestMode_)
-    {
-        glDepthFunc(glCmpFunc[mode]);
-        depthTestMode_ = mode;
+    uint64_t flag = 0;
+    switch (mode) {
+    case Urho3D::CMP_ALWAYS: flag = BGFX_STATE_DEPTH_TEST_ALWAYS; break;
+    case Urho3D::CMP_EQUAL: flag = BGFX_STATE_DEPTH_TEST_EQUAL; break;
+    case Urho3D::CMP_NOTEQUAL: flag = BGFX_STATE_DEPTH_TEST_NOTEQUAL; break;
+    case Urho3D::CMP_LESS: flag = BGFX_STATE_DEPTH_TEST_LESS; break;
+    case Urho3D::CMP_LESSEQUAL: flag = BGFX_STATE_DEPTH_TEST_LEQUAL; break;
+    case Urho3D::CMP_GREATER: flag = BGFX_STATE_DEPTH_TEST_GREATER; break;
+    case Urho3D::CMP_GREATEREQUAL: flag = BGFX_STATE_DEPTH_TEST_GEQUAL; break;
+    default: break;
     }
+
+    if (flag != 0) {
+        render_state_ |= flag;
+    }
+    
+//     if (mode != depthTestMode_)
+//     {
+//         glDepthFunc(glCmpFunc[mode]);
+//         depthTestMode_ = mode;
+//     }
 }
 
 void Graphics::SetDepthWrite(bool enable)
 {
-    if (enable != depthWrite_)
-    {
-        glDepthMask(enable ? GL_TRUE : GL_FALSE);
-        depthWrite_ = enable;
-    }
+    if (!enable)
+        return;
+    render_state_ |= BGFX_STATE_WRITE_Z;
+
+//     if (enable != depthWrite_)
+//     {
+//         glDepthMask(enable ? GL_TRUE : GL_FALSE);
+//         depthWrite_ = enable;
+//     }
 }
 
 void Graphics::SetFillMode(FillMode mode)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (mode != fillMode_)
-    {
-        glPolygonMode(GL_FRONT_AND_BACK, glFillMode[mode]);
-        fillMode_ = mode;
-    }
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     if (mode != fillMode_)
+//     {
+//         glPolygonMode(GL_FRONT_AND_BACK, glFillMode[mode]);
+//         fillMode_ = mode;
+//     }
+// #endif
+    
+    //_render->m_debug |= BGFX_DEBUG_WIREFRAME;
 }
 
 void Graphics::SetLineAntiAlias(bool enable)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (enable != lineAntiAlias_)
-    {
-        if (enable)
-            glEnable(GL_LINE_SMOOTH);
-        else
-            glDisable(GL_LINE_SMOOTH);
-        lineAntiAlias_ = enable;
-    }
-#endif
+    if (!enable)
+        return;
+    render_state_ |= BGFX_STATE_LINEAA;
+    // #ifndef GL_ES_VERSION_2_0
+//     if (enable != lineAntiAlias_)
+//     {
+//         if (enable)
+//             glEnable(GL_LINE_SMOOTH);
+//         else
+//             glDisable(GL_LINE_SMOOTH);
+//         lineAntiAlias_ = enable;
+//     }
+// #endif
 }
 
 void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusive)
@@ -1904,21 +2151,22 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
         if (enable && scissorRect_ != intRect)
         {
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
-            glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
+            //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
+            bgfx::setScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
         }
     }
     else
         scissorRect_ = IntRect::ZERO;
 
-    if (enable != scissorTest_)
-    {
-        if (enable)
-            glEnable(GL_SCISSOR_TEST);
-        else
-            glDisable(GL_SCISSOR_TEST);
-        scissorTest_ = enable;
-    }
+//     if (enable != scissorTest_)
+//     {
+//         if (enable)
+//             glEnable(GL_SCISSOR_TEST);
+//         else
+//             glDisable(GL_SCISSOR_TEST);
+//         scissorTest_ = enable;
+//     }
 }
 
 void Graphics::SetScissorTest(bool enable, const IntRect& rect)
@@ -1945,91 +2193,138 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
         if (enable && scissorRect_ != intRect)
         {
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
-            glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
+            //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
+            bgfx::setScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
         }
     }
     else
         scissorRect_ = IntRect::ZERO;
 
-    if (enable != scissorTest_)
-    {
-        if (enable)
-            glEnable(GL_SCISSOR_TEST);
-        else
-            glDisable(GL_SCISSOR_TEST);
-        scissorTest_ = enable;
-    }
+//     if (enable != scissorTest_)
+//     {
+//         if (enable)
+//             glEnable(GL_SCISSOR_TEST);
+//         else
+//             glDisable(GL_SCISSOR_TEST);
+//         scissorTest_ = enable;
+//     }
 }
 
 void Graphics::SetClipPlane(bool enable, const Plane& clipPlane, const Matrix3x4& view, const Matrix4& projection)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (enable != useClipPlane_)
-    {
-        if (enable)
-            glEnable(GL_CLIP_PLANE0);
-        else
-            glDisable(GL_CLIP_PLANE0);
-
-        useClipPlane_ = enable;
-    }
-
-    if (enable)
-    {
-        Matrix4 viewProj = projection * view;
-        clipPlane_ = clipPlane.Transformed(viewProj).ToVector4();
-
-        if (!gl3Support)
-        {
-            GLdouble planeData[4];
-            planeData[0] = clipPlane_.x_;
-            planeData[1] = clipPlane_.y_;
-            planeData[2] = clipPlane_.z_;
-            planeData[3] = clipPlane_.w_;
-
-            glClipPlane(GL_CLIP_PLANE0, &planeData[0]);
-        }
-    }
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     if (enable != useClipPlane_)
+//     {
+//         if (enable)
+//             glEnable(GL_CLIP_PLANE0);
+//         else
+//             glDisable(GL_CLIP_PLANE0);
+// 
+//         useClipPlane_ = enable;
+//     }
+// 
+//     if (enable)
+//     {
+//         Matrix4 viewProj = projection * view;
+//         clipPlane_ = clipPlane.Transformed(viewProj).ToVector4();
+// 
+//         if (!gl3Support)
+//         {
+//             GLdouble planeData[4];
+//             planeData[0] = clipPlane_.x_;
+//             planeData[1] = clipPlane_.y_;
+//             planeData[2] = clipPlane_.z_;
+//             planeData[3] = clipPlane_.w_;
+// 
+//             glClipPlane(GL_CLIP_PLANE0, &planeData[0]);
+//         }
+//     }
+// #endif
 }
 
 void Graphics::SetStencilTest(bool enable, CompareMode mode, StencilOp pass, StencilOp fail, StencilOp zFail, unsigned stencilRef,
     unsigned compareMask, unsigned writeMask)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (enable != stencilTest_)
-    {
-        if (enable)
-            glEnable(GL_STENCIL_TEST);
-        else
-            glDisable(GL_STENCIL_TEST);
-        stencilTest_ = enable;
+    if (!enable)
+        return;
+
+    uint64_t flag = 0;
+    flag |= BGFX_STENCIL_FUNC_REF(stencilRef);
+    flag |= BGFX_STENCIL_FUNC_RMASK(compareMask);
+    //flag |= BGFX_STENCIL_FUNC_RMASK_MASK(writeMask);
+
+    switch (mode) {
+    case Urho3D::CMP_ALWAYS: flag |= BGFX_STENCIL_TEST_ALWAYS; break;
+    case Urho3D::CMP_EQUAL: flag |= BGFX_STENCIL_TEST_EQUAL; break;
+    case Urho3D::CMP_NOTEQUAL: flag |= BGFX_STENCIL_TEST_NOTEQUAL; break;
+    case Urho3D::CMP_LESS: flag |= BGFX_STENCIL_TEST_LESS; break;
+    case Urho3D::CMP_LESSEQUAL: flag |= BGFX_STENCIL_TEST_LEQUAL; break;
+    case Urho3D::CMP_GREATER: flag |= BGFX_STENCIL_TEST_GREATER; break;
+    case Urho3D::CMP_GREATEREQUAL: flag |= BGFX_STENCIL_TEST_GEQUAL; break;
+    default: break;
     }
 
-    if (enable)
-    {
-        if (mode != stencilTestMode_ || stencilRef != stencilRef_ || compareMask != stencilCompareMask_)
-        {
-            glStencilFunc(glCmpFunc[mode], stencilRef, compareMask);
-            stencilTestMode_ = mode;
-            stencilRef_ = stencilRef;
-            stencilCompareMask_ = compareMask;
-        }
-        if (writeMask != stencilWriteMask_)
-        {
-            glStencilMask(writeMask);
-            stencilWriteMask_ = writeMask;
-        }
-        if (pass != stencilPass_ || fail != stencilFail_ || zFail != stencilZFail_)
-        {
-            glStencilOp(glStencilOps[fail], glStencilOps[zFail], glStencilOps[pass]);
-            stencilPass_ = pass;
-            stencilFail_ = fail;
-            stencilZFail_ = zFail;
-        }
+    switch (fail) {
+    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_FAIL_S_KEEP; break;
+    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_FAIL_S_ZERO; break;
+    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_FAIL_S_REPLACE; break;
+    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_FAIL_S_INCR; break;
+    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_FAIL_S_DECR; break;
+    default: break;
     }
-#endif
+
+    switch (zFail) {
+    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_FAIL_Z_KEEP; break;
+    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_FAIL_Z_ZERO; break;
+    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_FAIL_Z_REPLACE; break;
+    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_FAIL_Z_INCR; break;
+    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_FAIL_Z_DECR; break;
+    default: break;
+    }
+
+    switch (pass) {
+    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_PASS_Z_KEEP; break;
+    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_PASS_Z_ZERO; break;
+    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_PASS_Z_REPLACE; break;
+    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_PASS_Z_INCR; break;
+    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_PASS_Z_DECR; break;
+    default: break;
+    }
+
+// #ifndef GL_ES_VERSION_2_0
+//     if (enable != stencilTest_)
+//     {
+//         if (enable)
+//             glEnable(GL_STENCIL_TEST);
+//         else
+//             glDisable(GL_STENCIL_TEST);
+//         stencilTest_ = enable;
+//     }
+// 
+//     if (enable)
+//     {
+//         if (mode != stencilTestMode_ || stencilRef != stencilRef_ || compareMask != stencilCompareMask_)
+//         {
+//             glStencilFunc(glCmpFunc[mode], stencilRef, compareMask);
+//             stencilTestMode_ = mode;
+//             stencilRef_ = stencilRef;
+//             stencilCompareMask_ = compareMask;
+//         }
+//         if (writeMask != stencilWriteMask_)
+//         {
+//             glStencilMask(writeMask);
+//             stencilWriteMask_ = writeMask;
+//         }
+//         if (pass != stencilPass_ || fail != stencilFail_ || zFail != stencilZFail_)
+//         {
+//             glStencilOp(glStencilOps[fail], glStencilOps[zFail], glStencilOps[pass]);
+//             stencilPass_ = pass;
+//             stencilFail_ = fail;
+//             stencilZFail_ = zFail;
+//         }
+//     }
+// #endif
 }
 
 bool Graphics::IsInitialized() const
@@ -2074,39 +2369,39 @@ unsigned Graphics::GetFormat(CompressedFormat format) const
     switch (format)
     {
     case CF_RGBA:
-        return GL_RGBA;
+        return bgfx::TextureFormat::RGBA8; // GL_RGBA;
 
     case CF_DXT1:
-        return dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : 0;
+        return bgfx::TextureFormat::BC1; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : 0;
 
 #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
     case CF_DXT3:
-        return dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : 0;
+        return bgfx::TextureFormat::BC2; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : 0;
 
     case CF_DXT5:
-        return dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : 0;
+        return bgfx::TextureFormat::BC3; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : 0;
 #endif
 #ifdef GL_ES_VERSION_2_0
     case CF_ETC1:
-        return etcTextureSupport_ ? GL_ETC1_RGB8_OES : 0;
+        return bgfx::TextureFormat::ETC1; // etcTextureSupport_ ? GL_ETC1_RGB8_OES : 0;
 
     case CF_ETC2_RGB:
-        return etc2TextureSupport_ ? GL_ETC2_RGB8_OES : 0;
+        return bgfx::TextureFormat::ETC2; // etc2TextureSupport_ ? GL_ETC2_RGB8_OES : 0;
 
     case CF_ETC2_RGBA:
-        return etc2TextureSupport_ ? GL_ETC2_RGBA8_OES : 0;
+        return bgfx::TextureFormat::ETC2A; // etc2TextureSupport_ ? GL_ETC2_RGBA8_OES : 0;
 
     case CF_PVRTC_RGB_2BPP:
-        return pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0;
+        return bgfx::TextureFormat::PTC12; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0;
 
     case CF_PVRTC_RGB_4BPP:
-        return pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0;
+        return bgfx::TextureFormat::PTC14; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0;
 
     case CF_PVRTC_RGBA_2BPP:
-        return pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0;
+        return bgfx::TextureFormat::PTC12A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0;
 
     case CF_PVRTC_RGBA_4BPP:
-        return pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0;
+        return bgfx::TextureFormat::PTC14A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0;
 #endif
 
     default:
@@ -2139,14 +2434,15 @@ ShaderVariation* Graphics::GetShader(ShaderType type, const char* name, const ch
     if (lastShaderName_ != name || !lastShader_)
     {
         auto* cache = GetSubsystem<ResourceCache>();
-
-        String fullShaderName = shaderPath_ + name + shaderExtension_;
+        String realName;// = (type == VS) ? "vs_" : "fs_";
+        realName += name;
+        String fullShaderName = shaderPath_ + realName + shaderExtension_;
         // Try to reduce repeated error log prints because of missing shaders
-        if (lastShaderName_ == name && !cache->Exists(fullShaderName))
+        if (lastShaderName_ == realName && !cache->Exists(fullShaderName))
             return nullptr;
 
         lastShader_ = cache->GetResource<Shader>(fullShaderName);
-        lastShaderName_ = name;
+        lastShaderName_ = realName;
     }
 
     return lastShader_ ? lastShader_->GetVariation(type, defines) : nullptr;
@@ -2556,144 +2852,160 @@ void Graphics::SetUBO(unsigned object)
 
 unsigned Graphics::GetAlphaFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    // Alpha format is deprecated on OpenGL 3+
-    if (gl3Support)
-        return GL_R8;
-#endif
-    return GL_ALPHA;
+// #ifndef GL_ES_VERSION_2_0
+//     // Alpha format is deprecated on OpenGL 3+
+//     if (gl3Support)
+//         return GL_R8;
+// #endif
+//     return GL_ALPHA;
+    return bgfx::TextureFormat::R8;
 }
 
 unsigned Graphics::GetLuminanceFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    // Luminance format is deprecated on OpenGL 3+
-    if (gl3Support)
-        return GL_R8;
-#endif
-    return GL_LUMINANCE;
+// #ifndef GL_ES_VERSION_2_0
+//     // Luminance format is deprecated on OpenGL 3+
+//     if (gl3Support)
+//         return GL_R8;
+// #endif
+//     return GL_LUMINANCE;
+    return bgfx::TextureFormat::R8;
 }
 
 unsigned Graphics::GetLuminanceAlphaFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    // Luminance alpha format is deprecated on OpenGL 3+
-    if (gl3Support)
-        return GL_RG8;
-#endif
-    return GL_LUMINANCE_ALPHA;
+// #ifndef GL_ES_VERSION_2_0
+//     // Luminance alpha format is deprecated on OpenGL 3+
+//     if (gl3Support)
+//         return GL_RG8;
+// #endif
+//     return GL_LUMINANCE_ALPHA;
+    return bgfx::TextureFormat::RG8;
 }
 
 unsigned Graphics::GetRGBFormat()
 {
-    return GL_RGB;
+//    return GL_RGB;
+    return bgfx::TextureFormat::RGB8;
 }
 
 unsigned Graphics::GetRGBAFormat()
 {
-    return GL_RGBA;
+//    return GL_RGBA;
+    return bgfx::TextureFormat::RGBA8;
 }
 
 unsigned Graphics::GetRGBA16Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RGBA16;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RGBA16;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RGBA16;
 }
 
 unsigned Graphics::GetRGBAFloat16Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RGBA16F_ARB;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RGBA16F_ARB;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RGBA16F;
 }
 
 unsigned Graphics::GetRGBAFloat32Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RGBA32F_ARB;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RGBA32F_ARB;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RGBA32F;
 }
 
 unsigned Graphics::GetRG16Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RG16;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RG16;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RG16;
 }
 
 unsigned Graphics::GetRGFloat16Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RG16F;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RG16F;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RG16F;
 }
 
 unsigned Graphics::GetRGFloat32Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_RG32F;
-#else
-    return GL_RGBA;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_RG32F;
+// #else
+//     return GL_RGBA;
+// #endif
+    return bgfx::TextureFormat::RG32F;
 }
 
 unsigned Graphics::GetFloat16Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_R16F;
-#else
-    return GL_LUMINANCE;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_R16F;
+// #else
+//     return GL_LUMINANCE;
+// #endif
+    return bgfx::TextureFormat::R16F;
 }
 
 unsigned Graphics::GetFloat32Format()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_R32F;
-#else
-    return GL_LUMINANCE;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_R32F;
+// #else
+//     return GL_LUMINANCE;
+// #endif
+    return bgfx::TextureFormat::R32F;
 }
 
 unsigned Graphics::GetLinearDepthFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    // OpenGL 3 can use different color attachment formats
-    if (gl3Support)
-        return GL_R32F;
-#endif
-    // OpenGL 2 requires color attachments to have the same format, therefore encode deferred depth to RGBA manually
-    // if not using a readable hardware depth texture
-    return GL_RGBA;
+// #ifndef GL_ES_VERSION_2_0
+//     // OpenGL 3 can use different color attachment formats
+//     if (gl3Support)
+//         return GL_R32F;
+// #endif
+//     // OpenGL 2 requires color attachments to have the same format, therefore encode deferred depth to RGBA manually
+//     // if not using a readable hardware depth texture
+//     return GL_RGBA;
+    return bgfx::TextureFormat::R32F;
 }
 
 unsigned Graphics::GetDepthStencilFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_DEPTH24_STENCIL8_EXT;
-#else
-    return glesDepthStencilFormat;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_DEPTH24_STENCIL8_EXT;
+// #else
+//     return glesDepthStencilFormat;
+// #endif
+    return bgfx::TextureFormat::D24S8;
 }
 
 unsigned Graphics::GetReadableDepthFormat()
 {
-#ifndef GL_ES_VERSION_2_0
-    return GL_DEPTH_COMPONENT24;
-#else
-    return glesReadableDepthFormat;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     return GL_DEPTH_COMPONENT24;
+// #else
+//     return glesReadableDepthFormat;
+// #endif
+    return bgfx::TextureFormat::D24;
 }
 
 unsigned Graphics::GetFormat(const String& formatName)
@@ -3116,11 +3428,14 @@ void Graphics::PrepareDraw()
                             impl_->instancingVertexAttributes_ &= ~locationMask;
                         }
                     }
-
-                    SetVBO(buffer->GetGPUObjectName());
-                    glVertexAttribPointer(location, glElementComponents[element.type_], glElementTypes[element.type_],
-                        element.type_ == TYPE_UBYTE4_NORM ? GL_TRUE : GL_FALSE, (unsigned)buffer->GetVertexSize(),
-                        (const void *)(size_t)dataStart);
+                    buffer->IsDynamic()
+                        ? bgfx::setVertexBuffer(0, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
+                        : bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
+                    
+//                     SetVBO(buffer->GetGPUObjectName());
+//                     glVertexAttribPointer(location, glElementComponents[element.type_], glElementTypes[element.type_],
+//                         element.type_ == TYPE_UBYTE4_NORM ? GL_TRUE : GL_FALSE, (unsigned)buffer->GetVertexSize(),
+//                         (const void *)(size_t)dataStart);
                 }
             }
         }

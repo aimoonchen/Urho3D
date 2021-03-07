@@ -33,6 +33,8 @@
 
 #include <vector>
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
@@ -122,23 +124,33 @@ bool ShaderProgram::Link()
     if (!vertexShader_ || !pixelShader_ || !vertexShader_->GetGPUObjectName() || !pixelShader_->GetGPUObjectName())
         return false;
 
-    auto vsHandle = vertexShader_->GetHandle();
-    auto psHandle = pixelShader_->GetHandle();
-    program_ = bgfx::createProgram(vsHandle, psHandle);
+    bgfx::ShaderHandle vsHandle{vertexShader_->GetGPUObjectHandle()};
+    bgfx::ShaderHandle psHandle{pixelShader_->GetGPUObjectHandle()};
+    
+    auto progHandle = bgfx::createProgram(vsHandle, psHandle);
+    if (!bgfx::isValid(progHandle)) {
+        URHO3D_LOGERROR("Failed to create ShaderProgram");
+    }
+    else {
+        object_.handle_ = progHandle.idx;
+    }
+
     std::vector<bgfx::UniformHandle> uniforms;
     auto uniformCount = bgfx::getShaderUniforms(vsHandle) + bgfx::getShaderUniforms(psHandle);
     if (uniformCount > 0) {
         uniforms.resize(uniformCount);
         auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0]);
-        bgfx::getShaderUniforms(psHandle, &uniforms[psOffset]);
+        if (psOffset < uniforms.size()) {
+            bgfx::getShaderUniforms(psHandle, &uniforms[psOffset]);
+        }
         for (auto& uniform : uniforms) {
             bgfx::UniformInfo info;
             bgfx::getUniformInfo(uniform, info);
             //shaderParameters_[StringHash(info.name)] = parameter;
-            uniforms_[StringHash(info.name)] = uniform;
+            uniforms_[StringHash(info.name)] = uniform.idx;
         }
     }
-
+    /*
     object_.name_ = glCreateProgram();
     if (!object_.name_)
     {
@@ -335,7 +347,7 @@ bool ShaderProgram::Link()
     // Rehash the parameter & vertex attributes maps to ensure minimal load factor
     vertexAttributes_.Rehash(NextPowerOfTwo(vertexAttributes_.Size()));
     shaderParameters_.Rehash(NextPowerOfTwo(shaderParameters_.Size()));
-
+    */
     return true;
 }
 
@@ -434,6 +446,15 @@ void ShaderProgram::ClearParameterSources()
 void ShaderProgram::ClearGlobalParameterSource(ShaderParameterGroup group)
 {
     globalParameterSources[group] = (const void*)M_MAX_UNSIGNED;
+}
+
+uint16_t ShaderProgram::GetUniform(StringHash param)
+{
+    auto it = uniforms_.Find(param);
+    if (it != uniforms_.End()) {
+        return it->second_;
+    }
+    return BGFX_INVALID_HANDLE;
 }
 
 }

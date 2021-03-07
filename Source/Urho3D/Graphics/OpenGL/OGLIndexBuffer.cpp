@@ -30,13 +30,15 @@
 
 #include "../../DebugNew.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
 void IndexBuffer::OnDeviceLost()
 {
-    if (object_.name_ && !graphics_->IsDeviceLost())
-        glDeleteBuffers(1, &object_.name_);
+//     if (object_.name_ && !graphics_->IsDeviceLost())
+//         glDeleteBuffers(1, &object_.name_);
 
     GPUObject::OnDeviceLost();
 }
@@ -58,20 +60,25 @@ void IndexBuffer::Release()
 {
     Unlock();
 
-    if (object_.name_)
+//     if (object_.name_)
+//     {
+//         if (!graphics_)
+//             return;
+// 
+//         if (!graphics_->IsDeviceLost())
+//         {
+//             if (graphics_->GetIndexBuffer() == this)
+//                 graphics_->SetIndexBuffer(nullptr);
+// 
+//             glDeleteBuffers(1, &object_.name_);
+//         }
+// 
+//         object_.name_ = 0;
+//     }
+    if (object_.handle_ != bgfx::kInvalidHandle)
     {
-        if (!graphics_)
-            return;
-
-        if (!graphics_->IsDeviceLost())
-        {
-            if (graphics_->GetIndexBuffer() == this)
-                graphics_->SetIndexBuffer(nullptr);
-
-            glDeleteBuffers(1, &object_.name_);
-        }
-
-        object_.name_ = 0;
+        dynamic_ ? bgfx::destroy(bgfx::DynamicIndexBufferHandle{object_.handle_})
+                 : bgfx::destroy(bgfx::IndexBufferHandle{object_.handle_});
     }
 }
 
@@ -92,20 +99,50 @@ bool IndexBuffer::SetData(const void* data)
     if (shadowData_ && data != shadowData_.Get())
         memcpy(shadowData_.Get(), data, indexCount_ * (size_t)indexSize_);
 
-    if (object_.name_)
+//     if (object_.name_)
+//     {
+//         if (!graphics_->IsDeviceLost())
+//         {
+//             graphics_->SetIndexBuffer(this);
+//             glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount_ * (size_t)indexSize_, data, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+//         }
+//         else
+//         {
+//             URHO3D_LOGWARNING("Index buffer data assignment while device is lost");
+//             dataPending_ = true;
+//         }
+//     }
+    auto mem = bgfx::copy(data, indexCount_ * (size_t)indexSize_);
+    if (dynamic_)
     {
-        if (!graphics_->IsDeviceLost())
+        if (object_.handle_ != bgfx::kInvalidHandle)
         {
-            graphics_->SetIndexBuffer(this);
-            glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount_ * (size_t)indexSize_, data, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+            bgfx::update(bgfx::DynamicIndexBufferHandle{object_.handle_}, 0, mem);
         }
         else
         {
-            URHO3D_LOGWARNING("Index buffer data assignment while device is lost");
-            dataPending_ = true;
+            URHO3D_LOGERROR("try update invalid index buffer.");
         }
     }
-
+    else
+    {
+        if (object_.handle_ == bgfx::kInvalidHandle)
+        {
+            auto handle = bgfx::createIndexBuffer(mem);
+            if (bgfx::isValid(handle))
+            {
+                object_.handle_ = handle.idx;
+            }
+            else
+            {
+                URHO3D_LOGERROR("createIndexBuffer failed!");
+            }
+        }
+        else
+        {
+            URHO3D_LOGERROR("try update static index buffer.");
+        }
+    }
     dataLost_ = false;
     return true;
 }
@@ -139,23 +176,38 @@ bool IndexBuffer::SetDataRange(const void* data, unsigned start, unsigned count,
     if (shadowData_ && shadowData_.Get() + start * indexSize_ != data)
         memcpy(shadowData_.Get() + start * indexSize_, data, count * (size_t)indexSize_);
 
-    if (object_.name_)
+//     if (object_.name_)
+//     {
+//         if (!graphics_->IsDeviceLost())
+//         {
+//             graphics_->SetIndexBuffer(this);
+//             if (!discard || start != 0)
+//                 glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, start * (size_t)indexSize_, count * indexSize_, data);
+//             else
+//                 glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * (size_t)indexSize_, data, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+//         }
+//         else
+//         {
+//             URHO3D_LOGWARNING("Index buffer data assignment while device is lost");
+//             dataPending_ = true;
+//         }
+//     }
+    if (object_.handle_ != bgfx::kInvalidHandle)
     {
-        if (!graphics_->IsDeviceLost())
+        if (dynamic_)
         {
-            graphics_->SetIndexBuffer(this);
-            if (!discard || start != 0)
-                glBufferSubData(GL_ELEMENT_ARRAY_BUFFER, start * (size_t)indexSize_, count * indexSize_, data);
-            else
-                glBufferData(GL_ELEMENT_ARRAY_BUFFER, count * (size_t)indexSize_, data, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+            bgfx::update(bgfx::DynamicIndexBufferHandle{object_.handle_}, start * (size_t)indexSize_,
+                         bgfx::copy(data, count * indexSize_));
         }
         else
         {
-            URHO3D_LOGWARNING("Index buffer data assignment while device is lost");
-            dataPending_ = true;
+            URHO3D_LOGERROR("try update static index buffer!");
         }
     }
-
+    else
+    {
+        URHO3D_LOGERROR("try update invalid index buffer!");
+    }
     return true;
 }
 
@@ -233,22 +285,33 @@ bool IndexBuffer::Create()
 
     if (graphics_)
     {
-        if (graphics_->IsDeviceLost())
+        auto size = indexCount_ * (size_t)indexSize_;
+        if (dynamic_)
         {
-            URHO3D_LOGWARNING("Index buffer creation while device is lost");
-            return true;
+            auto handle = bgfx::createDynamicIndexBuffer(size);
+            if (!bgfx::isValid(handle))
+            {
+                URHO3D_LOGERROR("createDynamicIndexBuffer Failed!");
+            }
+            object_.handle_ = handle.idx;
         }
-
-        if (!object_.name_)
-            glGenBuffers(1, &object_.name_);
-        if (!object_.name_)
-        {
-            URHO3D_LOGERROR("Failed to create index buffer");
-            return false;
-        }
-
-        graphics_->SetIndexBuffer(this);
-        glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount_ * (size_t)indexSize_, nullptr, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
+        
+//         if (graphics_->IsDeviceLost())
+//         {
+//             URHO3D_LOGWARNING("Index buffer creation while device is lost");
+//             return true;
+//         }
+// 
+//         if (!object_.name_)
+//             glGenBuffers(1, &object_.name_);
+//         if (!object_.name_)
+//         {
+//             URHO3D_LOGERROR("Failed to create index buffer");
+//             return false;
+//         }
+// 
+//         graphics_->SetIndexBuffer(this);
+//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, indexCount_ * (size_t)indexSize_, nullptr, dynamic_ ? GL_DYNAMIC_DRAW : GL_STATIC_DRAW);
     }
 
     return true;

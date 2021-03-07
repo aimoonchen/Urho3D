@@ -36,6 +36,8 @@
 
 #include "../../DebugNew.h"
 
+#include "bgfx/bgfx.h"
+
 namespace Urho3D
 {
 
@@ -390,6 +392,7 @@ bool Texture2D::Create()
     unsigned externalFormat = GetExternalFormat(format_);
     unsigned dataType = GetDataType(format_);
 
+    uint64_t textureFlags = 0;
     // Create a renderbuffer instead of a texture if depth texture is not properly supported, or if this will be a packed
     // depth stencil texture
 #ifndef GL_ES_VERSION_2_0
@@ -411,6 +414,7 @@ bool Texture2D::Create()
     {
         if (multiSample_ > 1)
         {
+            textureFlags |= BGFX_TEXTURE_MSAA_SAMPLE;
             if (autoResolve_)
             {
                 // Multisample with autoresolve: create a renderbuffer for rendering, but also a texture
@@ -433,7 +437,7 @@ bool Texture2D::Create()
             }
         }
     }
-
+    
     glGenTextures(1, &object_.name_);
 
     // Ensure that our texture is bound to OpenGL texture unit 0
@@ -442,31 +446,32 @@ bool Texture2D::Create()
     // If not compressed, create the initial level 0 texture with null data
     bool success = true;
 
-    if (!IsCompressed())
-    {
-        glGetError();
-#ifndef GL_ES_VERSION_2_0
-        if (multiSample_ > 1 && !autoResolve_)
-        {
-            glTexImage2DMultisample(target_, multiSample_, format, width_, height_, GL_TRUE);
-        }
-        else
-#endif
-        {
-            glTexImage2D(target_, 0, format, width_, height_, 0, externalFormat, dataType, nullptr);
-        }
-        if (glGetError())
-        {
-            URHO3D_LOGERROR("Failed to create texture");
-            success = false;
-        }
-    }
-
+//     if (!IsCompressed())
+//     {
+//         glGetError();
+// #ifndef GL_ES_VERSION_2_0
+//         if (multiSample_ > 1 && !autoResolve_)
+//         {
+//             glTexImage2DMultisample(target_, multiSample_, format, width_, height_, GL_TRUE);
+//         }
+//         else
+// #endif
+//         {
+//             glTexImage2D(target_, 0, format, width_, height_, 0, externalFormat, dataType, nullptr);
+//         }
+//         if (glGetError())
+//         {
+//             URHO3D_LOGERROR("Failed to create texture");
+//             success = false;
+//         }
+//     }
+    
     // Set mipmapping
     if (usage_ == TEXTURE_DEPTHSTENCIL || usage_ == TEXTURE_DYNAMIC)
         requestedLevels_ = 1;
     else if (usage_ == TEXTURE_RENDERTARGET)
     {
+        textureFlags |= BGFX_TEXTURE_RT;
 #if defined(__EMSCRIPTEN__) || defined(IOS) || defined(TVOS)
         // glGenerateMipmap appears to not be working on WebGL or iOS/tvOS, disable rendertarget mipmaps for now
         requestedLevels_ = 1;
@@ -482,15 +487,22 @@ bool Texture2D::Create()
     }
 
     levels_ = CheckMaxLevels(width_, height_, requestedLevels_);
-#ifndef GL_ES_VERSION_2_0
-    glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
+//     glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
+// #endif
 
     // Set initial parameters, then unbind the texture
     UpdateParameters();
     graphics_->SetTexture(0, nullptr);
-
+    
+    textureFlags = GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W);
+    auto textureHandle = bgfx::createTexture2D(width_, height_, levels_ > 1, 1, bgfx::TextureFormat::Enum(format_), textureFlags);
+    if (!bgfx::isValid(textureHandle)) {
+        URHO3D_LOGERROR("Failed to create texture");
+        return false;
+    }
+    object_.handle_ = textureHandle.idx;
     return success;
 }
 
