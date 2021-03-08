@@ -172,11 +172,13 @@ bool ShaderVariation::Create()
     else
         shaderCode += originalShaderCode;
 
+
+    shaderCode = originalShaderCode;
     const char* shaderCStr = shaderCode.CString();
-    const char* name = GetName().CString();
+    String filePath = "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\" + GetName() + ".sc";
     //
     bgfx::Options options;
-    options.inputFilePath = ""; // filePath;
+    options.inputFilePath = filePath.CString();   // filePath;
     options.outputFilePath = ""; // outFilePath;
     options.shaderType = (type_ == VS) ? 'v':'f'; // bx::toLower(type[0]);
 
@@ -185,7 +187,7 @@ bool ShaderVariation::Create()
 
     options.raw = false; // cmdLine.hasArg('\0', "raw");
 
-    //options.profile = ;//
+    options.profile = "150";//
     options.debugInformation = false; // cmdLine.hasArg('\0', "debug");
     options.avoidFlowControl = false; // cmdLine.hasArg('\0', "avoid-flow-control");
     options.noPreshader = false;      // cmdLine.hasArg('\0', "no-preshader");
@@ -202,51 +204,107 @@ bool ShaderVariation::Create()
     }
     options.depends = false; // cmdLine.hasArg("depends");
     options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
-    
-    //
-    const char* varying = NULL;
-    bgfx::File attribdef;
 
-    if ('c' != options.shaderType)
+    options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+
+    options.defines.push_back("COMPILEVS");
+
+    bx::FileReader reader;
+    if (!bx::open(&reader, filePath.CString()))
     {
-        std::string defaultVarying = "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
-        const char* varyingdef = defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
-        attribdef.load(varyingdef);
-        varying = attribdef.getData();
-        if (NULL != varying && *varying != '\0')
-        {
-            options.dependencies.push_back(varyingdef);
-        }
-        else
-        {
-            bx::printf("ERROR: Failed to parse varying def file: \"%s\" No input/output semantics will be generated in "
-                       "the code!\n",
-                       varyingdef);
-        }
+        bx::printf("Unable to open file '%s'.\n", filePath.CString());
+        return false;
     }
-
-    const size_t padding = 16384;
-    uint32_t size = shaderCode.Length(); // (uint32_t) bx::getSize(&reader);
-    char* data = new char[size + padding + 1];
-    //size = (uint32_t)bx::read(&reader, data, size);
-    memcpy(data, shaderCode.CString(), shaderCode.Length());
-    if (data[0] == '\xef' && data[1] == '\xbb' && data[2] == '\xbf')
+    else
     {
-        bx::memMove(data, &data[3], size - 3);
-        size -= 3;
-    }
+        const char* varying = NULL;
+        bgfx::File attribdef;
 
-    // Compiler generates "error X3000: syntax error: unexpected end of file"
-    // if input doesn't have empty line at EOF.
-    data[size] = '\n';
-    bx::memSet(&data[size + 1], 0, padding);
+        if ('c' != options.shaderType)
+        {
+            std::string defaultVarying =
+                "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+            const char* varyingdef =
+                defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
+            attribdef.load(varyingdef);
+            varying = attribdef.getData();
+            if (NULL != varying && *varying != '\0')
+            {
+                options.dependencies.push_back(varyingdef);
+            }
+            else
+            {
+                bx::printf(
+                    "ERROR: Failed to parse varying def file: \"%s\" No input/output semantics will be generated in "
+                    "the code!\n",
+                    varyingdef);
+            }
+        }
+        const size_t padding = 16384;
+        uint32_t size = (uint32_t)bx::getSize(&reader);
+        char* data = new char[size + padding + 1];
+        size = (uint32_t)bx::read(&reader, data, size);
+
+        if (data[0] == '\xef' && data[1] == '\xbb' && data[2] == '\xbf')
+        {
+            bx::memMove(data, &data[3], size - 3);
+            size -= 3;
+        }
+
+        // Compiler generates "error X3000: syntax error: unexpected end of file"
+        // if input doesn't have empty line at EOF.
+        data[size] = '\n';
+        bx::memSet(&data[size + 1], 0, padding);
+        bx::close(&reader);
+
+//         bx::FileWriter* writer = NULL;
+// 
+//         if (!bin2c.isEmpty())
+//         {
+//             writer = new Bin2cWriter(bin2c);
+//         }
+//         else
+//         {
+//             writer = new bx::FileWriter;
+//         }
+// 
+//         if (!bx::open(writer, outFilePath))
+//         {
+//             bx::printf("Unable to open output file '%s'.\n", outFilePath);
+//             return bx::kExitFailure;
+//         }
+        bgfx::memory_writer writer;
+        auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &writer);
+        if (!compiled)
+        {
+            ;
+        }
+        auto shaderHandle = bgfx::createShader(bgfx::copy(&writer.memory_[0], writer.current_size_));
+        object_.handle_ = shaderHandle.idx;
+        return bgfx::isValid(shaderHandle);
+        //         bx::close(writer);
+//         delete writer;
+    }
+//     const size_t padding = 16384;
+//     uint32_t size = shaderCode.Length(); // (uint32_t) bx::getSize(&reader);
+//     char* data = new char[size + padding + 1];
+//     //size = (uint32_t)bx::read(&reader, data, size);
+//     memcpy(data, shaderCode.CString(), shaderCode.Length());
+//     if (data[0] == '\xef' && data[1] == '\xbb' && data[2] == '\xbf')
+//     {
+//         bx::memMove(data, &data[3], size - 3);
+//         size -= 3;
+//     }
+// 
+//     // Compiler generates "error X3000: syntax error: unexpected end of file"
+//     // if input doesn't have empty line at EOF.
+//     data[size] = '\n';
+//     bx::memSet(&data[size + 1], 0, padding);
     //bx::close(&reader);
-
-    auto compiled = bgfx::compileShader(varying, ""/*commandLineComment.c_str()*/, data, size, options, nullptr/*writer*/);
-    delete [] data;
-    auto shaderHandle = bgfx::createShader(bgfx::copy(shaderCStr, shaderCode.Length()));
-    object_.handle_ = shaderHandle.idx;
-    return bgfx::isValid(shaderHandle);
+//     bgfx::memory_writer mw;
+//     auto compiled = bgfx::compileShader(varying, ""/*commandLineComment.c_str()*/, data, size, options, &mw/*writer*/);
+//     delete [] data;
+    
     /*
     glShaderSource(object_.name_, 1, &shaderCStr, nullptr);
     glCompileShader(object_.name_);

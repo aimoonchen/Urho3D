@@ -90,20 +90,28 @@ bool Shader::BeginLoad(Deserializer& source)
     // Load the shader source code and resolve any includes
     timeStamp_ = 0;
     String shaderCode;
-    if (!ProcessSource(shaderCode, source))
+
+    auto dataSize = source.GetSize();
+    SharedArrayPtr<char> buffer(new char[dataSize + 1]);
+    if (source.Read(buffer.Get(), dataSize) != dataSize)
         return false;
+    buffer[dataSize] = '\0';
+    shaderCode = buffer;
+
+//     if (!ProcessSource(shaderCode, source))
+//         return false;
 
     // Comment out the unneeded shader function
     vsSourceCode_ = shaderCode;
     psSourceCode_ = shaderCode;
-    CommentOutFunction(vsSourceCode_, "void PS(");
-    CommentOutFunction(psSourceCode_, "void VS(");
-
-    // OpenGL: rename either VS() or PS() to main()
-#ifdef URHO3D_OPENGL
-    vsSourceCode_.Replace("void VS(", "void main(");
-    psSourceCode_.Replace("void PS(", "void main(");
-#endif
+//     CommentOutFunction(vsSourceCode_, "void PS(");
+//     CommentOutFunction(psSourceCode_, "void VS(");
+// 
+//     // OpenGL: rename either VS() or PS() to main()
+// #ifdef URHO3D_OPENGL
+//     vsSourceCode_.Replace("void VS(", "void main(");
+//     psSourceCode_.Replace("void PS(", "void main(");
+// #endif
 
     RefreshMemoryUse();
     return true;
