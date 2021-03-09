@@ -92,11 +92,11 @@ bool Shader::BeginLoad(Deserializer& source)
     String shaderCode;
 
     auto dataSize = source.GetSize();
-    SharedArrayPtr<char> buffer(new char[dataSize + 1]);
-    if (source.Read(buffer.Get(), dataSize) != dataSize)
+    SharedArrayPtr<char> data(new char[dataSize + 1]);
+    if (source.Read(data.Get(), dataSize) != dataSize)
         return false;
-    buffer[dataSize] = '\0';
-    shaderCode = buffer;
+    data[dataSize] = '\0';
+    shaderCode = data;
 
 //     if (!ProcessSource(shaderCode, source))
 //         return false;

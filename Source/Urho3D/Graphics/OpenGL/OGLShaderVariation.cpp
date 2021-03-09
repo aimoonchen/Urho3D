@@ -175,7 +175,7 @@ bool ShaderVariation::Create()
 
     shaderCode = originalShaderCode;
     const char* shaderCStr = shaderCode.CString();
-    String filePath = "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\" + GetName() + ".sc";
+    String filePath = /*"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\" +*/ GetName() + ".sc";
     //
     bgfx::Options options;
     options.inputFilePath = filePath.CString();   // filePath;
@@ -183,7 +183,7 @@ bool ShaderVariation::Create()
     options.shaderType = (type_ == VS) ? 'v':'f'; // bx::toLower(type[0]);
 
     options.disasm = false; // cmdLine.hasArg('\0', "disasm");
-    options.platform = "osx"; // platform;
+    options.platform = "windows"; // platform;
 
     options.raw = false; // cmdLine.hasArg('\0', "raw");
 
@@ -205,25 +205,26 @@ bool ShaderVariation::Create()
     options.depends = false; // cmdLine.hasArg("depends");
     options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
 
-    options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
 
-    options.defines.push_back("COMPILEVS");
-
-    bx::FileReader reader;
-    if (!bx::open(&reader, filePath.CString()))
-    {
-        bx::printf("Unable to open file '%s'.\n", filePath.CString());
-        return false;
-    }
-    else
-    {
+//     bx::FileReader reader;
+//     if (!bx::open(&reader, filePath.CString()))
+//     {
+//         bx::printf("Unable to open file '%s'.\n", filePath.CString());
+//         return false;
+//     }
+//     else
+//     {
         const char* varying = NULL;
         bgfx::File attribdef;
 
         if ('c' != options.shaderType)
         {
             std::string defaultVarying =
-                "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+                //"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+                "D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
             const char* varyingdef =
                 defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);
@@ -241,9 +242,10 @@ bool ShaderVariation::Create()
             }
         }
         const size_t padding = 16384;
-        uint32_t size = (uint32_t)bx::getSize(&reader);
+        uint32_t size = originalShaderCode.Length();// (uint32_t)bx::getSize(&reader);
         char* data = new char[size + padding + 1];
-        size = (uint32_t)bx::read(&reader, data, size);
+        //size = (uint32_t)bx::read(&reader, data, size);
+        memcpy(data, originalShaderCode.CString(), size);
 
         if (data[0] == '\xef' && data[1] == '\xbb' && data[2] == '\xbf')
         {
@@ -255,7 +257,7 @@ bool ShaderVariation::Create()
         // if input doesn't have empty line at EOF.
         data[size] = '\n';
         bx::memSet(&data[size + 1], 0, padding);
-        bx::close(&reader);
+        //bx::close(&reader);
 
 //         bx::FileWriter* writer = NULL;
 // 
@@ -279,12 +281,15 @@ bool ShaderVariation::Create()
         {
             ;
         }
+        StringHash definesHash(defines_);
+        String outputFilename = GetName() + ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value());
+
         auto shaderHandle = bgfx::createShader(bgfx::copy(&writer.memory_[0], writer.current_size_));
         object_.handle_ = shaderHandle.idx;
         return bgfx::isValid(shaderHandle);
         //         bx::close(writer);
 //         delete writer;
-    }
+//    }
 //     const size_t padding = 16384;
 //     uint32_t size = shaderCode.Length(); // (uint32_t) bx::getSize(&reader);
 //     char* data = new char[size + padding + 1];

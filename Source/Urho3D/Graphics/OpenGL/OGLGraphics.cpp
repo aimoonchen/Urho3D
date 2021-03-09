@@ -972,10 +972,25 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 
     unsigned primitiveCount;
     GLenum glPrimitiveType;
-
+// 
     GetGLPrimitiveType(vertexCount, type, primitiveCount, glPrimitiveType);
-    glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
+//     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
+    if (impl_->shaderProgram_)
+    {
+        for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
+        {
+            VertexBuffer* buffer = vertexBuffers_[i];
+            // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory
+            // for vertex data, in which case the pointer will be invalid and cause a crash
+            if (!buffer || !buffer->GetGPUObjectHandle /*GetGPUObjectName*/() /* || !impl_->vertexAttributes_*/)
+                continue;
 
+            buffer->IsDynamic()
+                ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
+                : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
+        }
+        bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
+    }
     numPrimitives_ += primitiveCount;
     ++numBatches_;
 }
@@ -1179,7 +1194,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
 
     if (!vs || !ps)
     {
-        glUseProgram(0);
+        //glUseProgram(0);
         vertexShader_ = nullptr;
         pixelShader_ = nullptr;
         impl_->shaderProgram_ = nullptr;
@@ -1197,12 +1212,12 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
             // Use the existing linked program
             if (i->second_->GetGPUObjectName())
             {
-                glUseProgram(i->second_->GetGPUObjectName());
+                //glUseProgram(i->second_->GetGPUObjectName());
                 impl_->shaderProgram_ = i->second_;
             }
             else
             {
-                glUseProgram(0);
+                //glUseProgram(0);
                 impl_->shaderProgram_ = nullptr;
             }
         }
@@ -1223,7 +1238,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
             {
                 URHO3D_LOGERROR("Failed to link vertex shader " + vs->GetFullName() + " and pixel shader " + ps->GetFullName() + ":\n" +
                          newProgram->GetLinkerOutput());
-                glUseProgram(0);
+                //glUseProgram(0);
                 impl_->shaderProgram_ = nullptr;
             }
 
@@ -1233,7 +1248,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
 
     // Update the clip plane uniform on GL3, and set constant buffers
 #ifndef GL_ES_VERSION_2_0
-    if (gl3Support && impl_->shaderProgram_)
+    if (false/*gl3Support && impl_->shaderProgram_*/)
     {
         const SharedPtr<ConstantBuffer>* constantBuffers = impl_->shaderProgram_->GetConstantBuffers();
         for (unsigned i = 0; i < MAX_SHADER_PARAMETER_GROUPS * 2; ++i)
@@ -3362,100 +3377,101 @@ void Graphics::PrepareDraw()
             bool sRGBWrite = renderTargets_[0] ? renderTargets_[0]->GetParentTexture()->GetSRGB() : sRGB_;
             if (sRGBWrite != impl_->sRGBWrite_)
             {
-                if (sRGBWrite)
-                    glEnable(GL_FRAMEBUFFER_SRGB_EXT);
-                else
-                    glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+//                 if (sRGBWrite)
+//                     glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+//                 else
+//                     glDisable(GL_FRAMEBUFFER_SRGB_EXT);
                 impl_->sRGBWrite_ = sRGBWrite;
             }
         }
 #endif
     }
 
-    if (impl_->vertexBuffersDirty_)
-    {
-        // Go through currently bound vertex buffers and set the attribute pointers that are available & required
-        // Use reverse order so that elements from higher index buffers will override lower index buffers
-        unsigned assignedLocations = 0;
-
-        for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
-        {
-            VertexBuffer* buffer = vertexBuffers_[i];
-            // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory for vertex data,
-            // in which case the pointer will be invalid and cause a crash
-            if (!buffer || !buffer->GetGPUObjectName() || !impl_->vertexAttributes_)
-                continue;
-
-            const PODVector<VertexElement>& elements = buffer->GetElements();
-
-            for (PODVector<VertexElement>::ConstIterator j = elements.Begin(); j != elements.End(); ++j)
-            {
-                const VertexElement& element = *j;
-                HashMap<Pair<unsigned char, unsigned char>, unsigned>::ConstIterator k =
-                    impl_->vertexAttributes_->Find(MakePair((unsigned char)element.semantic_, element.index_));
-
-                if (k != impl_->vertexAttributes_->End())
-                {
-                    unsigned location = k->second_;
-                    unsigned locationMask = 1u << location;
-                    if (assignedLocations & locationMask)
-                        continue; // Already assigned by higher index vertex buffer
-                    assignedLocations |= locationMask;
-
-                    // Enable attribute if not enabled yet
-                    if (!(impl_->enabledVertexAttributes_ & locationMask))
-                    {
-                        glEnableVertexAttribArray(location);
-                        impl_->enabledVertexAttributes_ |= locationMask;
-                    }
-
-                    // Enable/disable instancing divisor as necessary
-                    unsigned dataStart = element.offset_;
-                    if (element.perInstance_)
-                    {
-                        dataStart += impl_->lastInstanceOffset_ * buffer->GetVertexSize();
-                        if (!(impl_->instancingVertexAttributes_ & locationMask))
-                        {
-                            SetVertexAttribDivisor(location, 1);
-                            impl_->instancingVertexAttributes_ |= locationMask;
-                        }
-                    }
-                    else
-                    {
-                        if (impl_->instancingVertexAttributes_ & locationMask)
-                        {
-                            SetVertexAttribDivisor(location, 0);
-                            impl_->instancingVertexAttributes_ &= ~locationMask;
-                        }
-                    }
-                    buffer->IsDynamic()
-                        ? bgfx::setVertexBuffer(0, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
-                        : bgfx::setVertexBuffer(0, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
-                    
+//     if (impl_->vertexBuffersDirty_)
+//     {
+//         // Go through currently bound vertex buffers and set the attribute pointers that are available & required
+//         // Use reverse order so that elements from higher index buffers will override lower index buffers
+//         unsigned assignedLocations = 0;
+// 
+//         for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
+//         {
+//             VertexBuffer* buffer = vertexBuffers_[i];
+//             // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory for vertex data,
+//             // in which case the pointer will be invalid and cause a crash
+//             if (!buffer || !buffer->GetGPUObjectHandle/*GetGPUObjectName*/()/* || !impl_->vertexAttributes_*/)
+//                 continue;
+// 
+//             buffer->IsDynamic()
+//                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
+//                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
+// 
+//             const PODVector<VertexElement>& elements = buffer->GetElements();
+// 
+//             for (PODVector<VertexElement>::ConstIterator j = elements.Begin(); j != elements.End(); ++j)
+//             {
+//                 const VertexElement& element = *j;
+//                 HashMap<Pair<unsigned char, unsigned char>, unsigned>::ConstIterator k =
+//                     impl_->vertexAttributes_->Find(MakePair((unsigned char)element.semantic_, element.index_));
+// 
+//                 if (k != impl_->vertexAttributes_->End())
+//                 {
+//                     unsigned location = k->second_;
+//                     unsigned locationMask = 1u << location;
+//                     if (assignedLocations & locationMask)
+//                         continue; // Already assigned by higher index vertex buffer
+//                     assignedLocations |= locationMask;
+// 
+//                     // Enable attribute if not enabled yet
+//                     if (!(impl_->enabledVertexAttributes_ & locationMask))
+//                     {
+//                         glEnableVertexAttribArray(location);
+//                         impl_->enabledVertexAttributes_ |= locationMask;
+//                     }
+// 
+//                     // Enable/disable instancing divisor as necessary
+//                     unsigned dataStart = element.offset_;
+//                     if (element.perInstance_)
+//                     {
+//                         dataStart += impl_->lastInstanceOffset_ * buffer->GetVertexSize();
+//                         if (!(impl_->instancingVertexAttributes_ & locationMask))
+//                         {
+//                             SetVertexAttribDivisor(location, 1);
+//                             impl_->instancingVertexAttributes_ |= locationMask;
+//                         }
+//                     }
+//                     else
+//                     {
+//                         if (impl_->instancingVertexAttributes_ & locationMask)
+//                         {
+//                             SetVertexAttribDivisor(location, 0);
+//                             impl_->instancingVertexAttributes_ &= ~locationMask;
+//                         }
+//                     }
+//                     
 //                     SetVBO(buffer->GetGPUObjectName());
 //                     glVertexAttribPointer(location, glElementComponents[element.type_], glElementTypes[element.type_],
 //                         element.type_ == TYPE_UBYTE4_NORM ? GL_TRUE : GL_FALSE, (unsigned)buffer->GetVertexSize(),
 //                         (const void *)(size_t)dataStart);
-                }
-            }
-        }
-
-        // Finally disable unnecessary vertex attributes
-        unsigned disableVertexAttributes = impl_->enabledVertexAttributes_ & (~impl_->usedVertexAttributes_);
-        unsigned location = 0;
-        while (disableVertexAttributes)
-        {
-            if (disableVertexAttributes & 1u)
-            {
-                glDisableVertexAttribArray(location);
-                impl_->enabledVertexAttributes_ &= ~(1u << location);
-            }
-            ++location;
-            disableVertexAttributes >>= 1;
-        }
-
-        impl_->vertexBuffersDirty_ = false;
-    }
+//                 }
+//             }
+//         }
+// 
+//         // Finally disable unnecessary vertex attributes
+//         unsigned disableVertexAttributes = impl_->enabledVertexAttributes_ & (~impl_->usedVertexAttributes_);
+//         unsigned location = 0;
+//         while (disableVertexAttributes)
+//         {
+//             if (disableVertexAttributes & 1u)
+//             {
+//                 glDisableVertexAttribArray(location);
+//                 impl_->enabledVertexAttributes_ &= ~(1u << location);
+//             }
+//             ++location;
+//             disableVertexAttributes >>= 1;
+//         }
+// 
+//         impl_->vertexBuffersDirty_ = false;
+//     }
 }
 
 void Graphics::CleanupFramebuffers()
