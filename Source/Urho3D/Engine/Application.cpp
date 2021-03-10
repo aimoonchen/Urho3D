@@ -31,6 +31,8 @@
 #include <SDL/SDL.h>
 #endif
 
+#include "bgfx/bgfx.h"
+
 #include "../DebugNew.h"
 
 namespace Urho3D
@@ -47,9 +49,10 @@ void RunFrame(void* data)
 }
 #endif
 
-Application::Application(Context* context) :
-    Object(context),
-    exitCode_(EXIT_SUCCESS)
+Application::Application(Context* context)
+    : Object(context)
+    , entry::AppI("","","")
+    , exitCode_(EXIT_SUCCESS)
 {
     engineParameters_ = Engine::ParseParameters(GetArguments());
 
@@ -58,6 +61,35 @@ Application::Application(Context* context) :
 
     // Subscribe to log messages so that can show errors if ErrorExit() is called with empty message
     SubscribeToEvent(E_LOGMESSAGE, URHO3D_HANDLER(Application, HandleLogMessage));
+}
+
+void Application::init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height)
+{
+    uint32_t m_width = _width;
+    uint32_t m_height = _height;
+    uint32_t m_debug = BGFX_DEBUG_NONE;
+    uint32_t m_reset = BGFX_RESET_VSYNC;
+
+    bgfx::Init init;
+    init.type = bgfx::RendererType::OpenGL; // args.m_type;
+    init.vendorId = 0; // args.m_pciId;
+    init.resolution.width = m_width;
+    init.resolution.height = m_height;
+    init.resolution.reset = m_reset;
+    bgfx::init(init);
+
+    // Enable debug text.
+    bgfx::setDebug(m_debug);
+}
+
+int Application::shutdown()
+{
+    return 0;
+}
+
+bool Application::update()
+{
+    return true;
 }
 
 int Application::Run()
