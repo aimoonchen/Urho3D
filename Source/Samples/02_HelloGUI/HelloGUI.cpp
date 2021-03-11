@@ -39,10 +39,20 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
+//URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
 
-HelloGUI::HelloGUI(Context* context) :
-    Sample(context),
+URHO3D_DEFINE_APPLICATION_MAIN(
+    HelloGUI
+    , "02-HelloGUI"
+    , "Loading textures."
+    , "https://bkaradzic.github.io/bgfx/examples.html#bump");
+
+HelloGUI::HelloGUI(Context* context,
+    const char* _name,
+    const char* _description,
+    const char* _url)
+    :
+    Sample(context, _name, _description, _url),
     uiRoot_(GetSubsystem<UI>()->GetRoot()),
     dragBeginPosition_(IntVector2::ZERO)
 {

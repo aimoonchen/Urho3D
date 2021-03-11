@@ -46,7 +46,8 @@ class HelloGUI : public Sample
 
 public:
     /// Construct.
-    explicit HelloGUI(Context* context);
+    explicit HelloGUI(Context* context, const char* _name, const char* _description,
+                      const char* _url = "https://bkaradzic.github.io/bgfx/index.html");
 
     /// Setup after engine initialization and before running the main loop.
     void Start() override;

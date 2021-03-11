@@ -42,8 +42,12 @@
 #include <Urho3D/Resource/XMLFile.h>
 #include <Urho3D/IO/Log.h>
 
-Sample::Sample(Context* context) :
-    Application(context),
+Sample::Sample(Context* context,
+    const char* _name,
+    const char* _description,
+    const char* _url)
+    :
+    Application(context, _name, _description, _url),
     yaw_(0.0f),
     pitch_(0.0f),
     touchEnabled_(false),

@@ -5,7 +5,7 @@
 
 #include "entry_p.h"
 
-//#if ENTRY_CONFIG_USE_NATIVE && BX_PLATFORM_WINDOWS
+#if ENTRY_CONFIG_USE_NATIVE && BX_PLATFORM_WINDOWS
 
 #include <bgfx/platform.h>
 
@@ -1177,10 +1177,10 @@ namespace entry
 
 } // namespace entry
 
-int main(int _argc, const char* const* _argv)
+URHO3D_API int main(int _argc, const char* const* _argv)
 {
 	using namespace entry;
 	return s_ctx.run(_argc, _argv);
 }
 
-//#endif // BX_PLATFORM_WINDOWS
+#endif // BX_PLATFORM_WINDOWS

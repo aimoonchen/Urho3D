@@ -49,9 +49,12 @@ void RunFrame(void* data)
 }
 #endif
 
-Application::Application(Context* context)
+Application::Application(Context* context,
+    const char* _name,
+    const char* _description,
+    const char* _url)
     : Object(context)
-    , entry::AppI("","","")
+    , entry::AppI(_name, _description, _url)
     , exitCode_(EXIT_SUCCESS)
 {
     engineParameters_ = Engine::ParseParameters(GetArguments());
@@ -84,12 +87,13 @@ void Application::init(int32_t _argc, const char* const* _argv, uint32_t _width,
 
 int Application::shutdown()
 {
+    bgfx::shutdown();
     return 0;
 }
 
 bool Application::update()
 {
-    return true;
+    return Run();
 }
 
 int Application::Run()
@@ -114,8 +118,10 @@ int Application::Run()
 
         // Platforms other than iOS/tvOS and Emscripten run a blocking main loop
 #if !defined(IOS) && !defined(TVOS) && !defined(__EMSCRIPTEN__)
-        while (!engine_->IsExiting())
+        while (!engine_->IsExiting()) {
             engine_->RunFrame();
+            bgfx::frame();
+        }
 
         Stop();
         // iOS/tvOS will setup a timer for running animation frames so eg. Game Center can run. In this case we do not

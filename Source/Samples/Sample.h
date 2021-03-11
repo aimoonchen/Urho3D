@@ -56,7 +56,8 @@ class Sample : public Application
 
 public:
     /// Construct.
-    explicit Sample(Context* context);
+    explicit Sample(Context* context, const char* _name, const char* _description,
+                    const char* _url = "https://bkaradzic.github.io/bgfx/index.html");
 
     /// Setup before engine initialization. Modifies the engine parameters.
     void Setup() override;
