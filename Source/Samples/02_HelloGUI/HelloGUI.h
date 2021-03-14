@@ -22,6 +22,8 @@
 
 #pragma once
 
+#include <memory>
+
 #include "Sample.h"
 
 namespace Urho3D
@@ -46,8 +48,7 @@ class HelloGUI : public Sample
 
 public:
     /// Construct.
-    explicit HelloGUI(Context* context, const char* _name, const char* _description,
-                      const char* _url = "https://bkaradzic.github.io/bgfx/index.html");
+    explicit HelloGUI(Context* context);
 
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
@@ -87,5 +88,14 @@ private:
     /// Remembered drag begin position.
     IntVector2 dragBeginPosition_;
 };
+class bgfxApp : public entry::AppI
+{
+public:
+    bgfxApp(const char* _name, const char* _description, const char* _url);
+    virtual ~bgfxApp();
+    bool update() override;
 
+private:
+    
+};
 

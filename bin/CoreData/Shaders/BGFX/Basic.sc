@@ -24,10 +24,10 @@ void main()
     gl_Position = GetClipPos(worldPos);
     
     #ifdef DIFFMAP
-        v_texcoord0 = iTexCoord;
+        v_texcoord0 = a_texcoord0;
     #endif
     #ifdef VERTEXCOLOR
-        v_color0 = iColor;
+        v_color0 = a_color0;
     #endif
 }
 #elif defined(COMPILEPS)

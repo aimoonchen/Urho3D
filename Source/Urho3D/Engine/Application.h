@@ -37,19 +37,13 @@ namespace Urho3D
 class Engine;
 
 /// Base class for creating applications which initialize the Urho3D engine and run a main loop until exited.
-class URHO3D_API Application : public Object, public entry::AppI
+class URHO3D_API Application : public Object
 {
     URHO3D_OBJECT(Application, Object);
 
 public:
-    void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) override;
-    int shutdown() override;
-    bool update() override;
     /// Construct. Parse default engine parameters from the command line, and create the engine in an uninitialized state.
-    explicit Application(Context* context,
-        const char* _name,
-        const char* _description,
-        const char* _url = "https://bkaradzic.github.io/bgfx/index.html");
+    explicit Application(Context* context);
 
     /// Setup before engine initialization. This is a chance to eg. modify the engine parameters. Call ErrorExit() to terminate without initializing the engine. Called by Application.
     virtual void Setup() { }
@@ -102,11 +96,9 @@ protected:
 #endif
 
 } // namespace Urho3D
-#define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)                                                                 \
-int _main_(int _argc, char** _argv)                                                                                \
-    {                                                                                                                  \
-        Urho3D::ParseArguments(GetCommandLineW());                                                                     \
-        Urho3D::SharedPtr<Urho3D::Context> context(new Urho3D::Context());                                             \
-        Urho3D::SharedPtr<className> app(new className(context, __VA_ARGS__));                                         \
-        return entry::runApp(app.Get(), _argc, _argv);                                                                 \
+#define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)  \
+int _main_(int _argc, char** _argv)                     \
+    {                                                   \
+        bgfxApp app(__VA_ARGS__);                       \
+        return entry::runApp(&app, _argc, _argv);       \
     }

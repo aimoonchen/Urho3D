@@ -288,13 +288,13 @@ namespace entry
 		virtual ~AppI() = 0;
 
 		///
-		virtual void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) = 0;
+		virtual void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height);
 
 		///
-		virtual int  shutdown() = 0;
+		virtual int  shutdown();
 
 		///
-		virtual bool update() = 0;
+		virtual bool update();
 
 		///
 		const char* getName() const;

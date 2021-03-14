@@ -73,8 +73,9 @@ void Graphics::SetExternalWindow(void* window)
 void Graphics::SetWindowTitle(const String& windowTitle)
 {
     windowTitle_ = windowTitle;
-    if (window_)
-        SDL_SetWindowTitle(window_, windowTitle_.CString());
+//     if (window_)
+//         SDL_SetWindowTitle(window_, windowTitle_.CString());
+    entry::setWindowTitle(default_window_, windowTitle_.CString());
 }
 
 void Graphics::SetWindowIcon(Image* windowIcon)
@@ -86,10 +87,12 @@ void Graphics::SetWindowIcon(Image* windowIcon)
 
 void Graphics::SetWindowPosition(const IntVector2& position)
 {
-    if (window_)
-        SDL_SetWindowPosition(window_, position.x_, position.y_);
-    else
-        position_ = position; // Sets as initial position for OpenWindow()
+//     if (window_)
+//         SDL_SetWindowPosition(window_, position.x_, position.y_);
+//     else
+//         position_ = position; // Sets as initial position for OpenWindow()
+
+    entry::setWindowPos(default_window_, position.x_, position.y_);
 }
 
 void Graphics::SetWindowPosition(int x, int y)
@@ -100,7 +103,7 @@ void Graphics::SetWindowPosition(int x, int y)
 void Graphics::SetOrientations(const String& orientations)
 {
     orientations_ = orientations.Trimmed();
-    SDL_SetHint(SDL_HINT_ORIENTATIONS, orientations_.CString());
+    //SDL_SetHint(SDL_HINT_ORIENTATIONS, orientations_.CString());
 }
 
 bool Graphics::SetScreenMode(int width, int height)
@@ -478,12 +481,12 @@ void Graphics::CreateWindowIcon()
 {
     if (windowIcon_)
     {
-        SDL_Surface* surface = windowIcon_->GetSDLSurface();
-        if (surface)
-        {
-            SDL_SetWindowIcon(window_, surface);
-            SDL_FreeSurface(surface);
-        }
+//         SDL_Surface* surface = windowIcon_->GetSDLSurface();
+//         if (surface)
+//         {
+//             SDL_SetWindowIcon(window_, surface);
+//             SDL_FreeSurface(surface);
+//         }
     }
 }
 

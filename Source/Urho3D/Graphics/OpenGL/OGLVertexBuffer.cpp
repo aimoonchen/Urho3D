@@ -40,20 +40,16 @@ static bgfx::AttribType::Enum Urho3DTypeToBGFXAttribType(VertexElementType eleme
     {
     case Urho3D::TYPE_INT:
         return bgfx::AttribType::Int16;
-        break;
     case Urho3D::TYPE_FLOAT:
     case Urho3D::TYPE_VECTOR2:
     case Urho3D::TYPE_VECTOR3:
     case Urho3D::TYPE_VECTOR4:
         return bgfx::AttribType::Float;
-        break;
     case Urho3D::TYPE_UBYTE4:
+    case Urho3D::TYPE_UBYTE4_NORM:
         return bgfx::AttribType::Uint8;
-        break;
-        //     case Urho3D::TYPE_UBYTE4_NORM:
-        //         return bgfx::AttribType::Uint8;
-        //         break;
     default:
+        URHO3D_LOGERROR("Can not map urho3d type to bgfx attribtype");
         break;
     }
 }
@@ -104,7 +100,9 @@ static uint8_t GetTypeNum(VertexElementType elementType)
     {
         return 3;
     }
-    else if (elementType == Urho3D::TYPE_VECTOR4)
+    else if (elementType == Urho3D::TYPE_VECTOR4
+        || elementType == Urho3D::TYPE_UBYTE4
+        || elementType == Urho3D::TYPE_UBYTE4_NORM)
     {
         return 4;
     }
@@ -121,7 +119,7 @@ static bgfx::VertexLayout Urho3DLayoutToBGFXLayout(const PODVector<VertexElement
     for (int i = 0; i < elements.Size(); i++)
     {
         layout.add(Urho3DSemanticToBGFXAttrib(elements[i].semantic_), GetTypeNum(elements[i].type_),
-                   Urho3DTypeToBGFXAttribType(elements[i].type_), false, false);
+                   Urho3DTypeToBGFXAttribType(elements[i].type_), (elements[i].type_ == TYPE_UBYTE4_NORM)/*false*/, false);
     }
     layout.end();
     return layout;
@@ -175,6 +173,7 @@ void VertexBuffer::Release()
     {
         dynamic_ ? bgfx::destroy(bgfx::DynamicVertexBufferHandle{object_.handle_})
                  : bgfx::destroy(bgfx::VertexBufferHandle{object_.handle_});
+        object_.handle_ = bgfx::kInvalidHandle;
     }
 }
 

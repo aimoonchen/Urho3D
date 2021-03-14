@@ -79,6 +79,7 @@ void IndexBuffer::Release()
     {
         dynamic_ ? bgfx::destroy(bgfx::DynamicIndexBufferHandle{object_.handle_})
                  : bgfx::destroy(bgfx::IndexBufferHandle{object_.handle_});
+        object_.handle_ = bgfx::kInvalidHandle;
     }
 }
 

@@ -18,6 +18,10 @@
 #include "cmd.h"
 #include "input.h"
 
+void OnMouseEvent(const void* me);
+void OnFocus(bool focus);
+void OnKey(const void* ke);
+
 extern "C" int32_t _main_(int32_t _argc, char** _argv);
 
 namespace entry
@@ -702,13 +706,13 @@ restart:
 				case Event::Mouse:
 					{
 						const MouseEvent* mouse = static_cast<const MouseEvent*>(ev);
-						handle = mouse->m_handle;
-
-						inputSetMousePos(mouse->m_mx, mouse->m_my, mouse->m_mz);
-						if (!mouse->m_move)
-						{
-							inputSetMouseButtonState(mouse->m_button, mouse->m_down);
-						}
+// 						handle = mouse->m_handle;
+// 
+// 						inputSetMousePos(mouse->m_mx, mouse->m_my, mouse->m_mz);
+// 						if (!mouse->m_move)
+// 						{
+// 							inputSetMouseButtonState(mouse->m_button, mouse->m_down);
+// 						}
 
 						if (NULL != _mouse
 						&&  !mouseLock)
@@ -721,15 +725,17 @@ restart:
 								_mouse->m_buttons[mouse->m_button] = mouse->m_down;
 							}
 						}
+                        OnMouseEvent(mouse);
 					}
 					break;
 
 				case Event::Key:
 					{
-						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
-						handle = key->m_handle;
-
-						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
+ 						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
+// 						handle = key->m_handle;
+// 
+// 						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
+                        OnKey(key);
 					}
 					break;
 
@@ -761,7 +767,12 @@ restart:
 						DBG("%s", drop->m_filePath.getCPtr() );
 					}
 					break;
-
+                case Event::Focus:
+                    {
+						const FocusEvent* fe = static_cast<const FocusEvent*>(ev);
+                        OnFocus(fe->m_has_focus);
+					}
+                    break;
 				default:
 					break;
 				}
@@ -998,6 +1009,32 @@ restart:
 		}
 	}
 
+	void AppI::init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height)
+	{
+        uint32_t m_width = _width;
+        uint32_t m_height = _height;
+        uint32_t m_debug = BGFX_DEBUG_NONE;
+        uint32_t m_reset = BGFX_RESET_VSYNC;
+
+        bgfx::Init init;
+        init.type = bgfx::RendererType::OpenGL; // args.m_type;
+        init.vendorId = 0;                      // args.m_pciId;
+        init.resolution.width = m_width;
+        init.resolution.height = m_height;
+        init.resolution.reset = m_reset;
+        bgfx::init(init);
+
+        // Enable debug text.
+        bgfx::setDebug(m_debug);
+
+        // Set view 0 clear state.
+        bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH, 0x303030ff, 1.0f, 0);
+	}
+    int AppI::shutdown()
+	{
+		bgfx::shutdown();
+		return 0;
+	}
 } // namespace entry
 
 extern "C" bool entry_process_events(uint32_t* _width, uint32_t* _height, uint32_t* _debug, uint32_t* _reset)

@@ -184,72 +184,72 @@ bool Texture::GetParametersDirty() const
 
 bool Texture::IsCompressed() const
 {
-    return format_ == GL_COMPRESSED_RGBA_S3TC_DXT1_EXT || format_ == GL_COMPRESSED_RGBA_S3TC_DXT3_EXT ||
-           format_ == GL_COMPRESSED_RGBA_S3TC_DXT5_EXT || format_ == GL_ETC1_RGB8_OES ||
-           format_ == GL_ETC2_RGB8_OES || format_ == GL_ETC2_RGBA8_OES ||
-           format_ == COMPRESSED_RGB_PVRTC_4BPPV1_IMG || format_ == COMPRESSED_RGBA_PVRTC_4BPPV1_IMG ||
-           format_ == COMPRESSED_RGB_PVRTC_2BPPV1_IMG || format_ == COMPRESSED_RGBA_PVRTC_2BPPV1_IMG;
+    return format_ == bgfx::TextureFormat::BC1 || format_ == bgfx::TextureFormat::BC2 ||
+           format_ == bgfx::TextureFormat::BC3 || format_ == bgfx::TextureFormat::ETC1 ||
+           format_ == bgfx::TextureFormat::ETC2 || format_ == bgfx::TextureFormat::ETC2A ||
+           format_ == bgfx::TextureFormat::PTC14 || format_ == bgfx::TextureFormat::PTC14A ||
+           format_ == bgfx::TextureFormat::PTC12 || format_ == bgfx::TextureFormat::PTC12A;
 }
 
 unsigned Texture::GetRowDataSize(int width) const
 {
     switch (format_)
     {
-    case GL_ALPHA:
-    case GL_LUMINANCE:
+    case bgfx::TextureFormat::R1:
+    case bgfx::TextureFormat::A8:
         return (unsigned)width;
 
-    case GL_LUMINANCE_ALPHA:
-        return (unsigned)(width * 2);
+//     case GL_LUMINANCE_ALPHA:
+//         return (unsigned)(width * 2);
 
-    case GL_RGB:
+    case bgfx::TextureFormat::RGB8:
         return (unsigned)(width * 3);
 
-    case GL_RGBA:
+    case bgfx::TextureFormat::RGBA8:
 #ifndef GL_ES_VERSION_2_0
-    case GL_DEPTH24_STENCIL8_EXT:
-    case GL_RG16:
-    case GL_RG16F:
-    case GL_R32F:
+    case bgfx::TextureFormat::D24S8:
+    case bgfx::TextureFormat::RG16:
+    case bgfx::TextureFormat::RG16F:
+    case bgfx::TextureFormat::R32F:
 #endif
         return (unsigned)(width * 4);
 
 #ifndef GL_ES_VERSION_2_0
-    case GL_R8:
+    case bgfx::TextureFormat::R8:
         return (unsigned)width;
 
-    case GL_RG8:
-    case GL_R16F:
+    case bgfx::TextureFormat::RG8:
+    case bgfx::TextureFormat::R16F:
         return (unsigned)(width * 2);
 
-    case GL_RGBA16:
-    case GL_RGBA16F_ARB:
+    case bgfx::TextureFormat::RGBA16:
+    case bgfx::TextureFormat::RGBA16F:
         return (unsigned)(width * 8);
 
-    case GL_RGBA32F_ARB:
+    case bgfx::TextureFormat::RGBA32F:
         return (unsigned)(width * 16);
 #endif
 
-    case GL_COMPRESSED_RGBA_S3TC_DXT1_EXT:
+    case bgfx::TextureFormat::BC1:
         return ((unsigned)(width + 3) >> 2u) * 8;
 
-    case GL_COMPRESSED_RGBA_S3TC_DXT3_EXT:
-    case GL_COMPRESSED_RGBA_S3TC_DXT5_EXT:
+    case bgfx::TextureFormat::BC2:
+    case bgfx::TextureFormat::BC3:
         return ((unsigned)(width + 3) >> 2u) * 16;
 
-    case GL_ETC1_RGB8_OES:
-    case GL_ETC2_RGB8_OES:
+    case bgfx::TextureFormat::ETC1:
+    case bgfx::TextureFormat::ETC2:
         return ((unsigned)(width + 3) >> 2u) * 8;
 
-    case GL_ETC2_RGBA8_OES:
+    case bgfx::TextureFormat::ETC2A:
         return ((unsigned)(width + 3) >> 2u) * 16;
 
-    case COMPRESSED_RGB_PVRTC_4BPPV1_IMG:
-    case COMPRESSED_RGBA_PVRTC_4BPPV1_IMG:
+    case bgfx::TextureFormat::PTC14:
+    case bgfx::TextureFormat::PTC14A:
         return ((unsigned)(width + 3) >> 2u) * 8;
 
-    case COMPRESSED_RGB_PVRTC_2BPPV1_IMG:
-    case COMPRESSED_RGBA_PVRTC_2BPPV1_IMG:
+    case bgfx::TextureFormat::PTC12:
+    case bgfx::TextureFormat::PTC12A:
         return ((unsigned)(width + 7) >> 3u) * 8;
 
     default:

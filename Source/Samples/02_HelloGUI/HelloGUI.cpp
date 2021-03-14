@@ -34,12 +34,30 @@
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
 #include <Urho3D/UI/Window.h>
-
 #include "HelloGUI.h"
 
 #include <Urho3D/DebugNew.h>
 
-//URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
+bgfxApp::bgfxApp(const char* _name, const char* _description, const char* _url)
+    : entry::AppI(_name, _description, _url)
+{
+}
+
+bgfxApp::~bgfxApp()
+{
+
+}
+
+bool bgfxApp::update()
+{
+    Urho3D::ParseArguments(GetCommandLineW());
+    std::shared_ptr<Urho3D::Context> context_ = std::make_shared<Urho3D::Context>();
+    std::shared_ptr<HelloGUI> urho3d_app_ = std::make_shared<HelloGUI>(context_.get());
+    urho3d_app_->Run();
+    return false;
+}
+
+    //URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
 
 URHO3D_DEFINE_APPLICATION_MAIN(
     HelloGUI
@@ -47,12 +65,9 @@ URHO3D_DEFINE_APPLICATION_MAIN(
     , "Loading textures."
     , "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
-HelloGUI::HelloGUI(Context* context,
-    const char* _name,
-    const char* _description,
-    const char* _url)
+HelloGUI::HelloGUI(Context* context)
     :
-    Sample(context, _name, _description, _url),
+    Sample(context),
     uiRoot_(GetSubsystem<UI>()->GetRoot()),
     dragBeginPosition_(IntVector2::ZERO)
 {

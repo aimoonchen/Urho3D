@@ -78,20 +78,20 @@ ShaderProgram::~ShaderProgram()
 
 void ShaderProgram::OnDeviceLost()
 {
-    if (object_.name_ && !graphics_->IsDeviceLost())
-        glDeleteProgram(object_.name_);
-
-    GPUObject::OnDeviceLost();
-
-    if (graphics_ && graphics_->GetShaderProgram() == this)
-        graphics_->SetShaders(nullptr, nullptr);
-
-    linkerOutput_.Clear();
+//     if (object_.name_ && !graphics_->IsDeviceLost())
+//         glDeleteProgram(object_.name_);
+// 
+//     GPUObject::OnDeviceLost();
+// 
+//     if (graphics_ && graphics_->GetShaderProgram() == this)
+//         graphics_->SetShaders(nullptr, nullptr);
+// 
+//     linkerOutput_.Clear();
 }
 
 void ShaderProgram::Release()
 {
-    if (object_.name_)
+    if (object_.handle_ != bgfx::kInvalidHandle)
     {
         if (!graphics_)
             return;
@@ -101,10 +101,10 @@ void ShaderProgram::Release()
             if (graphics_->GetShaderProgram() == this)
                 graphics_->SetShaders(nullptr, nullptr);
 
-            glDeleteProgram(object_.name_);
+            //glDeleteProgram(object_.name_);
         }
-
-        object_.name_ = 0;
+        bgfx::destroy(bgfx::ProgramHandle{object_.handle_});
+        object_.handle_ = bgfx::kInvalidHandle;
         linkerOutput_.Clear();
         shaderParameters_.Clear();
         vertexAttributes_.Clear();
@@ -136,18 +136,28 @@ bool ShaderProgram::Link()
     }
 
     std::vector<bgfx::UniformHandle> uniforms;
-    auto uniformCount = bgfx::getShaderUniforms(vsHandle) + bgfx::getShaderUniforms(psHandle);
+    auto vsUniformCount = bgfx::getShaderUniforms(vsHandle);
+    auto psUniformCount = bgfx::getShaderUniforms(psHandle);
+    auto uniformCount = vsUniformCount + psUniformCount;
     if (uniformCount > 0) {
         uniforms.resize(uniformCount);
-        auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0]);
+        auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0], vsUniformCount);
         if (psOffset < uniforms.size()) {
-            bgfx::getShaderUniforms(psHandle, &uniforms[psOffset]);
+            bgfx::getShaderUniforms(psHandle, &uniforms[psOffset], psUniformCount);
         }
         for (auto& uniform : uniforms) {
             bgfx::UniformInfo info;
             bgfx::getUniformInfo(uniform, info);
-            //shaderParameters_[StringHash(info.name)] = parameter;
-            uniforms_[StringHash(info.name)] = uniform.idx;
+            
+            if (info.name[0] == 'c' || info.name[0] == 's')
+            {
+                uniforms_[StringHash(&info.name[1])] = uniform.idx;
+            }
+            else
+            {
+                uniforms_[StringHash(info.name)] = uniform.idx;
+            }
+            
         }
     }
     /*

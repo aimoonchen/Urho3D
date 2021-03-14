@@ -432,6 +432,7 @@ bool TextureCube::GetData(CubeMapFace face, unsigned level, void* dest) const
 
 bool TextureCube::Create()
 {
+    return false;
     Release();
 
     if (!graphics_ || !width_ || !height_)

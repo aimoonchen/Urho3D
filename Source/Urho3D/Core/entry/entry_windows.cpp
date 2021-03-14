@@ -901,7 +901,16 @@ namespace entry
 						m_eventQueue.postDropFileEvent(handle, tmp);
 					}
 					break;
-
+                case WM_SETFOCUS:
+                    {
+                        m_eventQueue.postFocusEvent(findHandle(_hwnd), true);
+                    }
+                    break;
+                case WM_KILLFOCUS:
+					{
+                        m_eventQueue.postFocusEvent(findHandle(_hwnd), false);
+					}
+                    break;
 				default:
 					break;
 				}

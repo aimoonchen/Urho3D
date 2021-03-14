@@ -90,6 +90,7 @@ namespace entry
 			Window,
 			Suspend,
 			DropFile,
+			Focus,
 		};
 
 		Event(Enum _type)
@@ -182,6 +183,13 @@ namespace entry
 
 		bx::FilePath m_filePath;
 	};
+    
+	struct FocusEvent : public Event
+    {
+        ENTRY_IMPLEMENT_EVENT(FocusEvent, Event::Focus);
+
+        bool m_has_focus;
+    };
 
 	const Event* poll();
 	const Event* poll(WindowHandle _handle);
@@ -295,6 +303,13 @@ namespace entry
 			ev->m_filePath = _filePath;
 			m_queue.push(ev);
 		}
+
+        void postFocusEvent(WindowHandle _handle, bool focus)
+        {
+            FocusEvent* ev = BX_NEW(getAllocator(), FocusEvent)(_handle);
+            ev->m_has_focus = focus;
+            m_queue.push(ev);
+        }
 
 		const Event* poll()
 		{

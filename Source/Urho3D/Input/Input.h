@@ -34,7 +34,6 @@
 
 namespace Urho3D
 {
-
 /// %Input Mouse Modes.
 enum MouseMode
 {
@@ -348,6 +347,14 @@ public:
     /// @property
     bool IsMinimized() const;
 
+    uint16_t GetWidth() const { return m_width; }
+    uint16_t GetHeight() const { return m_height;}
+
+    void OnMouseEvent(const void* me);
+    void OnFocus(bool focus) { m_focus = focus; }
+    void OnKey(const void* ke);
+    static Input* s_input_;
+
 private:
     /// Initialize when screen mode initially set.
     void Initialize();
@@ -443,7 +450,7 @@ private:
     /// Input coordinate scaling. Non-unity when window and backbuffer have different sizes (e.g. Retina display).
     Vector2 inputScale_;
     /// SDL window ID.
-    unsigned windowID_;
+    //unsigned windowID_;
     /// Fullscreen toggle flag.
     bool toggleFullscreen_;
     /// Operating system mouse cursor visible flag.
@@ -487,6 +494,12 @@ private:
     /// Flag indicating current pointer-lock status.
     bool emscriptenPointerLock_;
 #endif
+    bool m_focus;
+    uint32_t m_width;
+    uint32_t m_height;
+    int32_t m_mouse_x{0};
+    int32_t m_mouse_y{0};
+    int32_t m_mouse_z{0};
 };
 
 }

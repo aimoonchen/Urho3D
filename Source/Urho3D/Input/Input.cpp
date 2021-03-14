@@ -42,6 +42,8 @@
 #include "../Engine/Engine.h"
 #endif
 
+#include "bgfx/bgfx.h"
+#include "../Core/entry/entry_p.h"
 
 #include <SDL/SDL.h>
 
@@ -57,6 +59,10 @@ extern "C" int SDL_AddTouch(SDL_TouchID touchID, SDL_TouchDeviceType type, const
 #if defined(_WIN32) || (defined(__APPLE__) && !defined(IOS) && !defined(TVOS)) || (defined(__linux__) && !defined(__ANDROID__))
 #define REQUIRE_CLICK_TO_FOCUS
 #endif
+
+void OnMouseEvent(const void* mouseEvent) { Urho3D::Input::s_input_->OnMouseEvent(mouseEvent); }
+void OnFocus(bool focus) { Urho3D::Input::s_input_->OnFocus(focus); }
+void OnKey(const void* ke) { Urho3D::Input::s_input_->OnKey(ke); }
 
 namespace Urho3D
 {
@@ -349,6 +355,74 @@ void JoystickState::Reset()
         hats_[i] = HAT_CENTER;
 }
 
+Input* Input::s_input_ = nullptr;
+
+void Input::OnMouseEvent(const void* mouseEvent)
+{
+    auto mouse = (entry::MouseEvent*)mouseEvent;
+    if (!mouse->m_move)
+    {
+        const auto mouseButton = static_cast<MouseButton>(1u << (mouse->m_button - 1u));
+        SetMouseButton(mouseButton, mouse->m_down, 1);
+    }
+    else
+    {
+        auto xrel = mouse->m_mx - m_mouse_x;
+        auto yrel = mouse->m_my - m_mouse_y;
+        m_mouse_x = mouse->m_mx;
+        m_mouse_y = mouse->m_my;
+        m_mouse_z = mouse->m_mz;
+#ifndef __EMSCRIPTEN__
+        if ((sdlMouseRelative_ || mouseVisible_ || mouseMode_ == MM_FREE) && !touchEmulation_)
+#else
+        if ((mouseVisible_ || emscriptenPointerLock_ || mouseMode_ == MM_FREE) && !touchEmulation_)
+#endif
+        {
+#ifdef __EMSCRIPTEN__
+            if (emscriptenExitingPointerLock_)
+            {
+                SuppressNextMouseMove();
+                break;
+            }
+#endif
+
+            // Accumulate without scaling for accuracy, needs to be scaled to backbuffer coordinates when asked
+            mouseMove_.x_ += xrel;
+            mouseMove_.y_ += yrel;
+            mouseMoveScaled_ = false;
+
+            if (!suppressNextMouseMove_)
+            {
+                using namespace MouseMove;
+
+                VariantMap& eventData = GetEventDataMap();
+                eventData[P_X] = (int)(m_mouse_x * inputScale_.x_);
+                eventData[P_Y] = (int)(m_mouse_y * inputScale_.y_);
+                // The "on-the-fly" motion data needs to be scaled now, though this may reduce accuracy
+                eventData[P_DX] = (int)(xrel * inputScale_.x_);
+                eventData[P_DY] = (int)(yrel * inputScale_.y_);
+                eventData[P_BUTTONS] = (unsigned)mouseButtonDown_;
+                eventData[P_QUALIFIERS] = (unsigned)GetQualifiers();
+                SendEvent(E_MOUSEMOVE, eventData);
+            }
+        }
+    }
+}
+
+Urho3D::Key ConvertBGFXKeyCode(int keySym/*, int scanCode*/)
+{
+//     if (scanCode == SCANCODE_AC_BACK)
+//         return KEY_ESCAPE;
+//     else
+        return (Urho3D::Key)keySym;
+}
+
+void Input::OnKey(const void* ke)
+{
+    auto keyEvent = (entry::KeyEvent*)ke;
+    SetKey(ConvertBGFXKeyCode(keyEvent->m_key), {}, keyEvent->m_down);
+}
+
 Input::Input(Context* context) :
     Object(context),
     mouseButtonDown_(0),
@@ -356,7 +430,7 @@ Input::Input(Context* context) :
     lastVisibleMousePosition_(MOUSE_POSITION_OFFSCREEN),
     mouseMoveWheel_(0),
     inputScale_(Vector2::ONE),
-    windowID_(0),
+    //windowID_(0),
     toggleFullscreen_(true),
     mouseVisible_(false),
     lastMouseVisible_(false),
@@ -379,7 +453,8 @@ Input::Input(Context* context) :
     mouseMoveScaled_(false),
     initialized_(false)
 {
-    context_->RequireSDL(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
+    s_input_ = this;
+        //    context_->RequireSDL(SDL_INIT_JOYSTICK | SDL_INIT_GAMECONTROLLER);
 
     for (int i = 0; i < TOUCHID_MAX; i++)
         availableTouchIDs_.Push(i);
@@ -400,7 +475,7 @@ Input::Input(Context* context) :
 
 Input::~Input()
 {
-    context_->ReleaseSDL();
+//    context_->ReleaseSDL();
 }
 
 void Input::Update()
@@ -415,24 +490,46 @@ void Input::Update()
         mouseMoved = true;
 
     ResetInputAccumulation();
+    
+    
+    static entry::MouseState m_mouseState;
+    static uint32_t m_debug = BGFX_DEBUG_TEXT;
+    static uint32_t m_reset = BGFX_RESET_VSYNC;
 
-    SDL_Event evt;
-    while (SDL_PollEvent(&evt))
-        HandleSDLEvent(&evt);
+    auto old_width = m_width;
+    auto old_height = m_height;
+    //
+    if (entry::processEvents(m_width, m_height, m_debug, m_reset, &m_mouseState))
+    {
+        SendEvent(E_EXITREQUESTED);
+    }
+
+    if (old_width != m_width || old_height != m_height)
+    {
+        auto* graphics = GetSubsystem<Graphics>();
+        if (graphics && graphics->IsInitialized())
+        {
+            graphics->OnWindowResized();
+            //GetSubsystem<Engine>()->RunFrame();
+        }
+    }    
+//     SDL_Event evt;
+//     while (SDL_PollEvent(&evt))
+//         HandleSDLEvent(&evt);
 
     if (suppressNextMouseMove_ && (mouseMove_ != IntVector2::ZERO || mouseMoved))
         UnsuppressMouseMove();
 #endif
 
     // Check for focus change this frame
-    SDL_Window* window = graphics_->GetWindow();
-    unsigned flags = window ? SDL_GetWindowFlags(window) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS) : 0;
+//     SDL_Window* window = graphics_->GetWindow();
+//     unsigned flags = window ? SDL_GetWindowFlags(window) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS) : 0;
 #ifndef __EMSCRIPTEN__
-    if (window)
+    if (m_focus/*window*/)
     {
 #ifdef REQUIRE_CLICK_TO_FOCUS
         // When using the "click to focus" mechanism, only focus automatically in fullscreen or non-hidden mouse mode
-        if (!inputFocus_ && ((mouseVisible_ || mouseMode_ == MM_FREE) || graphics_->GetFullscreen()) && (flags & SDL_WINDOW_INPUT_FOCUS))
+        if (!inputFocus_ && ((mouseVisible_ || mouseMode_ == MM_FREE) || graphics_->GetFullscreen())/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/)
 #else
         if (!inputFocus_ && (flags & SDL_WINDOW_INPUT_FOCUS))
 #endif
@@ -442,12 +539,12 @@ void Input::Update()
             GainFocus();
 
         // Check for losing focus. The window flags are not reliable when using an external window, so prevent losing focus in that case
-        if (inputFocus_ && !graphics_->GetExternalWindow() && (flags & SDL_WINDOW_INPUT_FOCUS) == 0)
+        if (inputFocus_ && !graphics_->GetExternalWindow()/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/ == 0)
             LoseFocus();
     }
     else
         return;
-
+    
     // Handle mouse mode MM_WRAP
     if (mouseVisible_ && mouseMode_ == MM_WRAP)
     {
@@ -501,7 +598,7 @@ void Input::Update()
 #endif
 
 #ifndef __EMSCRIPTEN__
-    if (!touchEmulation_ && (graphics_->GetExternalWindow() || ((!sdlMouseRelative_ && !mouseVisible_ && mouseMode_ != MM_FREE) && inputFocus_ && (flags & SDL_WINDOW_MOUSE_FOCUS))))
+    if (!touchEmulation_ && (graphics_->GetExternalWindow() || ((!sdlMouseRelative_ && !mouseVisible_ && mouseMode_ != MM_FREE) && inputFocus_/* && (flags & SDL_WINDOW_MOUSE_FOCUS)*/)))
 #else
     if (!touchEmulation_ && !emscriptenPointerLock_ && (graphics_->GetExternalWindow() || (!mouseVisible_ && inputFocus_ && (flags & SDL_WINDOW_MOUSE_FOCUS))))
 #endif
@@ -545,7 +642,7 @@ void Input::Update()
         }
     }
 #ifndef __EMSCRIPTEN__
-    else if (!touchEmulation_ && !mouseVisible_ && sdlMouseRelative_ && inputFocus_ && (flags & SDL_WINDOW_MOUSE_FOCUS))
+    else if (!touchEmulation_ && !mouseVisible_ && sdlMouseRelative_ && inputFocus_/* && (flags & SDL_WINDOW_MOUSE_FOCUS)*/)
     {
         // Keep the cursor trapped in window.
         CenterMousePosition();
@@ -828,6 +925,7 @@ void Input::ResetMouseGrabbed()
 #ifndef __EMSCRIPTEN__
 void Input::SetMouseModeAbsolute(SDL_bool enable)
 {
+    return;
     SDL_Window* const window = graphics_->GetWindow();
 
     SDL_SetWindowGrab(window, enable);
@@ -835,6 +933,7 @@ void Input::SetMouseModeAbsolute(SDL_bool enable)
 
 void Input::SetMouseModeRelative(SDL_bool enable)
 {
+    return;
     SDL_Window* const window = graphics_->GetWindow();
 
     int result = SDL_SetRelativeMouseMode(enable);
@@ -847,6 +946,7 @@ void Input::SetMouseModeRelative(SDL_bool enable)
 
 void Input::SetMouseMode(MouseMode mode, bool suppressEvent)
 {
+    return;
     const MouseMode previousMode = mouseMode_;
 
 #ifdef __EMSCRIPTEN__
@@ -1405,7 +1505,9 @@ IntVector2 Input::GetMousePosition() const
     if (!initialized_)
         return ret;
 
-    SDL_GetMouseState(&ret.x_, &ret.y_);
+    //SDL_GetMouseState(&ret.x_, &ret.y_);
+    ret.x_ = m_mouse_x;
+    ret.y_ = m_mouse_y;
     ret.x_ = (int)(ret.x_ * inputScale_.x_);
     ret.y_ = (int)(ret.y_ * inputScale_.y_);
 
@@ -1545,11 +1647,11 @@ void Input::Initialize()
 
 #ifdef _WIN32
     // Register callback for resizing in order to repaint.
-    if (SDL_Window* window = graphics_->GetWindow())
-    {
-        SDL_SetWindowData(window, "URHO3D_CONTEXT", GetContext());
-        SDL_AddEventWatch(Win32_ResizingEventWatcher, window);
-    }
+//     if (SDL_Window* window = graphics_->GetWindow())
+//     {
+//         SDL_SetWindowData(window, "URHO3D_CONTEXT", GetContext());
+//         SDL_AddEventWatch(Win32_ResizingEventWatcher, window);
+//     }
 #endif
 
     URHO3D_LOGINFO("Initialized input");
@@ -1605,8 +1707,8 @@ void Input::GainFocus()
     SuppressNextMouseMove();
 
     // Re-establish mouse cursor hiding as necessary
-    if (!mouseVisible_)
-        SDL_ShowCursor(SDL_FALSE);
+//     if (!mouseVisible_)
+//         SDL_ShowCursor(SDL_FALSE);
 
     SendInputFocusEvent();
 }
@@ -1619,7 +1721,7 @@ void Input::LoseFocus()
     focusedThisFrame_ = false;
 
     // Show the mouse cursor when inactive
-    SDL_ShowCursor(SDL_TRUE);
+    //SDL_ShowCursor(SDL_TRUE);
 
     // Change mouse mode -- removing any cursor grabs, etc.
 #ifndef __EMSCRIPTEN__
@@ -2401,35 +2503,35 @@ void Input::HandleScreenMode(StringHash eventType, VariantMap& eventData)
 
     // Re-enable cursor clipping, and re-center the cursor (if needed) to the new screen size, so that there is no erroneous
     // mouse move event. Also get new window ID if it changed
-    SDL_Window* window = graphics_->GetWindow();
-    windowID_ = SDL_GetWindowID(window);
-
-    // Resize screen joysticks to new screen size
-    for (HashMap<SDL_JoystickID, JoystickState>::Iterator i = joysticks_.Begin(); i != joysticks_.End(); ++i)
-    {
-        UIElement* screenjoystick = i->second_.screenJoystick_;
-        if (screenjoystick)
-            screenjoystick->SetSize(graphics_->GetWidth(), graphics_->GetHeight());
-    }
-
-    if (graphics_->GetFullscreen() || !mouseVisible_)
-        focusedThisFrame_ = true;
-
-    // After setting a new screen mode we should not be minimized
-    minimized_ = (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) != 0;
-
-    // Calculate input coordinate scaling from SDL window to backbuffer ratio
-    int winWidth, winHeight;
-    int gfxWidth = graphics_->GetWidth();
-    int gfxHeight = graphics_->GetHeight();
-    SDL_GetWindowSize(window, &winWidth, &winHeight);
-    if (winWidth > 0 && winHeight > 0 && gfxWidth > 0 && gfxHeight > 0)
-    {
-        inputScale_.x_ = (float)gfxWidth / (float)winWidth;
-        inputScale_.y_ = (float)gfxHeight / (float)winHeight;
-    }
-    else
-        inputScale_ = Vector2::ONE;
+//     SDL_Window* window = graphics_->GetWindow();
+//     windowID_ = SDL_GetWindowID(window);
+// 
+//     // Resize screen joysticks to new screen size
+//     for (HashMap<SDL_JoystickID, JoystickState>::Iterator i = joysticks_.Begin(); i != joysticks_.End(); ++i)
+//     {
+//         UIElement* screenjoystick = i->second_.screenJoystick_;
+//         if (screenjoystick)
+//             screenjoystick->SetSize(graphics_->GetWidth(), graphics_->GetHeight());
+//     }
+// 
+//     if (graphics_->GetFullscreen() || !mouseVisible_)
+//         focusedThisFrame_ = true;
+// 
+//     // After setting a new screen mode we should not be minimized
+//     minimized_ = (SDL_GetWindowFlags(window) & SDL_WINDOW_MINIMIZED) != 0;
+// 
+//     // Calculate input coordinate scaling from SDL window to backbuffer ratio
+//     int winWidth, winHeight;
+//     int gfxWidth = graphics_->GetWidth();
+//     int gfxHeight = graphics_->GetHeight();
+//     SDL_GetWindowSize(window, &winWidth, &winHeight);
+//     if (winWidth > 0 && winHeight > 0 && gfxWidth > 0 && gfxHeight > 0)
+//     {
+//         inputScale_.x_ = (float)gfxWidth / (float)winWidth;
+//         inputScale_.y_ = (float)gfxHeight / (float)winHeight;
+//     }
+//     else
+//         inputScale_ = Vector2::ONE;
 }
 
 void Input::HandleBeginFrame(StringHash eventType, VariantMap& eventData)

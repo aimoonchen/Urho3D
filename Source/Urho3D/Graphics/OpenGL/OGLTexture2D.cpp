@@ -34,46 +34,50 @@
 #include "../../Resource/ResourceCache.h"
 #include "../../Resource/XMLFile.h"
 
+#include "bgfx/bgfx.h"
+
+#include <vector>
+
 #include "../../DebugNew.h"
 
-#include "bgfx/bgfx.h"
+
 
 namespace Urho3D
 {
 
 void Texture2D::OnDeviceLost()
 {
-    if (object_.name_ && !graphics_->IsDeviceLost())
-        glDeleteTextures(1, &object_.name_);
-
-    GPUObject::OnDeviceLost();
-
-    if (renderSurface_)
-        renderSurface_->OnDeviceLost();
+//     if (object_.name_ && !graphics_->IsDeviceLost())
+//         glDeleteTextures(1, &object_.name_);
+// 
+//     GPUObject::OnDeviceLost();
+// 
+//     if (renderSurface_)
+//         renderSurface_->OnDeviceLost();
 }
 
 void Texture2D::OnDeviceReset()
 {
-    if (!object_.name_ || dataPending_)
-    {
-        // If has a resource file, reload through the resource cache. Otherwise just recreate.
-        auto* cache = GetSubsystem<ResourceCache>();
-        if (cache->Exists(GetName()))
-            dataLost_ = !cache->ReloadResource(this);
-
-        if (!object_.name_)
-        {
-            Create();
-            dataLost_ = true;
-        }
-    }
-
-    dataPending_ = false;
+//     if (!object_.name_ || dataPending_)
+//     {
+//         // If has a resource file, reload through the resource cache. Otherwise just recreate.
+//         auto* cache = GetSubsystem<ResourceCache>();
+//         if (cache->Exists(GetName()))
+//             dataLost_ = !cache->ReloadResource(this);
+// 
+//         if (!object_.name_)
+//         {
+//             Create();
+//             dataLost_ = true;
+//         }
+//     }
+// 
+//     dataPending_ = false;
 }
 
 void Texture2D::Release()
 {
-    if (object_.name_)
+    if (object_.handle_ != bgfx::kInvalidHandle)
     {
         if (!graphics_)
             return;
@@ -86,13 +90,13 @@ void Texture2D::Release()
                     graphics_->SetTexture(i, nullptr);
             }
 
-            glDeleteTextures(1, &object_.name_);
+            //glDeleteTextures(1, &object_.name_);
         }
 
         if (renderSurface_)
             renderSurface_->Release();
 
-        object_.name_ = 0;
+        object_.handle_ = bgfx::kInvalidHandle;
     }
     else
     {
@@ -108,7 +112,7 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
 {
     URHO3D_PROFILE(SetTextureData);
 
-    if (!object_.name_ || !graphics_)
+    if (object_.handle_ == bgfx::kInvalidHandle || !graphics_)
     {
         URHO3D_LOGERROR("No texture created, can not set data");
         return false;
@@ -154,20 +158,21 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
 
     if (!IsCompressed())
     {
-        if (wholeLevel)
-            glTexImage2D(target_, level, format, width, height, 0, GetExternalFormat(format_), GetDataType(format_), data);
-        else
-            glTexSubImage2D(target_, level, x, y, width, height, GetExternalFormat(format_), GetDataType(format_), data);
+//         if (wholeLevel)
+//             glTexImage2D(target_, level, format, width, height, 0, GetExternalFormat(format_), GetDataType(format_), data);
+//         else
+//             glTexSubImage2D(target_, level, x, y, width, height, GetExternalFormat(format_), GetDataType(format_), data);
     }
     else
     {
-        if (wholeLevel)
-            glCompressedTexImage2D(target_, level, format, width, height, 0, GetDataSize(width, height), data);
-        else
-            glCompressedTexSubImage2D(target_, level, x, y, width, height, format, GetDataSize(width, height), data);
+//         if (wholeLevel)
+//             glCompressedTexImage2D(target_, level, format, width, height, 0, GetDataSize(width, height), data);
+//         else
+//             glCompressedTexSubImage2D(target_, level, x, y, width, height, format, GetDataSize(width, height), data);
     }
-
-    graphics_->SetTexture(0, nullptr);
+    bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, level, false, x, y, width, height,
+                          bgfx::copy(data, width * height * depth_ * GetComponents()));
+    //graphics_->SetTexture(0, nullptr);
     return true;
 }
 
@@ -240,22 +245,29 @@ bool Texture2D::SetData(Image* image, bool useAlpha)
         if (IsCompressed() && requestedLevels_ > 1)
             requestedLevels_ = 0;
         SetSize(levelWidth, levelHeight, format);
-        if (!object_.name_)
+        if (object_.handle_ == bgfx::kInvalidHandle)
             return false;
 
+        int totalSize = 0;
         for (unsigned i = 0; i < levels_; ++i)
         {
-            SetData(i, 0, 0, levelWidth, levelHeight, levelData);
+            //SetData(i, 0, 0, levelWidth, levelHeight, levelData);
             memoryUse += levelWidth * levelHeight * components;
-
+            totalSize += levelWidth * levelHeight * components;
             if (i < levels_ - 1)
             {
-                mipImage = image->GetNextLevel(); image = mipImage;
-                levelData = image->GetData();
-                levelWidth = image->GetWidth();
-                levelHeight = image->GetHeight();
+//                 mipImage = image->GetNextLevel(); image = mipImage;
+//                 levelData = image->GetData();
+                levelWidth /= 2; // image->GetWidth();
+                levelHeight /= 2; // image->GetHeight();
+                if (levelWidth < 1)
+                    levelWidth = 1;
+                if (levelHeight < 1)
+                    levelHeight = 1;
             }
         }
+        bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, levels_ > 1, 0, 0, width_, height_,
+                              bgfx::copy(image->GetData(), totalSize));
     }
     else
     {
@@ -307,7 +319,7 @@ bool Texture2D::SetData(Image* image, bool useAlpha)
 
 bool Texture2D::GetData(unsigned level, void* dest) const
 {
-    if (!object_.name_ || !graphics_)
+    if (object_.handle_ == bgfx::kInvalidHandle || !graphics_)
     {
         URHO3D_LOGERROR("No texture created, can not get data");
         return false;
@@ -389,8 +401,8 @@ bool Texture2D::Create()
 #endif
 
     unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
-    unsigned externalFormat = GetExternalFormat(format_);
-    unsigned dataType = GetDataType(format_);
+//     unsigned externalFormat = GetExternalFormat(format_);
+//     unsigned dataType = GetDataType(format_);
 
     uint64_t textureFlags = 0;
     // Create a renderbuffer instead of a texture if depth texture is not properly supported, or if this will be a packed
@@ -438,10 +450,10 @@ bool Texture2D::Create()
         }
     }
     
-    glGenTextures(1, &object_.name_);
-
-    // Ensure that our texture is bound to OpenGL texture unit 0
-    graphics_->SetTextureForUpdate(this);
+//     glGenTextures(1, &object_.name_);
+// 
+//     // Ensure that our texture is bound to OpenGL texture unit 0
+//     graphics_->SetTextureForUpdate(this);
 
     // If not compressed, create the initial level 0 texture with null data
     bool success = true;

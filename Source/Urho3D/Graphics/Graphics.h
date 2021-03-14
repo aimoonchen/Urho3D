@@ -33,6 +33,8 @@
 #include "../Math/Rect.h"
 #include "../Resource/Image.h"
 
+#include "../Core/entry/entry.h"
+
 struct SDL_Window;
 
 namespace Urho3D
@@ -919,9 +921,10 @@ private:
     static const Vector2 pixelUVOffset;
     /// OpenGL3 support flag.
     static bool gl3Support;
-    uint64_t render_state_;
+    uint64_t render_state_{ 0 };
     uint64_t GetRendererState() const { return render_state_; }
     void ResetRendererState() { render_state_ = 0; }
+    entry::WindowHandle default_window_ = {0};
 };
 
 /// Register Graphics library objects.

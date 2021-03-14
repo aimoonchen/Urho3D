@@ -42,6 +42,7 @@
 #include "../../IO/File.h"
 #include "../../IO/Log.h"
 #include "../../Resource/ResourceCache.h"
+#include "../../Input/Input.h"
 
 #if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
 #if ENTRY_CONFIG_USE_WAYLAND
@@ -356,70 +357,6 @@ Graphics::~Graphics()
     context_->ReleaseSDL();
 }
 
-static void* sdlNativeWindowHandle(SDL_Window* _window)
-{
-    SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(_window, &wmi))
-    {
-        return NULL;
-    }
-
-#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
-#if ENTRY_CONFIG_USE_WAYLAND
-    wl_egl_window* win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
-    if (!win_impl)
-    {
-        int width, height;
-        SDL_GetWindowSize(_window, &width, &height);
-        struct wl_surface* surface = wmi.info.wl.surface;
-        if (!surface)
-            return nullptr;
-        win_impl = wl_egl_window_create(surface, width, height);
-        SDL_SetWindowData(_window, "wl_egl_window", win_impl);
-    }
-    return (void*)(uintptr_t)win_impl;
-#else
-    return (void*)wmi.info.x11.window;
-#endif
-#elif BX_PLATFORM_OSX
-    return wmi.info.cocoa.window;
-#elif BX_PLATFORM_WINDOWS
-    return wmi.info.win.window;
-#endif // BX_PLATFORM_
-}
-
-static bool sdlSetWindow(SDL_Window* _window)
-{
-    SDL_SysWMinfo wmi;
-    SDL_VERSION(&wmi.version);
-    if (!SDL_GetWindowWMInfo(_window, &wmi))
-    {
-        return false;
-    }
-
-    bgfx::PlatformData pd;
-#if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
-#if ENTRY_CONFIG_USE_WAYLAND
-    pd.ndt = wmi.info.wl.display;
-#else
-    pd.ndt = wmi.info.x11.display;
-#endif
-#elif BX_PLATFORM_OSX
-    pd.ndt = NULL;
-#elif BX_PLATFORM_WINDOWS
-    pd.ndt = NULL;
-#endif // BX_PLATFORM_
-    pd.nwh = sdlNativeWindowHandle(_window);
-
-    pd.context = NULL;
-    pd.backBuffer = NULL;
-    pd.backBufferDS = NULL;
-    bgfx::setPlatformData(pd);
-
-    return true;
-}
-
 bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& params, bool maximize)
 {
     URHO3D_PROFILE(SetScreenMode);
@@ -430,6 +367,11 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
 
     if (IsInitialized() && width == width_ && height == height_ && screenParams_ == newParams)
         return true;
+
+    entry::setWindowSize(default_window_, width, height);
+    window_ = (SDL_Window*)1;
+    OnScreenModeChanged();
+    return true;
 
     // If only vsync changes, do not destroy/recreate the context
     if (IsInitialized() && width == width_ && height == height_
@@ -588,23 +530,6 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     SDL_GetWindowSize(window_, &logicalWidth, &logicalHeight);
     screenParams_.highDPI_ = (width_ != logicalWidth) || (height_ != logicalHeight);
 
-    sdlSetWindow(window_);
-    uint32_t m_debug;
-    uint32_t m_reset;
-    m_debug = BGFX_DEBUG_NONE;
-    m_reset = BGFX_RESET_VSYNC;
-
-    bgfx::Init init;
-    init.type = bgfx::RendererType::OpenGL; // args.m_type;
-    init.vendorId = 0;                      // args.m_pciId;
-    init.resolution.width = width;
-    init.resolution.height = height;
-    init.resolution.reset = m_reset;
-    bgfx::init(init);
-
-    // Enable debug text.
-    bgfx::setDebug(m_debug);
-
     // Reset rendertargets and viewport for the new screen mode
     ResetRenderTargets();
 
@@ -700,6 +625,13 @@ bool Graphics::TakeScreenShot(Image& destImage)
 
 bool Graphics::BeginFrame()
 {
+//     // Set view 0 default viewport.
+//     bgfx::setViewRect(0, 0, 0, uint16_t(width_), uint16_t(height_));
+// 
+//     // This dummy draw call is here to make sure that view 0 is cleared
+//     // if no other draw calls are submitted to view 0.
+//     bgfx::touch(0);
+
     if (!IsInitialized() || IsDeviceLost())
         return false;
 
@@ -745,7 +677,7 @@ void Graphics::EndFrame()
 
     SendEvent(E_ENDRENDERING);
 
-    SDL_GL_SwapWindow(window_);
+    //SDL_GL_SwapWindow(window_);
 
     // Clean up too large scratch buffers
     CleanupScratchBuffers();
@@ -792,7 +724,14 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
 //         glFlags |= GL_STENCIL_BUFFER_BIT;
 //         glClearStencil(stencil);
     }
-    bgfx::setViewClear(0, clearFlag, color.ToUInt(), depth, stencil);
+    auto ToRGBA = [](const Color& color) {
+        auto r = (unsigned)Clamp(((int)(color.r_ * 255.0f)), 0, 255);
+        auto g = (unsigned)Clamp(((int)(color.g_ * 255.0f)), 0, 255);
+        auto b = (unsigned)Clamp(((int)(color.b_ * 255.0f)), 0, 255);
+        auto a = (unsigned)Clamp(((int)(color.a_ * 255.0f)), 0, 255);
+        return (r << 24u) | (g << 16u) | (b << 8u) | a;
+    };
+    bgfx::setViewClear(0, clearFlag, ToRGBA(color), depth, stencil);
 
     // If viewport is less than full screen, set a scissor to limit the clear
     /// \todo Any user-set scissor test will be lost
@@ -982,13 +921,16 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
             VertexBuffer* buffer = vertexBuffers_[i];
             // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory
             // for vertex data, in which case the pointer will be invalid and cause a crash
-            if (!buffer || !buffer->GetGPUObjectHandle /*GetGPUObjectName*/() /* || !impl_->vertexAttributes_*/)
+            if (!buffer || buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle /*GetGPUObjectName*/ /* || !impl_->vertexAttributes_*/)
                 continue;
 
             buffer->IsDynamic()
                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
         }
+
+        bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_ALWAYS);
+        //bgfx::setState(render_state_);
         bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
     }
     numPrimitives_ += primitiveCount;
@@ -1293,7 +1235,7 @@ void Graphics::SetShaderParameter(StringHash param, const float* data, unsigned 
     {
         bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
         if (bgfx::isValid(uniformHandle)) {
-            bgfx::setUniform(uniformHandle, data, count);
+            bgfx::setUniform(uniformHandle, data, count / 4);
         }
         /*
         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
@@ -1605,7 +1547,20 @@ void Graphics::SetShaderParameter(StringHash param, const Matrix3x4& matrix)
         bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
         if (bgfx::isValid(uniformHandle))
         {
-            bgfx::setUniform(uniformHandle, matrix.Data());
+            static Matrix4 fullMatrix;
+            fullMatrix.m00_ = matrix.m00_;
+            fullMatrix.m01_ = matrix.m01_;
+            fullMatrix.m02_ = matrix.m02_;
+            fullMatrix.m03_ = matrix.m03_;
+            fullMatrix.m10_ = matrix.m10_;
+            fullMatrix.m11_ = matrix.m11_;
+            fullMatrix.m12_ = matrix.m12_;
+            fullMatrix.m13_ = matrix.m13_;
+            fullMatrix.m20_ = matrix.m20_;
+            fullMatrix.m21_ = matrix.m21_;
+            fullMatrix.m22_ = matrix.m22_;
+            fullMatrix.m23_ = matrix.m23_;
+            bgfx::setUniform(uniformHandle, fullMatrix.Data());
         }
         //         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
 //         if (info)
@@ -1696,9 +1651,31 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
             }
         }
     }
-
+    static StringHash samplerName[TextureUnit::MAX_TEXTURE_UNITS] = {
+        {"DiffMap"},
+        {"NormalMap"},
+        {"SpecMap"},
+        {"EmissiveMap"},
+        {"EnvMap"},
+        {"LightRampMap"},
+        {"LightSpotMap"},
+        {"ShadowMap"},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""},
+        {""}
+    };
     if (texture) {
-        bgfx::setTexture(index, {texture->GetSampler()}, {texture->GetGPUObjectHandle()});
+        auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
+        if (sampler_handle == bgfx::kInvalidHandle)
+        {
+            URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+        }
+        bgfx::setTexture(index, {sampler_handle}, {texture->GetGPUObjectHandle()});
     }
     
     /*
@@ -2354,6 +2331,7 @@ bool Graphics::GetDither() const
 
 bool Graphics::IsDeviceLost() const
 {
+    return false;
     // On iOS and tvOS treat window minimization as device loss, as it is forbidden to access OpenGL when minimized
 #if defined(IOS) || defined(TVOS)
     if (window_ && (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED) != 0)
@@ -2530,18 +2508,18 @@ void Graphics::OnWindowResized()
     if (!window_)
         return;
 
-    int newWidth, newHeight;
-
-    SDL_GL_GetDrawableSize(window_, &newWidth, &newHeight);
+    int newWidth = GetSubsystem<Input>()->GetWidth();
+    int newHeight = GetSubsystem<Input>()->GetHeight();
+    //     SDL_GL_GetDrawableSize(window_, &newWidth, &newHeight);
     if (newWidth == width_ && newHeight == height_)
         return;
 
     width_ = newWidth;
     height_ = newHeight;
 
-    int logicalWidth, logicalHeight;
-    SDL_GetWindowSize(window_, &logicalWidth, &logicalHeight);
-    screenParams_.highDPI_ = (width_ != logicalWidth) || (height_ != logicalHeight);
+//     int logicalWidth, logicalHeight;
+//     SDL_GetWindowSize(window_, &logicalWidth, &logicalHeight);
+//     screenParams_.highDPI_ = (width_ != logicalWidth) || (height_ != logicalHeight);
 
     // Reset rendertargets and viewport for the new screen size. Also clean up any FBO's, as they may be screen size dependent
     CleanupFramebuffers();
@@ -2714,18 +2692,18 @@ void Graphics::Release(bool clearGPUObjects, bool closeWindow)
         if (!clearGPUObjects)
             URHO3D_LOGINFO("OpenGL context lost");
 
-        SDL_GL_DeleteContext(impl_->context_);
+        //SDL_GL_DeleteContext(impl_->context_);
         impl_->context_ = nullptr;
     }
 
     if (closeWindow)
     {
-        SDL_ShowCursor(SDL_TRUE);
+        //SDL_ShowCursor(SDL_TRUE);
 
         // Do not destroy external window except when shutting down
         if (!externalWindow_ || clearGPUObjects)
         {
-            SDL_DestroyWindow(window_);
+            //SDL_DestroyWindow(window_);
             window_ = nullptr;
         }
     }
@@ -3615,12 +3593,13 @@ void Graphics::DeleteFramebuffer(unsigned fbo)
 
 void Graphics::BindFramebuffer(unsigned fbo)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-        glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
-    else
-#endif
-        glBindFramebuffer(GL_FRAMEBUFFER, fbo);
+    return;
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//         glBindFramebufferEXT(GL_FRAMEBUFFER_EXT, fbo);
+//     else
+// #endif
+//         glBindFramebuffer(GL_FRAMEBUFFER, fbo);
 }
 
 void Graphics::BindColorAttachment(unsigned index, unsigned target, unsigned object, bool isRenderBuffer)
