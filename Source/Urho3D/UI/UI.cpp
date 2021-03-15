@@ -992,6 +992,9 @@ void UI::SetVertexData(VertexBuffer* dest, const PODVector<float>& vertexData)
 
 void UI::Render(VertexBuffer* buffer, const PODVector<UIBatch>& batches, unsigned batchStart, unsigned batchEnd)
 {
+    // todo;
+    graphics_->ResetRendererState();
+
     // Engine does not render when window is closed or device is lost
     assert(graphics_ && graphics_->IsInitialized() && !graphics_->IsDeviceLost());
 
