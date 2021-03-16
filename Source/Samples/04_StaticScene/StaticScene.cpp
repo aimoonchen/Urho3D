@@ -38,9 +38,37 @@
 
 #include "StaticScene.h"
 
+#include <memory>
+
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(StaticScene)
+//URHO3D_DEFINE_APPLICATION_MAIN(StaticScene)
+
+bgfxApp::bgfxApp(const char* _name, const char* _description, const char* _url)
+    : entry::AppI(_name, _description, _url)
+{
+}
+
+bgfxApp::~bgfxApp() {}
+
+void bgfxApp::init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height)
+{
+    AppI::init(_argc, _argv, _width, _height);
+}
+
+bool bgfxApp::update()
+{
+    Urho3D::ParseArguments(GetCommandLineW());
+    std::shared_ptr<Urho3D::Context> context_ = std::make_shared<Urho3D::Context>();
+    std::shared_ptr<StaticScene> urho3d_app_ = std::make_shared<StaticScene>(context_.get());
+    urho3d_app_->Run();
+    return false;
+}
+
+// URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
+
+URHO3D_DEFINE_APPLICATION_MAIN(StaticScene, "04-StaticScene", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
 StaticScene::StaticScene(Context* context) :
     Sample(context)
@@ -83,11 +111,11 @@ void StaticScene::CreateScene()
     // Create a child scene node (at world origin) and a StaticModel component into it. Set the StaticModel to show a simple
     // plane mesh with a "stone" material. Note that naming the scene nodes is optional. Scale the scene node larger
     // (100 x 100 world units)
-//     Node* planeNode = scene_->CreateChild("Plane");
-//     planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
-//     auto* planeObject = planeNode->CreateComponent<StaticModel>();
-//     planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
-//     planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
+    Node* planeNode = scene_->CreateChild("Plane");
+    planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+    auto* planeObject = planeNode->CreateComponent<StaticModel>();
+    planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
+    planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
 
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls the
     // light direction; we will use the SetDirection() function which calculates the orientation from a forward direction vector.
@@ -103,7 +131,7 @@ void StaticScene::CreateScene()
     // see the model get simpler as it moves further away). Finally, rendering a large number of the same object with the
     // same material allows instancing to be used, if the GPU supports it. This reduces the amount of CPU work in rendering the
     // scene.
-    const unsigned NUM_OBJECTS = 1;//200;
+    const unsigned NUM_OBJECTS = 0;//200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
         Node* mushroomNode = scene_->CreateChild("Mushroom");

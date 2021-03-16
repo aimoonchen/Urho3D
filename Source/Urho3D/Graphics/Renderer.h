@@ -307,7 +307,7 @@ public:
 
     /// Return whether drawing shadows is enabled.
     /// @property
-    bool GetDrawShadows() const { return drawShadows_; }
+    bool GetDrawShadows() const { return false/*drawShadows_*/; }
 
     /// Return default texture max. anisotropy level.
     /// @property

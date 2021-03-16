@@ -171,7 +171,7 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
 //             glCompressedTexSubImage2D(target_, level, x, y, width, height, format, GetDataSize(width, height), data);
     }
     bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, level, false, x, y, width, height,
-                          bgfx::copy(data, width * height * depth_ * GetComponents()));
+                          bgfx::copy(data, GetDataSize(width, height)/*width * height * depth_ * GetComponents())*/));
     //graphics_->SetTexture(0, nullptr);
     return true;
 }
