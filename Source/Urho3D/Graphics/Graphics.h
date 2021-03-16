@@ -925,8 +925,8 @@ private:
     uint64_t render_state_{ 0 };
 
 public:
-    uint64_t GetRendererState() const { return render_state_; }
-    void ResetRendererState() { render_state_ = 0; }
+    //uint64_t GetRendererState() const { return render_state_; }
+    void SetRendererState(uint64_t state);
 };
 
 /// Register Graphics library objects.

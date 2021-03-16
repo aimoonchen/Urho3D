@@ -929,8 +929,6 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
         }
 
-        //bgfx::setState(0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_ALWAYS);
-        bgfx::setState(render_state_);
         bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
     }
     numPrimitives_ += primitiveCount;
@@ -3696,5 +3694,8 @@ void Graphics::SetVertexAttribDivisor(unsigned location, unsigned divisor)
 #endif
 #endif
 }
-
+void Graphics::SetRendererState(uint64_t state)
+{
+    bgfx::setState(state);
+}
 }

@@ -48,6 +48,11 @@ bgfxApp::~bgfxApp()
 
 }
 
+void bgfxApp::init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height)
+{
+    AppI::init(_argc, _argv, _width, _height);
+}
+
 bool bgfxApp::update()
 {
     Urho3D::ParseArguments(GetCommandLineW());

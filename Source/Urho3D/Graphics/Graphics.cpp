@@ -540,8 +540,8 @@ void Graphics::AdjustScreenMode(int& newWidth, int& newHeight, ScreenModeParams&
         }
         else
         {
-            newWidth = 1024;
-            newHeight = 768;
+            newWidth = 1280;
+            newHeight = 720;
         }
     }
 

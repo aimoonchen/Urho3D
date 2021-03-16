@@ -93,6 +93,7 @@ class bgfxApp : public entry::AppI
 public:
     bgfxApp(const char* _name, const char* _description, const char* _url);
     virtual ~bgfxApp();
+    void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) override;
     bool update() override;
 
 private:
