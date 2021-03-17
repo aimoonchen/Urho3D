@@ -67,7 +67,7 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include "../../DebugNew.h"
 
-#include "bgfx/bgfx.h"
+#include "../BGFX/bgfxGraphics.h"
 
 #ifdef GL_ES_VERSION_2_0
 #define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
@@ -685,7 +685,6 @@ void Graphics::EndFrame()
 
 void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, unsigned stencil)
 {
-    render_state_ = 0;
     PrepareDraw();
 
 #ifdef GL_ES_VERSION_2_0
@@ -699,8 +698,8 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         SetColorWrite(true);
     if (flags & CLEAR_DEPTH && !oldDepthWrite)
         SetDepthWrite(true);
-    if (flags & CLEAR_STENCIL && stencilWriteMask_ != M_MAX_UNSIGNED)
-        glStencilMask(M_MAX_UNSIGNED);
+//     if (flags & CLEAR_STENCIL && stencilWriteMask_ != M_MAX_UNSIGNED)
+//         glStencilMask(M_MAX_UNSIGNED);
 
     unsigned glFlags = 0;
     uint64_t clearFlag = 0;
@@ -743,6 +742,7 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         SetScissorTest(false);
 
     bgfx::touch(0);
+
     //glClear(glFlags);
 
     SetScissorTest(false);
@@ -930,7 +930,8 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
         }
-
+        bgfx::setState(render_state_);
+        bgfx::setStencil(front_stencil_);
         bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
     }
     numPrimitives_ += primitiveCount;
@@ -966,8 +967,9 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
         buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount)
                             : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount);
     }
-    uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
-    bgfx::setState(render_state);
+    //uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
+    bgfx::setState(render_state_);
+    bgfx::setStencil(front_stencil_);
     bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
 
     numPrimitives_ += primitiveCount;
@@ -1934,51 +1936,10 @@ void Graphics::SetViewport(const IntRect& rect)
 
 void Graphics::SetBlendMode(BlendMode mode, bool alphaToCoverage)
 {
-    if (mode == BLEND_REPLACE)
-        return;
-
-    uint64_t flag = 0;
-    switch (mode) {
-    case Urho3D::BLEND_ADD:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_MULTIPLY:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_DST_COLOR, BGFX_STATE_BLEND_ZERO);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_ALPHA:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_ADDALPHA:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_PREMULALPHA:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_INV_SRC_ALPHA);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_INVDESTALPHA:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_INV_DST_ALPHA, BGFX_STATE_BLEND_DST_ALPHA);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_ADD);
-        break;
-    case Urho3D::BLEND_SUBTRACT:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_REVSUB);
-        break;
-    case Urho3D::BLEND_SUBTRACTALPHA:
-        flag |= BGFX_STATE_BLEND_FUNC(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE);
-        flag |= BGFX_STATE_BLEND_EQUATION(BGFX_STATE_BLEND_EQUATION_REVSUB);
-        break;
-    default:
-        break;
-    }
-
-    if (alphaToCoverage) {
-        flag |= BGFX_STATE_BLEND_ALPHA_TO_COVERAGE;
-    }
-    render_state_ |= flag;
+    render_state_ &= ~BGFX_STATE_BLEND_MASK;
+    render_state_ &= ~BGFX_STATE_BLEND_EQUATION_MASK;
+    render_state_ &= ~BGFX_STATE_BLEND_ALPHA_TO_COVERAGE;
+    render_state_ |= bgfxRSBend(mode, alphaToCoverage);
 
 //     if (mode != blendMode_)
 //     {
@@ -2007,7 +1968,11 @@ void Graphics::SetBlendMode(BlendMode mode, bool alphaToCoverage)
 
 void Graphics::SetColorWrite(bool enable)
 {
-    render_state_ |= BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A;
+    render_state_ &= ~(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+    if (enable)
+    {
+        render_state_ |= (BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
+    }
 //     if (enable != colorWrite_)
 //     {
 //         if (enable)
@@ -2021,9 +1986,8 @@ void Graphics::SetColorWrite(bool enable)
 
 void Graphics::SetCullMode(CullMode mode)
 {
-    if (mode == CULL_NONE)
-        return;
-    render_state_ |= ((mode == CULL_CCW) ? BGFX_STATE_CULL_CCW : BGFX_STATE_CULL_CW);
+    render_state_ &= ~BGFX_STATE_CULL_MASK;
+    render_state_ |= bgfxRSCull(mode);
     
 //     if (mode != cullMode_)
 //     {
@@ -2064,22 +2028,8 @@ void Graphics::SetDepthBias(float constantBias, float slopeScaledBias)
 
 void Graphics::SetDepthTest(CompareMode mode)
 {
-    uint64_t flag = 0;
-    switch (mode) {
-    case Urho3D::CMP_ALWAYS: flag = BGFX_STATE_DEPTH_TEST_ALWAYS; break;
-    case Urho3D::CMP_EQUAL: flag = BGFX_STATE_DEPTH_TEST_EQUAL; break;
-    case Urho3D::CMP_NOTEQUAL: flag = BGFX_STATE_DEPTH_TEST_NOTEQUAL; break;
-    case Urho3D::CMP_LESS: flag = BGFX_STATE_DEPTH_TEST_LESS; break;
-    case Urho3D::CMP_LESSEQUAL: flag = BGFX_STATE_DEPTH_TEST_LEQUAL; break;
-    case Urho3D::CMP_GREATER: flag = BGFX_STATE_DEPTH_TEST_GREATER; break;
-    case Urho3D::CMP_GREATEREQUAL: flag = BGFX_STATE_DEPTH_TEST_GEQUAL; break;
-    default: break;
-    }
-
-    if (flag != 0) {
-        render_state_ |= flag;
-    }
-    
+    render_state_ &= ~BGFX_STATE_DEPTH_TEST_MASK;
+    render_state_ |= bgfxRSDepthCompare(mode);
 //     if (mode != depthTestMode_)
 //     {
 //         glDepthFunc(glCmpFunc[mode]);
@@ -2089,9 +2039,11 @@ void Graphics::SetDepthTest(CompareMode mode)
 
 void Graphics::SetDepthWrite(bool enable)
 {
-    if (!enable)
-        return;
-    render_state_ |= BGFX_STATE_WRITE_Z;
+    render_state_ &= ~BGFX_STATE_WRITE_Z;
+    if (enable)
+    {
+        render_state_ |= BGFX_STATE_WRITE_Z;
+    }
 
 //     if (enable != depthWrite_)
 //     {
@@ -2115,10 +2067,12 @@ void Graphics::SetFillMode(FillMode mode)
 
 void Graphics::SetLineAntiAlias(bool enable)
 {
-    if (!enable)
-        return;
-    render_state_ |= BGFX_STATE_LINEAA;
-    // #ifndef GL_ES_VERSION_2_0
+    render_state_ &= ~BGFX_STATE_LINEAA;
+    if (enable)
+    {
+        render_state_ |= BGFX_STATE_LINEAA;
+    }
+// #ifndef GL_ES_VERSION_2_0
 //     if (enable != lineAntiAlias_)
 //     {
 //         if (enable)
@@ -2167,8 +2121,10 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
         }
     }
     else
+    {
+        bgfx::setScissor();
         scissorRect_ = IntRect::ZERO;
-
+    }
 //     if (enable != scissorTest_)
 //     {
 //         if (enable)
@@ -2209,9 +2165,11 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
         }
     }
     else
+    {
+        bgfx::setScissor();
         scissorRect_ = IntRect::ZERO;
-
-//     if (enable != scissorTest_)
+    }
+    //     if (enable != scissorTest_)
 //     {
 //         if (enable)
 //             glEnable(GL_SCISSOR_TEST);
@@ -2256,53 +2214,19 @@ void Graphics::SetClipPlane(bool enable, const Plane& clipPlane, const Matrix3x4
 void Graphics::SetStencilTest(bool enable, CompareMode mode, StencilOp pass, StencilOp fail, StencilOp zFail, unsigned stencilRef,
     unsigned compareMask, unsigned writeMask)
 {
-    if (!enable)
-        return;
-
-    uint64_t flag = 0;
-    flag |= BGFX_STENCIL_FUNC_REF(stencilRef);
-    flag |= BGFX_STENCIL_FUNC_RMASK(compareMask);
-    //flag |= BGFX_STENCIL_FUNC_RMASK_MASK(writeMask);
-
-    switch (mode) {
-    case Urho3D::CMP_ALWAYS: flag |= BGFX_STENCIL_TEST_ALWAYS; break;
-    case Urho3D::CMP_EQUAL: flag |= BGFX_STENCIL_TEST_EQUAL; break;
-    case Urho3D::CMP_NOTEQUAL: flag |= BGFX_STENCIL_TEST_NOTEQUAL; break;
-    case Urho3D::CMP_LESS: flag |= BGFX_STENCIL_TEST_LESS; break;
-    case Urho3D::CMP_LESSEQUAL: flag |= BGFX_STENCIL_TEST_LEQUAL; break;
-    case Urho3D::CMP_GREATER: flag |= BGFX_STENCIL_TEST_GREATER; break;
-    case Urho3D::CMP_GREATEREQUAL: flag |= BGFX_STENCIL_TEST_GEQUAL; break;
-    default: break;
+    front_stencil_ = back_stencil_ = BGFX_STENCIL_NONE;
+    auto& flag = front_stencil_;
+    if (enable) {
+        flag |= BGFX_STENCIL_FUNC_REF(stencilRef);
+        flag |= BGFX_STENCIL_FUNC_RMASK(compareMask);
+        // flag |= BGFX_STENCIL_FUNC_RMASK_MASK(writeMask);
+        flag |= bgfxRSStencilCompare(mode);
+        flag |= bgfxRSStencilFail(fail);
+        flag |= bgfxRSDepthFail(zFail);
+        flag |= bgfxRSDepthPass(pass);
     }
-
-    switch (fail) {
-    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_FAIL_S_KEEP; break;
-    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_FAIL_S_ZERO; break;
-    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_FAIL_S_REPLACE; break;
-    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_FAIL_S_INCR; break;
-    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_FAIL_S_DECR; break;
-    default: break;
-    }
-
-    switch (zFail) {
-    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_FAIL_Z_KEEP; break;
-    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_FAIL_Z_ZERO; break;
-    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_FAIL_Z_REPLACE; break;
-    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_FAIL_Z_INCR; break;
-    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_FAIL_Z_DECR; break;
-    default: break;
-    }
-
-    switch (pass) {
-    case Urho3D::OP_KEEP: flag |= BGFX_STENCIL_OP_PASS_Z_KEEP; break;
-    case Urho3D::OP_ZERO: flag |= BGFX_STENCIL_OP_PASS_Z_ZERO; break;
-    case Urho3D::OP_REF: flag |= BGFX_STENCIL_OP_PASS_Z_REPLACE; break;
-    case Urho3D::OP_INCR: flag |= BGFX_STENCIL_OP_PASS_Z_INCR; break;
-    case Urho3D::OP_DECR: flag |= BGFX_STENCIL_OP_PASS_Z_DECR; break;
-    default: break;
-    }
-
-// #ifndef GL_ES_VERSION_2_0
+    back_stencil_ = front_stencil_;
+    // #ifndef GL_ES_VERSION_2_0
 //     if (enable != stencilTest_)
 //     {
 //         if (enable)
@@ -2416,7 +2340,7 @@ unsigned Graphics::GetFormat(CompressedFormat format) const
 #endif
 
     default:
-        return 0;
+        return bgfx::TextureFormat::Unknown;
     }
 }
 

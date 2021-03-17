@@ -98,7 +98,7 @@ Pass::Pass(const String& name) :
         lightingMode_ = LIGHTING_PERPIXEL;
     render_state_ = bgfxRSBend(blendMode_)
         | bgfxRSCull(cullMode_)
-        | bgfxRSCompare(depthTestMode_)
+        | bgfxRSDepthCompare(depthTestMode_)
         | bgfxRSDepthWrite(depthWrite_)
         | bgfxRSAlphaToCoverage(alphaToCoverage_);
 }
@@ -124,7 +124,7 @@ void Pass::SetDepthTestMode(CompareMode mode)
 {
     depthTestMode_ = mode;
     render_state_ &= (~BGFX_STATE_DEPTH_TEST_MASK);
-    render_state_ |= bgfxRSCompare(mode);
+    render_state_ |= bgfxRSDepthCompare(mode);
 }
 
 void Pass::SetLightingMode(PassLightingMode mode)

@@ -239,7 +239,6 @@ void Texture::SetLevelsDirty()
 
 unsigned Texture::CheckMaxLevels(int width, int height, unsigned requestedLevels)
 {
-    return 1;
     unsigned maxLevels = 1;
     while (width > 1 || height > 1)
     {

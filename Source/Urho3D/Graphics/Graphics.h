@@ -923,7 +923,8 @@ private:
     static bool gl3Support;
     entry::WindowHandle default_window_ = {0};
     uint64_t render_state_{ 0 };
-
+    uint32_t front_stencil_{ 0 };
+    uint32_t back_stencil_{ 0 };
 public:
     //uint64_t GetRendererState() const { return render_state_; }
     void SetRendererState(uint64_t state);
