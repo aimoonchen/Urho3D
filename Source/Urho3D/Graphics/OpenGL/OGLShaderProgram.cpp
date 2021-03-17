@@ -152,6 +152,18 @@ bool ShaderProgram::Link()
             if (info.name[0] == 'c' || info.name[0] == 's')
             {
                 uniforms_[StringHash(&info.name[1])] = uniform.idx;
+
+                if (info.name[0] == 's')
+                {
+                    unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
+                    if (unit >= MAX_TEXTURE_UNITS)
+                        unit = NumberPostfix(info.name);
+
+                    if (unit < MAX_TEXTURE_UNITS)
+                    {
+                        useTextureUnits_[unit] = true;
+                    }
+                }
             }
             else
             {

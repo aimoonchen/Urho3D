@@ -1151,7 +1151,7 @@ void UI::Render(VertexBuffer* buffer, const PODVector<UIBatch>& batches, unsigne
                 graphics_->SetTexture(it->first_, it->second_);
             }
         }
-        graphics_->SetRendererState(render_state | bgfx::Urho3DBlendToBGFXBlend(batch.blendMode_));
+        graphics_->SetRendererState(render_state | bgfxRSBend(batch.blendMode_));
         graphics_->Draw(TRIANGLE_LIST, batch.vertexStart_ / UI_VERTEX_SIZE,
             (batch.vertexEnd_ - batch.vertexStart_) / UI_VERTEX_SIZE);
 

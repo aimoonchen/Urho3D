@@ -32,6 +32,9 @@
 #include "../Resource/ResourceCache.h"
 #include "../Resource/XMLFile.h"
 
+#include "bgfx/bgfx.h"
+#include "../Graphics/BGFX/bgfxGraphics.h"
+
 #include "../DebugNew.h"
 
 namespace Urho3D
@@ -81,7 +84,8 @@ Pass::Pass(const String& name) :
     shadersLoadedFrameNumber_(0),
     alphaToCoverage_(false),
     depthWrite_(true),
-    isDesktop_(false)
+    isDesktop_(false),
+    render_state_{0}
 {
     name_ = name.ToLower();
     index_ = Technique::GetPassIndex(name_);
@@ -92,6 +96,11 @@ Pass::Pass(const String& name) :
         lightingMode_ = LIGHTING_PERVERTEX;
     else if (index_ == Technique::lightPassIndex || index_ == Technique::litBasePassIndex || index_ == Technique::litAlphaPassIndex)
         lightingMode_ = LIGHTING_PERPIXEL;
+    render_state_ = bgfxRSBend(blendMode_)
+        | bgfxRSCull(cullMode_)
+        | bgfxRSCompare(depthTestMode_)
+        | bgfxRSDepthWrite(depthWrite_)
+        | bgfxRSAlphaToCoverage(alphaToCoverage_);
 }
 
 Pass::~Pass() = default;
@@ -99,16 +108,23 @@ Pass::~Pass() = default;
 void Pass::SetBlendMode(BlendMode mode)
 {
     blendMode_ = mode;
+    render_state_ &= (~BGFX_STATE_BLEND_MASK);
+    render_state_ &= (~BGFX_STATE_BLEND_EQUATION_MASK);
+    render_state_ |= bgfxRSBend(mode);
 }
 
 void Pass::SetCullMode(CullMode mode)
 {
     cullMode_ = mode;
+    render_state_ &= (~BGFX_STATE_CULL_MASK);
+    render_state_ |= bgfxRSCull(mode);
 }
 
 void Pass::SetDepthTestMode(CompareMode mode)
 {
     depthTestMode_ = mode;
+    render_state_ &= (~BGFX_STATE_DEPTH_TEST_MASK);
+    render_state_ |= bgfxRSCompare(mode);
 }
 
 void Pass::SetLightingMode(PassLightingMode mode)
@@ -119,11 +135,28 @@ void Pass::SetLightingMode(PassLightingMode mode)
 void Pass::SetDepthWrite(bool enable)
 {
     depthWrite_ = enable;
+    if (enable)
+    {
+        render_state_ |= BGFX_STATE_WRITE_Z;
+    }
+    else
+    {
+        render_state_ &= (~BGFX_STATE_WRITE_Z);
+    }
 }
 
 void Pass::SetAlphaToCoverage(bool enable)
 {
     alphaToCoverage_ = enable;
+
+    if (enable)
+    {
+        render_state_ |= BGFX_STATE_BLEND_ALPHA_TO_COVERAGE;
+    }
+    else
+    {
+        render_state_ &= (~BGFX_STATE_BLEND_ALPHA_TO_COVERAGE);
+    }
 }
 
 

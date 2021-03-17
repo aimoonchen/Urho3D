@@ -107,7 +107,7 @@ vec4 GetShadowPos(int index, vec3 normal, vec4 projWorldPos)
 float GetDiffuse(vec3 normal, vec3 worldPos, out vec3 lightDir)
 {
     #ifdef DIRLIGHT
-        lightDir = cLightDirPS;
+        lightDir = cLightDirPS.xyz;
         #ifdef TRANSLUCENT
             return abs(dot(normal, lightDir));
         #else
@@ -127,7 +127,7 @@ float GetDiffuse(vec3 normal, vec3 worldPos, out vec3 lightDir)
 
 float GetAtten(vec3 normal, vec3 worldPos, out vec3 lightDir)
 {
-    lightDir = cLightDirPS;
+    lightDir = cLightDirPS.xyz;
     return clamp(dot(normal, lightDir), 0.0, 1.0);
 }
 
@@ -322,7 +322,7 @@ float GetDirShadowDeferred(vec4 projWorldPos, vec3 normal, float depth)
     vec4 shadowPos;
 
     #ifdef NORMALOFFSET
-        float cosAngle = clamp(1.0 - dot(normal, cLightDirPS), 0.0, 1.0);
+        float cosAngle = clamp(1.0 - dot(normal, cLightDirPS.xyz), 0.0, 1.0);
         if (depth < cShadowSplits.x)
             shadowPos = vec4(projWorldPos.xyz + cosAngle * cNormalOffsetScalePS.x * normal, 1.0) * cLightMatricesPS[0];
         else if (depth < cShadowSplits.y)

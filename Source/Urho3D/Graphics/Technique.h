@@ -168,7 +168,7 @@ public:
     String GetEffectiveVertexShaderDefines() const;
     /// Return the effective pixel shader defines, accounting for excludes. Called internally by Renderer.
     String GetEffectivePixelShaderDefines() const;
-
+    uint64_t GetRenderState() const { return render_state_; }
 private:
     /// Pass index.
     unsigned index_;
@@ -210,6 +210,8 @@ private:
     HashMap<StringHash, Vector<SharedPtr<ShaderVariation> > > extraPixelShaders_;
     /// Pass name.
     String name_;
+    /// Renderer State
+    uint64_t render_state_{ 0 };
 };
 
 /// %Material technique. Consists of several passes.

@@ -1433,12 +1433,12 @@ String Input::GetScancodeName(Scancode scancode) const
 
 bool Input::GetKeyDown(Key key) const
 {
-    return keyDown_.Contains(SDL_tolower(key));
+    return keyDown_.Contains(/*SDL_tolower*/(key));
 }
 
 bool Input::GetKeyPress(Key key) const
 {
-    return keyPress_.Contains(SDL_tolower(key));
+    return keyPress_.Contains(/*SDL_tolower*/(key));
 }
 
 bool Input::GetScancodeDown(Scancode scancode) const

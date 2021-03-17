@@ -53,16 +53,16 @@ uniform mat4 cZone;
 #endif
 
 uniform vec4 cAmbientColor;
-uniform vec3 cCameraPosPS;
+uniform vec4 cCameraPosPS;
 uniform float cDeltaTimePS;
 uniform vec4 cDepthReconstruct;
 uniform float cElapsedTimePS;
 uniform vec4 cFogParams;
-uniform vec3 cFogColor;
+uniform vec4 cFogColor;
 uniform vec2 cGBufferInvSize;
 uniform vec4 cLightColor;
 uniform vec4 cLightPosPS;
-uniform vec3 cLightDirPS;
+uniform vec4 cLightDirPS;
 uniform vec4 cNormalOffsetScalePS;
 uniform vec4 cMatDiffColor;
 uniform vec3 cMatEmissiveColor;

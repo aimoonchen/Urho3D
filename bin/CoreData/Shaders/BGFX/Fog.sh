@@ -1,7 +1,7 @@
 #ifdef COMPILEPS
 vec3 GetFog(vec3 color, float fogFactor)
 {
-    return mix(cFogColor, color, fogFactor);
+    return mix(cFogColor.xyz, color, fogFactor);
 }
 
 vec3 GetLitFog(vec3 color, float fogFactor)

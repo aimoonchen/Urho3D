@@ -24,7 +24,7 @@ void main()
     gl_Position = GetClipPos(worldPos);
     
     #ifdef DIFFMAP
-        v_texcoord0 = a_texcoord0;
+        v_texcoord0.xy = a_texcoord0;
     #endif
     #ifdef VERTEXCOLOR
         v_color0 = a_color0;
@@ -43,7 +43,7 @@ void main()
         gl_FragColor = diffColor;
     #endif
     #ifdef DIFFMAP
-        vec4 diffInput = texture2D(sDiffMap, v_texcoord0);
+        vec4 diffInput = texture2D(sDiffMap, v_texcoord0.xy);
         #ifdef ALPHAMASK
             if (diffInput.a < 0.5)
                 discard;
@@ -52,9 +52,9 @@ void main()
     #endif
     #ifdef ALPHAMAP
         #ifdef GL3
-            float alphaInput = texture2D(sDiffMap, v_texcoord0).r;
+            float alphaInput = texture2D(sDiffMap, v_texcoord0.xy).r;
         #else
-            float alphaInput = texture2D(sDiffMap, v_texcoord0).a;
+            float alphaInput = texture2D(sDiffMap, v_texcoord0.xy).a;
         #endif
         gl_FragColor = vec4(diffColor.rgb, diffColor.a * alphaInput);
     #endif

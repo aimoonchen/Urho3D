@@ -685,6 +685,7 @@ void Graphics::EndFrame()
 
 void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, unsigned stencil)
 {
+    render_state_ = 0;
     PrepareDraw();
 
 #ifdef GL_ES_VERSION_2_0
@@ -741,13 +742,14 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     else
         SetScissorTest(false);
 
+    bgfx::touch(0);
     //glClear(glFlags);
 
     SetScissorTest(false);
     SetColorWrite(oldColorWrite);
     SetDepthWrite(oldDepthWrite);
-    if (flags & CLEAR_STENCIL && stencilWriteMask_ != M_MAX_UNSIGNED)
-        glStencilMask(stencilWriteMask_);
+//     if (flags & CLEAR_STENCIL && stencilWriteMask_ != M_MAX_UNSIGNED)
+//         glStencilMask(stencilWriteMask_);
 }
 
 bool Graphics::ResolveToTexture(Texture2D* destination, const IntRect& viewport)
@@ -937,7 +939,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount)
 {
-    if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName())
+    if (!indexCount || !indexBuffer_ || indexBuffer_->GetGPUObjectHandle() == bgfx::kInvalidHandle/*!indexBuffer_->GetGPUObjectName()*/)
         return;
 
     PrepareDraw();
@@ -947,8 +949,26 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     GLenum glPrimitiveType;
 
     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-    GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-    glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
+//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+//     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
+
+    indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
+                        : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount);
+    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
+    {
+        VertexBuffer* buffer = vertexBuffers_[i];
+        // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory
+        // for vertex data, in which case the pointer will be invalid and cause a crash
+        if (!buffer ||
+            buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle /*GetGPUObjectName*/ /* || !impl_->vertexAttributes_*/)
+            continue;
+
+        buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount)
+                            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount);
+    }
+    uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
+    bgfx::setState(render_state);
+    bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
 
     numPrimitives_ += primitiveCount;
     ++numBatches_;
@@ -1083,8 +1103,8 @@ void Graphics::SetIndexBuffer(IndexBuffer* buffer)
         return;
 
     //glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, buffer ? buffer->GetGPUObjectName() : 0);
-    buffer->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{buffer->GetGPUObjectHandle()})
-                        : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{buffer->GetGPUObjectHandle()});
+//     buffer->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{buffer->GetGPUObjectHandle()})
+//                         : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{buffer->GetGPUObjectHandle()});
     indexBuffer_ = buffer;
 }
 
