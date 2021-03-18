@@ -124,23 +124,27 @@ void StaticScene::CreateScene()
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-
+    light->SetCastShadows(true);
+    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+    // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
+    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     // Create more StaticModel objects to the scene, randomly positioned, rotated and scaled. For rotation, we construct a
     // quaternion from Euler angles where the Y angle (rotation about the Y axis) is randomized. The mushroom model contains
     // LOD levels, so the StaticModel component will automatically select the LOD level according to the view distance (you'll
     // see the model get simpler as it moves further away). Finally, rendering a large number of the same object with the
     // same material allows instancing to be used, if the GPU supports it. This reduces the amount of CPU work in rendering the
     // scene.
-    const unsigned NUM_OBJECTS = 0;//200;
+    const unsigned NUM_OBJECTS = 1;//200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
         Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition({0.0f, 0.0f, 0.0f} /*Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f)*/);
+        mushroomNode->SetPosition({0.0f, 3.0f, 0.0f} /*Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f)*/);
         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
         mushroomNode->SetScale(0.5f + Random(2.0f));
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+        mushroomObject->SetCastShadows(true);
     }
 
     // Create a scene node for the camera, which we will move around

@@ -170,7 +170,7 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
 //         else
 //             glCompressedTexSubImage2D(target_, level, x, y, width, height, format, GetDataSize(width, height), data);
     }
-    bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, levels_ > 1, x, y, width, height,
+    bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, level, x, y, width, height,
                           bgfx::copy(data, GetDataSize(width, height)/*width * height * depth_ * GetComponents())*/));
     //graphics_->SetTexture(0, nullptr);
     return true;
@@ -248,27 +248,22 @@ bool Texture2D::SetData(Image* image, bool useAlpha)
         if (object_.handle_ == bgfx::kInvalidHandle)
             return false;
 
-        int totalSize = 0;
         for (unsigned i = 0; i < levels_; ++i)
         {
-            //SetData(i, 0, 0, levelWidth, levelHeight, levelData);
-            auto dataSize = GetDataSize(levelWidth, levelHeight);
-            memoryUse += dataSize; // levelWidth * levelHeight * components;
-            totalSize += dataSize; // levelWidth * levelHeight * components;
+            SetData(i, 0, 0, levelWidth, levelHeight, levelData);
+            memoryUse += levelWidth * levelHeight * components;
+
             if (i < levels_ - 1)
             {
-//                 mipImage = image->GetNextLevel(); image = mipImage;
-//                 levelData = image->GetData();
-                levelWidth /= 2; // image->GetWidth();
-                levelHeight /= 2; // image->GetHeight();
-                if (levelWidth < 1)
-                    levelWidth = 1;
-                if (levelHeight < 1)
-                    levelHeight = 1;
+                mipImage = image->GetNextLevel();
+                image = mipImage;
+                levelData = image->GetData();
+                levelWidth = image->GetWidth();
+                levelHeight = image->GetHeight();
             }
         }
-        bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, levels_ > 1, 0, 0, width_, height_,
-                              bgfx::copy(image->GetData(), totalSize));
+//         bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, levels_, 0, 0, width_, height_,
+//                               bgfx::copy(image->GetData(), totalSize));
     }
     else
     {
@@ -278,7 +273,7 @@ bool Texture2D::SetData(Image* image, bool useAlpha)
         unsigned format = graphics_->GetFormat(image->GetCompressedFormat());
         bool needDecompress = false;
 
-        if (/*!format*/format == bgfx::TextureFormat::Unknown)
+        if (format == bgfx::TextureFormat::Unknown)
         {
             format = Graphics::GetRGBAFormat();
             needDecompress = true;
@@ -294,27 +289,24 @@ bool Texture2D::SetData(Image* image, bool useAlpha)
 
         SetNumLevels(Max((levels - mipsToSkip), 1U));
         SetSize(width, height, format);
-        uint32_t totalSize = 0;
+
         for (unsigned i = 0; i < levels_ && i < levels - mipsToSkip; ++i)
         {
             CompressedLevel level = image->GetCompressedLevel(i + mipsToSkip);
-            totalSize += level.dataSize_;
-//             if (!needDecompress)
-//             {
-//                 SetData(i, 0, 0, level.width_, level.height_, level.data_);
-//                 memoryUse += level.rows_ * level.rowSize_;
-//             }
-//             else
-//             {
-//                 auto* rgbaData = new unsigned char[level.width_ * level.height_ * 4];
-//                 level.Decompress(rgbaData);
-//                 SetData(i, 0, 0, level.width_, level.height_, rgbaData);
-//                 memoryUse += level.width_ * level.height_ * 4;
-//                 delete[] rgbaData;
-//             }
+            if (!needDecompress)
+            {
+                SetData(i, 0, 0, level.width_, level.height_, level.data_);
+                memoryUse += level.rows_ * level.rowSize_;
+            }
+            else
+            {
+                auto* rgbaData = new unsigned char[level.width_ * level.height_ * 4];
+                level.Decompress(rgbaData);
+                SetData(i, 0, 0, level.width_, level.height_, rgbaData);
+                memoryUse += level.width_ * level.height_ * 4;
+                delete[] rgbaData;
+            }
         }
-        bgfx::updateTexture2D(bgfx::TextureHandle{object_.handle_}, 0, levels_ > 1, 0, 0, width_, height_,
-                              bgfx::copy(image->GetData(), totalSize));
     }
 
     SetMemoryUse(memoryUse);
