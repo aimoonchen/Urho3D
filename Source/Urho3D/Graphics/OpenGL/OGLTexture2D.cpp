@@ -484,13 +484,14 @@ bool Texture2D::Create()
         // glGenerateMipmap appears to not be working on WebGL or iOS/tvOS, disable rendertarget mipmaps for now
         requestedLevels_ = 1;
 #else
-        if (requestedLevels_ != 1)
-        {
-            // Generate levels for the first time now
-            RegenerateLevels();
-            // Determine max. levels automatically
-            requestedLevels_ = 0;
-        }
+//         if (requestedLevels_ != 1)
+//         {
+//             // Generate levels for the first time now
+//             RegenerateLevels();
+//             // Determine max. levels automatically
+//             requestedLevels_ = 0;
+//         }
+        requestedLevels_ = 1;
 #endif
     }
 
@@ -504,13 +505,19 @@ bool Texture2D::Create()
     UpdateParameters();
     graphics_->SetTexture(0, nullptr);
     
-    textureFlags = GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W);
+    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
     auto textureHandle = bgfx::createTexture2D(width_, height_, levels_ > 1, 1, bgfx::TextureFormat::Enum(format_), textureFlags);
     if (!bgfx::isValid(textureHandle)) {
         URHO3D_LOGERROR("Failed to create texture");
         return false;
     }
     object_.handle_ = textureHandle.idx;
+    
+    if (renderSurface_)
+    {
+        renderSurface_->CreateFrameBuffer();
+    }
+    
     return success;
 }
 

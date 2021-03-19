@@ -29,6 +29,8 @@
 #include "../../Graphics/RenderSurface.h"
 #include "../../Graphics/Texture.h"
 
+#include "bgfx/bgfx.h"
+
 #include "../../DebugNew.h"
 
 #ifdef GL_ES_VERSION_2_0
@@ -45,42 +47,43 @@ namespace Urho3D
 RenderSurface::RenderSurface(Texture* parentTexture) :      // NOLINT(hicpp-member-init)
     parentTexture_(parentTexture),
     target_(GL_TEXTURE_2D),
-    renderBuffer_(0)
+    renderBuffer_(0),
+    framebuffer_handle_{ bgfx::kInvalidHandle }
 {
 }
 
 bool RenderSurface::CreateRenderBuffer(unsigned width, unsigned height, unsigned format, int multiSample)
 {
-    Graphics* graphics = parentTexture_->GetGraphics();
-    if (!graphics)
-        return false;
-
-    Release();
-
-#ifndef GL_ES_VERSION_2_0
-    if (Graphics::GetGL3Support())
-    {
-        glGenRenderbuffers(1, &renderBuffer_);
-        glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
-        if (multiSample > 1)
-            glRenderbufferStorageMultisample(GL_RENDERBUFFER, multiSample, format, width, height);
-        else
-            glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
-        glBindRenderbuffer(GL_RENDERBUFFER, 0);
-    }
-    else
-#endif
-    {
-        glGenRenderbuffersEXT(1, &renderBuffer_);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, renderBuffer_);
-#ifndef GL_ES_VERSION_2_0
-        if (multiSample > 1)
-            glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, multiSample, format, width, height);
-        else
-#endif
-            glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
-        glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
-    }
+//     Graphics* graphics = parentTexture_->GetGraphics();
+//     if (!graphics)
+//         return false;
+// 
+//     Release();
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     if (Graphics::GetGL3Support())
+//     {
+//         glGenRenderbuffers(1, &renderBuffer_);
+//         glBindRenderbuffer(GL_RENDERBUFFER, renderBuffer_);
+//         if (multiSample > 1)
+//             glRenderbufferStorageMultisample(GL_RENDERBUFFER, multiSample, format, width, height);
+//         else
+//             glRenderbufferStorage(GL_RENDERBUFFER, format, width, height);
+//         glBindRenderbuffer(GL_RENDERBUFFER, 0);
+//     }
+//     else
+// #endif
+//     {
+//         glGenRenderbuffersEXT(1, &renderBuffer_);
+//         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, renderBuffer_);
+// #ifndef GL_ES_VERSION_2_0
+//         if (multiSample > 1)
+//             glRenderbufferStorageMultisampleEXT(GL_RENDERBUFFER_EXT, multiSample, format, width, height);
+//         else
+// #endif
+//             glRenderbufferStorageEXT(GL_RENDERBUFFER_EXT, format, width, height);
+//         glBindRenderbufferEXT(GL_RENDERBUFFER_EXT, 0);
+//     }
 
     return true;
 }
@@ -115,25 +118,40 @@ void RenderSurface::Release()
     if (!graphics)
         return;
 
-    if (!graphics->IsDeviceLost())
-    {
-        for (unsigned i = 0; i < MAX_RENDERTARGETS; ++i)
-        {
-            if (graphics->GetRenderTarget(i) == this)
-                graphics->ResetRenderTarget(i);
-        }
-
-        if (graphics->GetDepthStencil() == this)
-            graphics->ResetDepthStencil();
-
-        // Clean up also from non-active FBOs
-        graphics->CleanupRenderSurface(this);
-
-        if (renderBuffer_)
-            glDeleteRenderbuffersEXT(1, &renderBuffer_);
+//     if (!graphics->IsDeviceLost())
+//     {
+//         for (unsigned i = 0; i < MAX_RENDERTARGETS; ++i)
+//         {
+//             if (graphics->GetRenderTarget(i) == this)
+//                 graphics->ResetRenderTarget(i);
+//         }
+// 
+//         if (graphics->GetDepthStencil() == this)
+//             graphics->ResetDepthStencil();
+// 
+//         // Clean up also from non-active FBOs
+//         graphics->CleanupRenderSurface(this);
+// 
+//         if (renderBuffer_)
+//             glDeleteRenderbuffersEXT(1, &renderBuffer_);
+//     }
+// 
+//     renderBuffer_ = 0;
+    if (framebuffer_handle_ != bgfx::kInvalidHandle) {
+        bgfx::destroy(bgfx::FrameBufferHandle{framebuffer_handle_});
+        framebuffer_handle_ = bgfx::kInvalidHandle;
     }
+}
 
-    renderBuffer_ = 0;
+void RenderSurface::CreateFrameBuffer()
+{
+    Graphics* graphics = parentTexture_->GetGraphics();
+    if (!graphics)
+        return;
+    Release();
+    auto handle = bgfx::TextureHandle{ parentTexture_->GetGPUObjectHandle() };
+    auto fb = bgfx::createFrameBuffer(1, &handle);
+    framebuffer_handle_ = fb.idx;
 }
 
 }

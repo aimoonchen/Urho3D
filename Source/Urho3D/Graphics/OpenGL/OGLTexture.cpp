@@ -338,17 +338,17 @@ unsigned Texture::GetSRGBFormat(unsigned format)
 
 void Texture::RegenerateLevels()
 {
-    if (!object_.name_)
-        return;
-
-#ifndef GL_ES_VERSION_2_0
-    if (Graphics::GetGL3Support())
-        glGenerateMipmap(target_);
-    else
-        glGenerateMipmapEXT(target_);
-#else
-    glGenerateMipmap(target_);
-#endif
+//     if (!object_.name_)
+//         return;
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     if (Graphics::GetGL3Support())
+//         glGenerateMipmap(target_);
+//     else
+//         glGenerateMipmapEXT(target_);
+// #else
+//     glGenerateMipmap(target_);
+// #endif
 
     levelsDirty_ = false;
 }

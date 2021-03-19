@@ -19,7 +19,7 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-
+#include <memory>
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
 #include <Urho3D/Graphics/Camera.h>
@@ -45,7 +45,33 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(RenderToTexture)
+//URHO3D_DEFINE_APPLICATION_MAIN(RenderToTexture)
+
+bgfxApp::bgfxApp(const char* _name, const char* _description, const char* _url)
+    : entry::AppI(_name, _description, _url)
+{
+}
+
+bgfxApp::~bgfxApp() {}
+
+void bgfxApp::init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height)
+{
+    AppI::init(_argc, _argv, _width, _height);
+}
+
+bool bgfxApp::update()
+{
+    Urho3D::ParseArguments(GetCommandLineW());
+    std::shared_ptr<Urho3D::Context> context_ = std::make_shared<Urho3D::Context>();
+    std::shared_ptr<RenderToTexture> urho3d_app_ = std::make_shared<RenderToTexture>(context_.get());
+    urho3d_app_->Run();
+    return false;
+}
+
+// URHO3D_DEFINE_APPLICATION_MAIN(HelloGUI)
+
+URHO3D_DEFINE_APPLICATION_MAIN(RenderToTexture, "10-RenderToTexture", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
 RenderToTexture::RenderToTexture(Context* context) :
     Sample(context)

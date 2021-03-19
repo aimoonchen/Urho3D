@@ -137,6 +137,7 @@ public:
     /// Set or clear the need resolve flag. Called internally by Graphics.
     void SetResolveDirty(bool enable) { resolveDirty_ = enable; }
 
+    void CreateFrameBuffer();
 private:
     /// Parent texture.
     Texture* parentTexture_;
@@ -153,6 +154,8 @@ private:
         /// OpenGL renderbuffer name.
         /// @nobind
         unsigned renderBuffer_;
+
+        uint16_t framebuffer_handle_;
     };
 
     // https://github.com/doxygen/doxygen/issues/7623

@@ -1683,8 +1683,8 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         {""},
         {""},
         {""},
-        {""},
-        {""},
+        {"FaceSelectCubeMap"},
+        {"IndirectionCubeMap"},
         {""},
         {""},
         {""}
