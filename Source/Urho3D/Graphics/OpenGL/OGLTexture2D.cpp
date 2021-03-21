@@ -410,13 +410,13 @@ bool Texture2D::Create()
         (format == GL_DEPTH_COMPONENT && !graphics_->GetShadowMapFormat()))
 #endif
     {
-        if (renderSurface_)
-        {
-            renderSurface_->CreateRenderBuffer(width_, height_, format, multiSample_);
-            return true;
-        }
-        else
-            return false;
+//         if (renderSurface_)
+//         {
+//             renderSurface_->CreateRenderBuffer(width_, height_, format, multiSample_);
+//             return true;
+//         }
+//         else
+//             return false;
     }
     else
     {
@@ -474,12 +474,15 @@ bool Texture2D::Create()
 //         }
 //     }
     
+    if (usage_ >= TEXTURE_RENDERTARGET)
+    {
+        textureFlags |= BGFX_TEXTURE_RT;
+    }
     // Set mipmapping
     if (usage_ == TEXTURE_DEPTHSTENCIL || usage_ == TEXTURE_DYNAMIC)
         requestedLevels_ = 1;
     else if (usage_ == TEXTURE_RENDERTARGET)
     {
-        textureFlags |= BGFX_TEXTURE_RT;
 #if defined(__EMSCRIPTEN__) || defined(IOS) || defined(TVOS)
         // glGenerateMipmap appears to not be working on WebGL or iOS/tvOS, disable rendertarget mipmaps for now
         requestedLevels_ = 1;
@@ -506,17 +509,21 @@ bool Texture2D::Create()
     graphics_->SetTexture(0, nullptr);
     
     textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
+    if (usage_ >= TEXTURE_RENDERTARGET)
+    {
+        textureFlags = BGFX_TEXTURE_RT;
+    }
     auto textureHandle = bgfx::createTexture2D(width_, height_, levels_ > 1, 1, bgfx::TextureFormat::Enum(format_), textureFlags);
     if (!bgfx::isValid(textureHandle)) {
-        URHO3D_LOGERROR("Failed to create texture");
+        URHO3D_LOGERROR("Failed to create Texture2D");
         return false;
     }
     object_.handle_ = textureHandle.idx;
     
-    if (renderSurface_)
-    {
-        renderSurface_->CreateFrameBuffer();
-    }
+//     if (renderSurface_)
+//     {
+//         renderSurface_->CreateFrameBuffer();
+//     }
     
     return success;
 }

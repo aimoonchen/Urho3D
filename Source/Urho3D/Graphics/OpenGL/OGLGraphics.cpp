@@ -321,8 +321,8 @@ Graphics::Graphics(Context* context) :
     Object(context),
     impl_(new GraphicsImpl()),
     position_(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED),
-    shadowMapFormat_(GL_DEPTH_COMPONENT16),
-    hiresShadowMapFormat_(GL_DEPTH_COMPONENT24),
+    shadowMapFormat_(bgfx::TextureFormat::D16/*GL_DEPTH_COMPONENT16*/),
+    hiresShadowMapFormat_(bgfx::TextureFormat::D24/*GL_DEPTH_COMPONENT24*/),
 //     shaderPath_("Shaders/GLSL/"),
 //     shaderExtension_(".glsl"),
     shaderPath_("Shaders/BGFX/"),
@@ -626,11 +626,12 @@ bool Graphics::TakeScreenShot(Image& destImage)
 bool Graphics::BeginFrame()
 {
 //     // Set view 0 default viewport.
-//     bgfx::setViewRect(0, 0, 0, uint16_t(width_), uint16_t(height_));
+//     bgfx::setViewRect(view_id_, 0, 0, uint16_t(width_), uint16_t(height_));
 // 
 //     // This dummy draw call is here to make sure that view 0 is cleared
 //     // if no other draw calls are submitted to view 0.
-//     bgfx::touch(0);
+//     bgfx::touch(view_id_);
+    view_id_ = 0;
 
     if (!IsInitialized() || IsDeviceLost())
         return false;
@@ -731,7 +732,7 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         auto a = (unsigned)Clamp(((int)(color.a_ * 255.0f)), 0, 255);
         return (r << 24u) | (g << 16u) | (b << 8u) | a;
     };
-    bgfx::setViewClear(0, clearFlag, ToRGBA(color), depth, stencil);
+    bgfx::setViewClear(view_id_, clearFlag, ToRGBA(color), depth, stencil);
 
     // If viewport is less than full screen, set a scissor to limit the clear
     /// \todo Any user-set scissor test will be lost
@@ -741,7 +742,7 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     else
         SetScissorTest(false);
 
-    bgfx::touch(0);
+    bgfx::touch(view_id_);
 
     //glClear(glFlags);
 
@@ -932,7 +933,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
         }
         bgfx::setState(render_state_);
         bgfx::setStencil(front_stencil_);
-        bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
+        bgfx::submit(view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
     }
     numPrimitives_ += primitiveCount;
     ++numBatches_;
@@ -970,7 +971,7 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     //uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
-    bgfx::submit(0, { impl_->shaderProgram_->GetGPUObjectHandle() });
+    bgfx::submit(view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
 
     numPrimitives_ += primitiveCount;
     ++numBatches_;
@@ -1172,7 +1173,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
         if (i != impl_->shaderPrograms_.End())
         {
             // Use the existing linked program
-            if (i->second_->GetGPUObjectName())
+            if (i->second_->GetGPUObjectHandle() != bgfx::kInvalidHandle /*i->second_->GetGPUObjectName()*/)
             {
                 //glUseProgram(i->second_->GetGPUObjectName());
                 impl_->shaderProgram_ = i->second_;
@@ -1677,23 +1678,24 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         {"SpecMap"},
         {"EmissiveMap"},
         {"EnvMap"},
+        {""},
+        {""},
+        {""},
         {"LightRampMap"},
         {"LightSpotMap"},
         {"ShadowMap"},
-        {""},
-        {""},
-        {""},
         {"FaceSelectCubeMap"},
         {"IndirectionCubeMap"},
         {""},
         {""},
         {""}
     };
-    if (texture) {
+    if (texture && impl_->shaderProgram_) {
         auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
         if (sampler_handle == bgfx::kInvalidHandle)
         {
-            URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+            //URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+            return;
         }
         bgfx::setTexture(index, {sampler_handle}, {texture->GetGPUObjectHandle()});
     }
@@ -1927,7 +1929,7 @@ void Graphics::SetViewport(const IntRect& rect)
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
     //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
-    bgfx::setViewRect(0, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
+    bgfx::setViewRect(view_id_, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
     viewport_ = rectCopy;
 
     // Disable scissor test, needs to be re-enabled by the user
@@ -3123,174 +3125,202 @@ void Graphics::PrepareDraw()
                 bool sRGBWrite = sRGB_;
                 if (sRGBWrite != impl_->sRGBWrite_)
                 {
-                    if (sRGBWrite)
-                        glEnable(GL_FRAMEBUFFER_SRGB_EXT);
-                    else
-                        glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+//                     if (sRGBWrite)
+//                         glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+//                     else
+//                         glDisable(GL_FRAMEBUFFER_SRGB_EXT);
                     impl_->sRGBWrite_ = sRGBWrite;
                 }
             }
 #endif
-
+            bgfx::setViewFrameBuffer(view_id_, BGFX_INVALID_HANDLE);
             return;
         }
 
         // Search for a new framebuffer based on format & size, or create new
-        IntVector2 rtSize = Graphics::GetRenderTargetDimensions();
-        unsigned format = 0;
-        if (renderTargets_[0])
-            format = renderTargets_[0]->GetParentTexture()->GetFormat();
-        else if (depthStencil_)
-            format = depthStencil_->GetParentTexture()->GetFormat();
-
-        auto fboKey = (unsigned long long)format << 32u | rtSize.x_ << 16u | rtSize.y_;
-        HashMap<unsigned long long, FrameBufferObject>::Iterator i = impl_->frameBuffers_.Find(fboKey);
-        if (i == impl_->frameBuffers_.End())
-        {
-            FrameBufferObject newFbo;
-            newFbo.fbo_ = CreateFramebuffer();
-            i = impl_->frameBuffers_.Insert(MakePair(fboKey, newFbo));
-        }
-
-        if (impl_->boundFBO_ != i->second_.fbo_)
-        {
-            BindFramebuffer(i->second_.fbo_);
-            impl_->boundFBO_ = i->second_.fbo_;
-        }
+//         IntVector2 rtSize = Graphics::GetRenderTargetDimensions();
+//         unsigned format = 0;
+//         if (renderTargets_[0])
+//             format = renderTargets_[0]->GetParentTexture()->GetFormat();
+//         else if (depthStencil_)
+//             format = depthStencil_->GetParentTexture()->GetFormat();
+// 
+//         auto fboKey = (unsigned long long)format << 32u | rtSize.x_ << 16u | rtSize.y_;
+//         HashMap<unsigned long long, FrameBufferObject>::Iterator i = impl_->frameBuffers_.Find(fboKey);
+//         if (i == impl_->frameBuffers_.End())
+//         {
+//             FrameBufferObject newFbo;
+//             newFbo.fbo_ = CreateFramebuffer();
+//             i = impl_->frameBuffers_.Insert(MakePair(fboKey, newFbo));
+//         }
+// 
+//         if (impl_->boundFBO_ != i->second_.fbo_)
+//         {
+//             BindFramebuffer(i->second_.fbo_);
+//             impl_->boundFBO_ = i->second_.fbo_;
+//         }
 
 #ifndef GL_ES_VERSION_2_0
         // Setup readbuffers & drawbuffers if needed
-        if (i->second_.readBuffers_ != GL_NONE)
-        {
-            glReadBuffer(GL_NONE);
-            i->second_.readBuffers_ = GL_NONE;
-        }
-
-        // Calculate the bit combination of non-zero color rendertargets to first check if the combination changed
-        unsigned newDrawBuffers = 0;
-        for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-        {
-            if (renderTargets_[j])
-                newDrawBuffers |= 1u << j;
-        }
-
-        if (newDrawBuffers != i->second_.drawBuffers_)
-        {
-            // Check for no color rendertargets (depth rendering only)
-            if (!newDrawBuffers)
-                glDrawBuffer(GL_NONE);
-            else
-            {
-                int drawBufferIds[MAX_RENDERTARGETS];
-                unsigned drawBufferCount = 0;
-
-                for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-                {
-                    if (renderTargets_[j])
-                    {
-                        if (!gl3Support)
-                            drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0_EXT + j;
-                        else
-                            drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0 + j;
-                    }
-                }
-                glDrawBuffers(drawBufferCount, (const GLenum*)drawBufferIds);
-            }
-
-            i->second_.drawBuffers_ = newDrawBuffers;
-        }
+//         if (i->second_.readBuffers_ != GL_NONE)
+//         {
+//             glReadBuffer(GL_NONE);
+//             i->second_.readBuffers_ = GL_NONE;
+//         }
+// 
+//         // Calculate the bit combination of non-zero color rendertargets to first check if the combination changed
+//         unsigned newDrawBuffers = 0;
+//         for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
+//         {
+//             if (renderTargets_[j])
+//                 newDrawBuffers |= 1u << j;
+//         }
+// 
+//         if (newDrawBuffers != i->second_.drawBuffers_)
+//         {
+//             // Check for no color rendertargets (depth rendering only)
+//             if (!newDrawBuffers)
+//                 glDrawBuffer(GL_NONE);
+//             else
+//             {
+//                 int drawBufferIds[MAX_RENDERTARGETS];
+//                 unsigned drawBufferCount = 0;
+// 
+//                 for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
+//                 {
+//                     if (renderTargets_[j])
+//                     {
+//                         if (!gl3Support)
+//                             drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0_EXT + j;
+//                         else
+//                             drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0 + j;
+//                     }
+//                 }
+//                 glDrawBuffers(drawBufferCount, (const GLenum*)drawBufferIds);
+//             }
+// 
+//             i->second_.drawBuffers_ = newDrawBuffers;
+//         }
 #endif
-
         for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
         {
             if (renderTargets_[j])
             {
-                Texture* texture = renderTargets_[j]->GetParentTexture();
-
-                // Bind either a renderbuffer or texture, depending on what is available
-                unsigned renderBufferID = renderTargets_[j]->GetRenderBuffer();
-                if (!renderBufferID)
-                {
-                    // If texture's parameters are dirty, update before attaching
-                    if (texture->GetParametersDirty())
-                    {
-                        SetTextureForUpdate(texture);
-                        texture->UpdateParameters();
-                        SetTexture(0, nullptr);
-                    }
-
-                    if (i->second_.colorAttachments_[j] != renderTargets_[j])
-                    {
-                        BindColorAttachment(j, renderTargets_[j]->GetTarget(), texture->GetGPUObjectName(), false);
-                        i->second_.colorAttachments_[j] = renderTargets_[j];
-                    }
-                }
-                else
-                {
-                    if (i->second_.colorAttachments_[j] != renderTargets_[j])
-                    {
-                        BindColorAttachment(j, renderTargets_[j]->GetTarget(), renderBufferID, true);
-                        i->second_.colorAttachments_[j] = renderTargets_[j];
-                    }
-                }
+                //bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[j]->GetFrameBufferHandle()});
+                //                 Texture* texture = renderTargets_[j]->GetParentTexture();
+// 
+//                 // Bind either a renderbuffer or texture, depending on what is available
+//                 unsigned renderBufferID = renderTargets_[j]->GetRenderBuffer();
+//                 if (!renderBufferID)
+//                 {
+//                     // If texture's parameters are dirty, update before attaching
+//                     if (texture->GetParametersDirty())
+//                     {
+//                         SetTextureForUpdate(texture);
+//                         texture->UpdateParameters();
+//                         SetTexture(0, nullptr);
+//                     }
+// 
+//                     if (i->second_.colorAttachments_[j] != renderTargets_[j])
+//                     {
+//                         BindColorAttachment(j, renderTargets_[j]->GetTarget(), texture->GetGPUObjectName(), false);
+//                         i->second_.colorAttachments_[j] = renderTargets_[j];
+//                     }
+//                 }
+//                 else
+//                 {
+//                     if (i->second_.colorAttachments_[j] != renderTargets_[j])
+//                     {
+//                         BindColorAttachment(j, renderTargets_[j]->GetTarget(), renderBufferID, true);
+//                         i->second_.colorAttachments_[j] = renderTargets_[j];
+//                     }
+//                 }
             }
             else
             {
-                if (i->second_.colorAttachments_[j])
-                {
-                    BindColorAttachment(j, GL_TEXTURE_2D, 0, false);
-                    i->second_.colorAttachments_[j] = nullptr;
-                }
+                //                 if (i->second_.colorAttachments_[j])
+//                 {
+//                     BindColorAttachment(j, GL_TEXTURE_2D, 0, false);
+//                     i->second_.colorAttachments_[j] = nullptr;
+//                 }
             }
+            break;
         }
 
         if (depthStencil_)
         {
             // Bind either a renderbuffer or a depth texture, depending on what is available
-            Texture* texture = depthStencil_->GetParentTexture();
-#ifndef GL_ES_VERSION_2_0
-            bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_EXT;
-#else
-            bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_OES;
-#endif
-            unsigned renderBufferID = depthStencil_->GetRenderBuffer();
-            if (!renderBufferID)
-            {
-                // If texture's parameters are dirty, update before attaching
-                if (texture->GetParametersDirty())
-                {
-                    SetTextureForUpdate(texture);
-                    texture->UpdateParameters();
-                    SetTexture(0, nullptr);
-                }
-
-                if (i->second_.depthAttachment_ != depthStencil_)
-                {
-                    BindDepthAttachment(texture->GetGPUObjectName(), false);
-                    BindStencilAttachment(hasStencil ? texture->GetGPUObjectName() : 0, false);
-                    i->second_.depthAttachment_ = depthStencil_;
-                }
-            }
-            else
-            {
-                if (i->second_.depthAttachment_ != depthStencil_)
-                {
-                    BindDepthAttachment(renderBufferID, true);
-                    BindStencilAttachment(hasStencil ? renderBufferID : 0, true);
-                    i->second_.depthAttachment_ = depthStencil_;
-                }
-            }
+//             Texture* texture = depthStencil_->GetParentTexture();
+// #ifndef GL_ES_VERSION_2_0
+//             bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_EXT;
+// #else
+//             bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_OES;
+// #endif
+//             unsigned renderBufferID = depthStencil_->GetRenderBuffer();
+//             if (!renderBufferID)
+//             {
+//                 // If texture's parameters are dirty, update before attaching
+//                 if (texture->GetParametersDirty())
+//                 {
+//                     SetTextureForUpdate(texture);
+//                     texture->UpdateParameters();
+//                     SetTexture(0, nullptr);
+//                 }
+// 
+//                 if (i->second_.depthAttachment_ != depthStencil_)
+//                 {
+//                     BindDepthAttachment(texture->GetGPUObjectName(), false);
+//                     BindStencilAttachment(hasStencil ? texture->GetGPUObjectName() : 0, false);
+//                     i->second_.depthAttachment_ = depthStencil_;
+//                 }
+//             }
+//             else
+//             {
+//                 if (i->second_.depthAttachment_ != depthStencil_)
+//                 {
+//                     BindDepthAttachment(renderBufferID, true);
+//                     BindStencilAttachment(hasStencil ? renderBufferID : 0, true);
+//                     i->second_.depthAttachment_ = depthStencil_;
+//                 }
+//             }
         }
         else
         {
-            if (i->second_.depthAttachment_)
-            {
-                BindDepthAttachment(0, false);
-                BindStencilAttachment(0, false);
-                i->second_.depthAttachment_ = nullptr;
-            }
+//             if (i->second_.depthAttachment_)
+//             {
+//                 BindDepthAttachment(0, false);
+//                 BindStencilAttachment(0, false);
+//                 i->second_.depthAttachment_ = nullptr;
+//             }
         }
-
+        if (renderTargets_[0])
+        {
+            if (renderTargets_[0]->GetFrameBufferHandle() == bgfx::kInvalidHandle)
+            {
+                bgfx::TextureHandle fbt[2];
+                uint8_t count = 1;
+                fbt[0] = bgfx::TextureHandle{renderTargets_[0]->GetParentTexture()->GetGPUObjectHandle()};
+                if (depthStencil_)
+                {
+                    count++;
+                    fbt[1] = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
+                }
+                auto framebuffer = bgfx::createFrameBuffer(count, fbt);
+                renderTargets_[0]->SetFrameBufferHandle(framebuffer.idx);
+            }
+            bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+        }
+        else if (depthStencil_)
+        {
+            if (depthStencil_->GetFrameBufferHandle() == bgfx::kInvalidHandle)
+            {
+                auto fbt = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
+                auto framebuffer = bgfx::createFrameBuffer(1, &fbt);
+                depthStencil_->SetFrameBufferHandle(framebuffer.idx);
+            }
+            bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{depthStencil_->GetFrameBufferHandle()});
+        }
+        
 #ifndef GL_ES_VERSION_2_0
         // Disable/enable sRGB write
         if (sRGBWriteSupport_)

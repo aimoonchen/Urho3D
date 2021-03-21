@@ -124,10 +124,10 @@ void StaticScene::CreateScene()
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetCastShadows(true);
-    light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-    // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
-    light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
+//     light->SetCastShadows(true);
+//     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
+//     // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
+//     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
     // Create more StaticModel objects to the scene, randomly positioned, rotated and scaled. For rotation, we construct a
     // quaternion from Euler angles where the Y angle (rotation about the Y axis) is randomized. The mushroom model contains
     // LOD levels, so the StaticModel component will automatically select the LOD level according to the view distance (you'll
@@ -144,7 +144,7 @@ void StaticScene::CreateScene()
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-        mushroomObject->SetCastShadows(true);
+        //mushroomObject->SetCastShadows(true);
     }
 
     // Create a scene node for the camera, which we will move around

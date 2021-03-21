@@ -213,9 +213,9 @@ float GetShadow(vec4 shadowPos)
     #if defined(SIMPLE_SHADOW)
         // Take one sample
         #ifndef GL3
-            float inLight = shadow2DProj(sShadowMap, shadowPos).r;
+            float inLight = shadow2DProj(sShadowMap, shadowPos);
         #else
-            float inLight = textureProj(sShadowMap, shadowPos);
+            float inLight = texture2DProj(sShadowMap, shadowPos).r;
         #endif
         return cShadowIntensity.y + cShadowIntensity.x * inLight;
     #elif defined(PCF_SHADOW)
@@ -227,15 +227,15 @@ float GetShadow(vec4 shadowPos)
             vec2 offsets = cShadowMapInvSize;
         #endif
         #ifndef GL3
-            return cShadowIntensity.y + cShadowIntensity.x * (shadow2DProj(sShadowMap, shadowPos).r +
-                shadow2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r +
-                shadow2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r +
-                shadow2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r);
+            return cShadowIntensity.y + cShadowIntensity.x * (shadow2DProj(sShadowMap, shadowPos) +
+                shadow2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)) +
+                shadow2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)) +
+                shadow2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)));
         #else
-            return cShadowIntensity.y + cShadowIntensity.x * (textureProj(sShadowMap, shadowPos) +
-                textureProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)) +
-                textureProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)) +
-                textureProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)));
+            return cShadowIntensity.y + cShadowIntensity.x * (texture2DProj(sShadowMap, shadowPos).r +
+                texture2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r +
+                texture2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r +
+                texture2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r);
         #endif
     #elif defined(VSM_SHADOW)
         vec2 samples = texture2D(sShadowMap, shadowPos.xy / shadowPos.w).rg; 
@@ -243,7 +243,7 @@ float GetShadow(vec4 shadowPos)
     #endif
 }
 #else
-float GetShadow(highp vec4 shadowPos)
+float GetShadow(vec4 shadowPos)
 {
     #if defined(SIMPLE_SHADOW)
         // Take one sample
@@ -310,7 +310,7 @@ float GetDirShadow(const vec4 iShadowPos[NUMCASCADES], float depth)
     return GetDirShadowFade(GetShadow(shadowPos), depth);
 }
 #else
-float GetDirShadow(const highp vec4 iShadowPos[NUMCASCADES], float depth)
+float GetDirShadow(const vec4 iShadowPos[NUMCASCADES], float depth)
 {
     return GetDirShadowFade(GetShadow(iShadowPos[0]), depth);
 }
@@ -350,7 +350,7 @@ float GetDirShadowDeferred(vec4 projWorldPos, vec3 normal, float depth)
 #ifndef GL_ES
 float GetShadow(const vec4 iShadowPos[NUMCASCADES], float depth)
 #else
-float GetShadow(const highp vec4 iShadowPos[NUMCASCADES], float depth)
+float GetShadow(const vec4 iShadowPos[NUMCASCADES], float depth)
 #endif
 {
     #if defined(DIRLIGHT)

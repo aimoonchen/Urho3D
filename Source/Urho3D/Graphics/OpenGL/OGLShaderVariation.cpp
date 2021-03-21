@@ -205,8 +205,8 @@ bool ShaderVariation::Create()
     options.depends = false; // cmdLine.hasArg("depends");
     options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
 
-    //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
-    options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    //options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
     options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
     for (const auto& def : defineVec)
     {
@@ -226,8 +226,8 @@ bool ShaderVariation::Create()
         if ('c' != options.shaderType)
         {
             std::string defaultVarying =
-                //"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
-                "D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
+                "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+                //"D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
             const char* varyingdef =
                 defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);
@@ -262,7 +262,7 @@ bool ShaderVariation::Create()
         bx::memSet(&data[size + 1], 0, padding);
         //bx::close(&reader);
 
-//         bx::FileWriter* writer = NULL;
+//         bx::FileWriter* fwriter = NULL;
 // 
 //         if (false/*!bin2c.isEmpty()*/)
 //         {
@@ -270,33 +270,37 @@ bool ShaderVariation::Create()
 //         }
 //         else
 //         {
-//             writer = new bx::FileWriter;
+//             fwriter = new bx::FileWriter;
 //         }
-// 
-//         if (!bx::open(writer, /*outFilePath*/"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\output.txt"))
+//         std::string outfileName = std::string("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\output_") + filePath.CString() + ".txt";
+//         if (!bx::open(fwriter, /*outFilePath*/ outfileName.c_str()))
 //         {
 //             //bx::printf("Unable to open output file '%s'.\n", outFilePath);
 //             return bx::kExitFailure;
 //         }
-
-        bgfx::memory_writer writer;
-        auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &writer);
+//         // bgfx::memory_writer writer;
+//         auto compiled0 = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, fwriter);
+//         if (!compiled0)
+//         {
+//             URHO3D_LOGERROR("CompileShader %s Failed.", filePath.CString());
+//         }
+//         bx::close(fwriter);
+//         delete fwriter;
+//         return true;
+        bgfx::memory_writer mwriter;
+        auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &mwriter);
         if (!compiled)
         {
-            URHO3D_LOGERROR("CompileShader Failed.");
+            URHO3D_LOGERROR("CompileShader %s Failed.", filePath.CString());
         }
 
-        StringHash definesHash(defines_);
-        String outputFilename = GetName() + ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value());
+//         StringHash definesHash(defines_);
+//         String outputFilename = GetName() + ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value());
 
-        auto shaderHandle = bgfx::createShader(bgfx::copy(&writer.memory_[0], writer.current_size_));
+        auto shaderHandle = bgfx::createShader(bgfx::copy(&mwriter.memory_[0], mwriter.current_size_));
         object_.handle_ = shaderHandle.idx;
         return bgfx::isValid(shaderHandle);
-        
-//         bx::close(writer);
-//         delete writer;
-//         return true;
-        
+ 
 //    }
 //     const size_t padding = 16384;
 //     uint32_t size = shaderCode.Length(); // (uint32_t) bx::getSize(&reader);

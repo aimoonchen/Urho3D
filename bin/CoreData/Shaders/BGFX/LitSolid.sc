@@ -1,8 +1,8 @@
 #if defined(COMPILEVS)
 $input a_position, a_normal, a_tangent, a_color0, a_texcoord0
-$output v_color0, v_texcoord0, v_wpos, v_normal, v_tangent
+$output v_color0, v_texcoord0, v_wpos, v_normal, v_tangent, v_screen_pos, v_vertex_light, v_spot_pos, v_cube_mask_vec, v_shadow_pos0, v_shadow_pos1, v_shadow_pos2, v_shadow_pos3
 #elif defined(COMPILEPS)
-$input v_color0, v_texcoord0, v_wpos, v_normal, v_tangent
+$input v_color0, v_texcoord0, v_wpos, v_normal, v_tangent, v_screen_pos, v_vertex_light, v_spot_pos, v_cube_mask_vec, v_shadow_pos0, v_shadow_pos1, v_shadow_pos2, v_shadow_pos3
 #endif
 #include "bgfx_shader.sh"
 #include "shaderlib.sh"
@@ -33,14 +33,14 @@ varying vec4 v_wpos;
         #endif
     #endif
     #ifdef SPOTLIGHT
-        varying vec4 vSpotPos;
+        varying vec4 v_spot_pos;
     #endif
     #ifdef POINTLIGHT
-        varying vec3 vCubeMaskVec;
+        varying vec3 v_cube_mask_vec;
     #endif
 #else
-    varying vec3 vVertexLight;
-    varying vec4 vScreenPos;
+    varying vec3 v_vertex_light;
+    varying vec4 v_screen_pos;
     #ifdef ENVCUBEMAP
         varying vec3 vReflectionVec;
     #endif
@@ -77,35 +77,39 @@ void main()
 
         #ifdef SHADOW
             // Shadow projection: transform from world space to shadow space
-            for (int i = 0; i < NUMCASCADES; i++)
-                vShadowPos[i] = GetShadowPos(i, v_normal, projWorldPos);
+            //for (int i = 0; i < NUMCASCADES; i++)
+            //    vShadowPos[i] = GetShadowPos(i, v_normal, projWorldPos);
+            v_shadow_pos0 = GetShadowPos(0, v_normal, projWorldPos);
+            v_shadow_pos1 = GetShadowPos(1, v_normal, projWorldPos);
+            v_shadow_pos2 = GetShadowPos(2, v_normal, projWorldPos);
+            v_shadow_pos3 = GetShadowPos(3, v_normal, projWorldPos);
         #endif
 
         #ifdef SPOTLIGHT
             // Spotlight projection: transform from world space to projector texture coordinates
-            vSpotPos = projWorldPos * cLightMatrices[0];
+            v_spot_pos = projWorldPos * cLightMatrices[0];
         #endif
     
         #ifdef POINTLIGHT
-            vCubeMaskVec = (worldPos - cLightPos.xyz) * mat3(cLightMatrices[0][0].xyz, cLightMatrices[0][1].xyz, cLightMatrices[0][2].xyz);
+            v_cube_mask_vec = (worldPos - cLightPos.xyz) * mat3(cLightMatrices[0][0].xyz, cLightMatrices[0][1].xyz, cLightMatrices[0][2].xyz);
         #endif
     #else
         // Ambient & per-vertex lighting
         #if defined(LIGHTMAP) || defined(AO)
             // If using lightmap, disregard zone ambient light
             // If using AO, calculate ambient in the PS
-            vVertexLight = vec3(0.0, 0.0, 0.0);
+            v_vertex_light = vec3(0.0, 0.0, 0.0);
             v_texcoord1 = a_texcoord1;
         #else
-            vVertexLight = GetAmbient(GetZonePos(worldPos));
+            v_vertex_light = GetAmbient(GetZonePos(worldPos));
         #endif
         
         #ifdef NUMVERTEXLIGHTS
             for (int i = 0; i < NUMVERTEXLIGHTS; ++i)
-                vVertexLight += GetVertexLight(i, worldPos, v_normal) * cVertexLights[i * 3].rgb;
+                v_vertex_light += GetVertexLight(i, worldPos, v_normal) * cVertexLights[i * 3].rgb;
         #endif
         
-        vScreenPos = GetScreenPos(gl_Position);
+        v_screen_pos = GetScreenPos(gl_Position);
 
         #ifdef ENVCUBEMAP
             vReflectionVec = worldPos - cCameraPos;
@@ -162,13 +166,18 @@ void main()
         float diff = GetDiffuse(normal, v_wpos.xyz, lightDir);
 
         #ifdef SHADOW
+            vec4 vShadowPos[NUMCASCADES];//{v_shadow_pos0, v_shadow_pos1, v_shadow_pos2, v_shadow_pos3};
+            vShadowPos[0] = v_shadow_pos0;
+            vShadowPos[1] = v_shadow_pos1;
+            vShadowPos[2] = v_shadow_pos2;
+            vShadowPos[3] = v_shadow_pos3;
             diff *= GetShadow(vShadowPos, v_wpos.w);
         #endif
     
         #if defined(SPOTLIGHT)
-            lightColor = vSpotPos.w > 0.0 ? texture2DProj(sLightSpotMap, vSpotPos).rgb * cLightColor.rgb : vec3(0.0, 0.0, 0.0);
+            lightColor = v_spot_pos.w > 0.0 ? texture2DProj(sLightSpotMap, v_spot_pos).rgb * cLightColor.rgb : vec3(0.0, 0.0, 0.0);
         #elif defined(CUBEMASK)
-            lightColor = textureCube(sLightCubeMap, vCubeMaskVec).rgb * cLightColor.rgb;
+            lightColor = textureCube(sLightCubeMap, v_cube_mask_vec).rgb * cLightColor.rgb;
         #else
             lightColor = cLightColor.rgb;
         #endif
@@ -198,7 +207,7 @@ void main()
         float specIntensity = specColor.g;
         float specPower = cMatSpecColor.a / 255.0;
 
-        vec3 finalColor = vVertexLight * diffColor.rgb;
+        vec3 finalColor = v_vertex_light * diffColor.rgb;
         #ifdef AO
             // If using AO, the vertex light ambient is black, calculate occluded ambient here
             finalColor += texture2D(sEmissiveMap, v_texcoord1).rgb * cAmbientColor.rgb * diffColor.rgb;
@@ -222,7 +231,7 @@ void main()
         gl_FragData[3] = vec4(EncodeDepth(v_wpos.w), 0.0);
     #else
         // Ambient & per-vertex lighting
-        vec3 finalColor = vVertexLight * diffColor.rgb;
+        vec3 finalColor = v_vertex_light * diffColor.rgb;
         #ifdef AO
             // If using AO, the vertex light ambient is black, calculate occluded ambient here
             finalColor += texture2D(sEmissiveMap, v_texcoord1).rgb * cAmbientColor.rgb * diffColor.rgb;
@@ -231,7 +240,7 @@ void main()
         #ifdef MATERIAL
             // Add light pre-pass accumulation result
             // Lights are accumulated at half intensity. Bring back to full intensity now
-            vec4 lightInput = 2.0 * texture2DProj(sLightBuffer, vScreenPos);
+            vec4 lightInput = 2.0 * texture2DProj(sLightBuffer, v_screen_pos);
             vec3 lightSpecColor = lightInput.a * lightInput.rgb / max(GetIntensity(lightInput.rgb), 0.001);
 
             finalColor += lightInput.rgb * diffColor.rgb + lightSpecColor * specColor;

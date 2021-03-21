@@ -138,6 +138,9 @@ public:
     void SetResolveDirty(bool enable) { resolveDirty_ = enable; }
 
     void CreateFrameBuffer();
+    uint16_t GetFrameBufferHandle() const { return framebuffer_handle_; }
+    void SetFrameBufferHandle(uint16_t fh) { framebuffer_handle_ = fh; }
+
 private:
     /// Parent texture.
     Texture* parentTexture_;

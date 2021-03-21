@@ -6,9 +6,9 @@ SAMPLER2D(sSpecMap, 2);
 SAMPLER2D(sEmissiveMap, 3);
 SAMPLER2D(sEnvMap, 4);
 SAMPLERCUBE(sEnvCubeMap, 4);
-SAMPLER2D(sLightRampMap, 5);
-SAMPLER2D(sLightSpotMap, 6);
-SAMPLERCUBE(sLightCubeMap, 6);
+SAMPLER2D(sLightRampMap, 8);
+SAMPLER2D(sLightSpotMap, 9);
+SAMPLERCUBE(sLightCubeMap, 9);
 #ifndef GL_ES
     SAMPLER3D(sVolumeMap, 5);
     SAMPLER2D(sAlbedoBuffer, 0);
@@ -16,16 +16,16 @@ SAMPLERCUBE(sLightCubeMap, 6);
     SAMPLER2D(sDepthBuffer, 13);
     SAMPLER2D(sLightBuffer, 14);
     #ifdef VSM_SHADOW
-        SAMPLER2D(sShadowMap, 7);
+        SAMPLER2D(sShadowMap, 10);
     #else
-        SAMPLER2DSHADOW(sShadowMap, 7);
+        SAMPLER2DSHADOW(sShadowMap, 10);
     #endif
     SAMPLERCUBE(sFaceSelectCubeMap, 11);
     SAMPLERCUBE(sIndirectionCubeMap, 12);
     SAMPLERCUBE(sZoneCubeMap, 15);
     SAMPLER3D(sZoneVolumeMap, 15);
 #else
-    SAMPLER2D(sShadowMap, 7);
+    SAMPLER2D(sShadowMap, 10);
 #endif
 
 #ifdef GL3

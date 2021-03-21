@@ -33,7 +33,7 @@
 #include "../../IO/Log.h"
 #include "../../Resource/ResourceCache.h"
 #include "../../Resource/XMLFile.h"
-
+#include "../BGFX/bgfxGraphics.h"
 #include "../../DebugNew.h"
 
 #ifdef _MSC_VER
@@ -45,62 +45,62 @@ namespace Urho3D
 
 void TextureCube::OnDeviceLost()
 {
-    if (object_.name_ && !graphics_->IsDeviceLost())
-        glDeleteTextures(1, &object_.name_);
-
-    GPUObject::OnDeviceLost();
-
-    for (auto& renderSurface : renderSurfaces_)
-    {
-        if (renderSurface)
-            renderSurface->OnDeviceLost();
-    }
+//     if (object_.name_ && !graphics_->IsDeviceLost())
+//         glDeleteTextures(1, &object_.name_);
+// 
+//     GPUObject::OnDeviceLost();
+// 
+//     for (auto& renderSurface : renderSurfaces_)
+//     {
+//         if (renderSurface)
+//             renderSurface->OnDeviceLost();
+//     }
 }
 
 void TextureCube::OnDeviceReset()
 {
-    if (!object_.name_ || dataPending_)
-    {
-        // If has a resource file, reload through the resource cache. Otherwise just recreate.
-        auto* cache = GetSubsystem<ResourceCache>();
-        if (cache->Exists(GetName()))
-            dataLost_ = !cache->ReloadResource(this);
-
-        if (!object_.name_)
-        {
-            Create();
-            dataLost_ = true;
-        }
-    }
-
-    dataPending_ = false;
+//     if (!object_.name_ || dataPending_)
+//     {
+//         // If has a resource file, reload through the resource cache. Otherwise just recreate.
+//         auto* cache = GetSubsystem<ResourceCache>();
+//         if (cache->Exists(GetName()))
+//             dataLost_ = !cache->ReloadResource(this);
+// 
+//         if (!object_.name_)
+//         {
+//             Create();
+//             dataLost_ = true;
+//         }
+//     }
+// 
+//     dataPending_ = false;
 }
 
 void TextureCube::Release()
 {
-    if (object_.name_)
+    if (object_.handle_ != bgfx::kInvalidHandle)
     {
         if (!graphics_)
             return;
 
-        if (!graphics_->IsDeviceLost())
-        {
-            for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
-            {
-                if (graphics_->GetTexture(i) == this)
-                    graphics_->SetTexture(i, nullptr);
-            }
-
-            glDeleteTextures(1, &object_.name_);
-        }
-
-        for (auto& renderSurface : renderSurfaces_)
-        {
-            if (renderSurface)
-                renderSurface->Release();
-        }
-
-        object_.name_ = 0;
+//         if (!graphics_->IsDeviceLost())
+//         {
+//             for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
+//             {
+//                 if (graphics_->GetTexture(i) == this)
+//                     graphics_->SetTexture(i, nullptr);
+//             }
+// 
+//             glDeleteTextures(1, &object_.name_);
+//         }
+// 
+//         for (auto& renderSurface : renderSurfaces_)
+//         {
+//             if (renderSurface)
+//                 renderSurface->Release();
+//         }
+        bgfx::destroy(bgfx::TextureHandle{ object_.handle_ });
+        object_.handle_ = bgfx::kInvalidHandle;
     }
 
     resolveDirty_ = false;
@@ -111,7 +111,7 @@ bool TextureCube::SetData(CubeMapFace face, unsigned level, int x, int y, int wi
 {
     URHO3D_PROFILE(SetTextureData);
 
-    if (!object_.name_ || !graphics_)
+    if (object_.handle_ == bgfx::kInvalidHandle || !graphics_)
     {
         URHO3D_LOGERROR("No texture created, can not set data");
         return false;
@@ -152,29 +152,32 @@ bool TextureCube::SetData(CubeMapFace face, unsigned level, int x, int y, int wi
 
     graphics_->SetTextureForUpdate(this);
 
-    bool wholeLevel = x == 0 && y == 0 && width == levelWidth && height == levelHeight;
+//    bool wholeLevel = x == 0 && y == 0 && width == levelWidth && height == levelHeight;
     unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
 
-    if (!IsCompressed())
-    {
-        if (wholeLevel)
-            glTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, format, width, height, 0, GetExternalFormat(format_),
-                GetDataType(format_), data);
-        else
-            glTexSubImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, x, y, width, height, GetExternalFormat(format_),
-                GetDataType(format_), data);
-    }
-    else
-    {
-        if (wholeLevel)
-            glCompressedTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, format, width, height, 0,
-                GetDataSize(width, height), data);
-        else
-            glCompressedTexSubImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, x, y, width, height, format,
-                GetDataSize(width, height), data);
-    }
-
-    graphics_->SetTexture(0, nullptr);
+//     if (!IsCompressed())
+//     {
+//         if (wholeLevel)
+//             glTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, format, width, height, 0, GetExternalFormat(format_),
+//                 GetDataType(format_), data);
+//         else
+//             glTexSubImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, x, y, width, height, GetExternalFormat(format_),
+//                 GetDataType(format_), data);
+//     }
+//     else
+//     {
+//         if (wholeLevel)
+//             glCompressedTexImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, format, width, height, 0,
+//                 GetDataSize(width, height), data);
+//         else
+//             glCompressedTexSubImage2D((GLenum)(GL_TEXTURE_CUBE_MAP_POSITIVE_X + face), level, x, y, width, height, format,
+//                 GetDataSize(width, height), data);
+//     }
+// 
+//     graphics_->SetTexture(0, nullptr);
+    
+    bgfx::updateTextureCube(bgfx::TextureHandle{object_.handle_}, 0, bgfxCubeMapSide(face), level, x, y, width, height,
+                            bgfx::copy(data, GetDataSize(width, height)));
     return true;
 }
 
@@ -371,7 +374,7 @@ bool TextureCube::SetData(CubeMapFace face, Image* image, bool useAlpha)
 
 bool TextureCube::GetData(CubeMapFace face, unsigned level, void* dest) const
 {
-    if (!object_.name_ || !graphics_)
+    if (object_.handle_ == bgfx::kInvalidHandle || !graphics_)
     {
         URHO3D_LOGERROR("No texture created, can not get data");
         return false;
@@ -432,7 +435,6 @@ bool TextureCube::GetData(CubeMapFace face, unsigned level, void* dest) const
 
 bool TextureCube::Create()
 {
-    return false;
     Release();
 
     if (!graphics_ || !width_ || !height_)
@@ -453,7 +455,7 @@ bool TextureCube::Create()
     }
 #endif
 
-    glGenTextures(1, &object_.name_);
+    //glGenTextures(1, &object_.name_);
 
     // Ensure that our texture is bound to OpenGL texture unit 0
     graphics_->SetTextureForUpdate(this);
@@ -463,27 +465,32 @@ bool TextureCube::Create()
     unsigned externalFormat = GetExternalFormat(format_);
     unsigned dataType = GetDataType(format_);
 
+    uint64_t textureFlags = 0;
     // If multisample, create renderbuffers for each face
     if (multiSample_ > 1)
     {
+        textureFlags |= BGFX_TEXTURE_MSAA_SAMPLE;
         for (auto& renderSurface : renderSurfaces_)
             renderSurface->CreateRenderBuffer(width_, height_, format, multiSample_);
     }
 
     bool success = true;
-    if (!IsCompressed())
-    {
-        glGetError();
-        for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
-        {
-            glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width_, height_, 0, externalFormat, dataType, nullptr);
-            if (glGetError())
-                success = false;
-        }
-    }
+//     if (!IsCompressed())
+//     {
+//         glGetError();
+//         for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
+//         {
+//             glTexImage2D(GL_TEXTURE_CUBE_MAP_POSITIVE_X + i, 0, format, width_, height_, 0, externalFormat, dataType, nullptr);
+//             if (glGetError())
+//                 success = false;
+//         }
+//     }
     if (!success)
         URHO3D_LOGERROR("Failed to create texture");
-
+    if (usage_ >= TEXTURE_RENDERTARGET)
+    {
+        textureFlags |= BGFX_TEXTURE_RT;
+    }
     // Set mipmapping
     if (usage_ == TEXTURE_DEPTHSTENCIL || usage_ == TEXTURE_DYNAMIC)
         requestedLevels_ = 1;
@@ -493,26 +500,35 @@ bool TextureCube::Create()
         // glGenerateMipmap appears to not be working on WebGL or iOS/tvOS, disable rendertarget mipmaps for now
         requestedLevels_ = 1;
 #else
-        if (requestedLevels_ != 1)
-        {
-            // Generate levels for the first time now
-            RegenerateLevels();
-            // Determine max. levels automatically
-            requestedLevels_ = 0;
-        }
+//         if (requestedLevels_ != 1)
+//         {
+//             // Generate levels for the first time now
+//             RegenerateLevels();
+//             // Determine max. levels automatically
+//             requestedLevels_ = 0;
+//         }
+        requestedLevels_ = 1;
 #endif
     }
 
     levels_ = CheckMaxLevels(width_, height_, requestedLevels_);
 #ifndef GL_ES_VERSION_2_0
-    glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
+//     glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
+//     glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
 #endif
 
     // Set initial parameters, then unbind the texture
     UpdateParameters();
     graphics_->SetTexture(0, nullptr);
 
+    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
+    auto textureHandle = bgfx::createTextureCube(width_, levels_ > 1, 1, bgfx::TextureFormat::Enum(format_), textureFlags);
+    if (!bgfx::isValid(textureHandle))
+    {
+        URHO3D_LOGERROR("Failed to create TextureCube");
+        return false;
+    }
+    object_.handle_ = textureHandle.idx;
     return success;
 }
 

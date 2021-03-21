@@ -195,3 +195,30 @@ uint64_t bgfxRSAlphaToCoverage(bool enable)
 {
     return enable ? BGFX_STATE_BLEND_ALPHA_TO_COVERAGE : 0;
 }
+
+uint8_t bgfxCubeMapSide(Urho3D::CubeMapFace cubeMapFace)
+{
+    switch (cubeMapFace) {
+    case Urho3D::FACE_POSITIVE_X:
+        return BGFX_CUBE_MAP_POSITIVE_X;
+        break;
+    case Urho3D::FACE_NEGATIVE_X:
+        return BGFX_CUBE_MAP_NEGATIVE_X;
+        break;
+    case Urho3D::FACE_POSITIVE_Y:
+        return BGFX_CUBE_MAP_POSITIVE_Y;
+        break;
+    case Urho3D::FACE_NEGATIVE_Y:
+        return BGFX_CUBE_MAP_NEGATIVE_Y;
+        break;
+    case Urho3D::FACE_POSITIVE_Z:
+        return BGFX_CUBE_MAP_POSITIVE_Z;
+        break;
+    case Urho3D::FACE_NEGATIVE_Z:
+        return BGFX_CUBE_MAP_NEGATIVE_Z;
+        break;
+    default:
+        break;
+    }
+    return 0xff;
+}

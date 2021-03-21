@@ -10,3 +10,4 @@ uint64_t bgfxRSDepthFail(Urho3D::StencilOp fail);
 uint64_t bgfxRSDepthPass(Urho3D::StencilOp pass);
 uint64_t bgfxRSDepthWrite(bool enable);
 uint64_t bgfxRSAlphaToCoverage(bool enable);
+uint8_t bgfxCubeMapSide(Urho3D::CubeMapFace);
