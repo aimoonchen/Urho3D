@@ -80,8 +80,8 @@ uniform float cNearClipPS;
 uniform float cFarClipPS;
 uniform vec4 cShadowCubeAdjust;
 uniform vec4 cShadowDepthFade;
-uniform vec2 cShadowIntensity;
-uniform vec2 cShadowMapInvSize;
+uniform vec4 cShadowIntensity;
+uniform vec4 cShadowMapInvSize;
 uniform vec4 cShadowSplits;
 uniform mat4 cLightMatricesPS[4];
 #ifdef VSM_SHADOW

@@ -1256,7 +1256,7 @@ void Graphics::SetShaderParameter(StringHash param, const float* data, unsigned 
     {
         bgfx::UniformHandle uniformHandle{impl_->shaderProgram_->GetUniform(param)};
         if (bgfx::isValid(uniformHandle)) {
-            bgfx::setUniform(uniformHandle, data, count / 4);
+            bgfx::setUniform(uniformHandle, data, count);
         }
         /*
         const ShaderParameter* info = impl_->shaderProgram_->GetParameter(param);
@@ -1380,7 +1380,7 @@ void Graphics::SetShaderParameter(StringHash param, bool value)
 
 void Graphics::SetShaderParameter(StringHash param, const Color& color)
 {
-    SetShaderParameter(param, color.Data(), 4);
+    SetShaderParameter(param, color.Data(), 1);
 }
 
 void Graphics::SetShaderParameter(StringHash param, const Vector2& vector)
@@ -1929,7 +1929,6 @@ void Graphics::SetViewport(const IntRect& rect)
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
     //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
-    //bgfx::setViewRect(view_id_, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
     bgfx::setViewRect(view_id_, rectCopy.left_, rectCopy.top_, rectCopy.Width(), rectCopy.Height());
     viewport_ = rectCopy;
 
@@ -3309,7 +3308,19 @@ void Graphics::PrepareDraw()
                 auto framebuffer = bgfx::createFrameBuffer(count, fbt);
                 renderTargets_[0]->SetFrameBufferHandle(framebuffer.idx);
             }
-            bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+            // todo : 
+            if (view_id_ == shadowmap_view_id_)
+            {
+                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+                bgfx::setViewFrameBuffer(view_id_ + 1, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+                bgfx::setViewFrameBuffer(view_id_ + 2, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+                bgfx::setViewFrameBuffer(view_id_ + 3, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+                bgfx::setViewFrameBuffer(view_id_ + 4, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+            }
+            else
+            {
+                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+            }
         }
         else if (depthStencil_)
         {

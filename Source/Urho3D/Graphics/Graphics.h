@@ -926,11 +926,13 @@ private:
     uint32_t front_stencil_{ 0 };
     uint32_t back_stencil_{ 0 };
     uint16_t view_id_{0};
+    uint16_t shadowmap_view_id_{ 0x0f };
 public:
     //uint64_t GetRendererState() const { return render_state_; }
     void SetRendererState(uint64_t state);
     void SetCurrentViewID(uint16_t viewID) { view_id_ = viewID; }
     uint16_t GetCurrentViewID() const { return view_id_; }
+    uint16_t GetShadowMapViewID() const { return shadowmap_view_id_; }
 };
 
 /// Register Graphics library objects.
