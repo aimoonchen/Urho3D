@@ -385,7 +385,8 @@ ShaderVariation* ShaderProgram::GetPixelShader() const
 
 bool ShaderProgram::HasParameter(StringHash param) const
 {
-    return shaderParameters_.Find(param) != shaderParameters_.End();
+    return uniforms_.Find(param) != uniforms_.End();
+    //return shaderParameters_.Find(param) != shaderParameters_.End();
 }
 
 const ShaderParameter* ShaderProgram::GetParameter(StringHash param) const

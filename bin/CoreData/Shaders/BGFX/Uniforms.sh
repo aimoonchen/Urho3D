@@ -32,7 +32,7 @@ uniform mat4 cZone;
 #if !defined(GL_ES) || defined(WEBGL)
     uniform mat4 cLightMatrices[4];
 #else
-    uniform highp mat4 cLightMatrices[2];
+    uniform mat4 cLightMatrices[2];
 #endif
 #ifdef SKINNED
     uniform vec4 cSkinMatrices[MAXBONES*3];
@@ -85,7 +85,7 @@ uniform vec2 cShadowMapInvSize;
 uniform vec4 cShadowSplits;
 uniform mat4 cLightMatricesPS[4];
 #ifdef VSM_SHADOW
-uniform vec2 cVSMShadowParams;
+uniform vec4 cVSMShadowParams;
 #endif
 #endif
 

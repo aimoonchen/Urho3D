@@ -1929,7 +1929,8 @@ void Graphics::SetViewport(const IntRect& rect)
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
     //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
-    bgfx::setViewRect(view_id_, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
+    //bgfx::setViewRect(view_id_, rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
+    bgfx::setViewRect(view_id_, rectCopy.left_, rectCopy.top_, rectCopy.Width(), rectCopy.Height());
     viewport_ = rectCopy;
 
     // Disable scissor test, needs to be re-enabled by the user

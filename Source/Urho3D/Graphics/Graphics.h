@@ -930,6 +930,7 @@ public:
     //uint64_t GetRendererState() const { return render_state_; }
     void SetRendererState(uint64_t state);
     void SetCurrentViewID(uint16_t viewID) { view_id_ = viewID; }
+    uint16_t GetCurrentViewID() const { return view_id_; }
 };
 
 /// Register Graphics library objects.

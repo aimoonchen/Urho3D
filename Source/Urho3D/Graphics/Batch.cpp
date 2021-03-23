@@ -330,7 +330,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         for (unsigned i = 0; i < numSplits; ++i)
                             CalculateShadowMatrix(shadowMatrices[i], lightQueue_, i, renderer);
 
-                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, shadowMatrices[0].Data(), 16 * numSplits);
+                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, shadowMatrices[0].Data(), /*16 * */numSplits);
                     }
                     break;
 
@@ -390,7 +390,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         for (unsigned i = 0; i < numSplits; ++i)
                             CalculateShadowMatrix(shadowMatrices[i], lightQueue_, i, renderer);
 
-                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, shadowMatrices[0].Data(), 16 * numSplits);
+                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, shadowMatrices[0].Data(), /*16 * */numSplits);
                     }
                     break;
 

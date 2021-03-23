@@ -18,7 +18,7 @@ SAMPLERCUBE(sLightCubeMap, 9);
     #ifdef VSM_SHADOW
         SAMPLER2D(sShadowMap, 10);
     #else
-        SAMPLER2DSHADOW(sShadowMap, 10);
+        SAMPLER2D(sShadowMap, 10);
     #endif
     SAMPLERCUBE(sFaceSelectCubeMap, 11);
     SAMPLERCUBE(sIndirectionCubeMap, 12);

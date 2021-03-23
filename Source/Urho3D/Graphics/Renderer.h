@@ -614,7 +614,7 @@ private:
     /// Shadow map resolution.
     int shadowMapSize_{1024};
     /// Shadow quality.
-    ShadowQuality shadowQuality_{SHADOWQUALITY_PCF_16BIT};
+    ShadowQuality shadowQuality_{ SHADOWQUALITY_VSM/*SHADOWQUALITY_PCF_16BIT*/};
     /// Shadow softness, only works when SHADOWQUALITY_BLUR_VSM is used.
     float shadowSoftness_{1.0f};
     /// Shadow parameters when VSM is used, they help to reduce light bleeding.
