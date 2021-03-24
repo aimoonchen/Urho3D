@@ -24,15 +24,41 @@
 /// @nobindfile
 
 #pragma once
-
+#include <memory>
 #include "../Core/Context.h"
 #include "../Core/Main.h"
 #include "../Engine/Engine.h"
-
 #include "../Core/entry/entry.h"
 
 namespace Urho3D
 {
+template<typename Impl>
+class bgfxApp : public entry::AppI
+{
+public:
+    bgfxApp(const char* _name, const char* _description, const char* _url)
+        : entry::AppI(_name, _description, _url)
+    {
+    }
+
+    virtual ~bgfxApp()
+    {
+    }
+
+    void init(int32_t _argc, const char* const* _argv, uint32_t _width, uint32_t _height) override
+    {
+        AppI::init(_argc, _argv, _width, _height);
+    }
+
+    bool update() override
+    {
+        Urho3D::ParseArguments(GetCommandLineW());
+        std::shared_ptr<Urho3D::Context> context_ = std::make_shared<Urho3D::Context>();
+        std::shared_ptr<Impl> urho3d_app_ = std::make_shared<Impl>(context_.get());
+        urho3d_app_->Run();
+        return false;
+    }
+};
 
 class Engine;
 
@@ -99,6 +125,6 @@ protected:
 #define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)  \
 int _main_(int _argc, char** _argv)                     \
     {                                                   \
-        bgfxApp app(__VA_ARGS__);                       \
+        bgfxApp<className> app(__VA_ARGS__);            \
         return entry::runApp(&app, _argc, _argv);       \
     }

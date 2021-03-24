@@ -245,7 +245,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
         if (geometryType_ == GEOM_SKINNED)
         {
             graphics->SetShaderParameter(VSP_SKINMATRICES, reinterpret_cast<const float*>(worldTransform_),
-                /*12 * */numWorldTransforms_);
+                /*12 * */numWorldTransforms_ * 3);
         }
         else
             graphics->SetShaderParameter(VSP_MODEL, *worldTransform_);
@@ -343,7 +343,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         if (isShadowed)
                             CalculateShadowMatrix(shadowMatrices[1], lightQueue_, 0, renderer);
 
-                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, shadowMatrices[0].Data(), isShadowed ? 32 : 16);
+                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, shadowMatrices[0].Data(), isShadowed ? 2/*32*/ : 1/*16*/);
                     }
                     break;
 
@@ -353,7 +353,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         // HLSL compiler will pack the parameters as if the matrix is only 3x4, so must be careful to not overwrite
                         // the next parameter
 #ifdef URHO3D_OPENGL
-                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, lightVecRot.Data(), 16);
+                        graphics->SetShaderParameter(VSP_LIGHTMATRICES, lightVecRot.Data(), 1/*16*/);
 #else
                         graphics->SetShaderParameter(VSP_LIGHTMATRICES, lightVecRot.Data(), 12);
 #endif
@@ -403,7 +403,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         if (isShadowed)
                             CalculateShadowMatrix(shadowMatrices[1], lightQueue_, 0, renderer);
 
-                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, shadowMatrices[0].Data(), isShadowed ? 32 : 16);
+                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, shadowMatrices[0].Data(), isShadowed ? 2/*32*/ : 1);
                     }
                     break;
 
@@ -413,9 +413,9 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                         // HLSL compiler will pack the parameters as if the matrix is only 3x4, so must be careful to not overwrite
                         // the next parameter
 #ifdef URHO3D_OPENGL
-                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, lightVecRot.Data(), 16);
+                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, lightVecRot.Data(), 1/*16*/);
 #else
-                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, lightVecRot.Data(), 12);
+                        graphics->SetShaderParameter(PSP_LIGHTMATRICES, lightVecRot.Data(), 1/*12*/);
 #endif
                     }
                     break;

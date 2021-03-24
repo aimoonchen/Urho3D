@@ -36,12 +36,15 @@
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
-
+#include <memory>
 #include "MaterialAnimation.h"
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(MaterialAnimation)
+//URHO3D_DEFINE_APPLICATION_MAIN(MaterialAnimation)
+
+URHO3D_DEFINE_APPLICATION_MAIN(MaterialAnimation, "06-MaterialAnimation", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
 MaterialAnimation::MaterialAnimation(Context* context) :
     Sample(context)

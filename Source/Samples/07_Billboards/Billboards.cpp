@@ -44,7 +44,10 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(Billboards)
+//URHO3D_DEFINE_APPLICATION_MAIN(Billboards)
+
+URHO3D_DEFINE_APPLICATION_MAIN(Billboards, "07-Billboards", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
 Billboards::Billboards(Context* context) :
     Sample(context),
@@ -133,7 +136,7 @@ void Billboards::CreateScene()
             auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
             mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
             mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-            mushroomObject->SetCastShadows(true);
+            //mushroomObject->SetCastShadows(true);
         }
     }
 
@@ -186,7 +189,7 @@ void Billboards::CreateScene()
         light->SetFov(45.0f);
         light->SetColor(color);
         light->SetSpecularIntensity(1.0f);
-        light->SetCastShadows(true);
+        //light->SetCastShadows(true);
         light->SetShadowBias(BiasParameters(0.00002f, 0.0f));
 
         // Configure shadow fading for the lights. When they are far away enough, the lights eventually become unshadowed for

@@ -2358,7 +2358,7 @@ unsigned Graphics::GetMaxBones()
 
 bool Graphics::GetGL3Support()
 {
-    return gl3Support;
+    return true; // gl3Support;
 }
 
 ShaderVariation* Graphics::GetShader(ShaderType type, const String& name, const String& defines) const
