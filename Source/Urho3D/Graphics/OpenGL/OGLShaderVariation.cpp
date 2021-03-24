@@ -205,8 +205,8 @@ bool ShaderVariation::Create()
     options.depends = false; // cmdLine.hasArg("depends");
     options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
 
-    options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
-    //options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
     options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
     for (const auto& def : defineVec)
     {
@@ -226,8 +226,8 @@ bool ShaderVariation::Create()
         if ('c' != options.shaderType)
         {
             std::string defaultVarying =
-                "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
-                //"D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
+                //"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+                "D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
             const char* varyingdef =
                 defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);
@@ -272,7 +272,8 @@ bool ShaderVariation::Create()
 //         {
 //             fwriter = new bx::FileWriter;
 //         }
-//         std::string outfileName = std::string("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\output_") + filePath.CString() + ".txt";
+//         //std::string outfileName = std::string("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\output_") + filePath.CString() + ".txt";
+//         std::string outfileName = std::string("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\output_") + filePath.CString() + ".txt";
 //         if (!bx::open(fwriter, /*outFilePath*/ outfileName.c_str()))
 //         {
 //             //bx::printf("Unable to open output file '%s'.\n", outFilePath);
@@ -287,6 +288,7 @@ bool ShaderVariation::Create()
 //         bx::close(fwriter);
 //         delete fwriter;
 //         return true;
+
         bgfx::memory_writer mwriter;
         auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &mwriter);
         if (!compiled)

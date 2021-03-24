@@ -3330,7 +3330,19 @@ void Graphics::PrepareDraw()
                 auto framebuffer = bgfx::createFrameBuffer(1, &fbt);
                 depthStencil_->SetFrameBufferHandle(framebuffer.idx);
             }
-            bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{depthStencil_->GetFrameBufferHandle()});
+            if (view_id_ == shadowmap_view_id_)
+            {
+                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+                bgfx::setViewFrameBuffer(view_id_ + 1, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+                bgfx::setViewFrameBuffer(view_id_ + 2, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+                bgfx::setViewFrameBuffer(view_id_ + 3, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+                bgfx::setViewFrameBuffer(view_id_ + 4, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+            }
+            else
+            {
+                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
+            }
+            
         }
         
 #ifndef GL_ES_VERSION_2_0

@@ -3059,7 +3059,7 @@ bool View::NeedRenderShadowMap(const LightBatchQueue& queue)
 void View::RenderShadowMap(const LightBatchQueue& queue)
 {
     URHO3D_PROFILE(RenderShadowMap);
-    auto shadow_view_id = graphics_->GetShadowMapViewID();
+    auto shadow_view_id = graphics_->GetShadowMapStartViewID();
     auto oldViewID = graphics_->GetCurrentViewID();
     graphics_->SetCurrentViewID(shadow_view_id);
 
