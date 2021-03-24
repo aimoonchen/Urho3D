@@ -208,6 +208,8 @@ bool ShaderVariation::Create()
     //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
     options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
     options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
+    auto maxbone = "MAXBONES=" + String(Graphics::GetMaxBones());
+    options.defines.push_back(maxbone.CString());
     for (const auto& def : defineVec)
     {
         options.defines.push_back(def.CString());

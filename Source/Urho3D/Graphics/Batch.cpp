@@ -245,7 +245,7 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
         if (geometryType_ == GEOM_SKINNED)
         {
             graphics->SetShaderParameter(VSP_SKINMATRICES, reinterpret_cast<const float*>(worldTransform_),
-                12 * numWorldTransforms_);
+                /*12 * */numWorldTransforms_);
         }
         else
             graphics->SetShaderParameter(VSP_MODEL, *worldTransform_);
