@@ -100,21 +100,21 @@ void StaticScene::CreateScene()
     Node* lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto* light = lightNode->CreateComponent<Light>();
-//    light->SetLightType(LIGHT_DIRECTIONAL);
+    //light->SetLightType(LIGHT_DIRECTIONAL);
+    light->SetCastShadows(true);
+//     lightNode->SetPosition({0.0f, 8.0f, -3.0f});
+//     lightNode->SetDirection({0.0f, -1.5f, 1.0f});
+//     light->SetLightType(LIGHT_SPOT);
+//     light->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
+//     light->SetRange(90.0f);
+//     light->SetRampTexture(cache->GetResource<Texture2D>("Textures/RampExtreme.png"));
+//     light->SetFov(45.0f);
+//     light->SetSpecularIntensity(1.0f);
 
-    lightNode->SetPosition({0.0f, 8.0f, 0.0f});
-    lightNode->SetDirection({0.0f, -1.5f, 0.0f});
-    light->SetLightType(LIGHT_SPOT);
-    light->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-    light->SetRange(90.0f);
-    light->SetRampTexture(cache->GetResource<Texture2D>("Textures/RampExtreme.png"));
-    light->SetFov(45.0f);
-    light->SetSpecularIntensity(1.0f);
+    lightNode->SetPosition({0.0f, 8.0f, -3.0f});
+    light->SetLightType(LIGHT_POINT);
+    light->SetRange(30.0f);
 
-//     lightNode->SetPosition({0.0f, 8.0f, 0.0f});
-//     light->SetLightType(LIGHT_POINT);
-//     light->SetRange(30.0f);
-//     light->SetCastShadows(true);
 //     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
 //     // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
 //     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
@@ -135,7 +135,7 @@ void StaticScene::CreateScene()
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-        //mushroomObject->SetCastShadows(true);
+        mushroomObject->SetCastShadows(true);
     }
 
     // Create a scene node for the camera, which we will move around

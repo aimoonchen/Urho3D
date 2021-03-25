@@ -1001,61 +1001,61 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount,
     unsigned instanceCount)
 {
-#if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
-    if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
-        return;
-
-    PrepareDraw();
-
-    unsigned indexSize = indexBuffer_->GetIndexSize();
-    unsigned primitiveCount;
-    GLenum glPrimitiveType;
-
-    GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-    GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-#ifdef __EMSCRIPTEN__
-    glDrawElementsInstancedANGLE(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-        instanceCount);
-#else
-    if (gl3Support)
-    {
-        glDrawElementsInstanced(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-            instanceCount);
-    }
-    else
-    {
-        glDrawElementsInstancedARB(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-            instanceCount);
-    }
-#endif
-
-    numPrimitives_ += instanceCount * primitiveCount;
-    ++numBatches_;
-#endif
+// #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
+//     if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
+//         return;
+// 
+//     PrepareDraw();
+// 
+//     unsigned indexSize = indexBuffer_->GetIndexSize();
+//     unsigned primitiveCount;
+//     GLenum glPrimitiveType;
+// 
+//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
+//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+// #ifdef __EMSCRIPTEN__
+//     glDrawElementsInstancedANGLE(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
+//         instanceCount);
+// #else
+//     if (gl3Support)
+//     {
+//         glDrawElementsInstanced(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
+//             instanceCount);
+//     }
+//     else
+//     {
+//         glDrawElementsInstancedARB(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
+//             instanceCount);
+//     }
+// #endif
+// 
+//     numPrimitives_ += instanceCount * primitiveCount;
+//     ++numBatches_;
+// #endif
 }
 
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned baseVertexIndex, unsigned minVertex,
         unsigned vertexCount, unsigned instanceCount)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
-        return;
-
-    PrepareDraw();
-
-    unsigned indexSize = indexBuffer_->GetIndexSize();
-    unsigned primitiveCount;
-    GLenum glPrimitiveType;
-
-    GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-    GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-
-    glDrawElementsInstancedBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-        instanceCount, baseVertexIndex);
-
-    numPrimitives_ += instanceCount * primitiveCount;
-    ++numBatches_;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
+//         return;
+// 
+//     PrepareDraw();
+// 
+//     unsigned indexSize = indexBuffer_->GetIndexSize();
+//     unsigned primitiveCount;
+//     GLenum glPrimitiveType;
+// 
+//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
+//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+// 
+//     glDrawElementsInstancedBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
+//         instanceCount, baseVertexIndex);
+// 
+//     numPrimitives_ += instanceCount * primitiveCount;
+//     ++numBatches_;
+// #endif
 }
 
 void Graphics::SetVertexBuffer(VertexBuffer* buffer)
@@ -1672,6 +1672,7 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
             }
         }
     }
+
     static StringHash samplerName[TextureUnit::MAX_TEXTURE_UNITS] = {
         {"DiffMap"},
         {"NormalMap"},
@@ -1690,16 +1691,26 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         {""},
         {""}
     };
-    if (texture && impl_->shaderProgram_) {
-        auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
-        if (sampler_handle == bgfx::kInvalidHandle)
-        {
-            //URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
-            return;
-        }
-        bgfx::setTexture(index, {sampler_handle}, {texture->GetGPUObjectHandle()});
+    // TODO: impl_->shaderProgram_ should be set corrent.
+    if (texture && impl_->shaderProgram_)
+    {
+//         for (int index = 0; index < MAX_TEXTURE_UNITS; index++)
+//         {
+            auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
+            if (sampler_handle == bgfx::kInvalidHandle)
+            {
+                URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+                return;
+            }
+            bgfx::setTexture(index, { sampler_handle }, { texture->GetGPUObjectHandle() });
+//                              (textures_[index] != nullptr) ? bgfx::TextureHandle{textures_[index]->GetGPUObjectHandle()}
+//                                                            : bgfx::TextureHandle{bgfx::kInvalidHandle});
+//        }
     }
-    
+    if ((index == 11 || index == 12) && texture)
+    {
+        textures_[index] = texture;
+    }
     /*
     if (textures_[index] != texture)
     {
@@ -3083,6 +3094,12 @@ void Graphics::CheckFeatureSupport()
 
 void Graphics::PrepareDraw()
 {
+    // TODO : Should be call right position
+    if (true /*renderer_->GetDrawShadows()*/)
+    {
+        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+    }
 #ifndef GL_ES_VERSION_2_0
     if (gl3Support)
     {
@@ -3447,6 +3464,8 @@ void Graphics::PrepareDraw()
 // 
 //         impl_->vertexBuffersDirty_ = false;
 //     }
+
+
 }
 
 void Graphics::CleanupFramebuffers()
