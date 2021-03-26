@@ -161,9 +161,9 @@ vec3 GetTrailNormal(vec4 iPos, vec3 iParentPos, vec3 iForward)
 vec3 GetWorldPos(mat4 modelMatrix)
 {
     #if defined(BILLBOARD)
-        return GetBillboardPos(a_position, a_texcoord1, modelMatrix);
+        return GetBillboardPos(vec4(a_position, 1), a_texcoord1, modelMatrix);
     #elif defined(DIRBILLBOARD)
-        return GetBillboardPos(a_position, a_normal, modelMatrix);
+        return GetBillboardPos(vec4(a_position, 1), a_normal, modelMatrix);
     #elif defined(TRAILFACECAM)
         return GetTrailPos(a_position, a_tangent.xyz, a_tangent.w, modelMatrix);
     #elif defined(TRAILBONE)

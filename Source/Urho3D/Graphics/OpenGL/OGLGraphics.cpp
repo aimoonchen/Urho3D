@@ -1699,7 +1699,7 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
             auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
             if (sampler_handle == bgfx::kInvalidHandle)
             {
-                URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+                //URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
                 return;
             }
             bgfx::setTexture(index, { sampler_handle }, { texture->GetGPUObjectHandle() });
