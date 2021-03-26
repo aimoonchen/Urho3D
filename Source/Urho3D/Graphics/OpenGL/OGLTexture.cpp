@@ -420,7 +420,7 @@ uint64_t Texture::GetFilterMode()
         if (levels_ > 1) {
             flags |= BGFX_SAMPLER_MIP_POINT;
         }
-        glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
+        //glTexParameteri(target_, GL_TEXTURE_MAG_FILTER, GL_NEAREST);
         break;
     case FILTER_BILINEAR:
 //         if (levels_ < 2)

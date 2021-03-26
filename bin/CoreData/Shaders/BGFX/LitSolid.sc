@@ -87,11 +87,11 @@ void main()
 
         #ifdef SPOTLIGHT
             // Spotlight projection: transform from world space to projector texture coordinates
-            v_spot_pos = projWorldPos * cLightMatrices[0];
+            v_spot_pos = mul(projWorldPos, cLightMatrices[0]);
         #endif
     
         #ifdef POINTLIGHT
-            v_cube_mask_vec = (worldPos - cLightPos.xyz) * mat3(cLightMatrices[0][0].xyz, cLightMatrices[0][1].xyz, cLightMatrices[0][2].xyz);
+            v_cube_mask_vec = mul((worldPos - cLightPos.xyz), mat3(cLightMatrices[0][0].xyz, cLightMatrices[0][1].xyz, cLightMatrices[0][2].xyz));
         #endif
     #else
         // Ambient & per-vertex lighting

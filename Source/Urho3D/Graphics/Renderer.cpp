@@ -1816,16 +1816,16 @@ void Renderer::CreateGeometries()
     {
         faceSelectCubeMap_ = new TextureCube(context_);
         faceSelectCubeMap_->SetNumLevels(1);
-        faceSelectCubeMap_->SetSize(1, graphics_->GetRGBAFormat());
         faceSelectCubeMap_->SetFilterMode(FILTER_NEAREST);
+        faceSelectCubeMap_->SetSize(1, graphics_->GetRGBAFormat());
 
         indirectionCubeMap_ = new TextureCube(context_);
         indirectionCubeMap_->SetNumLevels(1);
-        indirectionCubeMap_->SetSize(256, graphics_->GetRGBAFormat());
         indirectionCubeMap_->SetFilterMode(FILTER_BILINEAR);
         indirectionCubeMap_->SetAddressMode(COORD_U, ADDRESS_CLAMP);
         indirectionCubeMap_->SetAddressMode(COORD_V, ADDRESS_CLAMP);
         indirectionCubeMap_->SetAddressMode(COORD_W, ADDRESS_CLAMP);
+        indirectionCubeMap_->SetSize(256, graphics_->GetRGBAFormat());
 
         SetIndirectionTextureData();
     }

@@ -92,9 +92,9 @@ vec4 GetShadowPos(int index, vec3 normal, vec4 projWorldPos)
     #endif
 
     #if defined(DIRLIGHT)
-        return projWorldPos * cLightMatrices[index];
+        return mul(projWorldPos, cLightMatrices[index]);
     #elif defined(SPOTLIGHT)
-        return projWorldPos * cLightMatrices[1];
+        return mul(projWorldPos, cLightMatrices[1]);
     #else
         return vec4(projWorldPos.xyz - cLightPos.xyz, 1.0);
     #endif
@@ -274,7 +274,7 @@ float GetPointShadow(vec3 lightVec)
     // Expand the maximum component of the light vector to get full 0.0 - 1.0 UV range from the cube map,
     // and to avoid sampling across faces. Some GPU's filter across faces, while others do not, and in this
     // case filtering across faces is wrong
-    const vec3 factor = vec3(1.0 / 256.0);
+    vec3 factor = vec3_splat(1.0 / 256.0);
     lightVec += factor * axis * lightVec;
 
     // Read the 2D UV coordinates, adjust according to shadow map size and add face offset
