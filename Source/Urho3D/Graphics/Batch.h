@@ -172,6 +172,8 @@ struct BatchGroup : public Batch
     PODVector<InstanceData> instances_;
     /// Instance stream start index, or M_MAX_UNSIGNED if transforms not pre-set.
     unsigned startIndex_;
+
+    void* bgfx_instances_{nullptr};
 };
 
 /// Instanced draw call grouping key.

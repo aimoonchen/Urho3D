@@ -1,5 +1,5 @@
 #if defined(COMPILEVS)
-$input a_position, a_normal, a_tangent, a_indices, a_weight, a_texcoord0, a_texcoord1
+$input a_position, a_normal, a_tangent, a_indices, a_weight, a_texcoord0, a_texcoord1, i_data0, i_data1, i_data2
 $output v_color0, v_texcoord0, v_wpos, v_screen_pos, v_vertex_light, v_spot_pos, v_cube_mask_vec, v_shadow_pos0, v_shadow_pos1, v_shadow_pos2, v_shadow_pos3
 #elif defined(COMPILEPS)
 $input v_color0, v_texcoord0, v_wpos, v_screen_pos, v_vertex_light, v_spot_pos, v_cube_mask_vec, v_shadow_pos0, v_shadow_pos1, v_shadow_pos2, v_shadow_pos3

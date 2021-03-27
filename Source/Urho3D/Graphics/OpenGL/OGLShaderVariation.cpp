@@ -205,8 +205,8 @@ bool ShaderVariation::Create()
     options.depends = false; // cmdLine.hasArg("depends");
     options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
 
-    //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
-    options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+    //options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
     options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
     auto maxbone = "MAXBONES=" + String(Graphics::GetMaxBones());
     options.defines.push_back(maxbone.CString());
@@ -228,8 +228,8 @@ bool ShaderVariation::Create()
         if ('c' != options.shaderType)
         {
             std::string defaultVarying =
-                //"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
-                "D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
+                "C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc"; // /*dir + */ "varying.def.sc";
+                //"D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\varying.def.sc";
             const char* varyingdef =
                 defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);

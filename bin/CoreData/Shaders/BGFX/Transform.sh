@@ -43,7 +43,8 @@ mat4 GetSkinMatrix(vec4 blendWeights, vec4 blendIndices)
 mat4 GetInstanceMatrix()
 {
     const vec4 lastColumn = vec4(0.0, 0.0, 0.0, 1.0);
-    return mat4(a_texcoord4, a_texcoord5, a_texcoord6, lastColumn);
+    //return mat4(a_texcoord4, a_texcoord5, a_texcoord6, lastColumn);
+    return mat4(i_data0, i_data1, i_data2, lastColumn);
 }
 #endif
 
@@ -84,7 +85,7 @@ float GetDepth(vec4 clipPos)
 #ifdef BILLBOARD
 vec3 GetBillboardPos(vec4 iPos, vec2 iSize, mat4 modelMatrix)
 {
-    return (iPos * modelMatrix).xyz + vec3(iSize.x, iSize.y, 0.0) * cBillboardRot;
+    return mul(iPos, modelMatrix).xyz + mul(vec3(iSize.x, iSize.y, 0.0), cBillboardRot);
 }
 
 vec3 GetBillboardNormal()
@@ -191,9 +192,9 @@ vec3 GetWorldNormal(mat4 modelMatrix)
 vec4 GetWorldTangent(mat4 modelMatrix)
 {
     #if defined(BILLBOARD)
-        return vec4(normalize(vec3(1.0, 0.0, 0.0) * cBillboardRot), 1.0);
+        return vec4(normalize(mul(vec3(1.0, 0.0, 0.0), cBillboardRot)), 1.0);
     #elif defined(DIRBILLBOARD)
-        return vec4(normalize(vec3(1.0, 0.0, 0.0) * GetNormalMatrix(modelMatrix)), 1.0);
+        return vec4(normalize(mul(vec3(1.0, 0.0, 0.0), GetNormalMatrix(modelMatrix))), 1.0);
     #else
         return vec4(normalize(a_tangent.xyz * GetNormalMatrix(modelMatrix)), a_tangent.w);
     #endif

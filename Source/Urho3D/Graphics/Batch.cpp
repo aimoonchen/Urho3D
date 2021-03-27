@@ -645,21 +645,26 @@ void Batch::Draw(View* view, Camera* camera, bool allowDepthWrite) const
 void BatchGroup::SetInstancingData(void* lockedData, unsigned stride, unsigned& freeIndex)
 {
     // Do not use up buffer space if not going to draw as instanced
-    if (geometryType_ != GEOM_INSTANCED)
+    if (geometryType_ != GEOM_INSTANCED || instances_.Empty())
         return;
 
-    startIndex_ = freeIndex;
-    unsigned char* buffer = static_cast<unsigned char*>(lockedData) + startIndex_ * stride;
+    Graphics* graphics = geometry_->GetSubsystem<Graphics>();
+    bgfx_instances_ = graphics->AllocInstanceDataBuffer(instances_.Size(), stride, bgfx_instances_);
 
+    startIndex_ = freeIndex;
+    //unsigned char* buffer = static_cast<unsigned char*>(lockedData) + startIndex_ * stride;
+    uint32_t writePos = 0;
     for (unsigned i = 0; i < instances_.Size(); ++i)
     {
         const InstanceData& instance = instances_[i];
 
-        memcpy(buffer, instance.worldTransform_, sizeof(Matrix3x4));
+        //memcpy(buffer, instance.worldTransform_, sizeof(Matrix3x4));
+        graphics->WriteInstanceData(bgfx_instances_, writePos, (void*)instance.worldTransform_, sizeof(Matrix3x4));
         if (instance.instancingData_)
-            memcpy(buffer + sizeof(Matrix3x4), instance.instancingData_, stride - sizeof(Matrix3x4));
+            //memcpy(buffer + sizeof(Matrix3x4), instance.instancingData_, stride - sizeof(Matrix3x4));
+            graphics->WriteInstanceData(bgfx_instances_, writePos, (void*)instance.worldTransform_, sizeof(Matrix3x4));
 
-        buffer += stride;
+        //buffer += stride;
     }
 
     freeIndex += instances_.Size();
@@ -696,17 +701,21 @@ void BatchGroup::Draw(View* view, Camera* camera, bool allowDepthWrite) const
 
             // Get the geometry vertex buffers, then add the instancing stream buffer
             // Hack: use a const_cast to avoid dynamic allocation of new temp vectors
-            auto& vertexBuffers = const_cast<Vector<SharedPtr<VertexBuffer> >&>(
-                geometry_->GetVertexBuffers());
-            vertexBuffers.Push(SharedPtr<VertexBuffer>(instanceBuffer));
+//             auto& vertexBuffers = const_cast<Vector<SharedPtr<VertexBuffer> >&>(
+//                 geometry_->GetVertexBuffers());
+//             vertexBuffers.Push(SharedPtr<VertexBuffer>(instanceBuffer));
 
             graphics->SetIndexBuffer(geometry_->GetIndexBuffer());
-            graphics->SetVertexBuffers(vertexBuffers, startIndex_);
-            graphics->DrawInstanced(geometry_->GetPrimitiveType(), geometry_->GetIndexStart(), geometry_->GetIndexCount(),
-                geometry_->GetVertexStart(), geometry_->GetVertexCount(), instances_.Size());
-
+            graphics->SetVertexBuffers(geometry_->GetVertexBuffers());
+            //graphics->SetVertexBuffers(vertexBuffers, startIndex_);
+            graphics->SetInstanceDataBuffer(bgfx_instances_);
+            graphics->Draw(geometry_->GetPrimitiveType(), geometry_->GetIndexStart(), geometry_->GetIndexCount(),
+                           geometry_->GetVertexStart(), geometry_->GetVertexCount());
+            //             graphics->DrawInstanced(geometry_->GetPrimitiveType(), geometry_->GetIndexStart(), geometry_->GetIndexCount(),
+//                 geometry_->GetVertexStart(), geometry_->GetVertexCount(), instances_.Size());
+            graphics->SetInstanceDataBuffer(nullptr);
             // Remove the instancing buffer & element mask now
-            vertexBuffers.Pop();
+            //vertexBuffers.Pop();
         }
     }
 }

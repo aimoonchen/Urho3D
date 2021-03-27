@@ -2982,9 +2982,9 @@ void View::PrepareInstancingBuffer()
 
     VertexBuffer* instancingBuffer = renderer_->GetInstancingBuffer();
     unsigned freeIndex = 0;
-    void* dest = instancingBuffer->Lock(0, totalInstances, true);
-    if (!dest)
-        return;
+    void* dest = nullptr; // instancingBuffer->Lock(0, totalInstances, true);
+//     if (!dest)
+//         return;
 
     const unsigned stride = instancingBuffer->GetVertexSize();
     for (HashMap<unsigned, BatchQueue>::Iterator i = batchQueues_.Begin(); i != batchQueues_.End(); ++i)
@@ -2998,7 +2998,7 @@ void View::PrepareInstancingBuffer()
         i->litBatches_.SetInstancingData(dest, stride, freeIndex);
     }
 
-    instancingBuffer->Unlock();
+    //instancingBuffer->Unlock();
 }
 
 void View::SetupLightVolumeBatch(Batch& batch)

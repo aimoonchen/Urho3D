@@ -54,7 +54,7 @@ static bgfx::AttribType::Enum Urho3DTypeToBGFXAttribType(VertexElementType eleme
     }
 }
 
-static bgfx::Attrib::Enum Urho3DSemanticToBGFXAttrib(VertexElementSemantic elementSemantic)
+static bgfx::Attrib::Enum Urho3DSemanticToBGFXAttrib(VertexElementSemantic elementSemantic, uint8_t index)
 {
     switch (elementSemantic)
     {
@@ -71,7 +71,7 @@ static bgfx::Attrib::Enum Urho3DSemanticToBGFXAttrib(VertexElementSemantic eleme
         return bgfx::Attrib::Tangent;
         break;
     case Urho3D::SEM_TEXCOORD:
-        return bgfx::Attrib::TexCoord0;
+        return bgfx::Attrib::Enum(bgfx::Attrib::TexCoord0 + index);
         break;
     case Urho3D::SEM_COLOR:
         return bgfx::Attrib::Color0;
@@ -118,7 +118,8 @@ static bgfx::VertexLayout Urho3DLayoutToBGFXLayout(const PODVector<VertexElement
     layout.begin();
     for (int i = 0; i < elements.Size(); i++)
     {
-        layout.add(Urho3DSemanticToBGFXAttrib(elements[i].semantic_), GetTypeNum(elements[i].type_),
+        layout.add(Urho3DSemanticToBGFXAttrib(elements[i].semantic_, elements[i].index_),
+                   GetTypeNum(elements[i].type_),
                    Urho3DTypeToBGFXAttribType(elements[i].type_), (elements[i].type_ == TYPE_UBYTE4_NORM)/*false*/, false);
     }
     layout.end();

@@ -371,6 +371,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     entry::setWindowSize(default_window_, width, height);
     window_ = (SDL_Window*)1;
     OnScreenModeChanged();
+    CheckFeatureSupport();
     return true;
 
     // If only vsync changes, do not destroy/recreate the context
@@ -931,6 +932,10 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
         }
+        if (current_instance_buffer_)
+        {
+            bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+        }
         bgfx::setState(render_state_);
         bgfx::setStencil(front_stencil_);
         bgfx::submit(view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
@@ -968,6 +973,11 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
         buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount)
                             : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount);
     }
+
+    if (current_instance_buffer_)
+    {
+        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+    }
     //uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
@@ -1001,7 +1011,7 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount,
     unsigned instanceCount)
 {
-// #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
+    // #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
 //     if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
 //         return;
 // 
@@ -2999,32 +3009,36 @@ unsigned Graphics::GetFormat(const String& formatName)
 
 void Graphics::CheckFeatureSupport()
 {
+    // Get renderer capabilities info.
+    const bgfx::Caps* caps = bgfx::getCaps();
+
     // Check supported features: light pre-pass, deferred rendering and hardware depth texture
     lightPrepassSupport_ = false;
     deferredSupport_ = false;
 
+    
 #ifndef GL_ES_VERSION_2_0
     int numSupportedRTs = 1;
-    if (gl3Support)
+    if (true/*gl3Support*/)
     {
         // Work around GLEW failure to check extensions properly from a GL3 context
-        instancingSupport_ = glDrawElementsInstanced != nullptr && glVertexAttribDivisor != nullptr;
+        instancingSupport_ = ((BGFX_CAPS_INSTANCING & caps->supported) != 0);//glDrawElementsInstanced != nullptr && glVertexAttribDivisor != nullptr;
         dxtTextureSupport_ = true;
         anisotropySupport_ = true;
         sRGBSupport_ = true;
         sRGBWriteSupport_ = true;
-
-        glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &numSupportedRTs);
+        numSupportedRTs = caps->limits.maxFBAttachments;
+        //glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS, &numSupportedRTs);
     }
     else
     {
-        instancingSupport_ = GLEW_ARB_instanced_arrays != 0;
-        dxtTextureSupport_ = GLEW_EXT_texture_compression_s3tc != 0;
-        anisotropySupport_ = GLEW_EXT_texture_filter_anisotropic != 0;
-        sRGBSupport_ = GLEW_EXT_texture_sRGB != 0;
-        sRGBWriteSupport_ = GLEW_EXT_framebuffer_sRGB != 0;
-
-        glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &numSupportedRTs);
+//         instancingSupport_ = GLEW_ARB_instanced_arrays != 0;
+//         dxtTextureSupport_ = GLEW_EXT_texture_compression_s3tc != 0;
+//         anisotropySupport_ = GLEW_EXT_texture_filter_anisotropic != 0;
+//         sRGBSupport_ = GLEW_EXT_texture_sRGB != 0;
+//         sRGBWriteSupport_ = GLEW_EXT_framebuffer_sRGB != 0;
+// 
+//         glGetIntegerv(GL_MAX_COLOR_ATTACHMENTS_EXT, &numSupportedRTs);
     }
 
     // Must support 2 rendertargets for light pre-pass, and 4 for deferred
@@ -3715,4 +3729,27 @@ void Graphics::SetRendererState(uint64_t state)
 {
     bgfx::setState(state);
 }
+
+void* Graphics::AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance)
+{
+    auto newIdb = (bgfx::InstanceDataBuffer*)oldInstance;
+    if (newIdb)
+    {
+//         if (newIdb->num == numInstances && newIdb->stride == instanceStride)
+//         {
+//             return newIdb;
+//         }
+        delete newIdb;
+    }
+    newIdb = new bgfx::InstanceDataBuffer;
+    bgfx::allocInstanceDataBuffer(newIdb, numInstances, instanceStride);
+    return newIdb;
+}
+
+void Graphics::WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len)
+{
+    memcpy(((bgfx::InstanceDataBuffer*)idb)->data + pos, data, len);
+    pos += len;
+}
+
 }
