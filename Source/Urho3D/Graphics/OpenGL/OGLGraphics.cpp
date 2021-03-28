@@ -626,13 +626,8 @@ bool Graphics::TakeScreenShot(Image& destImage)
 
 bool Graphics::BeginFrame()
 {
-//     // Set view 0 default viewport.
-//     bgfx::setViewRect(view_id_, 0, 0, uint16_t(width_), uint16_t(height_));
-// 
-//     // This dummy draw call is here to make sure that view 0 is cleared
-//     // if no other draw calls are submitted to view 0.
-//     bgfx::touch(view_id_);
-    view_id_ = 0;
+    last_view_id_ = 0xff;
+    current_view_id_ = 0;
 
     if (!IsInitialized() || IsDeviceLost())
         return false;
@@ -733,7 +728,7 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         auto a = (unsigned)Clamp(((int)(color.a_ * 255.0f)), 0, 255);
         return (r << 24u) | (g << 16u) | (b << 8u) | a;
     };
-    bgfx::setViewClear(view_id_, clearFlag, ToRGBA(color), depth, stencil);
+    bgfx::setViewClear(current_view_id_, clearFlag, ToRGBA(color), depth, stencil);
 
     // If viewport is less than full screen, set a scissor to limit the clear
     /// \todo Any user-set scissor test will be lost
@@ -743,7 +738,17 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     else
         SetScissorTest(false);
 
-    bgfx::touch(view_id_);
+    bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+    if (scissorRect_ != IntRect::ZERO)
+    {
+        bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+    }
+    else
+    {
+        bgfx::setScissor();
+    }
+
+    bgfx::touch(current_view_id_);
 
     //glClear(glFlags);
 
@@ -920,6 +925,19 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 //     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
     if (impl_->shaderProgram_)
     {
+        if (last_view_id_ != current_view_id_)
+        {
+            last_view_id_ = current_view_id_;
+            bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+        }
+        if (scissorRect_ != IntRect::ZERO)
+        {
+            bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+        }
+        else
+        {
+            bgfx::setScissor();
+        }
         for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
         {
             VertexBuffer* buffer = vertexBuffers_[i];
@@ -938,7 +956,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
         }
         bgfx::setState(render_state_);
         bgfx::setStencil(front_stencil_);
-        bgfx::submit(view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
+        bgfx::submit(current_view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
     }
     numPrimitives_ += primitiveCount;
     ++numBatches_;
@@ -958,6 +976,21 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
 //     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 //     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
+
+    
+    if (last_view_id_ != current_view_id_)
+    {
+        last_view_id_ = current_view_id_;
+        bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+    }
+    if (scissorRect_ != IntRect::ZERO)
+    {
+        bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+    }
+    else
+    {
+        bgfx::setScissor();
+    }
 
     indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
                         : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount);
@@ -981,7 +1014,7 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     //uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
-    bgfx::submit(view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
+    bgfx::submit(current_view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
 
     numPrimitives_ += primitiveCount;
     ++numBatches_;
@@ -1950,7 +1983,7 @@ void Graphics::SetViewport(const IntRect& rect)
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
     //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
-    bgfx::setViewRect(view_id_, rectCopy.left_, rectCopy.top_, rectCopy.Width(), rectCopy.Height());
+    
     viewport_ = rectCopy;
 
     // Disable scissor test, needs to be re-enabled by the user
@@ -2031,17 +2064,17 @@ void Graphics::SetDepthBias(float constantBias, float slopeScaledBias)
 {
 //     if (constantBias != constantDepthBias_ || slopeScaledBias != slopeScaledDepthBias_)
 //     {
-// #ifndef GL_ES_VERSION_2_0
-//         if (slopeScaledBias != 0.0f)
-//         {
-//             // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
-//             glEnable(GL_POLYGON_OFFSET_FILL);
-//             glPolygonOffset(slopeScaledBias, 0.0f);
-//         }
-//         else
-//             glDisable(GL_POLYGON_OFFSET_FILL);
-// #endif
-// 
+// // #ifndef GL_ES_VERSION_2_0
+// //         if (slopeScaledBias != 0.0f)
+// //         {
+// //             // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
+// //             glEnable(GL_POLYGON_OFFSET_FILL);
+// //             glPolygonOffset(slopeScaledBias, 0.0f);
+// //         }
+// //         else
+// //             glDisable(GL_POLYGON_OFFSET_FILL);
+// // #endif
+// // 
 //         constantDepthBias_ = constantBias;
 //         slopeScaledDepthBias_ = slopeScaledBias;
 //         // Force update of the projection matrix shader parameter
@@ -2139,13 +2172,11 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
         {
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
             //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
-            bgfx::setScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
         }
     }
     else
     {
-        bgfx::setScissor();
         scissorRect_ = IntRect::ZERO;
     }
 //     if (enable != scissorTest_)
@@ -2183,13 +2214,11 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
         {
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
             //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
-            bgfx::setScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
         }
     }
     else
     {
-        bgfx::setScissor();
         scissorRect_ = IntRect::ZERO;
     }
     //     if (enable != scissorTest_)
@@ -3114,19 +3143,8 @@ void Graphics::PrepareDraw()
         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
     }
-#ifndef GL_ES_VERSION_2_0
-    if (gl3Support)
+    if (last_view_id_ != current_view_id_ || impl_->fboDirty_)
     {
-        for (PODVector<ConstantBuffer*>::Iterator i = impl_->dirtyConstantBuffers_.Begin(); i != impl_->dirtyConstantBuffers_.End(); ++i)
-            (*i)->Apply();
-        impl_->dirtyConstantBuffers_.Clear();
-    }
-#endif
-
-    if (impl_->fboDirty_)
-    {
-        impl_->fboDirty_ = false;
-
         // First check if no framebuffer is needed. In that case simply return to backbuffer rendering
         bool noFbo = !depthStencil_;
         if (noFbo)
@@ -3156,330 +3174,65 @@ void Graphics::PrepareDraw()
                 bool sRGBWrite = sRGB_;
                 if (sRGBWrite != impl_->sRGBWrite_)
                 {
-//                     if (sRGBWrite)
-//                         glEnable(GL_FRAMEBUFFER_SRGB_EXT);
-//                     else
-//                         glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+                    //                     if (sRGBWrite)
+                    //                         glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+                    //                     else
+                    //                         glDisable(GL_FRAMEBUFFER_SRGB_EXT);
                     impl_->sRGBWrite_ = sRGBWrite;
                 }
             }
 #endif
-            bgfx::setViewFrameBuffer(view_id_, BGFX_INVALID_HANDLE);
-            return;
-        }
-
-        // Search for a new framebuffer based on format & size, or create new
-//         IntVector2 rtSize = Graphics::GetRenderTargetDimensions();
-//         unsigned format = 0;
-//         if (renderTargets_[0])
-//             format = renderTargets_[0]->GetParentTexture()->GetFormat();
-//         else if (depthStencil_)
-//             format = depthStencil_->GetParentTexture()->GetFormat();
-// 
-//         auto fboKey = (unsigned long long)format << 32u | rtSize.x_ << 16u | rtSize.y_;
-//         HashMap<unsigned long long, FrameBufferObject>::Iterator i = impl_->frameBuffers_.Find(fboKey);
-//         if (i == impl_->frameBuffers_.End())
-//         {
-//             FrameBufferObject newFbo;
-//             newFbo.fbo_ = CreateFramebuffer();
-//             i = impl_->frameBuffers_.Insert(MakePair(fboKey, newFbo));
-//         }
-// 
-//         if (impl_->boundFBO_ != i->second_.fbo_)
-//         {
-//             BindFramebuffer(i->second_.fbo_);
-//             impl_->boundFBO_ = i->second_.fbo_;
-//         }
-
-#ifndef GL_ES_VERSION_2_0
-        // Setup readbuffers & drawbuffers if needed
-//         if (i->second_.readBuffers_ != GL_NONE)
-//         {
-//             glReadBuffer(GL_NONE);
-//             i->second_.readBuffers_ = GL_NONE;
-//         }
-// 
-//         // Calculate the bit combination of non-zero color rendertargets to first check if the combination changed
-//         unsigned newDrawBuffers = 0;
-//         for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-//         {
-//             if (renderTargets_[j])
-//                 newDrawBuffers |= 1u << j;
-//         }
-// 
-//         if (newDrawBuffers != i->second_.drawBuffers_)
-//         {
-//             // Check for no color rendertargets (depth rendering only)
-//             if (!newDrawBuffers)
-//                 glDrawBuffer(GL_NONE);
-//             else
-//             {
-//                 int drawBufferIds[MAX_RENDERTARGETS];
-//                 unsigned drawBufferCount = 0;
-// 
-//                 for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-//                 {
-//                     if (renderTargets_[j])
-//                     {
-//                         if (!gl3Support)
-//                             drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0_EXT + j;
-//                         else
-//                             drawBufferIds[drawBufferCount++] = GL_COLOR_ATTACHMENT0 + j;
-//                     }
-//                 }
-//                 glDrawBuffers(drawBufferCount, (const GLenum*)drawBufferIds);
-//             }
-// 
-//             i->second_.drawBuffers_ = newDrawBuffers;
-//         }
-#endif
-        for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-        {
-            if (renderTargets_[j])
-            {
-                //bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[j]->GetFrameBufferHandle()});
-                //                 Texture* texture = renderTargets_[j]->GetParentTexture();
-// 
-//                 // Bind either a renderbuffer or texture, depending on what is available
-//                 unsigned renderBufferID = renderTargets_[j]->GetRenderBuffer();
-//                 if (!renderBufferID)
-//                 {
-//                     // If texture's parameters are dirty, update before attaching
-//                     if (texture->GetParametersDirty())
-//                     {
-//                         SetTextureForUpdate(texture);
-//                         texture->UpdateParameters();
-//                         SetTexture(0, nullptr);
-//                     }
-// 
-//                     if (i->second_.colorAttachments_[j] != renderTargets_[j])
-//                     {
-//                         BindColorAttachment(j, renderTargets_[j]->GetTarget(), texture->GetGPUObjectName(), false);
-//                         i->second_.colorAttachments_[j] = renderTargets_[j];
-//                     }
-//                 }
-//                 else
-//                 {
-//                     if (i->second_.colorAttachments_[j] != renderTargets_[j])
-//                     {
-//                         BindColorAttachment(j, renderTargets_[j]->GetTarget(), renderBufferID, true);
-//                         i->second_.colorAttachments_[j] = renderTargets_[j];
-//                     }
-//                 }
-            }
-            else
-            {
-                //                 if (i->second_.colorAttachments_[j])
-//                 {
-//                     BindColorAttachment(j, GL_TEXTURE_2D, 0, false);
-//                     i->second_.colorAttachments_[j] = nullptr;
-//                 }
-            }
-            break;
-        }
-
-        if (depthStencil_)
-        {
-            // Bind either a renderbuffer or a depth texture, depending on what is available
-//             Texture* texture = depthStencil_->GetParentTexture();
-// #ifndef GL_ES_VERSION_2_0
-//             bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_EXT;
-// #else
-//             bool hasStencil = texture->GetFormat() == GL_DEPTH24_STENCIL8_OES;
-// #endif
-//             unsigned renderBufferID = depthStencil_->GetRenderBuffer();
-//             if (!renderBufferID)
-//             {
-//                 // If texture's parameters are dirty, update before attaching
-//                 if (texture->GetParametersDirty())
-//                 {
-//                     SetTextureForUpdate(texture);
-//                     texture->UpdateParameters();
-//                     SetTexture(0, nullptr);
-//                 }
-// 
-//                 if (i->second_.depthAttachment_ != depthStencil_)
-//                 {
-//                     BindDepthAttachment(texture->GetGPUObjectName(), false);
-//                     BindStencilAttachment(hasStencil ? texture->GetGPUObjectName() : 0, false);
-//                     i->second_.depthAttachment_ = depthStencil_;
-//                 }
-//             }
-//             else
-//             {
-//                 if (i->second_.depthAttachment_ != depthStencil_)
-//                 {
-//                     BindDepthAttachment(renderBufferID, true);
-//                     BindStencilAttachment(hasStencil ? renderBufferID : 0, true);
-//                     i->second_.depthAttachment_ = depthStencil_;
-//                 }
-//             }
+            bgfx::setViewFrameBuffer(current_view_id_, BGFX_INVALID_HANDLE);
         }
         else
         {
-//             if (i->second_.depthAttachment_)
-//             {
-//                 BindDepthAttachment(0, false);
-//                 BindStencilAttachment(0, false);
-//                 i->second_.depthAttachment_ = nullptr;
-//             }
-        }
-        if (renderTargets_[0])
-        {
-            if (renderTargets_[0]->GetFrameBufferHandle() == bgfx::kInvalidHandle)
+            if (renderTargets_[0])
             {
-                bgfx::TextureHandle fbt[2];
-                uint8_t count = 1;
-                fbt[0] = bgfx::TextureHandle{renderTargets_[0]->GetParentTexture()->GetGPUObjectHandle()};
-                if (depthStencil_)
+                if (renderTargets_[0]->GetFrameBufferHandle() == bgfx::kInvalidHandle)
                 {
-                    count++;
-                    fbt[1] = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
+                    bgfx::TextureHandle fbt[2];
+                    uint8_t count = 1;
+                    fbt[0] = bgfx::TextureHandle{renderTargets_[0]->GetParentTexture()->GetGPUObjectHandle()};
+                    if (depthStencil_)
+                    {
+                        count++;
+                        fbt[1] = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
+                    }
+                    auto framebuffer = bgfx::createFrameBuffer(count, fbt);
+                    renderTargets_[0]->SetFrameBufferHandle(framebuffer.idx);
                 }
-                auto framebuffer = bgfx::createFrameBuffer(count, fbt);
-                renderTargets_[0]->SetFrameBufferHandle(framebuffer.idx);
+                bgfx::setViewFrameBuffer(current_view_id_,
+                                         bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
             }
-            // todo : 
-            if (view_id_ == shadowmap_view_id_)
+            else if (depthStencil_)
             {
-                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
-                bgfx::setViewFrameBuffer(view_id_ + 1, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
-                bgfx::setViewFrameBuffer(view_id_ + 2, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
-                bgfx::setViewFrameBuffer(view_id_ + 3, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
-                bgfx::setViewFrameBuffer(view_id_ + 4, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
+                if (depthStencil_->GetFrameBufferHandle() == bgfx::kInvalidHandle)
+                {
+                    auto fbt = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
+                    auto framebuffer = bgfx::createFrameBuffer(1, &fbt);
+                    depthStencil_->SetFrameBufferHandle(framebuffer.idx);
+                }
+                bgfx::setViewFrameBuffer(current_view_id_,
+                                         bgfx::FrameBufferHandle{depthStencil_->GetFrameBufferHandle()});
             }
-            else
-            {
-                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{renderTargets_[0]->GetFrameBufferHandle()});
-            }
-        }
-        else if (depthStencil_)
-        {
-            if (depthStencil_->GetFrameBufferHandle() == bgfx::kInvalidHandle)
-            {
-                auto fbt = bgfx::TextureHandle{depthStencil_->GetParentTexture()->GetGPUObjectHandle()};
-                auto framebuffer = bgfx::createFrameBuffer(1, &fbt);
-                depthStencil_->SetFrameBufferHandle(framebuffer.idx);
-            }
-            if (view_id_ == shadowmap_view_id_)
-            {
-                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-                bgfx::setViewFrameBuffer(view_id_ + 1, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-                bgfx::setViewFrameBuffer(view_id_ + 2, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-                bgfx::setViewFrameBuffer(view_id_ + 3, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-                bgfx::setViewFrameBuffer(view_id_ + 4, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-            }
-            else
-            {
-                bgfx::setViewFrameBuffer(view_id_, bgfx::FrameBufferHandle{ depthStencil_->GetFrameBufferHandle() });
-            }
-            
-        }
-        
+
 #ifndef GL_ES_VERSION_2_0
-        // Disable/enable sRGB write
-        if (sRGBWriteSupport_)
-        {
-            bool sRGBWrite = renderTargets_[0] ? renderTargets_[0]->GetParentTexture()->GetSRGB() : sRGB_;
-            if (sRGBWrite != impl_->sRGBWrite_)
+            // Disable/enable sRGB write
+            if (sRGBWriteSupport_)
             {
-//                 if (sRGBWrite)
-//                     glEnable(GL_FRAMEBUFFER_SRGB_EXT);
-//                 else
-//                     glDisable(GL_FRAMEBUFFER_SRGB_EXT);
-                impl_->sRGBWrite_ = sRGBWrite;
+                bool sRGBWrite = renderTargets_[0] ? renderTargets_[0]->GetParentTexture()->GetSRGB() : sRGB_;
+                if (sRGBWrite != impl_->sRGBWrite_)
+                {
+                    //                 if (sRGBWrite)
+                    //                     glEnable(GL_FRAMEBUFFER_SRGB_EXT);
+                    //                 else
+                    //                     glDisable(GL_FRAMEBUFFER_SRGB_EXT);
+                    impl_->sRGBWrite_ = sRGBWrite;
+                }
             }
-        }
 #endif
+        }
     }
-
-//     if (impl_->vertexBuffersDirty_)
-//     {
-//         // Go through currently bound vertex buffers and set the attribute pointers that are available & required
-//         // Use reverse order so that elements from higher index buffers will override lower index buffers
-//         unsigned assignedLocations = 0;
-// 
-//         for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
-//         {
-//             VertexBuffer* buffer = vertexBuffers_[i];
-//             // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory for vertex data,
-//             // in which case the pointer will be invalid and cause a crash
-//             if (!buffer || !buffer->GetGPUObjectHandle/*GetGPUObjectName*/()/* || !impl_->vertexAttributes_*/)
-//                 continue;
-// 
-//             buffer->IsDynamic()
-//                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
-//                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
-// 
-//             const PODVector<VertexElement>& elements = buffer->GetElements();
-// 
-//             for (PODVector<VertexElement>::ConstIterator j = elements.Begin(); j != elements.End(); ++j)
-//             {
-//                 const VertexElement& element = *j;
-//                 HashMap<Pair<unsigned char, unsigned char>, unsigned>::ConstIterator k =
-//                     impl_->vertexAttributes_->Find(MakePair((unsigned char)element.semantic_, element.index_));
-// 
-//                 if (k != impl_->vertexAttributes_->End())
-//                 {
-//                     unsigned location = k->second_;
-//                     unsigned locationMask = 1u << location;
-//                     if (assignedLocations & locationMask)
-//                         continue; // Already assigned by higher index vertex buffer
-//                     assignedLocations |= locationMask;
-// 
-//                     // Enable attribute if not enabled yet
-//                     if (!(impl_->enabledVertexAttributes_ & locationMask))
-//                     {
-//                         glEnableVertexAttribArray(location);
-//                         impl_->enabledVertexAttributes_ |= locationMask;
-//                     }
-// 
-//                     // Enable/disable instancing divisor as necessary
-//                     unsigned dataStart = element.offset_;
-//                     if (element.perInstance_)
-//                     {
-//                         dataStart += impl_->lastInstanceOffset_ * buffer->GetVertexSize();
-//                         if (!(impl_->instancingVertexAttributes_ & locationMask))
-//                         {
-//                             SetVertexAttribDivisor(location, 1);
-//                             impl_->instancingVertexAttributes_ |= locationMask;
-//                         }
-//                     }
-//                     else
-//                     {
-//                         if (impl_->instancingVertexAttributes_ & locationMask)
-//                         {
-//                             SetVertexAttribDivisor(location, 0);
-//                             impl_->instancingVertexAttributes_ &= ~locationMask;
-//                         }
-//                     }
-//                     
-//                     SetVBO(buffer->GetGPUObjectName());
-//                     glVertexAttribPointer(location, glElementComponents[element.type_], glElementTypes[element.type_],
-//                         element.type_ == TYPE_UBYTE4_NORM ? GL_TRUE : GL_FALSE, (unsigned)buffer->GetVertexSize(),
-//                         (const void *)(size_t)dataStart);
-//                 }
-//             }
-//         }
-// 
-//         // Finally disable unnecessary vertex attributes
-//         unsigned disableVertexAttributes = impl_->enabledVertexAttributes_ & (~impl_->usedVertexAttributes_);
-//         unsigned location = 0;
-//         while (disableVertexAttributes)
-//         {
-//             if (disableVertexAttributes & 1u)
-//             {
-//                 glDisableVertexAttribArray(location);
-//                 impl_->enabledVertexAttributes_ &= ~(1u << location);
-//             }
-//             ++location;
-//             disableVertexAttributes >>= 1;
-//         }
-// 
-//         impl_->vertexBuffersDirty_ = false;
-//     }
-
-
 }
 
 void Graphics::CleanupFramebuffers()

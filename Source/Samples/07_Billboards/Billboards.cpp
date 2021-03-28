@@ -100,9 +100,9 @@ void Billboards::CreateScene()
     lightNode->SetDirection(Vector3(0.5f, -1.0f, 0.5f));
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetColor(Color(0.2f, 0.2f, 0.2f));
+    light->SetColor(Color(0.5f, 0.5f, 0.5f));
     light->SetSpecularIntensity(1.0f);
-
+    //light->SetCastShadows(true);
     // Create a "floor" consisting of several tiles
     for (int y = -5; y <= 5; ++y)
     {
@@ -118,19 +118,21 @@ void Billboards::CreateScene()
     }
 
     // Create groups of mushrooms, which act as shadow casters
-    const unsigned NUM_MUSHROOMGROUPS = 1; // 25;
-    const unsigned NUM_MUSHROOMS = 2;      // 25;
+    const unsigned NUM_MUSHROOMGROUPS = 25; // 25;
+    const unsigned NUM_MUSHROOMS = 25;      // 25;
     Vector3 p0[2]{{-2.0f, 0.0f, 0.0f}, {2.0f, 0.0f, 0.0f}};
     for (unsigned i = 0; i < NUM_MUSHROOMGROUPS; ++i)
     {
         // First create a scene node for the group. The individual mushrooms nodes will be created as children
         Node* groupNode = scene_->CreateChild("MushroomGroup");
-        groupNode->SetPosition(p0[i] /*Vector3(Random(190.0f) - 95.0f, 0.0f, Random(190.0f) - 95.0f)*/);
+        groupNode->SetPosition(Vector3(Random(190.0f) - 95.0f, 0.0f, Random(190.0f) - 95.0f));
+        //groupNode->SetPosition(p0[i] /*Vector3(Random(190.0f) - 95.0f, 0.0f, Random(190.0f) - 95.0f)*/);
 
         for (unsigned j = 0; j < NUM_MUSHROOMS; ++j)
         {
             Node* mushroomNode = groupNode->CreateChild("Mushroom");
-            mushroomNode->SetPosition(p0[j] /*Vector3(Random(25.0f) - 12.5f, 0.0f, Random(25.0f) - 12.5f)*/);
+            mushroomNode->SetPosition(Vector3(Random(25.0f) - 12.5f, 0.0f, Random(25.0f) - 12.5f));
+            //mushroomNode->SetPosition(p0[j] /*Vector3(Random(25.0f) - 12.5f, 0.0f, Random(25.0f) - 12.5f)*/);
             mushroomNode->SetRotation(Quaternion(0.0f, Random() * 360.0f, 0.0f));
             mushroomNode->SetScale(1.0f + Random() * 4.0f);
             auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
@@ -144,31 +146,31 @@ void Billboards::CreateScene()
     const unsigned NUM_BILLBOARDNODES = 25;
     const unsigned NUM_BILLBOARDS = 10;
 
-    //     for (unsigned i = 0; i < NUM_BILLBOARDNODES; ++i)
-    //     {
-    //         Node* smokeNode = scene_->CreateChild("Smoke");
-    //         smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
-    //
-    //         auto* billboardObject = smokeNode->CreateComponent<BillboardSet>();
-    //         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
-    //         billboardObject->SetMaterial(cache->GetResource<Material>("Materials/LitSmoke.xml"));
-    //         billboardObject->SetSorted(true);
-    //
-    //         for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
-    //         {
-    //             Billboard* bb = billboardObject->GetBillboard(j);
-    //             bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
-    //             bb->size_ = Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
-    //             bb->rotation_ = Random() * 360.0f;
-    //             bb->enabled_ = true;
-    //         }
-    //
-    //         // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its
-    //         internals billboardObject->Commit();
-    //     }
+//     for (unsigned i = 0; i < NUM_BILLBOARDNODES; ++i)
+//     {
+//         Node* smokeNode = scene_->CreateChild("Smoke");
+//         smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
+//
+//         auto* billboardObject = smokeNode->CreateComponent<BillboardSet>();
+//         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
+//         billboardObject->SetMaterial(cache->GetResource<Material>("Materials/LitSmoke.xml"));
+//         billboardObject->SetSorted(true);
+//
+//         for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
+//         {
+//             Billboard* bb = billboardObject->GetBillboard(j);
+//             bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
+//             bb->size_ = Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
+//             bb->rotation_ = Random() * 360.0f;
+//             bb->enabled_ = true;
+//         }
+//
+//         // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its
+//         internals billboardObject->Commit();
+//     }
 
     // Create shadow casting spotlights
-    const unsigned NUM_LIGHTS = 2; // 9;
+    const unsigned NUM_LIGHTS = 9; // 9;
     Vector3 p[2]{{-5.0f, 20.0f, -10.0f}, {5.0f, 20.0f, -10.0f}};
     for (unsigned i = 0; i < NUM_LIGHTS; ++i)
     {
@@ -180,8 +182,8 @@ void Billboards::CreateScene()
         Vector3 position((i % 3) * 60.0f - 60.0f, 45.0f, (i / 3.f) * 60.0f - 60.0f);
         Color color(((i + 1) & 1u) * 0.5f + 0.5f, (((i + 1) >> 1u) & 1u) * 0.5f + 0.5f,
                     (((i + 1) >> 2u) & 1u) * 0.5f + 0.5f);
-
-        lightNode->SetPosition(/*position*/ p[i]);
+        lightNode->SetPosition(position);
+        //lightNode->SetPosition(/*position*/ p[i]);
         lightNode->SetDirection(Vector3(Sin(angle), -1.5f, Cos(angle)));
 
         light->SetLightType(LIGHT_SPOT);
@@ -294,7 +296,6 @@ void Billboards::MoveCamera(float timeStep)
 
 void Billboards::AnimateScene(float timeStep)
 {
-    return;
     // Get the light and billboard scene nodes
     PODVector<Node*> lightNodes;
     PODVector<Node*> billboardNodes;

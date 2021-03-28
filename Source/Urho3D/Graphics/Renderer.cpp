@@ -729,8 +729,6 @@ void Renderer::Render()
     {
         if (!views_[i])
             continue;
-
-        graphics_->SetCurrentViewID(graphics_->GetSceneStartViewID() + i);
         // Screen buffers can be reused between views, as each is rendered completely
         PrepareViewRender();
         views_[i]->Render();

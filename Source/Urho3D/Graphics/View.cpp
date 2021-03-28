@@ -1450,6 +1450,8 @@ void View::GetLitBatches(Drawable* drawable, LightBatchQueue& lightQueue, BatchQ
 
 void View::ExecuteRenderPathCommands()
 {
+    graphics_->StartNewView();
+
     View* actualView = sourceView_ ? sourceView_ : this;
 
     // If not reusing shadowmaps, render all of them first
@@ -3060,9 +3062,8 @@ bool View::NeedRenderShadowMap(const LightBatchQueue& queue)
 void View::RenderShadowMap(const LightBatchQueue& queue)
 {
     URHO3D_PROFILE(RenderShadowMap);
-    auto shadow_view_id = graphics_->GetShadowMapStartViewID();
-    auto oldViewID = graphics_->GetCurrentViewID();
-    graphics_->SetCurrentViewID(shadow_view_id);
+
+    graphics_->StartNewView();
 
     Texture2D* shadowMap = queue.shadowMap_;
     graphics_->SetTexture(TU_SHADOWMAP, nullptr);
@@ -3128,13 +3129,12 @@ void View::RenderShadowMap(const LightBatchQueue& queue)
 
         if (!shadowQueue.shadowBatches_.IsEmpty())
         {
-            graphics_->SetCurrentViewID(++shadow_view_id);
+            graphics_->StartNewView();
             graphics_->SetViewport(shadowQueue.shadowViewport_);
             shadowQueue.shadowBatches_.Draw(this, shadowQueue.shadowCamera_, false, false, true);
         }
     }
-    graphics_->SetCurrentViewID(oldViewID);
-
+    graphics_->StartNewView();
     // Scale filter blur amount to shadow map viewport size so that different shadow map resolutions don't behave differently
     float blurScale = queue.shadowSplits_[0].shadowViewport_.Width() / 1024.0f;
     renderer_->ApplyShadowMapFilter(this, shadowMap, blurScale);

@@ -176,6 +176,7 @@ void StaticScene::SetupViewport()
 
 void StaticScene::MoveCamera(float timeStep)
 {
+    return;
     // Do not move if the UI has a focused element (the console)
     if (GetSubsystem<UI>()->GetFocusElement())
         return;

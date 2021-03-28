@@ -90,26 +90,26 @@ bool RenderSurface::CreateRenderBuffer(unsigned width, unsigned height, unsigned
 
 void RenderSurface::OnDeviceLost()
 {
-    Graphics* graphics = parentTexture_->GetGraphics();
-    if (!graphics)
-        return;
-
-    for (unsigned i = 0; i < MAX_RENDERTARGETS; ++i)
-    {
-        if (graphics->GetRenderTarget(i) == this)
-            graphics->ResetRenderTarget(i);
-    }
-
-    if (graphics->GetDepthStencil() == this)
-        graphics->ResetDepthStencil();
-
-    // Clean up also from non-active FBOs
-    graphics->CleanupRenderSurface(this);
-
-    if (renderBuffer_ && !graphics->IsDeviceLost())
-        glDeleteRenderbuffersEXT(1, &renderBuffer_);
-
-    renderBuffer_ = 0;
+//     Graphics* graphics = parentTexture_->GetGraphics();
+//     if (!graphics)
+//         return;
+// 
+//     for (unsigned i = 0; i < MAX_RENDERTARGETS; ++i)
+//     {
+//         if (graphics->GetRenderTarget(i) == this)
+//             graphics->ResetRenderTarget(i);
+//     }
+// 
+//     if (graphics->GetDepthStencil() == this)
+//         graphics->ResetDepthStencil();
+// 
+//     // Clean up also from non-active FBOs
+//     graphics->CleanupRenderSurface(this);
+// 
+//     if (renderBuffer_ && !graphics->IsDeviceLost())
+//         glDeleteRenderbuffersEXT(1, &renderBuffer_);
+// 
+//     renderBuffer_ = 0;
 }
 
 void RenderSurface::Release()

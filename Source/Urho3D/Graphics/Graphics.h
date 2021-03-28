@@ -925,24 +925,16 @@ private:
     uint64_t render_state_{ 0 };
     uint32_t front_stencil_{ 0 };
     uint32_t back_stencil_{ 0 };
-    uint16_t view_id_{0};
-    uint16_t shadowmap_view_id_{ 1 };
-    uint16_t scene_view_id_{ 0x0f };
-    uint16_t shadowmap_view_count_per_light_{5};//clear,shadowmap0-shadowmap4
-    uint16_t light_view_count_per_view_{10};
-    //constexpr const uint16_t MaxLightPerView = 16;
+    uint16_t last_view_id_{0xff};
+    uint16_t current_view_id_{0};
     void* current_instance_buffer_{nullptr};
-
 public:
-    //uint64_t GetRendererState() const { return render_state_; }
-    void SetRendererState(uint64_t state);
-    void SetCurrentViewID(uint16_t viewID) { view_id_ = viewID; }
-    uint16_t GetCurrentViewID() const { return view_id_; }
-    uint16_t GetShadowMapStartViewID() const { return shadowmap_view_id_; }
-    uint16_t GetSceneStartViewID() const { return scene_view_id_; }
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
     void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
+    //
+    void SetRendererState(uint64_t state);
+    void StartNewView() { current_view_id_++; }
 };
 
 /// Register Graphics library objects.
