@@ -44,7 +44,10 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(Decals)
+//URHO3D_DEFINE_APPLICATION_MAIN(Decals)
+
+URHO3D_DEFINE_APPLICATION_MAIN(Decals, "08-Decals", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
 Decals::Decals(Context* context) :
     Sample(context),
@@ -111,27 +114,27 @@ void Decals::CreateScene()
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
 
     // Create some mushrooms
-    const unsigned NUM_MUSHROOMS = 240;
-    for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
-    {
-        Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-        mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-        mushroomNode->SetScale(0.5f + Random(2.0f));
-        auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-        mushroomObject->SetCastShadows(true);
-    }
+//     const unsigned NUM_MUSHROOMS = 240;
+//     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
+//     {
+//         Node* mushroomNode = scene_->CreateChild("Mushroom");
+//         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+//         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+//         mushroomNode->SetScale(0.5f + Random(2.0f));
+//         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
+//         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+//         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+//         mushroomObject->SetCastShadows(true);
+//     }
 
     // Create randomly sized boxes. If boxes are big enough, make them occluders. Occluders will be software rasterized before
     // rendering to a low-resolution depth-only buffer to test the objects in the view frustum for visibility
-    const unsigned NUM_BOXES = 20;
+    const unsigned NUM_BOXES = 1/*20*/;
     for (unsigned i = 0; i < NUM_BOXES; ++i)
     {
         Node* boxNode = scene_->CreateChild("Box");
         float size = 1.0f + Random(10.0f);
-        boxNode->SetPosition(Vector3(Random(80.0f) - 40.0f, size * 0.5f, Random(80.0f) - 40.0f));
+        boxNode->SetPosition({0.0f, size * 0.5f, 0.0f} /*Vector3(Random(80.0f) - 40.0f, size * 0.5f, Random(80.0f) - 40.0f)*/);
         boxNode->SetScale(size);
         auto* boxObject = boxNode->CreateComponent<StaticModel>();
         boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
@@ -147,7 +150,7 @@ void Decals::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
 }
 
 void Decals::CreateUI()

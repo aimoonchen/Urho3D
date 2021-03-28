@@ -964,9 +964,12 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount)
 {
-    if (!indexCount || !indexBuffer_ || indexBuffer_->GetGPUObjectHandle() == bgfx::kInvalidHandle/*!indexBuffer_->GetGPUObjectName()*/)
+    if (!indexCount || !indexBuffer_ ||
+        indexBuffer_->GetGPUObjectHandle() == bgfx::kInvalidHandle /*!indexBuffer_->GetGPUObjectName()*/)
+    {
+        URHO3D_LOGERROR("indexbuffer invalid.");
         return;
-
+    }
     PrepareDraw();
 
     unsigned indexSize = indexBuffer_->GetIndexSize();
