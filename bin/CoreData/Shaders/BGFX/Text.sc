@@ -1,53 +1,58 @@
-// https://www.khronos.org/registry/OpenGL/extensions/OES/OES_standard_derivatives.txt
-#extension GL_OES_standard_derivatives : enable
+#if defined(COMPILEVS)
+$input a_position, a_normal, a_tangent, a_indices, a_weight, a_color0, a_texcoord0
+$output v_color0, v_texcoord0
+#elif defined(COMPILEPS)
+$input v_color0, v_texcoord0
+#endif
+#include "bgfx_shader.sh"
+#include "shaderlib.sh"
+#include "Uniforms.sh"
+#include "Samplers.sh"
+#include "Transform.sh"
 
-#include "Uniforms.glsl"
-#include "Samplers.glsl"
-#include "Transform.glsl"
-
-varying vec2 vTexCoord;
-varying vec4 vColor;
+//varying vec2 v_texcoord0;
+//varying vec4 v_color0;
 
 #ifdef TEXT_EFFECT_SHADOW
-uniform vec2 cShadowOffset;
+uniform vec4 cShadowOffset;
 uniform vec4 cShadowColor;
 #endif
 
 #ifdef TEXT_EFFECT_STROKE
 uniform vec4 cStrokeColor;
 #endif
-
-void VS()
+#if defined(COMPILEVS)
+void main()
 {
     mat4 modelMatrix = iModelMatrix;
     vec3 worldPos = GetWorldPos(modelMatrix);
     gl_Position = GetClipPos(worldPos);
 
-    vTexCoord = iTexCoord;
-    vColor = iColor;
+    v_texcoord0.xy = a_texcoord0;
+    v_color0 = a_color0;
 }
 
 /*
     1) Simplest SDF shader:
 
-    float distance = texture2D(sDiffMap, vTexCoord).a;
+    float distance = texture2D(sDiffMap, v_texcoord0.xy).a;
     if (distance >= 0.5)
-        gl_FragColor.a = vColor.a; // This is glyph
+        gl_FragColor.a = v_color0.a; // This is glyph
     else
         gl_FragColor.a = 0.0; // Outside glyph
 
     2) Glyph with antialiazed border:
 
-    float distance = texture2D(sDiffMap, vTexCoord).a;
-    gl_FragColor.a = vColor.a * smoothstep(0.495, 0.505, distance);
+    float distance = texture2D(sDiffMap, v_texcoord0.xy).a;
+    gl_FragColor.a = v_color0.a * smoothstep(0.495, 0.505, distance);
 
     3) Quality improvement for far and small text:
 
-    float distance = texture2D(sDiffMap, vTexCoord).a;
+    float distance = texture2D(sDiffMap, v_texcoord0.xy).a;
     // How much "distance" is changed for neighboring pixels.
     // If text is far then width is big. Far text will be blurred.
     float width = fwidth(distance);
-    gl_FragColor.a = vColor.a * smoothstep(0.5 - width, 0.5 + width, distance);
+    gl_FragColor.a = v_color0.a * smoothstep(0.5 - width, 0.5 + width, distance);
 */
 
 #if defined(COMPILEPS) && defined(SIGNED_DISTANCE_FIELD)
@@ -59,17 +64,17 @@ void VS()
     // Comment this define to turn off supersampling
     #define SUPERSAMPLING
 #endif
-
-void PS()
+#elif defined(COMPILEPS)
+void main()
 {
 #ifdef SIGNED_DISTANCE_FIELD
-    gl_FragColor.rgb = vColor.rgb;
-    float distance = texture2D(sDiffMap, vTexCoord).a;
+    gl_FragColor.rgb = v_color0.rgb;
+    float distance = texture2D(sDiffMap, v_texcoord0.xy).a;
 
     #ifdef TEXT_EFFECT_STROKE
         #ifdef SUPERSAMPLING
             float outlineFactor = smoothstep(0.5, 0.525, distance); // Border of glyph
-            gl_FragColor.rgb = mix(cStrokeColor.rgb, vColor.rgb, outlineFactor);
+            gl_FragColor.rgb = mix(cStrokeColor.rgb, v_color0.rgb, outlineFactor);
         #else
             if (distance < 0.525)
                gl_FragColor.rgb = cStrokeColor.rgb;
@@ -77,7 +82,7 @@ void PS()
     #endif
 
     #ifdef TEXT_EFFECT_SHADOW
-        if (texture2D(sDiffMap, vTexCoord - cShadowOffset).a > 0.5 && distance <= 0.5)
+        if (texture2D(sDiffMap, v_texcoord0.xy - cShadowOffset.xy).a > 0.5 && distance <= 0.5)
             gl_FragColor = cShadowColor;
         #ifndef SUPERSAMPLING
         else if (distance <= 0.5)
@@ -90,8 +95,8 @@ void PS()
             float alpha = GetAlpha(distance, width);
 
             #ifdef SUPERSAMPLING
-                vec2 deltaUV = 0.354 * fwidth(vTexCoord); // (1.0 / sqrt(2.0)) / 2.0 = 0.354
-                vec4 square = vec4(vTexCoord - deltaUV, vTexCoord + deltaUV);
+                vec2 deltaUV = 0.354 * fwidth(v_texcoord0.xy); // (1.0 / sqrt(2.0)) / 2.0 = 0.354
+                vec4 square = vec4(v_texcoord0.xy - deltaUV, v_texcoord0.xy + deltaUV);
 
                 float distance2 = texture2D(sDiffMap, square.xy).a;
                 float distance3 = texture2D(sDiffMap, square.zw).a;
@@ -112,14 +117,15 @@ void PS()
         }
 #else
     #ifdef ALPHAMAP
-        gl_FragColor.rgb = vColor.rgb;
+        gl_FragColor.rgb = v_color0.rgb;
         #ifdef GL3
-            gl_FragColor.a = vColor.a * texture2D(sDiffMap, vTexCoord).r;
+            gl_FragColor.a = v_color0.a * texture2D(sDiffMap, v_texcoord0.xy).r;
         #else
-            gl_FragColor.a = vColor.a * texture2D(sDiffMap, vTexCoord).a;
+            gl_FragColor.a = v_color0.a * texture2D(sDiffMap, v_texcoord0.xy).a;
         #endif
     #else
-        gl_FragColor = vColor * texture2D(sDiffMap, vTexCoord);
+        gl_FragColor = v_color0 * texture2D(sDiffMap, v_texcoord0.xy);
     #endif
 #endif
 }
+#endif

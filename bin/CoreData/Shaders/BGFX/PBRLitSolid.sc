@@ -226,7 +226,7 @@ void main()
 
         #ifdef AMBIENT
             finalColor += cAmbientColor.rgb * diffColor.rgb;
-            finalColor += cMatEmissiveColor;
+            finalColor += cMatEmissiveColor.rgb;
             gl_FragColor = vec4(GetFog(finalColor, fogFactor), diffColor.a);
         #else
             gl_FragColor = vec4(GetLitFog(finalColor, fogFactor), diffColor.a);
@@ -274,9 +274,9 @@ void main()
             finalColor += texture2D(sEmissiveMap, v_texcoord1).rgb * diffColor.rgb;
         #endif
         #ifdef EMISSIVEMAP
-            finalColor += cMatEmissiveColor * texture2D(sEmissiveMap, v_texcoord0.xy).rgb;
+            finalColor += cMatEmissiveColor.rgb * texture2D(sEmissiveMap, v_texcoord0.xy).rgb;
         #else
-            finalColor += cMatEmissiveColor;
+            finalColor += cMatEmissiveColor.rgb;
         #endif
 
         gl_FragColor = vec4(GetFog(finalColor, fogFactor), diffColor.a);

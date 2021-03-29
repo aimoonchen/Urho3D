@@ -925,6 +925,12 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 //     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
     if (impl_->shaderProgram_)
     {
+        // TODO : Should be call right position
+        if (true /*renderer_->GetDrawShadows()*/)
+        {
+            SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+            SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+        }
         if (last_view_id_ != current_view_id_)
         {
             last_view_id_ = current_view_id_;
@@ -981,6 +987,12 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 //     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
 
     
+    // TODO : Should be call right position
+    if (true /*renderer_->GetDrawShadows()*/)
+    {
+        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+    }
     if (last_view_id_ != current_view_id_)
     {
         last_view_id_ = current_view_id_;
@@ -3141,12 +3153,6 @@ void Graphics::CheckFeatureSupport()
 
 void Graphics::PrepareDraw()
 {
-    // TODO : Should be call right position
-    if (true /*renderer_->GetDrawShadows()*/)
-    {
-        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
-        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-    }
     if (last_view_id_ != current_view_id_ || impl_->fboDirty_)
     {
         // First check if no framebuffer is needed. In that case simply return to backbuffer rendering

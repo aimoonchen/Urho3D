@@ -60,14 +60,14 @@ uniform vec4 cDepthReconstruct;
 uniform float cElapsedTimePS;
 uniform vec4 cFogParams;
 uniform vec4 cFogColor;
-uniform vec2 cGBufferInvSize;
+uniform vec4 cGBufferInvSize;
 uniform vec4 cLightColor;
 uniform vec4 cLightPosPS;
 uniform vec4 cLightDirPS;
 uniform vec4 cNormalOffsetScalePS;
 uniform vec4 cMatDiffColor;
-uniform vec3 cMatEmissiveColor;
-uniform vec3 cMatEnvMapColor;
+uniform vec4 cMatEmissiveColor;
+uniform vec4 cMatEnvMapColor;
 uniform vec4 cMatSpecColor;
 #ifdef PBR
     uniform float cRoughness;
@@ -75,8 +75,8 @@ uniform vec4 cMatSpecColor;
     uniform float cLightRad;
     uniform float cLightLength;
 #endif
-uniform vec3 cZoneMin;
-uniform vec3 cZoneMax;
+uniform vec4 cZoneMin;
+uniform vec4 cZoneMax;
 uniform float cNearClipPS;
 uniform float cFarClipPS;
 uniform vec4 cShadowCubeAdjust;
