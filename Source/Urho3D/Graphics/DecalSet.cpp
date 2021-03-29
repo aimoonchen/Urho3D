@@ -1015,9 +1015,9 @@ void DecalSet::UpdateBuffers()
     unsigned newIBSize = optimizeBufferSize_ ? numIndices_ : maxIndices_;
 
     if (vertexBuffer_->GetElementMask() != newElementMask || vertexBuffer_->GetVertexCount() != newVBSize)
-        vertexBuffer_->SetSize(newVBSize, newElementMask);
+        vertexBuffer_->SetSize(newVBSize, newElementMask, true);
     if (indexBuffer_->GetIndexCount() != newIBSize)
-        indexBuffer_->SetSize(newIBSize, false);
+        indexBuffer_->SetSize(newIBSize, false, true);
     geometry_->SetVertexBuffer(0, vertexBuffer_);
     geometry_->SetDrawRange(TRIANGLE_LIST, 0, numIndices_, 0, numVertices_);
 

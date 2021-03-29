@@ -63,7 +63,7 @@
 #include "../UI/View3D.h"
 #include "../UI/UIComponent.h"
 
-#include "../Graphics/BGFX/bgfxGraphics.h"
+#include "../Graphics/BGFX/BGFXGraphics.h"
 
 #include <cassert>
 #include <SDL/SDL.h>

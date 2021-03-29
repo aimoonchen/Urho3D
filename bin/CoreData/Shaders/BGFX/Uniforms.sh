@@ -43,6 +43,7 @@ uniform mat4 cZone;
 #ifdef GL3
     uniform vec4 cClipPlane;
 #endif
+uniform vec4 cDepthBias;
 #endif
 
 #ifdef COMPILEPS

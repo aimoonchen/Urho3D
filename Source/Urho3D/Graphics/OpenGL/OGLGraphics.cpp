@@ -2065,24 +2065,25 @@ void Graphics::SetCullMode(CullMode mode)
 
 void Graphics::SetDepthBias(float constantBias, float slopeScaledBias)
 {
-//     if (constantBias != constantDepthBias_ || slopeScaledBias != slopeScaledDepthBias_)
-//     {
-// // #ifndef GL_ES_VERSION_2_0
-// //         if (slopeScaledBias != 0.0f)
-// //         {
-// //             // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
-// //             glEnable(GL_POLYGON_OFFSET_FILL);
-// //             glPolygonOffset(slopeScaledBias, 0.0f);
-// //         }
-// //         else
-// //             glDisable(GL_POLYGON_OFFSET_FILL);
-// // #endif
-// // 
-//         constantDepthBias_ = constantBias;
-//         slopeScaledDepthBias_ = slopeScaledBias;
-//         // Force update of the projection matrix shader parameter
-//         ClearParameterSource(SP_CAMERA);
-//     }
+    if (constantBias != constantDepthBias_ || slopeScaledBias != slopeScaledDepthBias_)
+    {
+// #ifndef GL_ES_VERSION_2_0
+//         if (slopeScaledBias != 0.0f)
+//         {
+//             // OpenGL constant bias is unreliable and dependent on depth buffer bitdepth, apply in the projection matrix instead
+//             glEnable(GL_POLYGON_OFFSET_FILL);
+//             glPolygonOffset(slopeScaledBias, 0.0f);
+//         }
+//         else
+//             glDisable(GL_POLYGON_OFFSET_FILL);
+// #endif
+// 
+        constantDepthBias_ = constantBias;
+        slopeScaledDepthBias_ = slopeScaledBias;
+        // Force update of the projection matrix shader parameter
+        ClearParameterSource(SP_CAMERA);
+    }
+    //SetShaderParameter(VSP_DEPTHBIAS, Vector4{ constantBias, slopeScaledDepthBias_, 0.0f, 0.0f });
 }
 
 void Graphics::SetDepthTest(CompareMode mode)

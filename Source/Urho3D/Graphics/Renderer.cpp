@@ -1047,15 +1047,15 @@ Texture* Renderer::GetScreenBuffer(int width, int height, unsigned format, int m
 #ifdef URHO3D_OPENGL
             // OpenGL hack: clear persistent floating point screen buffers to ensure the initial contents aren't illegal (NaN)?
             // Otherwise eg. the AutoExposure post process will not work correctly
-            if (persistentKey && Texture::GetDataType(format) == GL_FLOAT)
-            {
-                // Note: this loses current rendertarget assignment
-                graphics_->ResetRenderTargets();
-                graphics_->SetRenderTarget(0, newTex2D);
-                graphics_->SetDepthStencil((RenderSurface*)nullptr);
-                graphics_->SetViewport(IntRect(0, 0, width, height));
-                graphics_->Clear(CLEAR_COLOR);
-            }
+//             if (persistentKey && Texture::GetDataType(format) == GL_FLOAT)
+//             {
+//                 // Note: this loses current rendertarget assignment
+//                 graphics_->ResetRenderTargets();
+//                 graphics_->SetRenderTarget(0, newTex2D);
+//                 graphics_->SetDepthStencil((RenderSurface*)nullptr);
+//                 graphics_->SetViewport(IntRect(0, 0, width, height));
+//                 graphics_->Clear(CLEAR_COLOR);
+//             }
 #endif
 
             newBuffer = newTex2D;

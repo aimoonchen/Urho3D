@@ -374,6 +374,7 @@ enum ShadowQuality
 };
 
 // Inbuilt shader parameters.
+extern URHO3D_API const StringHash VSP_DEPTHBIAS;
 extern URHO3D_API const StringHash VSP_AMBIENTSTARTCOLOR;
 extern URHO3D_API const StringHash VSP_AMBIENTENDCOLOR;
 extern URHO3D_API const StringHash VSP_BILLBOARDROT;

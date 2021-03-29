@@ -44,8 +44,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(PBRMaterials)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(PBRMaterials)
+URHO3D_DEFINE_APPLICATION_MAIN(PBRMaterials, "42-PBRMaterials", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 PBRMaterials::PBRMaterials(Context* context) :
     Sample(context),
     dynamicMaterial_(nullptr),

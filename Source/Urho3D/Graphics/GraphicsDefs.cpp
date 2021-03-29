@@ -32,7 +32,7 @@ namespace Urho3D
 
 // The extern keyword is required when building Urho3D.dll for Windows platform
 // The keyword is not required for other platforms but it does no harm, aside from warning from static analyzer
-
+extern URHO3D_API const StringHash VSP_DEPTHBIAS("DEPTHBIAS");
 extern URHO3D_API const StringHash VSP_AMBIENTSTARTCOLOR("AmbientStartColor");
 extern URHO3D_API const StringHash VSP_AMBIENTENDCOLOR("AmbientEndColor");
 extern URHO3D_API const StringHash VSP_BILLBOARDROT("BillboardRot");

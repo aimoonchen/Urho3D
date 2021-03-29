@@ -33,7 +33,7 @@
 #include "../Resource/XMLFile.h"
 
 #include "bgfx/bgfx.h"
-#include "../Graphics/BGFX/bgfxGraphics.h"
+#include "../Graphics/BGFX/BGFXGraphics.h"
 
 #include "../DebugNew.h"
 

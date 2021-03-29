@@ -108,38 +108,38 @@ void Decals::CreateScene()
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f));
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetCastShadows(true);
+    //light->SetCastShadows(true);
     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
     // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
 
     // Create some mushrooms
-//     const unsigned NUM_MUSHROOMS = 240;
-//     for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
-//     {
-//         Node* mushroomNode = scene_->CreateChild("Mushroom");
-//         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-//         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-//         mushroomNode->SetScale(0.5f + Random(2.0f));
-//         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-//         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-//         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-//         mushroomObject->SetCastShadows(true);
-//     }
+    const unsigned NUM_MUSHROOMS = 240;
+    for (unsigned i = 0; i < NUM_MUSHROOMS; ++i)
+    {
+        Node* mushroomNode = scene_->CreateChild("Mushroom");
+        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+        mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+        mushroomNode->SetScale(0.5f + Random(2.0f));
+        auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
+        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+        //mushroomObject->SetCastShadows(true);
+    }
 
     // Create randomly sized boxes. If boxes are big enough, make them occluders. Occluders will be software rasterized before
     // rendering to a low-resolution depth-only buffer to test the objects in the view frustum for visibility
-    const unsigned NUM_BOXES = 1/*20*/;
+    const unsigned NUM_BOXES = 20;
     for (unsigned i = 0; i < NUM_BOXES; ++i)
     {
         Node* boxNode = scene_->CreateChild("Box");
         float size = 1.0f + Random(10.0f);
-        boxNode->SetPosition({0.0f, size * 0.5f, 0.0f} /*Vector3(Random(80.0f) - 40.0f, size * 0.5f, Random(80.0f) - 40.0f)*/);
+        boxNode->SetPosition(Vector3(Random(80.0f) - 40.0f, size * 0.5f, Random(80.0f) - 40.0f));
         boxNode->SetScale(size);
         auto* boxObject = boxNode->CreateComponent<StaticModel>();
         boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
         boxObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
-        boxObject->SetCastShadows(true);
+        //boxObject->SetCastShadows(true);
         if (size >= 3.0f)
             boxObject->SetOccluder(true);
     }
