@@ -257,7 +257,7 @@ bool TextureCube::SetData(CubeMapFace face, Image* image, bool useAlpha)
             return false;
         }
 
-        if (!format)
+        if (format == bgfx::TextureFormat::Unknown)
         {
             format = Graphics::GetRGBAFormat();
             needDecompress = true;
@@ -404,8 +404,8 @@ bool TextureCube::Create()
 #endif
 
     // Set initial parameters, then unbind the texture
-    UpdateParameters();
-    graphics_->SetTexture(0, nullptr);
+//     UpdateParameters();
+//     graphics_->SetTexture(0, nullptr);
 
     textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
     if (GetSRGB())

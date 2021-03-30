@@ -33,7 +33,7 @@
 #include "../../IO/Log.h"
 #include "../../Resource/ResourceCache.h"
 #include "../../Resource/XMLFile.h"
-
+#include "../BGFX/BGFXGraphics.h"
 #include "../../DebugNew.h"
 
 namespace Urho3D
@@ -254,7 +254,7 @@ bool Texture3D::SetData(Image* image, bool useAlpha)
         unsigned format = graphics_->GetFormat(image->GetCompressedFormat());
         bool needDecompress = false;
 
-        if (!format)
+        if (format == bgfx::TextureFormat::Unknown)
         {
             format = Graphics::GetRGBAFormat();
             needDecompress = true;
