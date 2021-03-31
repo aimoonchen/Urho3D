@@ -70,10 +70,15 @@ uniform vec4 cMatEmissiveColor;
 uniform vec4 cMatEnvMapColor;
 uniform vec4 cMatSpecColor;
 #ifdef PBR
-    uniform float cRoughness;
-    uniform float cMetallic;
-    uniform float cLightRad;
-    uniform float cLightLength;
+// uniform vec4 cRoughnessMetallicLightRadLightLength
+// #define cRoughness cRoughnessMetallicLightRadLightLength.x
+// #define cMetallic cRoughnessMetallicLightRadLightLength.y
+// #define cLightRad cRoughnessMetallicLightRadLightLength.z
+// #define cLightLength cRoughnessMetallicLightRadLightLength.w
+    uniform vec4 cRoughness;
+    uniform vec4 cMetallic;
+    uniform vec4 cLightRad;
+    uniform vec4 cLightLength;
 #endif
 uniform vec4 cZoneMin;
 uniform vec4 cZoneMax;

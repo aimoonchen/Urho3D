@@ -12,7 +12,7 @@
     {
         float specEnergy = 1.0;
 
-        float radius = cLightRad / 100.0;
+        float radius = cLightRad.x / 100.0;
         float rough2 = max(roughness, 0.08);
         rough2 *= rough2;
 
@@ -63,8 +63,8 @@
 
     vec3 TubeLight(vec3 worldPos, vec3 lightVec, vec3 normal, vec3 toCamera, float roughness, vec3 specColor, vec3 diffColor, out float ndl)
     {
-        float radius      = cLightRad / 100.0;
-        float len         = cLightLength / 10.0; 
+        float radius      = cLightRad.x / 100.0;
+        float len         = cLightLength.x / 10.0; 
         vec3 pos         = (cLightPosPS.xyz - worldPos);
         vec3 reflectVec  = reflect(-toCamera, normal);
         
@@ -131,9 +131,9 @@
         vec3 specularFactor = vec3(0.0, 0.0, 0.0);
 
         #ifdef SPECULAR
-            if(cLightRad > 0.0)
+            if(cLightRad.x > 0.0)
             {
-                if(cLightLength > 0.0)
+                if(cLightLength.x > 0.0)
                 {
                     specularFactor = TubeLight(worldPos, lightVec, normal, toCamera, roughness, specColor, diffColor, ndl);
                     specularFactor *= ndl;
