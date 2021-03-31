@@ -118,9 +118,11 @@ static bgfx::VertexLayout Urho3DLayoutToBGFXLayout(const PODVector<VertexElement
     layout.begin();
     for (int i = 0; i < elements.Size(); i++)
     {
+        bool asInt = ((elements[i].semantic_ == SEM_NORMAL) || (elements[i].semantic_ == SEM_TANGENT)) &&
+                     ((elements[i].type_ == TYPE_UBYTE4) || (elements[i].type_ == TYPE_UBYTE4_NORM));
         layout.add(Urho3DSemanticToBGFXAttrib(elements[i].semantic_, elements[i].index_),
                    GetTypeNum(elements[i].type_),
-                   Urho3DTypeToBGFXAttribType(elements[i].type_), (elements[i].type_ == TYPE_UBYTE4_NORM)/*false*/, false);
+                   Urho3DTypeToBGFXAttribType(elements[i].type_), (elements[i].type_ == TYPE_UBYTE4_NORM)/*false*/, asInt);
     }
     layout.end();
     return layout;

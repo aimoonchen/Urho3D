@@ -2106,7 +2106,7 @@ void View::BlitFramebuffer(Texture* source, RenderSurface* destination, bool dep
         return;
 
     URHO3D_PROFILE(BlitFramebuffer);
-
+    graphics_->StartNewView();
     // If blitting to the destination rendertarget, use the actual viewport. Intermediate textures on the other hand
     // are always viewport-sized
     IntVector2 srcSize(source->GetWidth(), source->GetHeight());
@@ -2137,6 +2137,7 @@ void View::BlitFramebuffer(Texture* source, RenderSurface* destination, bool dep
 
     graphics_->SetTexture(TU_DIFFUSE, source);
     DrawFullscreenQuad(true);
+    graphics_->StartNewView();
 }
 
 void View::DrawFullscreenQuad(bool setIdentityProjection)

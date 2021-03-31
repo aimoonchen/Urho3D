@@ -1042,6 +1042,8 @@ Texture* Renderer::GetScreenBuffer(int width, int height, unsigned format, int m
             SharedPtr<Texture2D> newTex2D(new Texture2D(context_));
             /// \todo Mipmaps disabled for now. Allow to request mipmapped buffer?
             newTex2D->SetNumLevels(1);
+            newTex2D->SetSRGB(srgb);
+            newTex2D->SetFilterMode(filtered ? FILTER_BILINEAR : FILTER_NEAREST);
             newTex2D->SetSize(width, height, format, depthStencil ? TEXTURE_DEPTHSTENCIL : TEXTURE_RENDERTARGET, multiSample, autoResolve);
 
 #ifdef URHO3D_OPENGL
@@ -1064,13 +1066,12 @@ Texture* Renderer::GetScreenBuffer(int width, int height, unsigned format, int m
         {
             SharedPtr<TextureCube> newTexCube(new TextureCube(context_));
             newTexCube->SetNumLevels(1);
+            newTexCube->SetSRGB(srgb);
+            newTexCube->SetFilterMode(filtered ? FILTER_BILINEAR : FILTER_NEAREST);
             newTexCube->SetSize(width, format, TEXTURE_RENDERTARGET, multiSample);
 
             newBuffer = newTexCube;
         }
-
-        newBuffer->SetSRGB(srgb);
-        newBuffer->SetFilterMode(filtered ? FILTER_BILINEAR : FILTER_NEAREST);
         newBuffer->ResetUseTimer();
         screenBuffers_[searchKey].Push(newBuffer);
 
