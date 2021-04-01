@@ -64,11 +64,11 @@
         float darknessCutoff = clamp((cAmbientColor.a - 1.0) * 0.1, 0.0, 0.25);
 
         const float hdrMaxBrightness = 5.0;
-        vec3 hdrCube = pow(cube + darknessCutoff, vec3(max(1.0, cAmbientColor.a)));
-        hdrCube += max(vec3(0.0), hdrCube - vec3(1.0)) * hdrMaxBrightness;
+        vec3 hdrCube = pow(cube + darknessCutoff, vec3_splat(max(1.0, cAmbientColor.a)));
+        hdrCube += max(vec3_splat(0.0), hdrCube - vec3_splat(1.0)) * hdrMaxBrightness;
 
-        vec3 hdrCubeD = pow(cubeD + darknessCutoff, vec3(max(1.0, cAmbientColor.a)));
-        hdrCubeD += max(vec3(0.0), hdrCubeD - vec3(1.0)) * hdrMaxBrightness;
+        vec3 hdrCubeD = pow(cubeD + darknessCutoff, vec3_splat(max(1.0, cAmbientColor.a)));
+        hdrCubeD += max(vec3_splat(0.0), hdrCubeD - vec3_splat(1.0)) * hdrMaxBrightness;
 
         vec3 environmentSpecular = EnvBRDFApprox(specColor, roughness, ndv);
         vec3 environmentDiffuse = EnvBRDFApprox(diffColor, 1.0, ndv);

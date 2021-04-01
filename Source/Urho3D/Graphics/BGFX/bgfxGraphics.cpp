@@ -1018,8 +1018,8 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
             buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle /*GetGPUObjectName*/ /* || !impl_->vertexAttributes_*/)
             continue;
 
-        buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount)
-                            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()}, minVertex, vertexCount);
+        buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
+                            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
     }
 
     if (current_instance_buffer_)
@@ -1747,7 +1747,7 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         {"IndirectionCubeMap"},
         {""},
         {""},
-        {""}
+        {"ZoneCubeMap"}
     };
     // TODO: impl_->shaderProgram_ should be set corrent.
     if (texture && impl_->shaderProgram_)
