@@ -278,38 +278,32 @@ bool CheckExtension(const String& name)
     return extensions.Contains(name);
 }
 
-static void GetGLPrimitiveType(unsigned elementCount, PrimitiveType type, unsigned& primitiveCount, GLenum& glPrimitiveType)
+static void GetGLPrimitiveType(unsigned elementCount, PrimitiveType type, unsigned& primitiveCount)
 {
     switch (type)
     {
     case TRIANGLE_LIST:
         primitiveCount = elementCount / 3;
-        glPrimitiveType = GL_TRIANGLES;
         break;
 
     case LINE_LIST:
         primitiveCount = elementCount / 2;
-        glPrimitiveType = GL_LINES;
         break;
 
     case POINT_LIST:
         primitiveCount = elementCount;
-        glPrimitiveType = GL_POINTS;
         break;
 
     case TRIANGLE_STRIP:
         primitiveCount = elementCount - 2;
-        glPrimitiveType = GL_TRIANGLE_STRIP;
         break;
 
     case LINE_STRIP:
         primitiveCount = elementCount - 1;
-        glPrimitiveType = GL_LINE_STRIP;
         break;
 
     case TRIANGLE_FAN:
         primitiveCount = elementCount - 2;
-        glPrimitiveType = GL_TRIANGLE_FAN;
         break;
     }
 }
@@ -739,14 +733,16 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
         SetScissorTest(false);
 
     bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
-    if (scissorRect_ != IntRect::ZERO)
-    {
-        bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-    }
-    else
-    {
-        bgfx::setScissor();
-    }
+    bgfx::setViewScissor(current_view_id_, scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+//     if (scissorRect_ != IntRect::ZERO)
+//     {
+//         bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+//     }
+//     else
+//     {
+// 
+//         bgfx::setScissor();
+//     }
 
     bgfx::touch(current_view_id_);
 
@@ -761,228 +757,229 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
 
 bool Graphics::ResolveToTexture(Texture2D* destination, const IntRect& viewport)
 {
-    if (!destination || !destination->GetRenderSurface())
-        return false;
-
-    URHO3D_PROFILE(ResolveToTexture);
-
-    IntRect vpCopy = viewport;
-    if (vpCopy.right_ <= vpCopy.left_)
-        vpCopy.right_ = vpCopy.left_ + 1;
-    if (vpCopy.bottom_ <= vpCopy.top_)
-        vpCopy.bottom_ = vpCopy.top_ + 1;
-    vpCopy.left_ = Clamp(vpCopy.left_, 0, width_);
-    vpCopy.top_ = Clamp(vpCopy.top_, 0, height_);
-    vpCopy.right_ = Clamp(vpCopy.right_, 0, width_);
-    vpCopy.bottom_ = Clamp(vpCopy.bottom_, 0, height_);
-
-    // Make sure the FBO is not in use
-    ResetRenderTargets();
-
-    // Use Direct3D convention with the vertical coordinates ie. 0 is top
-    SetTextureForUpdate(destination);
-    glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vpCopy.left_, height_ - vpCopy.bottom_, vpCopy.Width(), vpCopy.Height());
-    SetTexture(0, nullptr);
+//     if (!destination || !destination->GetRenderSurface())
+//         return false;
+// 
+//     URHO3D_PROFILE(ResolveToTexture);
+// 
+//     IntRect vpCopy = viewport;
+//     if (vpCopy.right_ <= vpCopy.left_)
+//         vpCopy.right_ = vpCopy.left_ + 1;
+//     if (vpCopy.bottom_ <= vpCopy.top_)
+//         vpCopy.bottom_ = vpCopy.top_ + 1;
+//     vpCopy.left_ = Clamp(vpCopy.left_, 0, width_);
+//     vpCopy.top_ = Clamp(vpCopy.top_, 0, height_);
+//     vpCopy.right_ = Clamp(vpCopy.right_, 0, width_);
+//     vpCopy.bottom_ = Clamp(vpCopy.bottom_, 0, height_);
+// 
+//     // Make sure the FBO is not in use
+//     ResetRenderTargets();
+// 
+//     // Use Direct3D convention with the vertical coordinates ie. 0 is top
+//     SetTextureForUpdate(destination);
+//     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vpCopy.left_, height_ - vpCopy.bottom_, vpCopy.Width(), vpCopy.Height());
+//     SetTexture(0, nullptr);
 
     return true;
 }
 
 bool Graphics::ResolveToTexture(Texture2D* texture)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!texture)
-        return false;
-    RenderSurface* surface = texture->GetRenderSurface();
-    if (!surface || !surface->GetRenderBuffer())
-        return false;
-
-    URHO3D_PROFILE(ResolveToTexture);
-
-    texture->SetResolveDirty(false);
-    surface->SetResolveDirty(false);
-
-    // Use separate FBOs for resolve to not disturb the currently set rendertarget(s)
-    if (!impl_->resolveSrcFBO_)
-        impl_->resolveSrcFBO_ = CreateFramebuffer();
-    if (!impl_->resolveDestFBO_)
-        impl_->resolveDestFBO_ = CreateFramebuffer();
-
-    if (!gl3Support)
-    {
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, impl_->resolveSrcFBO_);
-        glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT,
-            surface->GetRenderBuffer());
-        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, impl_->resolveDestFBO_);
-        glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture->GetGPUObjectName(),
-            0);
-        glBlitFramebufferEXT(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-    }
-    else
-    {
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, impl_->resolveSrcFBO_);
-        glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, surface->GetRenderBuffer());
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, impl_->resolveDestFBO_);
-        glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->GetGPUObjectName(), 0);
-        glBlitFramebuffer(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
-            GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    }
-
-    // Restore previously bound FBO
-    BindFramebuffer(impl_->boundFBO_);
     return true;
-#else
-    // Not supported on GLES
-    return false;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     if (!texture)
+//         return false;
+//     RenderSurface* surface = texture->GetRenderSurface();
+//     if (!surface || !surface->GetRenderBuffer())
+//         return false;
+// 
+//     URHO3D_PROFILE(ResolveToTexture);
+// 
+//     texture->SetResolveDirty(false);
+//     surface->SetResolveDirty(false);
+// 
+//     // Use separate FBOs for resolve to not disturb the currently set rendertarget(s)
+//     if (!impl_->resolveSrcFBO_)
+//         impl_->resolveSrcFBO_ = CreateFramebuffer();
+//     if (!impl_->resolveDestFBO_)
+//         impl_->resolveDestFBO_ = CreateFramebuffer();
+// 
+//     if (!gl3Support)
+//     {
+//         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, impl_->resolveSrcFBO_);
+//         glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT,
+//             surface->GetRenderBuffer());
+//         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, impl_->resolveDestFBO_);
+//         glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_2D, texture->GetGPUObjectName(),
+//             0);
+//         glBlitFramebufferEXT(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
+//             GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+//         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+//     }
+//     else
+//     {
+//         glBindFramebuffer(GL_READ_FRAMEBUFFER, impl_->resolveSrcFBO_);
+//         glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, surface->GetRenderBuffer());
+//         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, impl_->resolveDestFBO_);
+//         glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_2D, texture->GetGPUObjectName(), 0);
+//         glBlitFramebuffer(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
+//             GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//     }
+// 
+//     // Restore previously bound FBO
+//     BindFramebuffer(impl_->boundFBO_);
+//     return true;
+// #else
+//     // Not supported on GLES
+//     return false;
+// #endif
 }
 
 bool Graphics::ResolveToTexture(TextureCube* texture)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!texture)
-        return false;
-
-    URHO3D_PROFILE(ResolveToTexture);
-
-    texture->SetResolveDirty(false);
-
-    // Use separate FBOs for resolve to not disturb the currently set rendertarget(s)
-    if (!impl_->resolveSrcFBO_)
-        impl_->resolveSrcFBO_ = CreateFramebuffer();
-    if (!impl_->resolveDestFBO_)
-        impl_->resolveDestFBO_ = CreateFramebuffer();
-
-    if (!gl3Support)
-    {
-        for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
-        {
-            // Resolve only the surface(s) that were actually rendered to
-            RenderSurface* surface = texture->GetRenderSurface((CubeMapFace)i);
-            if (!surface->IsResolveDirty())
-                continue;
-
-            surface->SetResolveDirty(false);
-            glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, impl_->resolveSrcFBO_);
-            glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT,
-                surface->GetRenderBuffer());
-            glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, impl_->resolveDestFBO_);
-            glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                texture->GetGPUObjectName(), 0);
-            glBlitFramebufferEXT(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
-                GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        }
-
-        glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
-        glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
-    }
-    else
-    {
-        for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
-        {
-            RenderSurface* surface = texture->GetRenderSurface((CubeMapFace)i);
-            if (!surface->IsResolveDirty())
-                continue;
-
-            surface->SetResolveDirty(false);
-            glBindFramebuffer(GL_READ_FRAMEBUFFER, impl_->resolveSrcFBO_);
-            glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, surface->GetRenderBuffer());
-            glBindFramebuffer(GL_DRAW_FRAMEBUFFER, impl_->resolveDestFBO_);
-            glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
-                texture->GetGPUObjectName(), 0);
-            glBlitFramebuffer(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
-                GL_COLOR_BUFFER_BIT, GL_NEAREST);
-        }
-
-        glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
-        glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
-    }
-
-    // Restore previously bound FBO
-    BindFramebuffer(impl_->boundFBO_);
     return true;
-#else
-    // Not supported on GLES
-    return false;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     if (!texture)
+//         return false;
+// 
+//     URHO3D_PROFILE(ResolveToTexture);
+// 
+//     texture->SetResolveDirty(false);
+// 
+//     // Use separate FBOs for resolve to not disturb the currently set rendertarget(s)
+//     if (!impl_->resolveSrcFBO_)
+//         impl_->resolveSrcFBO_ = CreateFramebuffer();
+//     if (!impl_->resolveDestFBO_)
+//         impl_->resolveDestFBO_ = CreateFramebuffer();
+// 
+//     if (!gl3Support)
+//     {
+//         for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
+//         {
+//             // Resolve only the surface(s) that were actually rendered to
+//             RenderSurface* surface = texture->GetRenderSurface((CubeMapFace)i);
+//             if (!surface->IsResolveDirty())
+//                 continue;
+// 
+//             surface->SetResolveDirty(false);
+//             glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, impl_->resolveSrcFBO_);
+//             glFramebufferRenderbufferEXT(GL_READ_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_RENDERBUFFER_EXT,
+//                 surface->GetRenderBuffer());
+//             glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, impl_->resolveDestFBO_);
+//             glFramebufferTexture2DEXT(GL_DRAW_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+//                 texture->GetGPUObjectName(), 0);
+//             glBlitFramebufferEXT(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
+//                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//         }
+// 
+//         glBindFramebufferEXT(GL_READ_FRAMEBUFFER_EXT, 0);
+//         glBindFramebufferEXT(GL_DRAW_FRAMEBUFFER_EXT, 0);
+//     }
+//     else
+//     {
+//         for (unsigned i = 0; i < MAX_CUBEMAP_FACES; ++i)
+//         {
+//             RenderSurface* surface = texture->GetRenderSurface((CubeMapFace)i);
+//             if (!surface->IsResolveDirty())
+//                 continue;
+// 
+//             surface->SetResolveDirty(false);
+//             glBindFramebuffer(GL_READ_FRAMEBUFFER, impl_->resolveSrcFBO_);
+//             glFramebufferRenderbuffer(GL_READ_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_RENDERBUFFER, surface->GetRenderBuffer());
+//             glBindFramebuffer(GL_DRAW_FRAMEBUFFER, impl_->resolveDestFBO_);
+//             glFramebufferTexture2D(GL_DRAW_FRAMEBUFFER, GL_COLOR_ATTACHMENT0, GL_TEXTURE_CUBE_MAP_POSITIVE_X + i,
+//                 texture->GetGPUObjectName(), 0);
+//             glBlitFramebuffer(0, 0, texture->GetWidth(), texture->GetHeight(), 0, 0, texture->GetWidth(), texture->GetHeight(),
+//                 GL_COLOR_BUFFER_BIT, GL_NEAREST);
+//         }
+// 
+//         glBindFramebuffer(GL_READ_FRAMEBUFFER, 0);
+//         glBindFramebuffer(GL_DRAW_FRAMEBUFFER, 0);
+//     }
+// 
+//     // Restore previously bound FBO
+//     BindFramebuffer(impl_->boundFBO_);
+//     return true;
+// #else
+//     // Not supported on GLES
+//     return false;
+// #endif
 }
 
 void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCount)
 {
-    if (!vertexCount)
+    if (!vertexCount || !impl_->shaderProgram_)
         return;
+
+    if (vc_dirty_.rect_dirty || vc_dirty_.scissor_dirty || vc_dirty_.target_dirty || vc_dirty_.clear_dirty ||
+        vc_dirty_.transform_dirty)
+    {
+        current_view_id_++;
+    }
 
     PrepareDraw();
 
     unsigned primitiveCount;
-    GLenum glPrimitiveType;
-// 
-    GetGLPrimitiveType(vertexCount, type, primitiveCount, glPrimitiveType);
+    GetGLPrimitiveType(vertexCount, type, primitiveCount);
 //     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
-    if (impl_->shaderProgram_)
+    
+    // TODO : Should be call right position
+    if (true /*renderer_->GetDrawShadows()*/)
     {
-        // TODO : Should be call right position
-        if (true /*renderer_->GetDrawShadows()*/)
-        {
-            SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
-            SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-        }
-        if (last_view_id_ != current_view_id_)
-        {
-            last_view_id_ = current_view_id_;
-            bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
-        }
-        if (scissorRect_ != IntRect::ZERO)
-        {
-            bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-        }
-        else
-        {
-            bgfx::setScissor();
-        }
-        for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
-        {
-            VertexBuffer* buffer = vertexBuffers_[i];
-            // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory
-            // for vertex data, in which case the pointer will be invalid and cause a crash
-            if (!buffer || buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle /*GetGPUObjectName*/ /* || !impl_->vertexAttributes_*/)
-                continue;
-
-            buffer->IsDynamic()
-                ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
-                : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
-        }
-        if (current_instance_buffer_)
-        {
-            bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
-        }
-        bgfx::setState(render_state_);
-        bgfx::setStencil(front_stencil_);
-        bgfx::submit(current_view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
+        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
     }
+    if (last_view_id_ != current_view_id_)
+    {
+        last_view_id_ = current_view_id_;
+        bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+        bgfx::setViewScissor(current_view_id_, scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+    }
+//     if (scissorRect_ != IntRect::ZERO)
+//     {
+//         bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
+//     }
+//     else
+//     {
+//         bgfx::setScissor();
+//     }
+    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
+    {
+        auto buffer = vertexBuffers_[i];
+        if (!buffer || buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle)
+            continue;
+
+        buffer->IsDynamic()
+            ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
+            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
+    }
+    if (current_instance_buffer_)
+    {
+        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+    }
+    bgfx::setState(render_state_);
+    bgfx::setStencil(front_stencil_);
+    bgfx::submit(current_view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
+
     numPrimitives_ += primitiveCount;
     ++numBatches_;
 }
 
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount)
 {
-    if (!indexCount || !indexBuffer_ ||
-        indexBuffer_->GetGPUObjectHandle() == bgfx::kInvalidHandle /*!indexBuffer_->GetGPUObjectName()*/)
+    if (!indexCount || !indexBuffer_ || !impl_->shaderProgram_ ||
+        indexBuffer_->GetGPUObjectHandle() == bgfx::kInvalidHandle)
     {
         URHO3D_LOGERROR("indexbuffer invalid.");
         return;
     }
     PrepareDraw();
 
-    unsigned indexSize = indexBuffer_->GetIndexSize();
     unsigned primitiveCount;
-    GLenum glPrimitiveType;
-
-    GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
+    GetGLPrimitiveType(indexCount, type, primitiveCount);
 //     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 //     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
 
@@ -1026,7 +1023,6 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     {
         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
     }
-    //uint64_t render_state = 0 | BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A | BGFX_STATE_DEPTH_TEST_LESS | BGFX_STATE_CULL_CCW;
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
     bgfx::submit(current_view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
@@ -1037,28 +1033,30 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned baseVertexIndex, unsigned minVertex, unsigned vertexCount)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName())
-        return;
-
-    PrepareDraw();
-
-    unsigned indexSize = indexBuffer_->GetIndexSize();
-    unsigned primitiveCount;
-    GLenum glPrimitiveType;
-
-    GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-    GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-    glDrawElementsBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<GLvoid*>(indexStart * indexSize), baseVertexIndex);
-
-    numPrimitives_ += primitiveCount;
-    ++numBatches_;
-#endif
+    assert(false);
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName())
+//         return;
+// 
+//     PrepareDraw();
+// 
+//     unsigned indexSize = indexBuffer_->GetIndexSize();
+//     unsigned primitiveCount;
+//     GLenum glPrimitiveType;
+// 
+//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
+//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
+//     glDrawElementsBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<GLvoid*>(indexStart * indexSize), baseVertexIndex);
+// 
+//     numPrimitives_ += primitiveCount;
+//     ++numBatches_;
+// #endif
 }
 
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount,
     unsigned instanceCount)
 {
+    assert(false);
     // #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
 //     if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
 //         return;
@@ -1095,6 +1093,7 @@ void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned i
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned baseVertexIndex, unsigned minVertex,
         unsigned vertexCount, unsigned instanceCount)
 {
+    assert(false);
 // #ifndef GL_ES_VERSION_2_0
 //     if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
 //         return;
@@ -1900,29 +1899,29 @@ void Graphics::SetRenderTarget(unsigned index, RenderSurface* renderTarget)
     if (renderTarget != renderTargets_[index])
     {
         renderTargets_[index] = renderTarget;
-
+        vc_dirty_.target_dirty = true;
         // If the rendertarget is also bound as a texture, replace with backup texture or null
-        if (renderTarget)
-        {
-            Texture* parentTexture = renderTarget->GetParentTexture();
-
-            for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
-            {
-                if (textures_[i] == parentTexture)
-                    SetTexture(i, textures_[i]->GetBackupTexture());
-            }
-
-            // If multisampled, mark the texture & surface needing resolve
-            if (parentTexture->GetMultiSample() > 1 && parentTexture->GetAutoResolve())
-            {
-                parentTexture->SetResolveDirty(true);
-                renderTarget->SetResolveDirty(true);
-            }
-
-            // If mipmapped, mark the levels needing regeneration
-            if (parentTexture->GetLevels() > 1)
-                parentTexture->SetLevelsDirty();
-        }
+//         if (renderTarget)
+//         {
+//             Texture* parentTexture = renderTarget->GetParentTexture();
+// 
+//             for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
+//             {
+//                 if (textures_[i] == parentTexture)
+//                     SetTexture(i, textures_[i]->GetBackupTexture());
+//             }
+// 
+//             // If multisampled, mark the texture & surface needing resolve
+//             if (parentTexture->GetMultiSample() > 1 && parentTexture->GetAutoResolve())
+//             {
+//                 parentTexture->SetResolveDirty(true);
+//                 renderTarget->SetResolveDirty(true);
+//             }
+// 
+//             // If mipmapped, mark the levels needing regeneration
+//             if (parentTexture->GetLevels() > 1)
+//                 parentTexture->SetLevelsDirty();
+//         }
 
         impl_->fboDirty_ = true;
     }
@@ -1969,6 +1968,7 @@ void Graphics::SetDepthStencil(RenderSurface* depthStencil)
     if (depthStencil != depthStencil_)
     {
         depthStencil_ = depthStencil;
+        vc_dirty_.target_dirty = true;
         impl_->fboDirty_ = true;
     }
 }
@@ -1984,7 +1984,7 @@ void Graphics::SetDepthStencil(Texture2D* texture)
 
 void Graphics::SetViewport(const IntRect& rect)
 {
-    PrepareDraw();
+//    PrepareDraw();
 
     IntVector2 rtSize = GetRenderTargetDimensions();
 
@@ -2001,8 +2001,11 @@ void Graphics::SetViewport(const IntRect& rect)
 
     // Use Direct3D convention with the vertical coordinates ie. 0 is top
     //glViewport(rectCopy.left_, rtSize.y_ - rectCopy.bottom_, rectCopy.Width(), rectCopy.Height());
-    
-    viewport_ = rectCopy;
+    if (viewport_ != rectCopy)
+    {
+        viewport_ = rectCopy;
+        vc_dirty_.rect_dirty = true;
+    }
 
     // Disable scissor test, needs to be re-enabled by the user
     SetScissorTest(false);
@@ -2192,11 +2195,16 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
             //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
+            vc_dirty_.scissor_dirty = true;
         }
     }
     else
     {
-        scissorRect_ = IntRect::ZERO;
+        if (scissorRect_ != IntRect::ZERO)
+        {
+            scissorRect_ = IntRect::ZERO;
+            vc_dirty_.scissor_dirty = true;
+        }
     }
 //     if (enable != scissorTest_)
 //     {
@@ -2234,11 +2242,16 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
             // Use Direct3D convention with the vertical coordinates ie. 0 is top
             //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
+            vc_dirty_.scissor_dirty = true;
         }
     }
     else
     {
-        scissorRect_ = IntRect::ZERO;
+        if (scissorRect_ != IntRect::ZERO)
+        {
+            scissorRect_ = IntRect::ZERO;
+            vc_dirty_.scissor_dirty = true;
+        }
     }
     //     if (enable != scissorTest_)
 //     {

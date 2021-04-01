@@ -928,6 +928,15 @@ private:
     uint16_t last_view_id_{0xff};
     uint16_t current_view_id_{0};
     void* current_instance_buffer_{nullptr};
+    struct view_context_dirty
+    {
+        bool target_dirty   : 1;
+        bool rect_dirty     : 1;
+        bool scissor_dirty  : 1;
+        bool transform_dirty : 1;
+        bool clear_dirty    : 1;
+    };
+    view_context_dirty vc_dirty_{false, false, false, false, false };
 public:
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
