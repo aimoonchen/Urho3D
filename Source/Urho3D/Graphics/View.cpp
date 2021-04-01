@@ -1450,8 +1450,6 @@ void View::GetLitBatches(Drawable* drawable, LightBatchQueue& lightQueue, BatchQ
 
 void View::ExecuteRenderPathCommands()
 {
-    graphics_->StartNewView();
-
     View* actualView = sourceView_ ? sourceView_ : this;
 
     // If not reusing shadowmaps, render all of them first
@@ -2106,7 +2104,7 @@ void View::BlitFramebuffer(Texture* source, RenderSurface* destination, bool dep
         return;
 
     URHO3D_PROFILE(BlitFramebuffer);
-    graphics_->StartNewView();
+
     // If blitting to the destination rendertarget, use the actual viewport. Intermediate textures on the other hand
     // are always viewport-sized
     IntVector2 srcSize(source->GetWidth(), source->GetHeight());
@@ -2137,7 +2135,6 @@ void View::BlitFramebuffer(Texture* source, RenderSurface* destination, bool dep
 
     graphics_->SetTexture(TU_DIFFUSE, source);
     DrawFullscreenQuad(true);
-    graphics_->StartNewView();
 }
 
 void View::DrawFullscreenQuad(bool setIdentityProjection)
@@ -3064,8 +3061,6 @@ void View::RenderShadowMap(const LightBatchQueue& queue)
 {
     URHO3D_PROFILE(RenderShadowMap);
 
-    graphics_->StartNewView();
-
     Texture2D* shadowMap = queue.shadowMap_;
     graphics_->SetTexture(TU_SHADOWMAP, nullptr);
 
@@ -3084,7 +3079,7 @@ void View::RenderShadowMap(const LightBatchQueue& queue)
         graphics_->SetRenderTarget(0, shadowMap->GetRenderSurface()->GetLinkedRenderTarget());
         // Disable other render targets
         for (unsigned i = 1; i < MAX_RENDERTARGETS; ++i)
-            graphics_->SetRenderTarget(i, (RenderSurface*) nullptr);
+            graphics_->SetRenderTarget(i, (RenderSurface*)nullptr);
         graphics_->SetViewport(IntRect(0, 0, shadowMap->GetWidth(), shadowMap->GetHeight()));
         graphics_->Clear(CLEAR_DEPTH);
     }
@@ -3094,9 +3089,9 @@ void View::RenderShadowMap(const LightBatchQueue& queue)
         graphics_->SetRenderTarget(0, shadowMap);
         // Disable other render targets
         for (unsigned i = 1; i < MAX_RENDERTARGETS; ++i)
-            graphics_->SetRenderTarget(i, (RenderSurface*) nullptr);
-        graphics_->SetDepthStencil(renderer_->GetDepthStencil(shadowMap->GetWidth(), shadowMap->GetHeight(),
-            shadowMap->GetMultiSample(), shadowMap->GetAutoResolve()));
+            graphics_->SetRenderTarget(i, (RenderSurface*)nullptr);
+        graphics_->SetDepthStencil(renderer_->GetDepthStencil(
+            shadowMap->GetWidth(), shadowMap->GetHeight(), shadowMap->GetMultiSample(), shadowMap->GetAutoResolve()));
         graphics_->SetViewport(IntRect(0, 0, shadowMap->GetWidth(), shadowMap->GetHeight()));
         graphics_->Clear(CLEAR_DEPTH | CLEAR_COLOR, Color::WHITE);
 
@@ -3126,17 +3121,18 @@ void View::RenderShadowMap(const LightBatchQueue& queue)
         addition = renderer_->GetMobileShadowBiasAdd();
 #endif
 
-        graphics_->SetDepthBias(multiplier * parameters.constantBias_ + addition, multiplier * parameters.slopeScaledBias_);
+        graphics_->SetDepthBias(multiplier * parameters.constantBias_ + addition,
+                                multiplier * parameters.slopeScaledBias_);
 
         if (!shadowQueue.shadowBatches_.IsEmpty())
         {
-            graphics_->StartNewView();
             graphics_->SetViewport(shadowQueue.shadowViewport_);
             shadowQueue.shadowBatches_.Draw(this, shadowQueue.shadowCamera_, false, false, true);
         }
     }
-    graphics_->StartNewView();
-    // Scale filter blur amount to shadow map viewport size so that different shadow map resolutions don't behave differently
+
+    // Scale filter blur amount to shadow map viewport size so that different shadow map resolutions don't behave
+    // differently
     float blurScale = queue.shadowSplits_[0].shadowViewport_.Width() / 1024.0f;
     renderer_->ApplyShadowMapFilter(this, shadowMap, blurScale);
 

@@ -620,9 +620,6 @@ bool Graphics::TakeScreenShot(Image& destImage)
 
 bool Graphics::BeginFrame()
 {
-    last_view_id_ = 0xff;
-    current_view_id_ = 0;
-
     if (!IsInitialized() || IsDeviceLost())
         return false;
 
@@ -642,6 +639,13 @@ bool Graphics::BeginFrame()
 
     // Set default rendertarget and depth buffer
     ResetRenderTargets();
+    //
+    last_view_id_ = 0xff;
+    current_view_id_ = 0;
+    bgfx::setViewFrameBuffer(current_view_id_, BGFX_INVALID_HANDLE);
+    bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+    bgfx::setViewScissor(current_view_id_);
+    bgfx::setScissor();
 
     // Cleanup textures from previous frame
     for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
@@ -914,12 +918,6 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
     if (!vertexCount || !impl_->shaderProgram_)
         return;
 
-    if (vc_dirty_.rect_dirty || vc_dirty_.scissor_dirty || vc_dirty_.target_dirty || vc_dirty_.clear_dirty ||
-        vc_dirty_.transform_dirty)
-    {
-        current_view_id_++;
-    }
-
     PrepareDraw();
 
     unsigned primitiveCount;
@@ -932,12 +930,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
     }
-    if (last_view_id_ != current_view_id_)
-    {
-        last_view_id_ = current_view_id_;
-        bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
-        bgfx::setViewScissor(current_view_id_, scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-    }
+    
 //     if (scissorRect_ != IntRect::ZERO)
 //     {
 //         bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
@@ -976,6 +969,7 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
         URHO3D_LOGERROR("indexbuffer invalid.");
         return;
     }
+    
     PrepareDraw();
 
     unsigned primitiveCount;
@@ -989,19 +983,6 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     {
         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-    }
-    if (last_view_id_ != current_view_id_)
-    {
-        last_view_id_ = current_view_id_;
-        bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
-    }
-    if (scissorRect_ != IntRect::ZERO)
-    {
-        bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-    }
-    else
-    {
-        bgfx::setScissor();
     }
 
     indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
@@ -1899,7 +1880,7 @@ void Graphics::SetRenderTarget(unsigned index, RenderSurface* renderTarget)
     if (renderTarget != renderTargets_[index])
     {
         renderTargets_[index] = renderTarget;
-        vc_dirty_.target_dirty = true;
+        view_context_dirty_ = true;
         // If the rendertarget is also bound as a texture, replace with backup texture or null
 //         if (renderTarget)
 //         {
@@ -1968,7 +1949,7 @@ void Graphics::SetDepthStencil(RenderSurface* depthStencil)
     if (depthStencil != depthStencil_)
     {
         depthStencil_ = depthStencil;
-        vc_dirty_.target_dirty = true;
+        view_context_dirty_ = true;
         impl_->fboDirty_ = true;
     }
 }
@@ -2004,7 +1985,7 @@ void Graphics::SetViewport(const IntRect& rect)
     if (viewport_ != rectCopy)
     {
         viewport_ = rectCopy;
-        vc_dirty_.rect_dirty = true;
+        view_context_dirty_ = true;
     }
 
     // Disable scissor test, needs to be re-enabled by the user
@@ -2192,10 +2173,8 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
 
         if (enable && scissorRect_ != intRect)
         {
-            // Use Direct3D convention with the vertical coordinates ie. 0 is top
-            //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
-            vc_dirty_.scissor_dirty = true;
+            view_context_dirty_ = true;
         }
     }
     else
@@ -2203,17 +2182,9 @@ void Graphics::SetScissorTest(bool enable, const Rect& rect, bool borderInclusiv
         if (scissorRect_ != IntRect::ZERO)
         {
             scissorRect_ = IntRect::ZERO;
-            vc_dirty_.scissor_dirty = true;
+            view_context_dirty_ = true;
         }
     }
-//     if (enable != scissorTest_)
-//     {
-//         if (enable)
-//             glEnable(GL_SCISSOR_TEST);
-//         else
-//             glDisable(GL_SCISSOR_TEST);
-//         scissorTest_ = enable;
-//     }
 }
 
 void Graphics::SetScissorTest(bool enable, const IntRect& rect)
@@ -2239,10 +2210,8 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
 
         if (enable && scissorRect_ != intRect)
         {
-            // Use Direct3D convention with the vertical coordinates ie. 0 is top
-            //glScissor(intRect.left_, rtSize.y_ - intRect.bottom_, intRect.Width(), intRect.Height());
             scissorRect_ = intRect;
-            vc_dirty_.scissor_dirty = true;
+            view_context_dirty_ = true;
         }
     }
     else
@@ -2250,17 +2219,9 @@ void Graphics::SetScissorTest(bool enable, const IntRect& rect)
         if (scissorRect_ != IntRect::ZERO)
         {
             scissorRect_ = IntRect::ZERO;
-            vc_dirty_.scissor_dirty = true;
+            view_context_dirty_ = true;
         }
     }
-    //     if (enable != scissorTest_)
-//     {
-//         if (enable)
-//             glEnable(GL_SCISSOR_TEST);
-//         else
-//             glDisable(GL_SCISSOR_TEST);
-//         scissorTest_ = enable;
-//     }
 }
 
 void Graphics::SetClipPlane(bool enable, const Plane& clipPlane, const Matrix3x4& view, const Matrix4& projection)
@@ -2597,49 +2558,49 @@ void Graphics::OnWindowMoved()
 
 void Graphics::CleanupRenderSurface(RenderSurface* surface)
 {
-    if (!surface)
-        return;
-
-    // Flush pending FBO changes first if any
-    PrepareDraw();
-
-    unsigned currentFBO = impl_->boundFBO_;
-
-    // Go through all FBOs and clean up the surface from them
-    for (HashMap<unsigned long long, FrameBufferObject>::Iterator i = impl_->frameBuffers_.Begin();
-         i != impl_->frameBuffers_.End(); ++i)
-    {
-        for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
-        {
-            if (i->second_.colorAttachments_[j] == surface)
-            {
-                if (currentFBO != i->second_.fbo_)
-                {
-                    BindFramebuffer(i->second_.fbo_);
-                    currentFBO = i->second_.fbo_;
-                }
-                BindColorAttachment(j, GL_TEXTURE_2D, 0, false);
-                i->second_.colorAttachments_[j] = nullptr;
-                // Mark drawbuffer bits to need recalculation
-                i->second_.drawBuffers_ = M_MAX_UNSIGNED;
-            }
-        }
-        if (i->second_.depthAttachment_ == surface)
-        {
-            if (currentFBO != i->second_.fbo_)
-            {
-                BindFramebuffer(i->second_.fbo_);
-                currentFBO = i->second_.fbo_;
-            }
-            BindDepthAttachment(0, false);
-            BindStencilAttachment(0, false);
-            i->second_.depthAttachment_ = nullptr;
-        }
-    }
-
-    // Restore previously bound FBO now if needed
-    if (currentFBO != impl_->boundFBO_)
-        BindFramebuffer(impl_->boundFBO_);
+//     if (!surface)
+//         return;
+// 
+//     // Flush pending FBO changes first if any
+//     PrepareDraw();
+// 
+//     unsigned currentFBO = impl_->boundFBO_;
+// 
+//     // Go through all FBOs and clean up the surface from them
+//     for (HashMap<unsigned long long, FrameBufferObject>::Iterator i = impl_->frameBuffers_.Begin();
+//          i != impl_->frameBuffers_.End(); ++i)
+//     {
+//         for (unsigned j = 0; j < MAX_RENDERTARGETS; ++j)
+//         {
+//             if (i->second_.colorAttachments_[j] == surface)
+//             {
+//                 if (currentFBO != i->second_.fbo_)
+//                 {
+//                     BindFramebuffer(i->second_.fbo_);
+//                     currentFBO = i->second_.fbo_;
+//                 }
+//                 BindColorAttachment(j, GL_TEXTURE_2D, 0, false);
+//                 i->second_.colorAttachments_[j] = nullptr;
+//                 // Mark drawbuffer bits to need recalculation
+//                 i->second_.drawBuffers_ = M_MAX_UNSIGNED;
+//             }
+//         }
+//         if (i->second_.depthAttachment_ == surface)
+//         {
+//             if (currentFBO != i->second_.fbo_)
+//             {
+//                 BindFramebuffer(i->second_.fbo_);
+//                 currentFBO = i->second_.fbo_;
+//             }
+//             BindDepthAttachment(0, false);
+//             BindStencilAttachment(0, false);
+//             i->second_.depthAttachment_ = nullptr;
+//         }
+//     }
+// 
+//     // Restore previously bound FBO now if needed
+//     if (currentFBO != impl_->boundFBO_)
+//         BindFramebuffer(impl_->boundFBO_);
 }
 
 void Graphics::CleanupShaderPrograms(ShaderVariation* variation)
@@ -3169,8 +3130,21 @@ void Graphics::CheckFeatureSupport()
 
 void Graphics::PrepareDraw()
 {
-    if (last_view_id_ != current_view_id_ || impl_->fboDirty_)
+    if (view_context_dirty_)
     {
+        view_context_dirty_ = false;
+        current_view_id_++;
+    }
+    if (last_view_id_ != current_view_id_)
+    {
+        last_view_id_ = current_view_id_;
+        bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
+        bgfx::setViewScissor(current_view_id_, scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(),
+                             scissorRect_.Height());
+//    }
+//     if (impl_->fboDirty_)
+//     {
+//         impl_->fboDirty_ = false;
         // First check if no framebuffer is needed. In that case simply return to backbuffer rendering
         bool noFbo = !depthStencil_;
         if (noFbo)
@@ -3189,7 +3163,7 @@ void Graphics::PrepareDraw()
         {
             if (impl_->boundFBO_ != impl_->systemFBO_)
             {
-                BindFramebuffer(impl_->systemFBO_);
+                //BindFramebuffer(impl_->systemFBO_);
                 impl_->boundFBO_ = impl_->systemFBO_;
             }
 
@@ -3265,7 +3239,7 @@ void Graphics::CleanupFramebuffers()
 {
     if (!IsDeviceLost())
     {
-        BindFramebuffer(impl_->systemFBO_);
+        //BindFramebuffer(impl_->systemFBO_);
         impl_->boundFBO_ = impl_->systemFBO_;
         impl_->fboDirty_ = true;
 
