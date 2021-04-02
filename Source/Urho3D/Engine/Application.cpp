@@ -85,7 +85,6 @@ int Application::Run()
 #if !defined(IOS) && !defined(TVOS) && !defined(__EMSCRIPTEN__)
         while (!engine_->IsExiting()) {
             engine_->RunFrame();
-            bgfx::frame();
         }
 
         Stop();

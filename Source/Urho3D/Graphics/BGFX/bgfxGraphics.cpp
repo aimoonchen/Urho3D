@@ -668,6 +668,13 @@ void Graphics::EndFrame()
     if (!IsInitialized())
         return;
 
+    bgfx::frame();
+
+    for (uint16_t vid = 0; vid <= current_view_id_; vid++)
+    {
+        bgfx::resetView(vid);
+    }
+
     URHO3D_PROFILE(Present);
 
     SendEvent(E_ENDRENDERING);
@@ -699,26 +706,12 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
     unsigned glFlags = 0;
     uint64_t clearFlag = 0;
     if (flags & CLEAR_COLOR)
-    {
         clearFlag |= BGFX_CLEAR_COLOR;
-
-//         glFlags |= GL_COLOR_BUFFER_BIT;
-//         glClearColor(color.r_, color.g_, color.b_, color.a_);
-    }
     if (flags & CLEAR_DEPTH)
-    {
         clearFlag |= BGFX_CLEAR_DEPTH;
-
-//         glFlags |= GL_DEPTH_BUFFER_BIT;
-//         glClearDepth(depth);
-    }
     if (flags & CLEAR_STENCIL)
-    {
         clearFlag |= BGFX_CLEAR_STENCIL;
 
-//         glFlags |= GL_STENCIL_BUFFER_BIT;
-//         glClearStencil(stencil);
-    }
     auto ToRGBA = [](const Color& color) {
         auto r = (unsigned)Clamp(((int)(color.r_ * 255.0f)), 0, 255);
         auto g = (unsigned)Clamp(((int)(color.g_ * 255.0f)), 0, 255);
@@ -738,25 +731,11 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
 
     bgfx::setViewRect(current_view_id_, viewport_.left_, viewport_.top_, viewport_.Width(), viewport_.Height());
     bgfx::setViewScissor(current_view_id_, scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-//     if (scissorRect_ != IntRect::ZERO)
-//     {
-//         bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-//     }
-//     else
-//     {
-// 
-//         bgfx::setScissor();
-//     }
-
     bgfx::touch(current_view_id_);
-
-    //glClear(glFlags);
 
     SetScissorTest(false);
     SetColorWrite(oldColorWrite);
     SetDepthWrite(oldDepthWrite);
-//     if (flags & CLEAR_STENCIL && stencilWriteMask_ != M_MAX_UNSIGNED)
-//         glStencilMask(stencilWriteMask_);
 }
 
 bool Graphics::ResolveToTexture(Texture2D* destination, const IntRect& viewport)
@@ -2698,109 +2677,109 @@ void Graphics::Release(bool clearGPUObjects, bool closeWindow)
 
 void Graphics::Restore()
 {
-    if (!window_)
-        return;
-
-#ifdef __ANDROID__
-    // On Android the context may be lost behind the scenes as the application is minimized
-    if (impl_->context_ && !SDL_GL_GetCurrentContext())
-    {
-        impl_->context_ = 0;
-        // Mark GPU objects lost without a current context. In this case they just mark their internal state lost
-        // but do not perform OpenGL commands to delete the GL objects
-        Release(false, false);
-    }
-#endif
-
-    // Ensure first that the context exists
-    if (!impl_->context_)
-    {
-        impl_->context_ = SDL_GL_CreateContext(window_);
-
-#ifndef GL_ES_VERSION_2_0
-        // If we're trying to use OpenGL 3, but context creation fails, retry with 2
-        if (!forceGL2_ && !impl_->context_)
-        {
-            forceGL2_ = true;
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
-            SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
-            impl_->context_ = SDL_GL_CreateContext(window_);
-        }
-#endif
-
-#if defined(IOS) || defined(TVOS)
-        glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&impl_->systemFBO_);
-#endif
-
-        if (!impl_->context_)
-        {
-            URHO3D_LOGERRORF("Could not create OpenGL context, root cause '%s'", SDL_GetError());
-            return;
-        }
-
-        // Clear cached extensions string from the previous context
-        extensions.Clear();
-
-        // Initialize OpenGL extensions library (desktop only)
-#ifndef GL_ES_VERSION_2_0
-        GLenum err = glewInit();
-        if (GLEW_OK != err)
-        {
-            URHO3D_LOGERRORF("Could not initialize OpenGL extensions, root cause: '%s'", glewGetErrorString(err));
-            return;
-        }
-
-        if (!forceGL2_ && GLEW_VERSION_3_2)
-        {
-            gl3Support = true;
-            apiName_ = "GL3";
-
-            // Create and bind a vertex array object that will stay in use throughout
-            unsigned vertexArrayObject;
-            glGenVertexArrays(1, &vertexArrayObject);
-            glBindVertexArray(vertexArrayObject);
-        }
-        else if (GLEW_VERSION_2_0)
-        {
-            if (!GLEW_EXT_framebuffer_object || !GLEW_EXT_packed_depth_stencil)
-            {
-                URHO3D_LOGERROR("EXT_framebuffer_object and EXT_packed_depth_stencil OpenGL extensions are required");
-                return;
-            }
-
-            gl3Support = false;
-            apiName_ = "GL2";
-        }
-        else
-        {
-            URHO3D_LOGERROR("OpenGL 2.0 is required");
-            return;
-        }
-
-        // Enable seamless cubemap if possible
-        // Note: even though we check the extension, this can lead to software fallback on some old GPU's
-        // See https://github.com/urho3d/Urho3D/issues/1380 or
-        // http://distrustsimplicity.net/articles/gl_texture_cube_map_seamless-on-os-x/
-        // In case of trouble or for wanting maximum compatibility, simply remove the glEnable below.
-        if (gl3Support || GLEW_ARB_seamless_cube_map)
-            glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
-#endif
-
-        // Set up texture data read/write alignment. It is important that this is done before uploading any texture data
-        glPixelStorei(GL_PACK_ALIGNMENT, 1);
-        glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
-        ResetCachedState();
-    }
-
-    {
-        MutexLock lock(gpuObjectMutex_);
-
-        for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
-            (*i)->OnDeviceReset();
-    }
-
-    SendEvent(E_DEVICERESET);
+//     if (!window_)
+//         return;
+// 
+// #ifdef __ANDROID__
+//     // On Android the context may be lost behind the scenes as the application is minimized
+//     if (impl_->context_ && !SDL_GL_GetCurrentContext())
+//     {
+//         impl_->context_ = 0;
+//         // Mark GPU objects lost without a current context. In this case they just mark their internal state lost
+//         // but do not perform OpenGL commands to delete the GL objects
+//         Release(false, false);
+//     }
+// #endif
+// 
+//     // Ensure first that the context exists
+//     if (!impl_->context_)
+//     {
+//         impl_->context_ = SDL_GL_CreateContext(window_);
+// 
+// #ifndef GL_ES_VERSION_2_0
+//         // If we're trying to use OpenGL 3, but context creation fails, retry with 2
+//         if (!forceGL2_ && !impl_->context_)
+//         {
+//             forceGL2_ = true;
+//             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MAJOR_VERSION, 2);
+//             SDL_GL_SetAttribute(SDL_GL_CONTEXT_MINOR_VERSION, 0);
+//             SDL_GL_SetAttribute(SDL_GL_CONTEXT_PROFILE_MASK, 0);
+//             impl_->context_ = SDL_GL_CreateContext(window_);
+//         }
+// #endif
+// 
+// #if defined(IOS) || defined(TVOS)
+//         glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&impl_->systemFBO_);
+// #endif
+// 
+//         if (!impl_->context_)
+//         {
+//             URHO3D_LOGERRORF("Could not create OpenGL context, root cause '%s'", SDL_GetError());
+//             return;
+//         }
+// 
+//         // Clear cached extensions string from the previous context
+//         extensions.Clear();
+// 
+//         // Initialize OpenGL extensions library (desktop only)
+// #ifndef GL_ES_VERSION_2_0
+//         GLenum err = glewInit();
+//         if (GLEW_OK != err)
+//         {
+//             URHO3D_LOGERRORF("Could not initialize OpenGL extensions, root cause: '%s'", glewGetErrorString(err));
+//             return;
+//         }
+// 
+//         if (!forceGL2_ && GLEW_VERSION_3_2)
+//         {
+//             gl3Support = true;
+//             apiName_ = "GL3";
+// 
+//             // Create and bind a vertex array object that will stay in use throughout
+//             unsigned vertexArrayObject;
+//             glGenVertexArrays(1, &vertexArrayObject);
+//             glBindVertexArray(vertexArrayObject);
+//         }
+//         else if (GLEW_VERSION_2_0)
+//         {
+//             if (!GLEW_EXT_framebuffer_object || !GLEW_EXT_packed_depth_stencil)
+//             {
+//                 URHO3D_LOGERROR("EXT_framebuffer_object and EXT_packed_depth_stencil OpenGL extensions are required");
+//                 return;
+//             }
+// 
+//             gl3Support = false;
+//             apiName_ = "GL2";
+//         }
+//         else
+//         {
+//             URHO3D_LOGERROR("OpenGL 2.0 is required");
+//             return;
+//         }
+// 
+//         // Enable seamless cubemap if possible
+//         // Note: even though we check the extension, this can lead to software fallback on some old GPU's
+//         // See https://github.com/urho3d/Urho3D/issues/1380 or
+//         // http://distrustsimplicity.net/articles/gl_texture_cube_map_seamless-on-os-x/
+//         // In case of trouble or for wanting maximum compatibility, simply remove the glEnable below.
+//         if (gl3Support || GLEW_ARB_seamless_cube_map)
+//             glEnable(GL_TEXTURE_CUBE_MAP_SEAMLESS);
+// #endif
+// 
+//         // Set up texture data read/write alignment. It is important that this is done before uploading any texture data
+//         glPixelStorei(GL_PACK_ALIGNMENT, 1);
+//         glPixelStorei(GL_UNPACK_ALIGNMENT, 1);
+//         ResetCachedState();
+//     }
+// 
+//     {
+//         MutexLock lock(gpuObjectMutex_);
+// 
+//         for (PODVector<GPUObject*>::Iterator i = gpuObjects_.Begin(); i != gpuObjects_.End(); ++i)
+//             (*i)->OnDeviceReset();
+//     }
+// 
+//     SendEvent(E_DEVICERESET);
 }
 
 void Graphics::MarkFBODirty()
@@ -2810,182 +2789,92 @@ void Graphics::MarkFBODirty()
 
 void Graphics::SetVBO(unsigned object)
 {
-//     if (impl_->boundVBO_ != object)
-//     {
-//         if (object)
-//             glBindBuffer(GL_ARRAY_BUFFER, object);
-//         impl_->boundVBO_ = object;
-//     }
+
 }
 
 void Graphics::SetUBO(unsigned object)
 {
-// #ifndef GL_ES_VERSION_2_0
-//     if (impl_->boundUBO_ != object)
-//     {
-//         if (object)
-//             glBindBuffer(GL_UNIFORM_BUFFER, object);
-//         impl_->boundUBO_ = object;
-//     }
-// #endif
+
 }
 
 unsigned Graphics::GetAlphaFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     // Alpha format is deprecated on OpenGL 3+
-//     if (gl3Support)
-//         return GL_R8;
-// #endif
-//     return GL_ALPHA;
     return bgfx::TextureFormat::A8;
     //bgfx::TextureFormat::R8;
 }
 
 unsigned Graphics::GetLuminanceFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     // Luminance format is deprecated on OpenGL 3+
-//     if (gl3Support)
-//         return GL_R8;
-// #endif
-//     return GL_LUMINANCE;
     return bgfx::TextureFormat::R8;
 }
 
 unsigned Graphics::GetLuminanceAlphaFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     // Luminance alpha format is deprecated on OpenGL 3+
-//     if (gl3Support)
-//         return GL_RG8;
-// #endif
-//     return GL_LUMINANCE_ALPHA;
     return bgfx::TextureFormat::RG8;
 }
 
 unsigned Graphics::GetRGBFormat()
 {
-//    return GL_RGB;
     return bgfx::TextureFormat::RGB8;
 }
 
 unsigned Graphics::GetRGBAFormat()
 {
-//    return GL_RGBA;
     return bgfx::TextureFormat::RGBA8;
 }
 
 unsigned Graphics::GetRGBA16Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RGBA16;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RGBA16;
 }
 
 unsigned Graphics::GetRGBAFloat16Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RGBA16F_ARB;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RGBA16F;
 }
 
 unsigned Graphics::GetRGBAFloat32Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RGBA32F_ARB;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RGBA32F;
 }
 
 unsigned Graphics::GetRG16Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RG16;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RG16;
 }
 
 unsigned Graphics::GetRGFloat16Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RG16F;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RG16F;
 }
 
 unsigned Graphics::GetRGFloat32Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_RG32F;
-// #else
-//     return GL_RGBA;
-// #endif
     return bgfx::TextureFormat::RG32F;
 }
 
 unsigned Graphics::GetFloat16Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_R16F;
-// #else
-//     return GL_LUMINANCE;
-// #endif
     return bgfx::TextureFormat::R16F;
 }
 
 unsigned Graphics::GetFloat32Format()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_R32F;
-// #else
-//     return GL_LUMINANCE;
-// #endif
     return bgfx::TextureFormat::R32F;
 }
 
 unsigned Graphics::GetLinearDepthFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     // OpenGL 3 can use different color attachment formats
-//     if (gl3Support)
-//         return GL_R32F;
-// #endif
-//     // OpenGL 2 requires color attachments to have the same format, therefore encode deferred depth to RGBA manually
-//     // if not using a readable hardware depth texture
-//     return GL_RGBA;
     return bgfx::TextureFormat::R32F;
 }
 
 unsigned Graphics::GetDepthStencilFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_DEPTH24_STENCIL8_EXT;
-// #else
-//     return glesDepthStencilFormat;
-// #endif
     return bgfx::TextureFormat::D24S8;
 }
 
 unsigned Graphics::GetReadableDepthFormat()
 {
-// #ifndef GL_ES_VERSION_2_0
-//     return GL_DEPTH_COMPONENT24;
-// #else
-//     return glesReadableDepthFormat;
-// #endif
     return bgfx::TextureFormat::D24;
 }
 

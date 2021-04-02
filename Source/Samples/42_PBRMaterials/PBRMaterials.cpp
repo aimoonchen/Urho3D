@@ -33,9 +33,9 @@
 #include <Urho3D/UI/Button.h>
 #include <Urho3D/UI/Font.h>
 #include <Urho3D/UI/Slider.h>
+#include <Urho3D/UI/Text.h>
 #include <Urho3D/UI/UI.h>
 #include <Urho3D/UI/UIEvents.h>
-#include <Urho3D/UI/Text.h>
 #ifdef URHO3D_ANGELSCRIPT
 #include <Urho3D/AngelScript/Script.h>
 #endif
@@ -47,12 +47,12 @@
 //URHO3D_DEFINE_APPLICATION_MAIN(PBRMaterials)
 URHO3D_DEFINE_APPLICATION_MAIN(PBRMaterials, "42-PBRMaterials", "Loading textures.",
                                "https://bkaradzic.github.io/bgfx/examples.html#bump");
-PBRMaterials::PBRMaterials(Context* context) :
-    Sample(context),
-    dynamicMaterial_(nullptr),
-    roughnessLabel_(nullptr),
-    metallicLabel_(nullptr),
-    ambientLabel_(nullptr)
+PBRMaterials::PBRMaterials(Context* context)
+    : Sample(context)
+    , dynamicMaterial_(nullptr)
+    , roughnessLabel_(nullptr)
+    , metallicLabel_(nullptr)
+    , ambientLabel_(nullptr)
 {
 }
 
@@ -83,7 +83,7 @@ void PBRMaterials::CreateInstructions()
     // Construct new Text object, set string to display and font to use
     auto* instructionText = ui->GetRoot()->CreateChild<Text>();
     instructionText->SetText("Use sliders to change Roughness and Metallic\n"
-        "Hold RMB and use WASD keys and mouse to move");
+                             "Hold RMB and use WASD keys and mouse to move");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     instructionText->SetTextAlignment(HA_CENTER);
 
@@ -135,8 +135,8 @@ void PBRMaterials::CreateUI()
     auto* style = cache->GetResource<XMLFile>("UI/DefaultStyle.xml");
     ui->GetRoot()->SetDefaultStyle(style);
 
-    // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor will
-    // control the camera, and when visible, it will interact with the UI
+    // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor
+    // will control the camera, and when visible, it will interact with the UI
     SharedPtr<Cursor> cursor(new Cursor(context_));
     cursor->SetStyleAuto();
     ui->SetCursor(cursor);
@@ -218,13 +218,13 @@ void PBRMaterials::SetupViewport()
     renderer->SetViewport(0, viewport);
 
     // Add post-processing effects appropriate with the example scene
-    SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
-    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
-    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/GammaCorrection.xml"));
-    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Tonemap.xml"));
-    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/AutoExposure.xml"));
-
-    viewport->SetRenderPath(effectRenderPath);
+    //     SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
+    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
+    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/GammaCorrection.xml"));
+    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Tonemap.xml"));
+    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/AutoExposure.xml"));
+    //
+    //     viewport->SetRenderPath(effectRenderPath);
 }
 
 void PBRMaterials::SubscribeToEvents()

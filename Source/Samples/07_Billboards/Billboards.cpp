@@ -48,10 +48,9 @@
 
 URHO3D_DEFINE_APPLICATION_MAIN(Billboards, "07-Billboards", "Loading textures.",
                                "https://bkaradzic.github.io/bgfx/examples.html#bump");
-
-Billboards::Billboards(Context* context) :
-    Sample(context),
-    drawDebug_(false)
+Billboards::Billboards(Context* context)
+    : Sample(context)
+    , drawDebug_(false)
 {
 }
 
@@ -100,9 +99,9 @@ void Billboards::CreateScene()
     lightNode->SetDirection(Vector3(0.5f, -1.0f, 0.5f));
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-    light->SetColor(Color(0.5f, 0.5f, 0.5f));
+    light->SetColor(Color(0.2f, 0.2f, 0.2f));
     light->SetSpecularIntensity(1.0f);
-    //light->SetCastShadows(true);
+
     // Create a "floor" consisting of several tiles
     for (int y = -5; y <= 5; ++y)
     {
@@ -118,21 +117,19 @@ void Billboards::CreateScene()
     }
 
     // Create groups of mushrooms, which act as shadow casters
-    const unsigned NUM_MUSHROOMGROUPS = 25; // 25;
-    const unsigned NUM_MUSHROOMS = 25;      // 25;
-    Vector3 p0[2]{{-2.0f, 0.0f, 0.0f}, {2.0f, 0.0f, 0.0f}};
+    const unsigned NUM_MUSHROOMGROUPS = 10/*25*/;
+    const unsigned NUM_MUSHROOMS = 1/*25*/;
+
     for (unsigned i = 0; i < NUM_MUSHROOMGROUPS; ++i)
     {
         // First create a scene node for the group. The individual mushrooms nodes will be created as children
         Node* groupNode = scene_->CreateChild("MushroomGroup");
         groupNode->SetPosition(Vector3(Random(190.0f) - 95.0f, 0.0f, Random(190.0f) - 95.0f));
-        //groupNode->SetPosition(p0[i] /*Vector3(Random(190.0f) - 95.0f, 0.0f, Random(190.0f) - 95.0f)*/);
 
         for (unsigned j = 0; j < NUM_MUSHROOMS; ++j)
         {
             Node* mushroomNode = groupNode->CreateChild("Mushroom");
             mushroomNode->SetPosition(Vector3(Random(25.0f) - 12.5f, 0.0f, Random(25.0f) - 12.5f));
-            //mushroomNode->SetPosition(p0[j] /*Vector3(Random(25.0f) - 12.5f, 0.0f, Random(25.0f) - 12.5f)*/);
             mushroomNode->SetRotation(Quaternion(0.0f, Random() * 360.0f, 0.0f));
             mushroomNode->SetScale(1.0f + Random() * 4.0f);
             auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
@@ -143,35 +140,35 @@ void Billboards::CreateScene()
     }
 
     // Create billboard sets (floating smoke)
-    const unsigned NUM_BILLBOARDNODES = 25;
-    const unsigned NUM_BILLBOARDS = 10;
+    const unsigned NUM_BILLBOARDNODES = 1/*25*/;
+    const unsigned NUM_BILLBOARDS = 1/*10*/;
 
-//     for (unsigned i = 0; i < NUM_BILLBOARDNODES; ++i)
-//     {
-//         Node* smokeNode = scene_->CreateChild("Smoke");
-//         smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
-//
-//         auto* billboardObject = smokeNode->CreateComponent<BillboardSet>();
-//         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
-//         billboardObject->SetMaterial(cache->GetResource<Material>("Materials/LitSmoke.xml"));
-//         billboardObject->SetSorted(true);
-//
-//         for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
-//         {
-//             Billboard* bb = billboardObject->GetBillboard(j);
-//             bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
-//             bb->size_ = Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
-//             bb->rotation_ = Random() * 360.0f;
-//             bb->enabled_ = true;
-//         }
-//
-//         // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its
-//         internals billboardObject->Commit();
-//     }
+    for (unsigned i = 0; i < NUM_BILLBOARDNODES; ++i)
+    {
+        Node* smokeNode = scene_->CreateChild("Smoke");
+        smokeNode->SetPosition({}/*Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f)*/);
+
+        auto* billboardObject = smokeNode->CreateComponent<BillboardSet>();
+        billboardObject->SetNumBillboards(NUM_BILLBOARDS);
+        billboardObject->SetMaterial(cache->GetResource<Material>("Materials/LitSmoke.xml"));
+        billboardObject->SetSorted(true);
+
+        for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
+        {
+            Billboard* bb = billboardObject->GetBillboard(j);
+            bb->position_ = Vector3{1.0f,1.0f,0.0f};// Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
+            bb->size_ = Vector2{1.0f,1.0f};// Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
+            bb->rotation_ = Random() * 360.0f;
+            bb->enabled_ = true;
+        }
+
+        // After modifying the billboards, they need to be "committed" so that the BillboardSet updates its internals
+        billboardObject->Commit();
+    }
 
     // Create shadow casting spotlights
-    const unsigned NUM_LIGHTS = 9; // 9;
-    Vector3 p[2]{{-5.0f, 20.0f, -10.0f}, {5.0f, 20.0f, -10.0f}};
+    const unsigned NUM_LIGHTS = 9;
+
     for (unsigned i = 0; i < NUM_LIGHTS; ++i)
     {
         Node* lightNode = scene_->CreateChild("SpotLight");
@@ -182,8 +179,8 @@ void Billboards::CreateScene()
         Vector3 position((i % 3) * 60.0f - 60.0f, 45.0f, (i / 3.f) * 60.0f - 60.0f);
         Color color(((i + 1) & 1u) * 0.5f + 0.5f, (((i + 1) >> 1u) & 1u) * 0.5f + 0.5f,
                     (((i + 1) >> 2u) & 1u) * 0.5f + 0.5f);
+
         lightNode->SetPosition(position);
-        //lightNode->SetPosition(/*position*/ p[i]);
         lightNode->SetDirection(Vector3(Sin(angle), -1.5f, Cos(angle)));
 
         light->SetLightType(LIGHT_SPOT);
@@ -213,7 +210,6 @@ void Billboards::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    // cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
     cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
 }
 
@@ -224,10 +220,8 @@ void Billboards::CreateInstructions()
 
     // Construct new Text object, set string to display and font to use
     auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys and mouse/touch to move\n"
-        "Space to toggle debug geometry"
-    );
+    instructionText->SetText("Use WASD keys and mouse/touch to move\n"
+                             "Space to toggle debug geometry");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     // The text has multiple rows. Center them in relation to each other
     instructionText->SetTextAlignment(HA_CENTER);
@@ -296,6 +290,7 @@ void Billboards::MoveCamera(float timeStep)
 
 void Billboards::AnimateScene(float timeStep)
 {
+    return;
     // Get the light and billboard scene nodes
     PODVector<Node*> lightNodes;
     PODVector<Node*> billboardNodes;
@@ -338,8 +333,8 @@ void Billboards::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 void Billboards::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-    // If draw debug mode is enabled, draw viewport debug geometry. This time use depth test, as otherwise the result becomes
-    // hard to interpret due to large object count
+    // If draw debug mode is enabled, draw viewport debug geometry. This time use depth test, as otherwise the result
+    // becomes hard to interpret due to large object count
     if (drawDebug_)
         GetSubsystem<Renderer>()->DrawDebugGeometry(true);
 }
