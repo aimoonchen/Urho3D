@@ -922,7 +922,7 @@ private:
     /// OpenGL3 support flag.
     static bool gl3Support;
     entry::WindowHandle default_window_ = {0};
-    uint64_t render_state_{ 0 };
+    uint64_t render_state_{0};
     uint32_t front_stencil_{ 0 };
     uint32_t back_stencil_{ 0 };
     uint16_t last_view_id_{0xff};
@@ -938,6 +938,8 @@ private:
 //     };
 //     view_context_dirty vc_dirty_{false, false, false, false, false };
     bool view_context_dirty_{false};
+    // last used ShaderProgram
+    ShaderProgram* lastShaderProgram_{ nullptr };
 
 public:
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance);
@@ -945,6 +947,7 @@ public:
     void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
     //
     void SetRendererState(uint64_t state);
+    ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }
 };
 
 /// Register Graphics library objects.

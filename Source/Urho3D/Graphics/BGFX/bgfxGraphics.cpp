@@ -322,6 +322,7 @@ Graphics::Graphics(Context* context) :
     shaderPath_("Shaders/BGFX/"),
     shaderExtension_(".sc"),
     orientations_("LandscapeLeft LandscapeRight"),
+    render_state_{BGFX_STATE_CULL_CW | BGFX_STATE_FRONT_CCW},
 #ifndef GL_ES_VERSION_2_0
     apiName_("GL2")
 #else
@@ -1193,6 +1194,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
             if (i->second_->GetGPUObjectHandle() != bgfx::kInvalidHandle /*i->second_->GetGPUObjectName()*/)
             {
                 //glUseProgram(i->second_->GetGPUObjectName());
+                lastShaderProgram_ = impl_->shaderProgram_;
                 impl_->shaderProgram_ = i->second_;
             }
             else
@@ -1212,6 +1214,7 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
                 URHO3D_LOGDEBUG("Linked vertex shader " + vs->GetFullName() + " and pixel shader " + ps->GetFullName());
                 // Note: Link() calls glUseProgram() to set the texture sampler uniforms,
                 // so it is not necessary to call it again
+                lastShaderProgram_ = impl_->shaderProgram_;
                 impl_->shaderProgram_ = newProgram;
             }
             else
@@ -3442,7 +3445,7 @@ uint64_t bgfxRSBend(Urho3D::BlendMode mode, bool alphaToCoverage)
 
 uint64_t bgfxRSCull(Urho3D::CullMode mode)
 {
-    return (mode == Urho3D::CULL_NONE) ? 0 : (((mode == Urho3D::CULL_CCW) ? BGFX_STATE_CULL_CCW : BGFX_STATE_CULL_CW));
+    return (mode == Urho3D::CULL_NONE) ? 0 : (((mode == Urho3D::CULL_CCW) ? BGFX_STATE_CULL_CW : BGFX_STATE_CULL_CCW));
 }
 
 uint64_t bgfxRSDepthCompare(Urho3D::CompareMode mode)

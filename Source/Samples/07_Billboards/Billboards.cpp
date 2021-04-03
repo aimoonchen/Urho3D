@@ -117,8 +117,8 @@ void Billboards::CreateScene()
     }
 
     // Create groups of mushrooms, which act as shadow casters
-    const unsigned NUM_MUSHROOMGROUPS = 10/*25*/;
-    const unsigned NUM_MUSHROOMS = 1/*25*/;
+    const unsigned NUM_MUSHROOMGROUPS = 25;
+    const unsigned NUM_MUSHROOMS = 25;
 
     for (unsigned i = 0; i < NUM_MUSHROOMGROUPS; ++i)
     {
@@ -140,13 +140,13 @@ void Billboards::CreateScene()
     }
 
     // Create billboard sets (floating smoke)
-    const unsigned NUM_BILLBOARDNODES = 1/*25*/;
-    const unsigned NUM_BILLBOARDS = 1/*10*/;
+    const unsigned NUM_BILLBOARDNODES = 25;
+    const unsigned NUM_BILLBOARDS = 10;
 
     for (unsigned i = 0; i < NUM_BILLBOARDNODES; ++i)
     {
         Node* smokeNode = scene_->CreateChild("Smoke");
-        smokeNode->SetPosition({}/*Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f)*/);
+        smokeNode->SetPosition(Vector3(Random(200.0f) - 100.0f, Random(20.0f) + 10.0f, Random(200.0f) - 100.0f));
 
         auto* billboardObject = smokeNode->CreateComponent<BillboardSet>();
         billboardObject->SetNumBillboards(NUM_BILLBOARDS);
@@ -156,8 +156,8 @@ void Billboards::CreateScene()
         for (unsigned j = 0; j < NUM_BILLBOARDS; ++j)
         {
             Billboard* bb = billboardObject->GetBillboard(j);
-            bb->position_ = Vector3{1.0f,1.0f,0.0f};// Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
-            bb->size_ = Vector2{1.0f,1.0f};// Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
+            bb->position_ = Vector3(Random(12.0f) - 6.0f, Random(8.0f) - 4.0f, Random(12.0f) - 6.0f);
+            bb->size_ = Vector2(Random(2.0f) + 3.0f, Random(2.0f) + 3.0f);
             bb->rotation_ = Random() * 360.0f;
             bb->enabled_ = true;
         }
@@ -210,7 +210,7 @@ void Billboards::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
 }
 
 void Billboards::CreateInstructions()
@@ -290,7 +290,6 @@ void Billboards::MoveCamera(float timeStep)
 
 void Billboards::AnimateScene(float timeStep)
 {
-    return;
     // Get the light and billboard scene nodes
     PODVector<Node*> lightNodes;
     PODVector<Node*> billboardNodes;
