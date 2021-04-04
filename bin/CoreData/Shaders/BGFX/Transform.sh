@@ -97,7 +97,7 @@ vec3 GetBillboardNormal()
 #ifdef DIRBILLBOARD
 mat3 GetFaceCameraRotation(vec3 position, vec3 direction)
 {
-    vec3 cameraDir = normalize(position - cCameraPos);
+    vec3 cameraDir = normalize(position - cCameraPos.xyz);
     vec3 front = normalize(direction);
     vec3 right = normalize(cross(front, cameraDir));
     vec3 up = normalize(cross(front, right));
@@ -125,14 +125,14 @@ vec3 GetBillboardNormal(vec4 iPos, vec3 iDirection, mat4 modelMatrix)
 #ifdef TRAILFACECAM
 vec3 GetTrailPos(vec4 iPos, vec3 iFront, float iScale, mat4 modelMatrix)
 {
-    vec3 up = normalize(cCameraPos - iPos.xyz);
+    vec3 up = normalize(cCameraPos.xyz - iPos.xyz);
     vec3 right = normalize(cross(iFront, up));
     return (vec4((iPos.xyz + right * iScale), 1.0) * modelMatrix).xyz;
 }
 
 vec3 GetTrailNormal(vec4 iPos)
 {
-    return normalize(cCameraPos - iPos.xyz);
+    return normalize(cCameraPos.xyz - iPos.xyz);
 }
 #endif
 

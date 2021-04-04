@@ -44,8 +44,8 @@
 
 URHO3D_DEFINE_APPLICATION_MAIN(AnimatingScene)
 
-AnimatingScene::AnimatingScene(Context* context) :
-    Sample(context)
+AnimatingScene::AnimatingScene(Context* context)
+    : Sample(context)
 {
     // Register an object factory for our custom Rotator component so that we can create them to scene nodes
     context->RegisterFactory<Rotator>();
@@ -82,9 +82,10 @@ void AnimatingScene::CreateScene()
     // (-1000, -1000, -1000) to (1000, 1000, 1000)
     scene_->CreateComponent<Octree>();
 
-    // Create a Zone component into a child scene node. The Zone controls ambient lighting and fog settings. Like the Octree,
-    // it also defines its volume with a bounding box, but can be rotated (so it does not need to be aligned to the world X, Y
-    // and Z axes.) Drawable objects "pick up" the zone they belong to and use it when rendering; several zones can exist
+    // Create a Zone component into a child scene node. The Zone controls ambient lighting and fog settings. Like the
+    // Octree, it also defines its volume with a bounding box, but can be rotated (so it does not need to be aligned to
+    // the world X, Y and Z axes.) Drawable objects "pick up" the zone they belong to and use it when rendering; several
+    // zones can exist
     Node* zoneNode = scene_->CreateChild("Zone");
     auto* zone = zoneNode->CreateComponent<Zone>();
     // Set same volume as the Octree, set a close bluish fog and some ambient light
@@ -106,17 +107,17 @@ void AnimatingScene::CreateScene()
         boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
         boxObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
 
-        // Add our custom Rotator component which will rotate the scene node each frame, when the scene sends its update event.
-        // The Rotator component derives from the base class LogicComponent, which has convenience functionality to subscribe
-        // to the various update events, and forward them to virtual functions that can be implemented by subclasses. This way
-        // writing logic/update components in C++ becomes similar to scripting.
-        // Now we simply set same rotation speed for all objects
+        // Add our custom Rotator component which will rotate the scene node each frame, when the scene sends its update
+        // event. The Rotator component derives from the base class LogicComponent, which has convenience functionality
+        // to subscribe to the various update events, and forward them to virtual functions that can be implemented by
+        // subclasses. This way writing logic/update components in C++ becomes similar to scripting. Now we simply set
+        // same rotation speed for all objects
         auto* rotator = boxNode->CreateComponent<Rotator>();
         rotator->SetRotationSpeed(Vector3(10.0f, 20.0f, 30.0f));
     }
 
-    // Create the camera. Let the starting position be at the world origin. As the fog limits maximum visible distance, we can
-    // bring the far clip plane closer for more effective culling of distant objects
+    // Create the camera. Let the starting position be at the world origin. As the fog limits maximum visible distance,
+    // we can bring the far clip plane closer for more effective culling of distant objects
     cameraNode_ = scene_->CreateChild("Camera");
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(100.0f);

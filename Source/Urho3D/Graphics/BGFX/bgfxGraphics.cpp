@@ -364,6 +364,8 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
         return true;
 
     entry::setWindowSize(default_window_, width, height);
+    width_ = width;
+    height_ = height;
     window_ = (SDL_Window*)1;
     OnScreenModeChanged();
     CheckFeatureSupport();
@@ -1698,16 +1700,17 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         {"NormalMap"},
         {"SpecMap"},
         {"EmissiveMap"},
-        {"EnvMap"},
-        {""},
-        {""},
-        {""},
+        /*{"EnvMap"},*/
+        {"EnvCubeMap"},
+        {"WeightMap0"},
+        {"DetailMap1"},
+        {"DetailMap2"},
         {"LightRampMap"},
         {"LightSpotMap"},
         {"ShadowMap"},
         {"FaceSelectCubeMap"},
         {"IndirectionCubeMap"},
-        {""},
+        {"DetailMap3"},
         {""},
         {"ZoneCubeMap"}
     };
@@ -1719,11 +1722,31 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
             auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
             if (sampler_handle == bgfx::kInvalidHandle)
             {
-                if (index != 11 && index != 12)
+                if (index == 0)
                 {
-                    URHO3D_LOGERROR("Can not found sampler : %s.", samplerName[index].ToString().CString()); // error
+                    sampler_handle = impl_->shaderProgram_->GetUniform("WeightMap0");
                 }
-                return;
+                else if (index == 1)
+                {
+                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap1");
+                }
+                else if (index == 2)
+                {
+                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap2");
+                }
+                else if (index == 3)
+                {
+                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap3");
+                }
+                if (sampler_handle == bgfx::kInvalidHandle)
+                {
+                    if (index != 11 && index != 12)
+                    {
+                        URHO3D_LOGERROR("Can not found sampler : %s.",
+                                        samplerName[index].ToString().CString()); // error
+                    }
+                    return;
+                }
             }
             bgfx::setTexture(index, { sampler_handle }, { texture->GetGPUObjectHandle() });
 //                              (textures_[index] != nullptr) ? bgfx::TextureHandle{textures_[index]->GetGPUObjectHandle()}

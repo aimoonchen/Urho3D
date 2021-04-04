@@ -942,7 +942,16 @@ Texture2D* Renderer::GetShadowMap(Light* light, Camera* camera, unsigned viewWid
 
     // Disable mipmaps from the shadow map
     newShadowMap->SetNumLevels(1);
-
+#ifndef GL_ES_VERSION_2_0
+    // OpenGL (desktop) and D3D11: shadow compare mode needs to be specifically enabled for the shadow map
+    newShadowMap->SetFilterMode(FILTER_BILINEAR);
+    newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
+#endif
+#ifndef URHO3D_OPENGL
+    // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
+    // and other shadowed lights matches
+    newShadowMap->SetFilterMode(graphics_->GetHardwareShadowSupport() ? FILTER_BILINEAR : FILTER_NEAREST);
+#endif
     while (retries)
     {
         if (!newShadowMap->SetSize(width, height, shadowMapFormat, shadowMapUsage, multiSample))
@@ -953,16 +962,16 @@ Texture2D* Renderer::GetShadowMap(Light* light, Camera* camera, unsigned viewWid
         }
         else
         {
-#ifndef GL_ES_VERSION_2_0
-            // OpenGL (desktop) and D3D11: shadow compare mode needs to be specifically enabled for the shadow map
-            newShadowMap->SetFilterMode(FILTER_BILINEAR);
-            newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
-#endif
-#ifndef URHO3D_OPENGL
-            // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
-            // and other shadowed lights matches
-            newShadowMap->SetFilterMode(graphics_->GetHardwareShadowSupport() ? FILTER_BILINEAR : FILTER_NEAREST);
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//             // OpenGL (desktop) and D3D11: shadow compare mode needs to be specifically enabled for the shadow map
+//             newShadowMap->SetFilterMode(FILTER_BILINEAR);
+//             newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
+// #endif
+// #ifndef URHO3D_OPENGL
+//             // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
+//             // and other shadowed lights matches
+//             newShadowMap->SetFilterMode(graphics_->GetHardwareShadowSupport() ? FILTER_BILINEAR : FILTER_NEAREST);
+// #endif
             // Create dummy color texture for the shadow map if necessary: Direct3D9, or OpenGL when working around an OS X +
             // Intel driver bug
             if (shadowMapUsage == TEXTURE_DEPTHSTENCIL && dummyColorFormat)

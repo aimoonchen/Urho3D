@@ -89,11 +89,11 @@ void StaticScene::CreateScene()
     // Create a child scene node (at world origin) and a StaticModel component into it. Set the StaticModel to show a
     // simple plane mesh with a "stone" material. Note that naming the scene nodes is optional. Scale the scene node
     // larger (100 x 100 world units)
-    //     Node* planeNode = scene_->CreateChild("Plane");
-    //     planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
-    //     auto* planeObject = planeNode->CreateComponent<StaticModel>();
-    //     planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
-    //     planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
+    Node* planeNode = scene_->CreateChild("Plane");
+    planeNode->SetScale(Vector3(100.0f, 1.0f, 100.0f));
+    auto* planeObject = planeNode->CreateComponent<StaticModel>();
+    planeObject->SetModel(cache->GetResource<Model>("Models/Plane.mdl"));
+    planeObject->SetMaterial(cache->GetResource<Material>("Materials/StoneTiled.xml"));
 
     // Create a directional light to the world so that we can see something. The light scene node's orientation controls
     // the light direction; we will use the SetDirection() function which calculates the orientation from a forward
@@ -101,48 +101,24 @@ void StaticScene::CreateScene()
     Node* lightNode = scene_->CreateChild("DirectionalLight");
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto* light = lightNode->CreateComponent<Light>();
-    // light->SetLightType(LIGHT_DIRECTIONAL);
-    // light->SetCastShadows(true);
-    //     lightNode->SetPosition({0.0f, 8.0f, -3.0f});
-    //     lightNode->SetDirection({0.0f, -1.5f, 1.0f});
-    //     light->SetLightType(LIGHT_SPOT);
-    //     light->SetColor({1.0f, 1.0f, 1.0f, 1.0f});
-    //     light->SetRange(90.0f);
-    //     light->SetRampTexture(cache->GetResource<Texture2D>("Textures/RampExtreme.png"));
-    //     light->SetFov(45.0f);
-    //     light->SetSpecularIntensity(1.0f);
+    light->SetLightType(LIGHT_DIRECTIONAL);
 
-    lightNode->SetPosition({0.0f, 8.0f, -3.0f});
-    light->SetLightType(LIGHT_POINT);
-    light->SetRange(30.0f);
-
-    //     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
-    //     // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
-    //     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
-
-//     Node* skyNode = scene_->CreateChild("Sky");
-//     skyNode->SetScale(500.0f); // The scale actually does not matter
-//     auto* skybox = skyNode->CreateComponent<Skybox>();
-//     skybox->SetModel(cache->GetResource<Model>("Models/Sphere.mdl"));
-//     skybox->SetMaterial(cache->GetResource<Material>("Materials/Skybox2.xml"));
-    // skybox->SetMaterial(cache->GetResource<Material>("Materials/Skybox.xml"));
     // Create more StaticModel objects to the scene, randomly positioned, rotated and scaled. For rotation, we construct
     // a quaternion from Euler angles where the Y angle (rotation about the Y axis) is randomized. The mushroom model
     // contains LOD levels, so the StaticModel component will automatically select the LOD level according to the view
     // distance (you'll see the model get simpler as it moves further away). Finally, rendering a large number of the
     // same object with the same material allows instancing to be used, if the GPU supports it. This reduces the amount
     // of CPU work in rendering the scene.
-    const unsigned NUM_OBJECTS = 1; // 200;
+    const unsigned NUM_OBJECTS = 200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
         Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition({0.0f, 0.0f, 0.0f} /*Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f)*/);
+        mushroomNode->SetPosition({} /*Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f)*/);
         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
         mushroomNode->SetScale(0.5f + Random(2.0f));
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-        mushroomObject->SetModel(cache->GetResource<Model>("Models/MaterialPreview.mdl"));
-        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/PBR/DiamonPlate.xml"));
-        // mushroomObject->SetCastShadows(true);
+        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
     }
 
     // Create a scene node for the camera, which we will move around
@@ -151,7 +127,7 @@ void StaticScene::CreateScene()
     cameraNode_->CreateComponent<Camera>();
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -14.0f));
 }
 
 void StaticScene::CreateInstructions()

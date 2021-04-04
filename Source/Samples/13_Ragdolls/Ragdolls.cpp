@@ -48,8 +48,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(Ragdolls)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(Ragdolls)
+URHO3D_DEFINE_APPLICATION_MAIN(Ragdolls, "13-Ragdolls", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 Ragdolls::Ragdolls(Context* context) :
     Sample(context),
     drawDebug_(false)

@@ -51,8 +51,9 @@
 
 const float CAMERA_DISTANCE = 10.0f;
 
-URHO3D_DEFINE_APPLICATION_MAIN(VehicleDemo)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(VehicleDemo)
+URHO3D_DEFINE_APPLICATION_MAIN(VehicleDemo, "19-VehicleDemo", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 VehicleDemo::VehicleDemo(Context* context) :
     Sample(context)
 {
@@ -97,7 +98,7 @@ void VehicleDemo::CreateScene()
     auto* camera = cameraNode_->CreateComponent<Camera>();
     camera->SetFarClip(500.0f);
     GetSubsystem<Renderer>()->SetViewport(0, new Viewport(context_, scene_, camera));
-
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -14.0f));
     // Create static scene content. First create a zone for ambient lighting and fog control
     Node* zoneNode = scene_->CreateChild("Zone");
     auto* zone = zoneNode->CreateComponent<Zone>();

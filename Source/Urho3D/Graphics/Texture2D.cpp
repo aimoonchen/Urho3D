@@ -142,7 +142,7 @@ bool Texture2D::SetSize(int width, int height, unsigned format, TextureUsage usa
         // Clamp mode addressing by default and nearest filtering
         addressModes_[COORD_U] = ADDRESS_CLAMP;
         addressModes_[COORD_V] = ADDRESS_CLAMP;
-        filterMode_ = FILTER_NEAREST;
+        //filterMode_ = FILTER_NEAREST;
     }
 
     if (usage == TEXTURE_RENDERTARGET)

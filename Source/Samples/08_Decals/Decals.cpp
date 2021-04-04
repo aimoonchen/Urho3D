@@ -49,9 +49,9 @@
 URHO3D_DEFINE_APPLICATION_MAIN(Decals, "08-Decals", "Loading textures.",
                                "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
-Decals::Decals(Context* context) :
-    Sample(context),
-    drawDebug_(false)
+Decals::Decals(Context* context)
+    : Sample(context)
+    , drawDebug_(false)
 {
 }
 
@@ -108,7 +108,7 @@ void Decals::CreateScene()
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f));
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-    //light->SetCastShadows(true);
+    light->SetCastShadows(true);
     light->SetShadowBias(BiasParameters(0.00025f, 0.5f));
     // Set cascade splits at 10, 50 and 200 world units, fade shadows out at 80% of maximum shadow distance
     light->SetShadowCascade(CascadeParameters(10.0f, 50.0f, 200.0f, 0.0f, 0.8f));
@@ -124,11 +124,11 @@ void Decals::CreateScene()
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
-        //mushroomObject->SetCastShadows(true);
+        mushroomObject->SetCastShadows(true);
     }
 
-    // Create randomly sized boxes. If boxes are big enough, make them occluders. Occluders will be software rasterized before
-    // rendering to a low-resolution depth-only buffer to test the objects in the view frustum for visibility
+    // Create randomly sized boxes. If boxes are big enough, make them occluders. Occluders will be software rasterized
+    // before rendering to a low-resolution depth-only buffer to test the objects in the view frustum for visibility
     const unsigned NUM_BOXES = 20;
     for (unsigned i = 0; i < NUM_BOXES; ++i)
     {
@@ -139,7 +139,7 @@ void Decals::CreateScene()
         auto* boxObject = boxNode->CreateComponent<StaticModel>();
         boxObject->SetModel(cache->GetResource<Model>("Models/Box.mdl"));
         boxObject->SetMaterial(cache->GetResource<Material>("Materials/Stone.xml"));
-        //boxObject->SetCastShadows(true);
+        boxObject->SetCastShadows(true);
         if (size >= 3.0f)
             boxObject->SetOccluder(true);
     }
@@ -150,7 +150,7 @@ void Decals::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
 }
 
 void Decals::CreateUI()
@@ -158,8 +158,8 @@ void Decals::CreateUI()
     auto* cache = GetSubsystem<ResourceCache>();
     auto* ui = GetSubsystem<UI>();
 
-    // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor will
-    // control the camera, and when visible, it will point the raycast target
+    // Create a Cursor UI element because we want to be able to hide and show it at will. When hidden, the mouse cursor
+    // will control the camera, and when visible, it will point the raycast target
     auto* style = cache->GetResource<XMLFile>("UI/DefaultStyle.xml");
     SharedPtr<Cursor> cursor(new Cursor(context_));
     cursor->SetStyleAuto(style);
@@ -170,12 +170,10 @@ void Decals::CreateUI()
 
     // Construct new Text object, set string to display and font to use
     auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys to move\n"
-        "LMB to paint decals, RMB to rotate view\n"
-        "Space to toggle debug geometry\n"
-        "7 to toggle occlusion culling"
-    );
+    instructionText->SetText("Use WASD keys to move\n"
+                             "LMB to paint decals, RMB to rotate view\n"
+                             "Space to toggle debug geometry\n"
+                             "7 to toggle occlusion culling");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     // The text has multiple rows. Center them in relation to each other
     instructionText->SetTextAlignment(HA_CENTER);
@@ -270,12 +268,11 @@ void Decals::PaintDecal()
             decal = targetNode->CreateComponent<DecalSet>();
             decal->SetMaterial(cache->GetResource<Material>("Materials/UrhoDecal.xml"));
         }
-        // Add a square decal to the decal set using the geometry of the drawable that was hit, orient it to face the camera,
-        // use full texture UV's (0,0) to (1,1). Note that if we create several decals to a large object (such as the ground
-        // plane) over a large area using just one DecalSet component, the decals will all be culled as one unit. If that is
-        // undesirable, it may be necessary to create more than one DecalSet based on the distance
-        decal->AddDecal(hitDrawable, hitPos, cameraNode_->GetRotation(), 0.5f, 1.0f, 1.0f, Vector2::ZERO,
-            Vector2::ONE);
+        // Add a square decal to the decal set using the geometry of the drawable that was hit, orient it to face the
+        // camera, use full texture UV's (0,0) to (1,1). Note that if we create several decals to a large object (such
+        // as the ground plane) over a large area using just one DecalSet component, the decals will all be culled as
+        // one unit. If that is undesirable, it may be necessary to create more than one DecalSet based on the distance
+        decal->AddDecal(hitDrawable, hitPos, cameraNode_->GetRotation(), 0.5f, 1.0f, 1.0f, Vector2::ZERO, Vector2::ONE);
     }
 }
 
@@ -320,7 +317,8 @@ void Decals::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
 void Decals::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-    // If draw debug mode is enabled, draw viewport debug geometry. Disable depth test so that we can see the effect of occlusion
+    // If draw debug mode is enabled, draw viewport debug geometry. Disable depth test so that we can see the effect of
+    // occlusion
     if (drawDebug_)
         GetSubsystem<Renderer>()->DrawDebugGeometry(false);
 }

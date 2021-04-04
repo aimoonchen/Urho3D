@@ -44,11 +44,12 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(MultipleViewports)
-
-MultipleViewports::MultipleViewports(Context* context) :
-    Sample(context),
-    drawDebug_(false)
+//URHO3D_DEFINE_APPLICATION_MAIN(MultipleViewports)
+URHO3D_DEFINE_APPLICATION_MAIN(MultipleViewports, "09-MultipleViewports", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
+MultipleViewports::MultipleViewports(Context* context)
+    : Sample(context)
+    , drawDebug_(false)
 {
 }
 
@@ -167,11 +168,9 @@ void MultipleViewports::CreateInstructions()
 
     // Construct new Text object, set string to display and font to use
     auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys and mouse/touch to move\n"
-        "B to toggle bloom, F to toggle FXAA\n"
-        "Space to toggle debug geometry\n"
-    );
+    instructionText->SetText("Use WASD keys and mouse/touch to move\n"
+                             "B to toggle bloom, F to toggle FXAA\n"
+                             "Space to toggle debug geometry\n");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     // The text has multiple rows. Center them in relation to each other
     instructionText->SetTextAlignment(HA_CENTER);
@@ -209,8 +208,9 @@ void MultipleViewports::SetupViewports()
 
     // Set up the rear camera viewport on top of the front view ("rear view mirror")
     // The viewport index must be greater in that case, otherwise the view would be left behind
-    SharedPtr<Viewport> rearViewport(new Viewport(context_, scene_, rearCameraNode_->GetComponent<Camera>(),
-        IntRect(graphics->GetWidth() * 2 / 3, 32, graphics->GetWidth() - 32, graphics->GetHeight() / 3)));
+    SharedPtr<Viewport> rearViewport(
+        new Viewport(context_, scene_, rearCameraNode_->GetComponent<Camera>(),
+                     IntRect(graphics->GetWidth() * 2 / 3, 32, graphics->GetWidth() - 32, graphics->GetHeight() / 3)));
     renderer->SetViewport(1, rearViewport);
 }
 
@@ -226,7 +226,7 @@ void MultipleViewports::SubscribeToEvents()
 
 void MultipleViewports::MoveCamera(float timeStep)
 {
-     // Do not move if the UI has a focused element (the console)
+    // Do not move if the UI has a focused element (the console)
     if (GetSubsystem<UI>()->GetFocusElement())
         return;
 
@@ -281,8 +281,8 @@ void MultipleViewports::HandleUpdate(StringHash eventType, VariantMap& eventData
 
 void MultipleViewports::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-    // If draw debug mode is enabled, draw viewport debug geometry, which will show eg. drawable bounding boxes and skeleton
-    // bones. Disable depth test so that we can see the effect of occlusion
+    // If draw debug mode is enabled, draw viewport debug geometry, which will show eg. drawable bounding boxes and
+    // skeleton bones. Disable depth test so that we can see the effect of occlusion
     if (drawDebug_)
         GetSubsystem<Renderer>()->DrawDebugGeometry(false);
 }

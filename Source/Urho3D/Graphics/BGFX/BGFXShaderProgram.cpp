@@ -144,7 +144,25 @@ bool ShaderProgram::Link()
                 {
                     unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
                     if (unit >= MAX_TEXTURE_UNITS)
-                        unit = NumberPostfix(info.name);
+                    {
+                        if (!strcmp(&info.name[1], "WeightMap0"))
+                        {
+                            unit = 0;
+                        }
+                        else if (!strcmp(&info.name[1], "DetailMap1"))
+                        {
+                            unit = 1;
+                        }
+                        else if (!strcmp(&info.name[1], "DetailMap2"))
+                        {
+                            unit = 2;
+                        }
+                        else if (!strcmp(&info.name[1], "DetailMap3"))
+                        {
+                            unit = 3;
+                        }
+                        //unit = NumberPostfix(info.name);
+                    }
 
                     if (unit < MAX_TEXTURE_UNITS)
                     {

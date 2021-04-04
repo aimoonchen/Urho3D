@@ -50,9 +50,9 @@
 URHO3D_DEFINE_APPLICATION_MAIN(SkeletalAnimation, "06-SkeletalAnimation", "Loading textures.",
                                "https://bkaradzic.github.io/bgfx/examples.html#bump");
 
-SkeletalAnimation::SkeletalAnimation(Context* context) :
-    Sample(context),
-    drawDebug_(false)
+SkeletalAnimation::SkeletalAnimation(Context* context)
+    : Sample(context)
+    , drawDebug_(false)
 {
     // Register an object factory for our custom Mover component so that we can create them to scene nodes
     context->RegisterFactory<Mover>();
@@ -126,7 +126,7 @@ void SkeletalAnimation::CreateScene()
     for (unsigned i = 0; i < NUM_MODELS; ++i)
     {
         Node* modelNode = scene_->CreateChild("Jill");
-        modelNode->SetPosition({0.0f,0.0f,0.0f}/*Vector3(Random(40.0f) - 20.0f, 0.0f, Random(40.0f) - 20.0f)*/);
+        modelNode->SetPosition(Vector3(Random(40.0f) - 20.0f, 0.0f, Random(40.0f) - 20.0f));
         modelNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
 
         auto* modelObject = modelNode->CreateComponent<AnimatedModel>();
@@ -134,9 +134,9 @@ void SkeletalAnimation::CreateScene()
         modelObject->SetMaterial(cache->GetResource<Material>("Models/Kachujin/Materials/Kachujin.xml"));
         modelObject->SetCastShadows(true);
 
-        // Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance the
-        // animation, The alternative would be to use an AnimationController component which updates the animation automatically,
-        // but we need to update the model's position manually in any case
+        // Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance
+        // the animation, The alternative would be to use an AnimationController component which updates the animation
+        // automatically, but we need to update the model's position manually in any case
         auto* walkAnimation = cache->GetResource<Animation>("Models/Kachujin/Kachujin_Walk.ani");
 
         AnimationState* state = modelObject->AddAnimationState(walkAnimation);
@@ -160,8 +160,7 @@ void SkeletalAnimation::CreateScene()
     camera->SetFarClip(300.0f);
 
     // Set an initial position for the camera scene node above the plane
-    //cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
-    cameraNode_->SetPosition(Vector3(0.0f, 4.0f, -12.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, 0.0f));
 }
 
 void SkeletalAnimation::CreateInstructions()
@@ -171,10 +170,8 @@ void SkeletalAnimation::CreateInstructions()
 
     // Construct new Text object, set string to display and font to use
     auto* instructionText = ui->GetRoot()->CreateChild<Text>();
-    instructionText->SetText(
-        "Use WASD keys and mouse/touch to move\n"
-        "Space to toggle debug geometry"
-    );
+    instructionText->SetText("Use WASD keys and mouse/touch to move\n"
+                             "Space to toggle debug geometry");
     instructionText->SetFont(cache->GetResource<Font>("Fonts/Anonymous Pro.ttf"), 15);
     // The text has multiple rows. Center them in relation to each other
     instructionText->SetTextAlignment(HA_CENTER);
@@ -199,9 +196,9 @@ void SkeletalAnimation::SubscribeToEvents()
     // Subscribe HandleUpdate() function for processing update events
     SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(SkeletalAnimation, HandleUpdate));
 
-    // Subscribe HandlePostRenderUpdate() function for processing the post-render update event, sent after Renderer subsystem is
-    // done with defining the draw calls for the viewports (but before actually executing them.) We will request debug geometry
-    // rendering during that event
+    // Subscribe HandlePostRenderUpdate() function for processing the post-render update event, sent after Renderer
+    // subsystem is done with defining the draw calls for the viewports (but before actually executing them.) We will
+    // request debug geometry rendering during that event
     SubscribeToEvent(E_POSTRENDERUPDATE, URHO3D_HANDLER(SkeletalAnimation, HandlePostRenderUpdate));
 }
 
@@ -255,9 +252,9 @@ void SkeletalAnimation::HandleUpdate(StringHash eventType, VariantMap& eventData
 
 void SkeletalAnimation::HandlePostRenderUpdate(StringHash eventType, VariantMap& eventData)
 {
-    // If draw debug mode is enabled, draw viewport debug geometry, which will show eg. drawable bounding boxes and skeleton
-    // bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we can see the
-    // bones properly
+    // If draw debug mode is enabled, draw viewport debug geometry, which will show eg. drawable bounding boxes and
+    // skeleton bones. Note that debug geometry has to be separately requested each frame. Disable depth test so that we
+    // can see the bones properly
     if (drawDebug_)
         GetSubsystem<Renderer>()->DrawDebugGeometry(false);
 }

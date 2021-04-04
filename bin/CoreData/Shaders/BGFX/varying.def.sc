@@ -9,11 +9,12 @@ vec3 v_cube_mask_vec  : TEXCOORD3 = vec3(0.0, 0.0, 0.0);
 vec2 v_texcoord1 : TEXCOORD4 = vec2(0.0, 0.0);
 vec2 v_texcoord2 : TEXCOORD5 = vec2(0.0, 0.0);
 vec4 v_screen_pos : TEXCOORD6 = vec4(0.0, 0.0, 0.0, 1.0);
-vec3 v_vertex_light : TEXCOORD7 = vec3(0.0, 0.0);
+vec3 v_vertex_light : TEXCOORD7 = vec3(0.0, 0.0, 0.0);
 vec4 v_shadow_pos0 : TEXCOORD8 = vec4(0.0, 0.0, 0.0, 1.0);
 vec4 v_shadow_pos1 : TEXCOORD9 = vec4(0.0, 0.0, 0.0, 1.0);
 vec4 v_shadow_pos2 : TEXCOORD10 = vec4(0.0, 0.0, 0.0, 1.0);
 vec4 v_shadow_pos3 : TEXCOORD11 = vec4(0.0, 0.0, 0.0, 1.0);
+vec3 v_reflection_vec : TEXCOORD12 = vec3(0.0, 0.0, 0.0);
 
 vec3 a_position  : POSITION;
 vec3 a_normal    : NORMAL;

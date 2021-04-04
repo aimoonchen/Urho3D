@@ -11,7 +11,7 @@
 uniform vec3 cAmbientStartColor;
 uniform vec3 cAmbientEndColor;
 uniform mat3 cBillboardRot;
-uniform vec3 cCameraPos;
+uniform vec4 cCameraPos;
 uniform float cNearClip;
 uniform float cFarClip;
 uniform vec4 cDepthMode;

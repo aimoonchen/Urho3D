@@ -48,8 +48,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(Physics)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(Physics)
+URHO3D_DEFINE_APPLICATION_MAIN(Physics, "11-Physics", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 Physics::Physics(Context* context) :
     Sample(context),
     drawDebug_(false)
