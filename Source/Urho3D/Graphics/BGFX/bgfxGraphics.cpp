@@ -911,6 +911,10 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
     {
         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+        if (textures_[TU_ENVIRONMENT] && impl_->shaderProgram_->GetUniform(StringHash("EnvMap")))
+        {
+            SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+        }
     }
     
 //     if (scissorRect_ != IntRect::ZERO)
@@ -965,6 +969,10 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     {
         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+        if (textures_[TU_ENVIRONMENT] && impl_->shaderProgram_->GetUniform(StringHash("EnvMap")))
+        {
+            SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+        }
     }
 
     indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
@@ -1725,6 +1733,10 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
                 if (index == 0)
                 {
                     sampler_handle = impl_->shaderProgram_->GetUniform("WeightMap0");
+                    if (sampler_handle == bgfx::kInvalidHandle)
+                    {
+                        sampler_handle = impl_->shaderProgram_->GetUniform("DiffCubeMap");
+                    }
                 }
                 else if (index == 1)
                 {
@@ -1738,9 +1750,18 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
                 {
                     sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap3");
                 }
+                else if (index == 4)
+                {
+                    sampler_handle = impl_->shaderProgram_->GetUniform("EnvMap");
+                }
                 if (sampler_handle == bgfx::kInvalidHandle)
                 {
-                    if (index != 11 && index != 12)
+                    // TODO: SetTexture before SetShaders
+                    if ((index == 11 || index == 12 || index == 4))
+                    {
+                        textures_[index] = texture;
+                    }
+                    else
                     {
                         URHO3D_LOGERROR("Can not found sampler : %s.",
                                         samplerName[index].ToString().CString()); // error
@@ -1753,10 +1774,11 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
 //                                                            : bgfx::TextureHandle{bgfx::kInvalidHandle});
 //        }
     }
-    if ((index == 11 || index == 12) && texture)
-    {
-        textures_[index] = texture;
-    }
+    // TODO: SetTexture before SetShaders
+//     if ((index == 11 || index == 12 || index == 4) && texture)
+//     {
+//         textures_[index] = texture;
+//     }
     /*
     if (textures_[index] != texture)
     {

@@ -161,7 +161,10 @@ bool ShaderProgram::Link()
                         {
                             unit = 3;
                         }
-                        //unit = NumberPostfix(info.name);
+                        else
+                        {
+                            unit = NumberPostfix(info.name);
+                        }
                     }
 
                     if (unit < MAX_TEXTURE_UNITS)

@@ -43,8 +43,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(LightAnimation)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(LightAnimation)
+URHO3D_DEFINE_APPLICATION_MAIN(LightAnimation, "30-LightAnimation", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 LightAnimation::LightAnimation(Context* context) :
     Sample(context)
 {

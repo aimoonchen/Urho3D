@@ -70,7 +70,7 @@ void main()
     #ifdef ADAPTLUMINANCE
     float adaptedLum = texture2D(sDiffMap, v_texcoord0.xy).r;
     float lum = clamp(texture2D(sNormalMap, v_texcoord0.xy).r, cAutoExposureLumRange.x, cAutoExposureLumRange.y);
-    gl_FragColor.r = adaptedLum + (lum - adaptedLum) * (1.0 - exp(-cDeltaTimePS * cAutoExposureAdaptRate));
+    gl_FragColor.r = adaptedLum + (lum - adaptedLum) * (1.0 - exp(-cDeltaTimePS.x * cAutoExposureAdaptRate));
     #endif
 
     #ifdef EXPOSE

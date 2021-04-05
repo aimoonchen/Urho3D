@@ -739,7 +739,8 @@ void Renderer::Render()
     numBatches_ = graphics_->GetNumBatches();
 
     // Remove unused occlusion buffers and renderbuffers
-    RemoveUnusedBuffers();
+    // TODO: should call this
+    //RemoveUnusedBuffers();
 
     // All views done, custom rendering can now be done before UI
     SendEvent(E_ENDALLVIEWSRENDER);

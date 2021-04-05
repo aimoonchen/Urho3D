@@ -1,7 +1,7 @@
 #ifdef COMPILEVS
 vec3 GetAmbient(float zonePos)
 {
-    return cAmbientStartColor + zonePos * cAmbientEndColor;
+    return cAmbientStartColor.rgb + zonePos * cAmbientEndColor.rgb;
 }
 
 #ifdef NUMVERTEXLIGHTS

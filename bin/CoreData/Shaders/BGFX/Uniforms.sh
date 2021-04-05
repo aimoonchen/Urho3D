@@ -8,8 +8,8 @@
 #ifdef COMPILEVS
 
 // Vertex shader uniforms
-uniform vec3 cAmbientStartColor;
-uniform vec3 cAmbientEndColor;
+uniform vec4 cAmbientStartColor;
+uniform vec4 cAmbientEndColor;
 uniform mat3 cBillboardRot;
 uniform vec4 cCameraPos;
 uniform float cNearClip;
@@ -17,7 +17,7 @@ uniform float cFarClip;
 uniform vec4 cDepthMode;
 uniform vec3 cFrustumSize;
 uniform float cDeltaTime;
-uniform float cElapsedTime;
+uniform vec4 cElapsedTime;
 uniform vec4 cGBufferOffsets;
 uniform vec4 cLightPos;
 uniform vec3 cLightDir;
@@ -40,9 +40,9 @@ uniform mat4 cZone;
 #ifdef NUMVERTEXLIGHTS
     uniform vec4 cVertexLights[4*3];
 #endif
-#ifdef GL3
+//#ifdef GL3
     uniform vec4 cClipPlane;
-#endif
+//#endif
 uniform vec4 cDepthBias;
 #endif
 
@@ -55,7 +55,7 @@ uniform vec4 cDepthBias;
 
 uniform vec4 cAmbientColor;
 uniform vec4 cCameraPosPS;
-uniform float cDeltaTimePS;
+uniform vec4 cDeltaTimePS;
 uniform vec4 cDepthReconstruct;
 uniform float cElapsedTimePS;
 uniform vec4 cFogParams;
