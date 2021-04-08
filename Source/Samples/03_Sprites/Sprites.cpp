@@ -37,8 +37,9 @@ static const unsigned NUM_SPRITES = 100;
 // Custom variable identifier for storing sprite velocity within the UI element
 static const StringHash VAR_VELOCITY("Velocity");
 
-URHO3D_DEFINE_APPLICATION_MAIN(Sprites)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(Sprites)
+URHO3D_DEFINE_APPLICATION_MAIN(Sprites, "03-Sprites", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 Sprites::Sprites(Context* context) :
     Sample(context)
 {

@@ -218,13 +218,13 @@ void PBRMaterials::SetupViewport()
     renderer->SetViewport(0, viewport);
 
     // Add post-processing effects appropriate with the example scene
-    //     SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
-    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
-    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/GammaCorrection.xml"));
-    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Tonemap.xml"));
-    //     effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/AutoExposure.xml"));
-    //
-    //     viewport->SetRenderPath(effectRenderPath);
+    SharedPtr<RenderPath> effectRenderPath = viewport->GetRenderPath()->Clone();
+    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/FXAA2.xml"));
+    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/GammaCorrection.xml"));
+    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/Tonemap.xml"));
+    effectRenderPath->Append(cache->GetResource<XMLFile>("PostProcess/AutoExposure.xml"));
+
+    viewport->SetRenderPath(effectRenderPath);
 }
 
 void PBRMaterials::SubscribeToEvents()

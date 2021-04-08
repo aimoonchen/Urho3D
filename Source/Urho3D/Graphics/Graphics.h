@@ -948,6 +948,7 @@ public:
     //
     void SetRendererState(uint64_t state);
     ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }
+    void SetGlobalTexture(unsigned index, Texture* texture);
 };
 
 /// Register Graphics library objects.

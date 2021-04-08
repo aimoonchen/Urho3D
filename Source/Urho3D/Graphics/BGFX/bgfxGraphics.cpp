@@ -906,25 +906,32 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
     GetGLPrimitiveType(vertexCount, type, primitiveCount);
 //     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
     
-    // TODO : Should be call right position
-    if (true /*renderer_->GetDrawShadows()*/)
+//     if (HasTextureUnit(TU_FACESELECT))
+//     {
+//         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+//     }
+//     if (HasTextureUnit(TU_INDIRECTION))
+//     {
+//         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+//     }
+//     if (HasTextureUnit(TU_ENVIRONMENT))
+//     {
+//         SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+//     }
+
+    const auto& samples = impl_->shaderProgram_->GetSamplers();
+    for (auto [unit, handle] : samples)
     {
-        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
-        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-        if (textures_[TU_ENVIRONMENT] && impl_->shaderProgram_->GetUniform(StringHash("EnvMap")))
+        if (textures_[unit])
         {
-            SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+            bgfx::setTexture(unit, {handle}, {textures_[unit]->GetGPUObjectHandle()});
+        }
+        else
+        {
+            URHO3D_LOGERROR("texture unit %d invalid.", unit);
         }
     }
-    
-//     if (scissorRect_ != IntRect::ZERO)
-//     {
-//         bgfx::setScissor(scissorRect_.left_, scissorRect_.top_, scissorRect_.Width(), scissorRect_.Height());
-//     }
-//     else
-//     {
-//         bgfx::setScissor();
-//     }
+
     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
     {
         auto buffer = vertexBuffers_[i];
@@ -962,16 +969,25 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     GetGLPrimitiveType(indexCount, type, primitiveCount);
 //     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
 //     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
-
     
-    // TODO : Should be call right position
-    if (true /*renderer_->GetDrawShadows()*/)
-    {
-        SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
-        SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-        if (textures_[TU_ENVIRONMENT] && impl_->shaderProgram_->GetUniform(StringHash("EnvMap")))
-        {
-            SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+//     if (HasTextureUnit(TU_FACESELECT))
+//     {
+//         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+//     }
+//     if (HasTextureUnit(TU_INDIRECTION))
+//     {
+//         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+//     }
+//     if (HasTextureUnit(TU_ENVIRONMENT))
+//     {
+//         SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+//     }
+    const auto& samples = impl_->shaderProgram_->GetSamplers();
+    for (auto [unit, handle] : samples) {
+        if (textures_[unit]) {
+            bgfx::setTexture(unit, {handle}, {textures_[unit]->GetGPUObjectHandle()});
+        } else {
+            URHO3D_LOGERROR("texture unit %d invalid.", unit);
         }
     }
 
@@ -1703,81 +1719,47 @@ void Graphics::SetTexture(unsigned index, Texture* texture)
         }
     }
 
-    static StringHash samplerName[TextureUnit::MAX_TEXTURE_UNITS] = {
-        {"DiffMap"},
-        {"NormalMap"},
-        {"SpecMap"},
-        {"EmissiveMap"},
-        /*{"EnvMap"},*/
-        {"EnvCubeMap"},
-        {"WeightMap0"},
-        {"DetailMap1"},
-        {"DetailMap2"},
-        {"LightRampMap"},
-        {"LightSpotMap"},
-        {"ShadowMap"},
-        {"FaceSelectCubeMap"},
-        {"IndirectionCubeMap"},
-        {"DetailMap3"},
-        {""},
-        {"ZoneCubeMap"}
-    };
-    // TODO: impl_->shaderProgram_ should be set corrent.
-    if (texture && impl_->shaderProgram_)
+//     static StringHash samplerName[TextureUnit::MAX_TEXTURE_UNITS] = {
+//         {"DiffMap"},
+//         {"NormalMap"},
+//         {"SpecMap"},
+//         {"EmissiveMap"},
+//         /*{"EnvMap"},*/
+//         {"EnvCubeMap"},
+//         {"WeightMap0"},
+//         {"DetailMap1"},
+//         {"DetailMap2"},
+//         {"LightRampMap"},
+//         {"LightSpotMap"},
+//         {"ShadowMap"},
+//         {"FaceSelectCubeMap"},
+//         {"IndirectionCubeMap"},
+//         {"DetailMap3"},
+//         {""},
+//         {"ZoneCubeMap"}
+//     };
+    if (textures_[index] != texture)
     {
-//         for (int index = 0; index < MAX_TEXTURE_UNITS; index++)
-//         {
-            auto sampler_handle = impl_->shaderProgram_->GetUniform(samplerName[index]);
-            if (sampler_handle == bgfx::kInvalidHandle)
-            {
-                if (index == 0)
-                {
-                    sampler_handle = impl_->shaderProgram_->GetUniform("WeightMap0");
-                    if (sampler_handle == bgfx::kInvalidHandle)
-                    {
-                        sampler_handle = impl_->shaderProgram_->GetUniform("DiffCubeMap");
-                    }
-                }
-                else if (index == 1)
-                {
-                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap1");
-                }
-                else if (index == 2)
-                {
-                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap2");
-                }
-                else if (index == 3)
-                {
-                    sampler_handle = impl_->shaderProgram_->GetUniform("DetailMap3");
-                }
-                else if (index == 4)
-                {
-                    sampler_handle = impl_->shaderProgram_->GetUniform("EnvMap");
-                }
-                if (sampler_handle == bgfx::kInvalidHandle)
-                {
-                    // TODO: SetTexture before SetShaders
-                    if ((index == 11 || index == 12 || index == 4))
-                    {
-                        textures_[index] = texture;
-                    }
-                    else
-                    {
-                        URHO3D_LOGERROR("Can not found sampler : %s.",
-                                        samplerName[index].ToString().CString()); // error
-                    }
-                    return;
-                }
-            }
-            bgfx::setTexture(index, { sampler_handle }, { texture->GetGPUObjectHandle() });
-//                              (textures_[index] != nullptr) ? bgfx::TextureHandle{textures_[index]->GetGPUObjectHandle()}
-//                                                            : bgfx::TextureHandle{bgfx::kInvalidHandle});
-//        }
+        textures_[index] = texture;
     }
-    // TODO: SetTexture before SetShaders
-//     if ((index == 11 || index == 12 || index == 4) && texture)
+//     if (texture && impl_->shaderProgram_)
 //     {
-//         textures_[index] = texture;
+//         auto sampler_handle = impl_->shaderProgram_->GetSampler(index);
+//         if (sampler_handle != bgfx::kInvalidHandle)
+//         {
+//             bgfx::setTexture(index, {sampler_handle}, {texture->GetGPUObjectHandle()});
+//         }
+//         else
+//         {
+//             if (index == TU_FACESELECT || index == TU_INDIRECTION || index == TU_ENVIRONMENT)
+//             {
+//                 textures_[index] = texture;
+//             }
+//             else
+//             {
+//                 URHO3D_LOGERROR("Can not found texture unit : %d.", index);
+//             }
+//         }
 //     }
     /*
     if (textures_[index] != texture)

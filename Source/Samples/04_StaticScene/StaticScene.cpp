@@ -113,7 +113,7 @@ void StaticScene::CreateScene()
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
         Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition({} /*Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f)*/);
+        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
         mushroomNode->SetScale(0.5f + Random(2.0f));
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();

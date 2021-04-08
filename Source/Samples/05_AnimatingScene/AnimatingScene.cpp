@@ -42,8 +42,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(AnimatingScene)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(AnimatingScene)
+URHO3D_DEFINE_APPLICATION_MAIN(AnimatingScene, "05-AnimatingScene", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 AnimatingScene::AnimatingScene(Context* context)
     : Sample(context)
 {

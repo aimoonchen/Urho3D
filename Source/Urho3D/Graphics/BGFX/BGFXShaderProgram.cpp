@@ -69,6 +69,7 @@ ShaderProgram::ShaderProgram(Graphics* graphics, ShaderVariation* vertexShader, 
 {
     for (auto& parameterSource : parameterSources_)
         parameterSource = (const void*)M_MAX_UNSIGNED;
+    samplers_.clear();
 }
 
 ShaderProgram::~ShaderProgram()
@@ -96,9 +97,11 @@ void ShaderProgram::Release()
         shaderParameters_.Clear();
         vertexAttributes_.Clear();
         usedVertexAttributes_ = 0;
-
+        
         for (bool& useTextureUnit : useTextureUnits_)
             useTextureUnit = false;
+        uniforms_.Clear();
+        samplers_.clear();
         for (unsigned i = 0; i < MAX_SHADER_PARAMETER_GROUPS; ++i)
             constantBuffers_[i].Reset();
     }
@@ -126,6 +129,8 @@ bool ShaderProgram::Link()
     auto vsUniformCount = bgfx::getShaderUniforms(vsHandle);
     auto psUniformCount = bgfx::getShaderUniforms(psHandle);
     auto uniformCount = vsUniformCount + psUniformCount;
+    samplers_.clear();
+    uniforms_.Clear();
     if (uniformCount > 0) {
         uniforms.resize(uniformCount);
         auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0], vsUniformCount);
@@ -145,6 +150,7 @@ bool ShaderProgram::Link()
                     unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
                     if (unit >= MAX_TEXTURE_UNITS)
                     {
+                        // for terrain
                         if (!strcmp(&info.name[1], "WeightMap0"))
                         {
                             unit = 0;
@@ -170,6 +176,11 @@ bool ShaderProgram::Link()
                     if (unit < MAX_TEXTURE_UNITS)
                     {
                         useTextureUnits_[unit] = true;
+                        samplers_.emplace_back(TextureUnit(unit), uniform.idx);
+                    }
+                    else
+                    {
+                        URHO3D_LOGERROR("Can't found texture unit : \"%s\"\n", &info.name[1]);
                     }
                 }
             }

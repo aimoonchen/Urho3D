@@ -27,6 +27,7 @@
 #include "../../Graphics/GPUObject.h"
 #include "../../Graphics/GraphicsDefs.h"
 #include "../../Graphics/ShaderVariation.h"
+#include <vector>
 
 namespace Urho3D
 {
@@ -87,6 +88,7 @@ public:
     static void ClearGlobalParameterSource(ShaderParameterGroup group);
     
     uint16_t GetUniform(StringHash param);
+    const std::vector<std::pair<TextureUnit, uint16_t>>& GetSamplers() const { return samplers_; };
 
 private:
     /// Vertex shader.
@@ -116,6 +118,9 @@ private:
     static const void* globalParameterSources[MAX_SHADER_PARAMETER_GROUPS];
 
     HashMap<StringHash, uint16_t> uniforms_;
+
+    //uint16_t samplers_[MAX_TEXTURE_UNITS]{};
+    std::vector<std::pair<TextureUnit, uint16_t>> samplers_;
 };
 
 }
