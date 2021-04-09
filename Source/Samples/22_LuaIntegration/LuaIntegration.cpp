@@ -45,8 +45,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(LuaIntegration)
-
+//URHO3D_DEFINE_APPLICATION_MAIN(LuaIntegration)
+URHO3D_DEFINE_APPLICATION_MAIN(LuaIntegration, "22-LuaIntegration", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 LuaIntegration::LuaIntegration(Context* context) :
     Sample(context)
 {
