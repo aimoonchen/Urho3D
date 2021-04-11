@@ -1183,8 +1183,8 @@ namespace entry
 		PostMessage(s_ctx.m_hwnd[0], WM_QUIT, 0, 0);
 		return result;
 	}
-
-} // namespace entry
+    void* getNativeWindow() { return s_ctx.m_hwnd[0]; }
+    } // namespace entry
 
 URHO3D_API int main(int _argc, const char* const* _argv)
 {

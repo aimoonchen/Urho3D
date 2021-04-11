@@ -927,6 +927,7 @@ private:
     uint32_t back_stencil_{ 0 };
     uint16_t last_view_id_{0xff};
     uint16_t current_view_id_{0};
+    bool ui_view_{false};
     void* current_instance_buffer_{nullptr};
 //     struct view_context_dirty
 //     {
@@ -946,7 +947,7 @@ public:
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
     void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
     //
-    void SetRendererState(uint64_t state);
+    void SetUIMode(bool b) { ui_view_ = b; }
     ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }
     void SetGlobalTexture(unsigned index, Texture* texture);
 };

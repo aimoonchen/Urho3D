@@ -366,7 +366,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     entry::setWindowSize(default_window_, width, height);
     width_ = width;
     height_ = height;
-    window_ = (SDL_Window*)1;
+    window_ = (SDL_Window*)entry::getNativeWindow(); // (SDL_Window*) 1;
     OnScreenModeChanged();
     CheckFeatureSupport();
     return true;
@@ -3053,6 +3053,11 @@ void Graphics::PrepareDraw()
     {
         view_context_dirty_ = false;
         current_view_id_++;
+        if (ui_view_)
+        {
+            // TODO: no sort for ui
+            bgfx::setViewMode(current_view_id_, bgfx::ViewMode::Sequential);
+        }
     }
     if (last_view_id_ != current_view_id_)
     {
@@ -3396,10 +3401,6 @@ void Graphics::SetVertexAttribDivisor(unsigned location, unsigned divisor)
         glVertexAttribDivisorANGLE(location, divisor);
 #endif
 #endif
-}
-void Graphics::SetRendererState(uint64_t state)
-{
-    bgfx::setState(state);
 }
 
 void* Graphics::AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance)

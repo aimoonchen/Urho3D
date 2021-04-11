@@ -1,5 +1,5 @@
 //
-// Copyright (c) 2008-2020 the Urho3D project.
+// Copyright (c) 2008-2019 the Urho3D project.
 //
 // Permission is hereby granted, free of charge, to any person obtaining a copy
 // of this software and associated documentation files (the "Software"), to deal
@@ -21,8 +21,6 @@
 //
 
 #pragma once
-
-#include <memory>
 
 #include "Sample.h"
 
@@ -52,15 +50,17 @@ public:
 
     /// Setup after engine initialization and before running the main loop.
     void Start() override;
+    void Setup() override;
 
 protected:
     /// Return XML patch instructions for screen joystick layout for a specific sample app, if any.
-    String GetScreenJoystickPatchString() const override { return
-        "<patch>"
-        "    <add sel=\"/element/element[./attribute[@name='Name' and @value='Hat0']]\">"
-        "        <attribute name=\"Is Visible\" value=\"false\" />"
-        "    </add>"
-        "</patch>";
+    String GetScreenJoystickPatchString() const override
+    {
+        return "<patch>"
+               "    <add sel=\"/element/element[./attribute[@name='Name' and @value='Hat0']]\">"
+               "        <attribute name=\"Is Visible\" value=\"false\" />"
+               "    </add>"
+               "</patch>";
     }
 
 private:
@@ -82,9 +82,16 @@ private:
     void HandleClosePressed(StringHash eventType, VariantMap& eventData);
 
     /// The Window.
-    SharedPtr<Window> window_;
+    SharedPtr<Urho3D::Window> window_;
     /// The UI's root UIElement.
     SharedPtr<UIElement> uiRoot_;
+    SharedPtr<UIComponent> uiCom_;
     /// Remembered drag begin position.
     IntVector2 dragBeginPosition_;
+
+    void* m_renderdocdll;
+
+    SharedPtr<Scene> scene_;
+    /// Camera scene node.
+    SharedPtr<Node> cameraNode_;
 };
