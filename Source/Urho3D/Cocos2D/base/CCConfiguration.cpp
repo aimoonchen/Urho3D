@@ -113,63 +113,63 @@ std::string Configuration::getInfo() const
 
 void Configuration::gatherGPUInfo()
 {
-	_valueDict["gl.vendor"] = Value((const char*)glGetString(GL_VENDOR));
-	_valueDict["gl.renderer"] = Value((const char*)glGetString(GL_RENDERER));
-	_valueDict["gl.version"] = Value((const char*)glGetString(GL_VERSION));
-
-    _glExtensions = (char *)glGetString(GL_EXTENSIONS);
-
-    glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_maxTextureSize);
-	_valueDict["gl.max_texture_size"] = Value((int)_maxTextureSize);
-
-    glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &_maxTextureUnits);
-	_valueDict["gl.max_texture_units"] = Value((int)_maxTextureUnits);
-
-#if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
-    glGetIntegerv(GL_MAX_SAMPLES_APPLE, &_maxSamplesAllowed);
-	_valueDict["gl.max_samples_allowed"] = Value((int)_maxSamplesAllowed);
-#endif
-    
-    _supportsETC1 = checkForGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
-    _valueDict["gl.supports_ETC1"] = Value(_supportsETC1);
-    
-    _supportsS3TC = checkForGLExtension("GL_EXT_texture_compression_s3tc");
-    _valueDict["gl.supports_S3TC"] = Value(_supportsS3TC);
-    
-    _supportsATITC = checkForGLExtension("GL_AMD_compressed_ATC_texture");
-    _valueDict["gl.supports_ATITC"] = Value(_supportsATITC);
-    
-    _supportsPVRTC = checkForGLExtension("GL_IMG_texture_compression_pvrtc");
-	_valueDict["gl.supports_PVRTC"] = Value(_supportsPVRTC);
-
-    _supportsNPOT = true;
-	_valueDict["gl.supports_NPOT"] = Value(_supportsNPOT);
-	
-    _supportsBGRA8888 = checkForGLExtension("GL_IMG_texture_format_BGRA8888");
-	_valueDict["gl.supports_BGRA8888"] = Value(_supportsBGRA8888);
-
-    _supportsDiscardFramebuffer = checkForGLExtension("GL_EXT_discard_framebuffer");
-	_valueDict["gl.supports_discard_framebuffer"] = Value(_supportsDiscardFramebuffer);
-
-#ifdef CC_PLATFORM_PC
-    _supportsShareableVAO = checkForGLExtension("vertex_array_object");
-#else
-    _supportsShareableVAO = checkForGLExtension("GL_OES_vertex_array_object");
-#endif
-    _valueDict["gl.supports_vertex_array_object"] = Value(_supportsShareableVAO);
-
-    _supportsOESMapBuffer = checkForGLExtension("GL_OES_mapbuffer");
-    _valueDict["gl.supports_OES_map_buffer"] = Value(_supportsOESMapBuffer);
-
-    _supportsOESDepth24 = checkForGLExtension("GL_OES_depth24");
-    _valueDict["gl.supports_OES_depth24"] = Value(_supportsOESDepth24);
-
-    
-    _supportsOESPackedDepthStencil = checkForGLExtension("GL_OES_packed_depth_stencil");
-    _valueDict["gl.supports_OES_packed_depth_stencil"] = Value(_supportsOESPackedDepthStencil);
-
-
-    CHECK_GL_ERROR_DEBUG();
+// 	_valueDict["gl.vendor"] = Value((const char*)glGetString(GL_VENDOR));
+// 	_valueDict["gl.renderer"] = Value((const char*)glGetString(GL_RENDERER));
+// 	_valueDict["gl.version"] = Value((const char*)glGetString(GL_VERSION));
+// 
+//     _glExtensions = (char *)glGetString(GL_EXTENSIONS);
+// 
+//     glGetIntegerv(GL_MAX_TEXTURE_SIZE, &_maxTextureSize);
+// 	_valueDict["gl.max_texture_size"] = Value((int)_maxTextureSize);
+// 
+//     glGetIntegerv(GL_MAX_COMBINED_TEXTURE_IMAGE_UNITS, &_maxTextureUnits);
+// 	_valueDict["gl.max_texture_units"] = Value((int)_maxTextureUnits);
+// 
+// #if (CC_TARGET_PLATFORM == CC_PLATFORM_IOS)
+//     glGetIntegerv(GL_MAX_SAMPLES_APPLE, &_maxSamplesAllowed);
+// 	_valueDict["gl.max_samples_allowed"] = Value((int)_maxSamplesAllowed);
+// #endif
+//     
+//     _supportsETC1 = checkForGLExtension("GL_OES_compressed_ETC1_RGB8_texture");
+//     _valueDict["gl.supports_ETC1"] = Value(_supportsETC1);
+//     
+//     _supportsS3TC = checkForGLExtension("GL_EXT_texture_compression_s3tc");
+//     _valueDict["gl.supports_S3TC"] = Value(_supportsS3TC);
+//     
+//     _supportsATITC = checkForGLExtension("GL_AMD_compressed_ATC_texture");
+//     _valueDict["gl.supports_ATITC"] = Value(_supportsATITC);
+//     
+//     _supportsPVRTC = checkForGLExtension("GL_IMG_texture_compression_pvrtc");
+// 	_valueDict["gl.supports_PVRTC"] = Value(_supportsPVRTC);
+// 
+//     _supportsNPOT = true;
+// 	_valueDict["gl.supports_NPOT"] = Value(_supportsNPOT);
+// 	
+//     _supportsBGRA8888 = checkForGLExtension("GL_IMG_texture_format_BGRA8888");
+// 	_valueDict["gl.supports_BGRA8888"] = Value(_supportsBGRA8888);
+// 
+//     _supportsDiscardFramebuffer = checkForGLExtension("GL_EXT_discard_framebuffer");
+// 	_valueDict["gl.supports_discard_framebuffer"] = Value(_supportsDiscardFramebuffer);
+// 
+// #ifdef CC_PLATFORM_PC
+//     _supportsShareableVAO = checkForGLExtension("vertex_array_object");
+// #else
+//     _supportsShareableVAO = checkForGLExtension("GL_OES_vertex_array_object");
+// #endif
+//     _valueDict["gl.supports_vertex_array_object"] = Value(_supportsShareableVAO);
+// 
+//     _supportsOESMapBuffer = checkForGLExtension("GL_OES_mapbuffer");
+//     _valueDict["gl.supports_OES_map_buffer"] = Value(_supportsOESMapBuffer);
+// 
+//     _supportsOESDepth24 = checkForGLExtension("GL_OES_depth24");
+//     _valueDict["gl.supports_OES_depth24"] = Value(_supportsOESDepth24);
+// 
+//     
+//     _supportsOESPackedDepthStencil = checkForGLExtension("GL_OES_packed_depth_stencil");
+//     _valueDict["gl.supports_OES_packed_depth_stencil"] = Value(_supportsOESPackedDepthStencil);
+// 
+// 
+//     CHECK_GL_ERROR_DEBUG();
 }
 
 Configuration* Configuration::getInstance()

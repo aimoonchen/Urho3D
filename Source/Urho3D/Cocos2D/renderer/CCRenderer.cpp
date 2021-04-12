@@ -759,7 +759,10 @@ void Renderer::SetVertexData(Urho3D::VertexBuffer* dest)
     // Resize the vertex buffer first if too small or much too large
     unsigned numVertices = _filledVertex; // vertexData.Size() / UI_VERTEX_SIZE;
     if (dest->GetVertexCount() < numVertices || dest->GetVertexCount() > numVertices * 2)
+    {
+        dest->Release();
         dest->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+    }
 
     dest->SetData(&_verts[0]);
 }
@@ -773,7 +776,10 @@ void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
     // Resize the vertex buffer first if too small or much too large
     unsigned numIndices = _filledIndex; // vertexData.Size() / UI_VERTEX_SIZE;
     if (dest->GetIndexCount() < numIndices || dest->GetIndexCount() > numIndices * 2)
+    {
+        dest->Release();
         dest->SetSize(numIndices, false, true);
+    }
 
     dest->SetData(&_indices[0]);
 }
