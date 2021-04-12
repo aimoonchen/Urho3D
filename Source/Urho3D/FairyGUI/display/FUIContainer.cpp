@@ -2,7 +2,9 @@
 // #include "base/CCStencilStateManager.h"
 #include "utils/ToolSet.h"
 #include "GComponent.h"
-
+#include "Urho3DContext.h"
+#include "../../Core/Context.h"
+#include "../../Graphics/Graphics.h"
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -315,11 +317,11 @@ void FUIContainer::onBeforeVisitScissor()
     Rect clippingRect = getClippingRect();
     if (false == _rectClippingSupport->_scissorOldState)
     {
-#if COCOS2D_VERSION >= 0x00040000
-        Director::getInstance()->getRenderer()->setScissorTest(true);
-#else
-        glEnable(GL_SCISSOR_TEST);
-#endif
+// #if COCOS2D_VERSION >= 0x00040000
+//         Director::getInstance()->getRenderer()->setScissorTest(true);
+// #else
+//         glEnable(GL_SCISSOR_TEST);
+// #endif
     }
     else
     {
@@ -346,11 +348,13 @@ void FUIContainer::onAfterVisitScissor()
     else
     {
         // revert scissor test
-#if COCOS2D_VERSION >= 0x00040000
-        Director::getInstance()->getRenderer()->setScissorTest(false);
-#else
-        glDisable(GL_SCISSOR_TEST);
-#endif
+// #if COCOS2D_VERSION >= 0x00040000
+//         Director::getInstance()->getRenderer()->setScissorTest(false);
+// #else
+//         glDisable(GL_SCISSOR_TEST);
+// #endif
+        auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+        graphics->SetScissorTest(false);
     }
 }
 

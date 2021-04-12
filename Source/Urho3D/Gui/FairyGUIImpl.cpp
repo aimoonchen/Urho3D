@@ -24,10 +24,10 @@ namespace Urho3D {
 	{
 		context_ = context;
 		SetUrho3DContext(context);
-// 		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/FairyGUI-cocos2dx/Examples/Resources");
-// 		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/FairyGUI-cocos2dx/Examples/Resources");
- 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/bin/Data/FairyGUI/Resources");
- 		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/bin/Data/FairyGUI/Resources");
+		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/FairyGUI-cocos2dx/Examples/Resources");
+		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/FairyGUI-cocos2dx/Examples/Resources");
+//  		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/Urho3D/bin/Data/FairyGUI/Resources");
+//  		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/Urho3D/bin/Data/FairyGUI/Resources");
 // 		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
 // 		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/Urho3D/build/bin/Data/FairyGUI/Resources");
 		

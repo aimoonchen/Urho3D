@@ -314,9 +314,13 @@ const Color4F Color4F::BLACK  (    0,     0,     0, 1);
 const Color4F Color4F::ORANGE (    1,  0.5f,     0, 1);
 const Color4F Color4F::GRAY   (0.65f, 0.65f, 0.65f, 1);
 
-const BlendFunc BlendFunc::DISABLE = {GL_ONE, GL_ZERO};
-const BlendFunc BlendFunc::ALPHA_PREMULTIPLIED = {GL_ONE, GL_ONE_MINUS_SRC_ALPHA};
-const BlendFunc BlendFunc::ALPHA_NON_PREMULTIPLIED = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
-const BlendFunc BlendFunc::ADDITIVE = {GL_SRC_ALPHA, GL_ONE};
+// const BlendFunc BlendFunc::DISABLE = {GL_ONE, GL_ZERO};
+// const BlendFunc BlendFunc::ALPHA_PREMULTIPLIED = {GL_ONE, GL_ONE_MINUS_SRC_ALPHA};
+// const BlendFunc BlendFunc::ALPHA_NON_PREMULTIPLIED = {GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA};
+// const BlendFunc BlendFunc::ADDITIVE = {GL_SRC_ALPHA, GL_ONE};
 
+const BlendFunc BlendFunc::DISABLE = {1/*GL_ONE*/, 0/*GL_ZERO*/};
+const BlendFunc BlendFunc::ALPHA_PREMULTIPLIED = {1/*GL_ONE*/, 0x0303 };
+const BlendFunc BlendFunc::ALPHA_NON_PREMULTIPLIED = { 0x0302, 0x0303 };
+const BlendFunc BlendFunc::ADDITIVE = { 0x0302, 1/*GL_ONE*/};
 NS_CC_END

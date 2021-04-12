@@ -608,7 +608,8 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 
     graphics_->SetBlendMode(blendMode);
     //		graphics_->SetScissorTest(true, scissor);
-    glLineWidth(_lineWidth);
+    //glLineWidth(_lineWidth);
+
     graphics_->Draw(Urho3D::LINE_LIST, 0, _bufferCountGLLine);
 
 //     if (Configuration::getInstance()->supportsShareableVAO())

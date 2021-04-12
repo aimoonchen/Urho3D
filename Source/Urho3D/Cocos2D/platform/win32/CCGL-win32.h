@@ -30,9 +30,19 @@ THE SOFTWARE.
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
-#include "GLEW/glew.h"
-
-#define CC_GL_DEPTH24_STENCIL8      GL_DEPTH24_STENCIL8
+using GLboolean = unsigned char;
+using GLubyte = uint8_t;
+using GLfloat = float;
+using GLenum = unsigned int;
+using GLshort = short;
+using GLuint = unsigned int;
+using GLint = int;
+using GLsizei = int;
+using GLvoid = void;
+using GLushort = unsigned short;
+// #include "GLEW/glew.h"
+// 
+// #define CC_GL_DEPTH24_STENCIL8      GL_DEPTH24_STENCIL8
 
 #endif // CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 

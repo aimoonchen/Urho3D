@@ -34,6 +34,9 @@ THE SOFTWARE.
 #include "renderer/CCRenderer.h"
 // #include "vr/CCVRProtocol.h"
 // #include "vr/CCVRGenericRenderer.h"
+#include "Urho3DContext.h"
+#include "../../Core/Context.h"
+#include "../../Graphics/Graphics.h"
 
 NS_CC_BEGIN
 
@@ -173,7 +176,9 @@ void GLView::updateDesignResolutionSize()
         // A default viewport is needed in order to display the FPS,
         // since the FPS are rendered in the Director, and there is no viewport there.
         // Everything, including the FPS should renderer in the Scene.
-        glViewport(0, 0, _screenSize.width, _screenSize.height);
+        //glViewport(0, 0, _screenSize.width, _screenSize.height);
+        auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+        graphics->SetViewport({ 0, 0, (int)_screenSize.width, (int)_screenSize.height });
     }
 }
 
@@ -261,25 +266,40 @@ void GLView::setViewPortInPoints(float x , float y , float w , float h)
 
 void GLView::setScissorInPoints(float x , float y , float w , float h)
 {
-    glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
-              (GLint)(y * _scaleY + _viewPortRect.origin.y),
-              (GLsizei)(w * _scaleX),
-              (GLsizei)(h * _scaleY));
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    int left = (GLint)(x * _scaleX + _viewPortRect.origin.x);
+    int top = (GLint)(y * _scaleY + _viewPortRect.origin.y);
+    int right = left + (GLsizei)(w * _scaleX);
+    int bottom = top + (GLsizei)(h * _scaleY);
+
+    graphics->SetScissorTest(true, Urho3D::IntRect{ left, top, right, bottom });
+//     glScissor((GLint)(x * _scaleX + _viewPortRect.origin.x),
+//               (GLint)(y * _scaleY + _viewPortRect.origin.y),
+//               (GLsizei)(w * _scaleX),
+//               (GLsizei)(h * _scaleY));
 }
 
 bool GLView::isScissorEnabled()
 {
-    return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
+    //return (GL_FALSE == glIsEnabled(GL_SCISSOR_TEST)) ? false : true;
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    return graphics->GetScissorRect() != Urho3D::IntRect::ZERO;
 }
 
 Rect GLView::getScissorRect() const
 {
-    GLfloat params[4];
-    glGetFloatv(GL_SCISSOR_BOX, params);
-    float x = (params[0] - _viewPortRect.origin.x) / _scaleX;
-    float y = (params[1] - _viewPortRect.origin.y) / _scaleY;
-    float w = params[2] / _scaleX;
-    float h = params[3] / _scaleY;
+//     GLfloat params[4];
+//     glGetFloatv(GL_SCISSOR_BOX, params);
+//     float x = (params[0] - _viewPortRect.origin.x) / _scaleX;
+//     float y = (params[1] - _viewPortRect.origin.y) / _scaleY;
+//     float w = params[2] / _scaleX;
+//     float h = params[3] / _scaleY;
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    auto rect = graphics->GetScissorRect();
+    float x = (rect.left_ - _viewPortRect.origin.x) / _scaleX;
+    float y = (rect.top_ - _viewPortRect.origin.y) / _scaleY;
+    float w = rect.Width() / _scaleX;
+    float h = rect.Height() / _scaleY;
     return Rect(x, y, w, h);
 }
 
