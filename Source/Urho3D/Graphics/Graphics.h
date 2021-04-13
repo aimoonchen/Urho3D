@@ -947,7 +947,7 @@ public:
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
     void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
     //
-    void SetUIMode(bool b) { ui_view_ = b; }
+    void SetUIMode(bool b) { ui_view_ = b; view_context_dirty_ = true; }
     ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }
     void SetGlobalTexture(unsigned index, Texture* texture);
 };
