@@ -334,7 +334,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
             vertexBuffer_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1,
                                    true);
 
-        vertexBuffer_->SetData(_buffer);
+        vertexBuffer_->SetDataRange(_buffer, 0, numVertices);
         _dirty = false;
     }
 
@@ -580,14 +580,12 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 //     graphics_->SetShaders(graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR"),
 //                           graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR"));
     auto glProgram = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_LENGTH_TEXTURE_COLOR);
-    glProgram->apply();
-    const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    Mat4 matrixMVP = matrixP * transform;
-    matrixMVP.transpose();
-    Urho3D::Matrix4 urho3dMVP(matrixMVP.m);
-    static auto VSP_MVP = Urho3D::StringHash("CC_MVPMatrix");
+    glProgram->apply(transform);
+//     const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+//     Mat4 matrixMVP = matrixP * transform;
+//     matrixMVP.transpose();
+//     Urho3D::Matrix4 urho3dMVP(matrixMVP.m);
     static auto VSP_u_alpha = Urho3D::StringHash("u_alpha");
-    graphics_->SetShaderParameter(VSP_MVP, urho3dMVP);
     graphics_->SetShaderParameter(VSP_u_alpha, _displayedOpacity / 255.0f);
 //     if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
 //         graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);

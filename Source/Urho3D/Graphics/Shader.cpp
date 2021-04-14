@@ -104,6 +104,9 @@ bool Shader::BeginLoad(Deserializer& source)
     // Comment out the unneeded shader function
     vsSourceCode_ = shaderCode;
     psSourceCode_ = shaderCode;
+    // TODO: 
+    shaderPath_ = source.GetName();
+
 //     CommentOutFunction(vsSourceCode_, "void PS(");
 //     CommentOutFunction(psSourceCode_, "void VS(");
 // 

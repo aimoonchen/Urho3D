@@ -766,7 +766,7 @@ void Renderer::SetVertexData(Urho3D::VertexBuffer* dest)
         dest->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
     }
 
-    dest->SetData(&_verts[0]);
+    dest->SetDataRange(&_verts[0], 0, _filledVertex);
 }
 
 void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
@@ -783,7 +783,7 @@ void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
         dest->SetSize(numIndices, false, true);
     }
 
-    dest->SetData(&_indices[0]);
+    dest->SetDataRange(&_indices[0], 0, _filledIndex);
 }
 
 void Renderer::drawBatchedTriangles()

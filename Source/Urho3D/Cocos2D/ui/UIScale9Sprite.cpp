@@ -31,6 +31,7 @@
 #include "base/ccUTF8.h"
 // #include "renderer/CCGLProgram.h"
 // #include "renderer/ccShaders.h"
+#include "renderer/CCGLProgramState.h"
 #include "platform/CCImage.h"
 #include "base/CCNinePatchImageParser.h"
 #include "2d/CCDrawNode.h"

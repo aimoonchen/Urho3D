@@ -734,15 +734,15 @@ GLProgramState* Node::getGLProgramState() const
 
 void Node::setGLProgramState(cocos2d::GLProgramState* glProgramState)
 {
-//     if (glProgramState != _glProgramState)
-//     {
-//         CC_SAFE_RELEASE(_glProgramState);
-//         _glProgramState = glProgramState;
-//         CC_SAFE_RETAIN(_glProgramState);
-// 
+    if (glProgramState != _glProgramState)
+    {
+        //CC_SAFE_RELEASE(_glProgramState);
+        _glProgramState = glProgramState;
+        //CC_SAFE_RETAIN(_glProgramState);
+
 //         if (_glProgramState)
 //             _glProgramState->setNodeBinding(this);
-//     }
+    }
 }
 
 

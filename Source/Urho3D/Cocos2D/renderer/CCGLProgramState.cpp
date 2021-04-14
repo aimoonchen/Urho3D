@@ -54,6 +54,13 @@ void GLProgramState::setUniformsForBuiltins(const Mat4& modelView)
         Urho3D::Matrix4 urho3dMV(tm.m);
         graphics_->SetShaderParameter(modelViewName_, urho3dMV);
     }
+    if (graphics_->HasShaderParameter(projMatName_))
+    {
+        Mat4 proj = matrixP;
+        proj.transpose();
+        Urho3D::Matrix4 urho3dProj(proj.m);
+        graphics_->SetShaderParameter(projMatName_, urho3dProj);
+    }
     if (graphics_->HasShaderParameter(modelViewProjName_))
     {
         Mat4 matrixMVP = matrixP * modelView;
@@ -99,7 +106,7 @@ GLProgramState* GLProgramState::getOrCreateWithGLProgramName(const std::string& 
 
 GLProgramState* GLProgramState::getOrCreateWithGLProgramName(const std::string& glProgramName)
 {
-    std::string fileName = "FairyGUI/" + glProgramName + ".sc";
+    std::string fileName = "FairyGUI/" + glProgramName;
     auto it = programs_.find(fileName);
     if (it != programs_.end()) {
         return it->second.get();

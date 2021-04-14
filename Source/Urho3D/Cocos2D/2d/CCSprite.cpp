@@ -36,6 +36,7 @@ THE SOFTWARE.
 #include "2d/CCSpriteFrameCache.h"
 // #include "renderer/CCTextureCache.h"
 // #include "renderer/CCTexture2D.h"
+#include "renderer/CCGLProgramState.h"
 #include "renderer/CCRenderer.h"
 #include "base/CCDirector.h"
 #include "base/ccUTF8.h"

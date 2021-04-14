@@ -2,6 +2,7 @@
 #include <unordered_map>
 #include <memory>
 #include <string>
+#include "base/CCRef.h"
 #include "base/ccTypes.h"
 #include "../../Math/StringHash.h"
 

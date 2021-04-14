@@ -31,8 +31,14 @@ THE SOFTWARE.
 #include "base/ccMacros.h"
 #include "base/CCDirector.h"
 #include "2d/CCSprite.h"
+#include "renderer/CCGLProgramState.h"
 // #include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
+#include "renderer/Texture2DUtils.h"
+#include "Urho3DContext.h"
+#include "../../Core/Context.h"
+#include "../../Graphics/Graphics.h"
+#include "../../Graphics/Texture2D.h"
 
 NS_CC_BEGIN
 
@@ -273,7 +279,7 @@ void ProgressTimer::updateRadial(void)
     }
     float alpha = _percentage / 100.f;
 
-    float angle = 2.f*((float)M_PI) * ( _reverseDirection ? alpha : 1.0f - alpha);
+    float angle = 2.f*((float)Urho3D::M_PI) * ( _reverseDirection ? alpha : 1.0f - alpha);
 
     //    We find the vector to do a hit detection based on the percentage
     //    We know the first vector is the one @ 12 o'clock (top,mid) so we rotate
@@ -505,8 +511,11 @@ Vec2 ProgressTimer::boundaryTexCoord(char index)
 
 void ProgressTimer::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 {
-
-//     getGLProgram()->use();
+    getGLProgramState()->apply(transform);
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    graphics->SetTexture(0, _sprite->getTexture());
+    graphics->SetBlendMode(BlendCocosToUrho3D(_sprite->getBlendFunc()));
+    //     getGLProgram()->use();
 //     getGLProgram()->setUniformsForBuiltins(transform);
 // 
 //     GL::blendFunc( _sprite->getBlendFunc().src, _sprite->getBlendFunc().dst );

@@ -59,6 +59,8 @@ public:
 
     /// Return the latest timestamp of the shader code and its includes.
     unsigned GetTimeStamp() const { return timeStamp_; }
+    // TODO:
+    const String& GetShaderPath() const { return shaderPath_; }
 
 private:
     /// Process source code and include files. Return true if successful.
@@ -67,7 +69,6 @@ private:
     String NormalizeDefines(const String& defines);
     /// Recalculate the memory used by the shader.
     void RefreshMemoryUse();
-
     /// Source code adapted for vertex shader.
     String vsSourceCode_;
     /// Source code adapted for pixel shader.
@@ -80,6 +81,8 @@ private:
     unsigned timeStamp_;
     /// Number of unique variations so far.
     unsigned numVariations_;
+    // TODO:
+    String shaderPath_;
 };
 
 }

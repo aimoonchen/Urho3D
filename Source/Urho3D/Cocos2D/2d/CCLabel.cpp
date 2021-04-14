@@ -1507,18 +1507,14 @@ void Label::onDrawShadow(GLProgramState* glProgram, const Color4F& shadowColor)
     {
         if (_currLabelEffect == LabelEffect::OUTLINE)
         {
-//             glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
-//             glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
             graphics->SetShaderParameter(_uniformEffectType, 2.0f);
             graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
         }
         else
         {
-            //glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
             graphics->SetShaderParameter(_uniformTextColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
             if (_currLabelEffect == LabelEffect::GLOW)
             {
-                //glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
                 graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
             }
         }
@@ -1561,8 +1557,7 @@ void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
     auto glprogram = getGLProgramState();/*getGLProgram()*/
     glprogram->apply();
     //GL::blendFunc(_blendFunc.src, _blendFunc.dst);
-    auto blendMode = BlendCocosToUrho3D(_blendFunc);
-    graphics->SetBlendMode(blendMode);
+    graphics->SetBlendMode(BlendCocosToUrho3D(_blendFunc));
     if (_shadowEnabled)
     {
         if (_boldEnabled)

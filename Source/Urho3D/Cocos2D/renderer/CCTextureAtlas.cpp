@@ -272,8 +272,10 @@ void TextureAtlas::setupVBOandVAO()
 
 // #define kQuadSize sizeof(_quads[0].bl)
     vertexBuffer_->SetSize(_capacity * 4, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+    vertexBuffer_->SetData(_quads);
     indexBuffer_->SetSize(_capacity * 6, false, true);
-//     glGenBuffers(2, &_buffersVBO[0]);
+    indexBuffer_->SetData(_indices);
+    //     glGenBuffers(2, &_buffersVBO[0]);
 // 
 //     glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
 //     glBufferData(GL_ARRAY_BUFFER, sizeof(_quads[0]) * _capacity, _quads, GL_DYNAMIC_DRAW);
@@ -307,7 +309,9 @@ void TextureAtlas::setupVBO()
 // 
 //     mapBuffers();
     vertexBuffer_->SetSize(_capacity * 4, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+    vertexBuffer_->SetData(_quads);
     indexBuffer_->SetSize(_capacity * 6, false, true);
+    indexBuffer_->SetData(_indices);
 }
 
 void TextureAtlas::mapBuffers()
@@ -682,14 +686,14 @@ void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads, ssize_t start)
 //         // Using VBO without VAO
 //         //
 // 
-#define kQuadSize sizeof(_quads[0].bl)
+// #define kQuadSize sizeof(_quads[0].bl)
 //         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
 
         // FIXME:: update is done in draw... perhaps it should be done in a timer
         if (_dirty) 
         {
             //glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quads[0]) * _totalQuads , &_quads[0] );
-            vertexBuffer_->SetData(&_quads[0]);
+            vertexBuffer_->SetDataRange(&_quads[0], 0, _totalQuads * 4);
             _dirty = false;
         }
 

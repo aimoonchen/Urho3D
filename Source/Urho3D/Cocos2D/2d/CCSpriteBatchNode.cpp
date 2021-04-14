@@ -33,6 +33,7 @@ THE SOFTWARE.
 // #include "base/CCProfiling.h"
 #include "base/ccUTF8.h"
 // #include "renderer/CCTextureCache.h"
+#include "renderer/CCGLProgramState.h"
 #include "renderer/CCRenderer.h"
 #include "renderer/CCQuadCommand.h"
 #include "renderer/Texture2DUtils.h"
