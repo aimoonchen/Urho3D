@@ -31,6 +31,8 @@
 #include "renderer/CCBatchCommand.h"
 #include "renderer/CCCustomCommand.h"
 #include "renderer/CCGroupCommand.h"
+#include "renderer/CCGLProgramState.h"
+#include "renderer/Texture2DUtils.h"
 // #include "renderer/CCPrimitiveCommand.h"
 // #include "renderer/CCMeshCommand.h"
 // #include "renderer/CCGLProgramCache.h"
@@ -883,9 +885,9 @@ void Renderer::drawBatchedTriangles()
     // 	projection.m22_ = 1.0f;
     // 	projection.m23_ = 0.0f;
     // 	projection.m33_ = 1.0f;
-    auto matrixP = Director::getInstance()->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    matrixP.transpose();
-    Urho3D::Matrix4 projection(matrixP.m);
+//     auto matrixP = Director::getInstance()->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+//     matrixP.transpose();
+//     Urho3D::Matrix4 projection(matrixP.m);
 
     graphics_->ClearParameterSources();
     graphics_->SetColorWrite(true);
@@ -904,167 +906,24 @@ void Renderer::drawBatchedTriangles()
     graphics_->SetVertexBuffer(vertexBuffer_);
     graphics_->SetIndexBuffer(indexBuffer_);
 
-    Urho3D::ShaderVariation* noTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "DIFFMAP VERTEXCOLOR");
-    Urho3D::ShaderVariation* noTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffMaskTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP ALPHAMASK VERTEXCOLOR");
-    Urho3D::ShaderVariation* alphaTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "ALPHAMAP VERTEXCOLOR");
-
-    // for (unsigned i = batchStart; i < batchEnd; ++i)
     for (int i = 0; i < batchesTotal; ++i)
     {
-        // 		const UIBatch& batch = batches[i];
-        // 		if (batch.vertexStart_ == batch.vertexEnd_)
-        // 			continue;
-
-        Urho3D::ShaderVariation* ps;
-        Urho3D::ShaderVariation* vs;
-
-        auto texture = _triBatchesToDraw[i].cmd->GetTexture();
-        auto blendType = _triBatchesToDraw[i].cmd->getBlendType();
-        Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
-        if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
-        {
-            blendMode = Urho3D::BLEND_PREMULALPHA;
+        auto renderCmd = _triBatchesToDraw[i].cmd;
+        auto program = renderCmd->getGLProgramState();
+        auto& mv = renderCmd->getModelView();
+        program->apply(mv);
+        auto texture = renderCmd->GetTexture();
+        if (texture) {
+            graphics_->SetTexture(0, texture);
         }
-        else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
-        {
-            blendMode = Urho3D::BLEND_ALPHA;
+        auto alphaTexture = renderCmd->GetAlphaTexture();
+        if (alphaTexture) {
+            // ANDROID ETC1 ALPHA supports.
+            graphics_->SetTexture(1, alphaTexture);
         }
-        else if (blendType == BlendFunc::ADDITIVE)
-        {
-            blendMode = Urho3D::BLEND_ADD;
-        }
-
-        if (!texture)
-        {
-            ps = noTexturePS;
-            vs = noTextureVS;
-        }
-        else
-        {
-            // If texture contains only an alpha channel, use alpha shader (for fonts)
-            vs = diffTextureVS;
-
-            if (texture->GetFormat() == alphaFormat)
-                ps = alphaTexturePS;
-            // 			else if (batch.blendMode_ != Urho3D::BLEND_ALPHA && batch.blendMode_ != Urho3D::BLEND_ADDALPHA
-            // && batch.blendMode_ != Urho3D::BLEND_PREMULALPHA) 				ps = diffMaskTexturePS;
-            else
-                ps = diffTexturePS;
-        }
-
-        graphics_->SetShaders(vs, ps);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
-            graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
-            graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
-            graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
-
-        float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
-        graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
-        graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
-
-        //         Urho3D::IntRect scissor = batch.scissor_;
-        // 		scissor.left_ = (int)(scissor.left_ * uiScale_);
-        // 		scissor.top_ = (int)(scissor.top_ * uiScale_);
-        // 		scissor.right_ = (int)(scissor.right_ * uiScale_);
-        // 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
-
-        // Flip scissor vertically if using OpenGL texture rendering
-#ifdef URHO3D_OPENGL
-        if (surface)
-        {
-            // 			int top = scissor.top_;
-            // 			int bottom = scissor.bottom_;
-            // 			scissor.top_ = viewSize.y_ - bottom;
-            // 			scissor.bottom_ = viewSize.y_ - top;
-        }
-#endif
-
-        graphics_->SetBlendMode(blendMode);
-        //		graphics_->SetScissorTest(true, scissor);
-        graphics_->SetTexture(0, texture);
-        // 		graphics_->Draw(Urho3D::TRIANGLE_LIST, batch.vertexStart_ / UI_VERTEX_SIZE,
-        // 			(batch.vertexEnd_ - batch.vertexStart_) / UI_VERTEX_SIZE);
+        graphics_->SetBlendMode(BlendCocosToUrho3D(renderCmd->getBlendType()));
         graphics_->Draw(Urho3D::TRIANGLE_LIST, _triBatchesToDraw[i].offset, _triBatchesToDraw[i].indicesToDraw, 0, 0);
     }
-
-//     /************** 2: Copy vertices/indices to GL objects *************/
-//     auto conf = Configuration::getInstance();
-//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-//     {
-//         //Bind VAO
-//         GL::bindVAO(_buffersVAO);
-//         //Set VBO data
-//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-// 
-//         // option 1: subdata
-// //        glBufferSubData(GL_ARRAY_BUFFER, sizeof(_quads[0])*start, sizeof(_quads[0]) * n , &_quads[start] );
-// 
-//         // option 2: data
-// //        glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, _verts, GL_STATIC_DRAW);
-// 
-//         // option 3: orphaning + glMapBuffer
-//         // FIXME: in order to work as fast as possible, it must "and the exact same size and usage hints it had before."
-//         //  source: https://www.opengl.org/wiki/Buffer_Object_Streaming#Explicit_multiple_buffering
-//         // so most probably we won't have any benefit of using it
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex, nullptr, GL_STATIC_DRAW);
-//         void *buf = glMapBuffer(GL_ARRAY_BUFFER, GL_WRITE_ONLY);
-//         memcpy(buf, _verts, sizeof(_verts[0]) * _filledVertex);
-//         glUnmapBuffer(GL_ARRAY_BUFFER);
-// 
-//         glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-//     }
-//     else
-//     {
-//         // Client Side Arrays
-// #define kQuadSize sizeof(_verts[0])
-//         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-// 
-//         glBufferData(GL_ARRAY_BUFFER, sizeof(_verts[0]) * _filledVertex , _verts, GL_DYNAMIC_DRAW);
-// 
-//         GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
-// 
-//         // vertices
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_POSITION, 3, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, vertices));
-// 
-//         // colors
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_COLOR, 4, GL_UNSIGNED_BYTE, GL_TRUE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, colors));
-// 
-//         // tex coords
-//         glVertexAttribPointer(GLProgram::VERTEX_ATTRIB_TEX_COORD, 2, GL_FLOAT, GL_FALSE, kQuadSize, (GLvoid*) offsetof(V3F_C4B_T2F, texCoords));
-// 
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
-//         glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(_indices[0]) * _filledIndex, _indices, GL_STATIC_DRAW);
-//     }
-// 
-//     /************** 3: Draw *************/
-//     for (int i=0; i<batchesTotal; ++i)
-//     {
-//         CC_ASSERT(_triBatchesToDraw[i].cmd && "Invalid batch");
-//         _triBatchesToDraw[i].cmd->useMaterial();
-//         glDrawElements(GL_TRIANGLES, (GLsizei) _triBatchesToDraw[i].indicesToDraw, GL_UNSIGNED_SHORT, (GLvoid*) (_triBatchesToDraw[i].offset*sizeof(_indices[0])) );
-//         _drawnBatches++;
-//         _drawnVertices += _triBatchesToDraw[i].indicesToDraw;
-//     }
-// 
-//     /************** 4: Cleanup *************/
-//     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
-//     {
-//         //Unbind VAO
-//         GL::bindVAO(0);
-//     }
-//     else
-//     {
-//         glBindBuffer(GL_ARRAY_BUFFER, 0);
-//         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
-//     }
 
     _queuedTriangleCommands.clear();
     _filledVertex = 0;

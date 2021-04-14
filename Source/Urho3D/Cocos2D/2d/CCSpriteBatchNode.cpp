@@ -107,7 +107,7 @@ bool SpriteBatchNode::initWithTexture(Urho3D::Texture2D *tex, ssize_t capacity/*
 
     _descendants.reserve(capacity);
     
-    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, tex));
+    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, tex));
     return true;
 }
 

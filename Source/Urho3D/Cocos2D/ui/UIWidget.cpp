@@ -34,7 +34,7 @@ THE SOFTWARE.
 #include "base/CCTouch.h"
 // #include "ui/UILayoutComponent.h"
 // #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramState.h"
+#include "renderer/CCGLProgramState.h"
 // #include "renderer/ccShaders.h"
 #include "2d/CCCamera.h"
 #include "2d/CCSprite.h"
@@ -1214,12 +1214,12 @@ void Widget::copyClonedWidgetChildren(Widget* model)
 
 GLProgramState* Widget::getNormalGLProgramState(Urho3D::Texture2D* texture) const
 {
-    return {}; // GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
+    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture);
 }
 
 GLProgramState* Widget::getGrayGLProgramState(Urho3D::Texture2D* texture) const
 {
-    return {}; // GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
+    return GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, texture);
 }
 
 void Widget::copySpecialProperties(Widget* /*model*/)

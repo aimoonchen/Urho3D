@@ -42,6 +42,11 @@ THE SOFTWARE.
 // #include "renderer/ccGLStateCache.h"
 #include "renderer/CCRenderer.h"
 // #include "renderer/CCTexture2D.h"
+#include "Urho3DContext.h"
+#include "../../Core/Context.h"
+#include "../../Graphics/Graphics.h"
+#include "../../Graphics/VertexBuffer.h"
+#include "../../Graphics/IndexBuffer.h"
 #include "../../Graphics/Texture2D.h"
 #include "renderer/Texture2DUtils.h"
 #include "platform/CCGL.h"
@@ -60,7 +65,12 @@ TextureAtlas::TextureAtlas()
 #if CC_ENABLE_CACHE_TEXTURE_DATA
     ,_rendererRecreatedListener(nullptr)
 #endif
-{}
+{
+    auto ctx = GetUrho3DContext();
+    graphics_ = ctx->GetSubsystem<Urho3D::Graphics>();
+    vertexBuffer_ = std::make_unique<Urho3D::VertexBuffer>(ctx);
+    indexBuffer_ = std::make_unique<Urho3D::IndexBuffer>(ctx);
+}
 
 TextureAtlas::~TextureAtlas()
 {
@@ -68,7 +78,7 @@ TextureAtlas::~TextureAtlas()
 
     CC_SAFE_FREE(_quads);
     CC_SAFE_FREE(_indices);
-
+    
 //     glDeleteBuffers(2, _buffersVBO);
 // 
 //     if (Configuration::getInstance()->supportsShareableVAO())
@@ -259,9 +269,10 @@ void TextureAtlas::setupVBOandVAO()
 {
 //     glGenVertexArrays(1, &_VAOname);
 //     GL::bindVAO(_VAOname);
-// 
+
 // #define kQuadSize sizeof(_quads[0].bl)
-// 
+    vertexBuffer_->SetSize(_capacity * 4, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+    indexBuffer_->SetSize(_capacity * 6, false, true);
 //     glGenBuffers(2, &_buffersVBO[0]);
 // 
 //     glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
@@ -295,6 +306,8 @@ void TextureAtlas::setupVBO()
 //     glGenBuffers(2, &_buffersVBO[0]);
 // 
 //     mapBuffers();
+    vertexBuffer_->SetSize(_capacity * 4, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+    indexBuffer_->SetSize(_capacity * 6, false, true);
 }
 
 void TextureAtlas::mapBuffers()
@@ -610,13 +623,15 @@ void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads)
 
 void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads, ssize_t start)
 {
-//     CCASSERT(numberOfQuads>=0 && start>=0, "numberOfQuads and start must be >= 0");
-// 
-//     if(!numberOfQuads)
-//         return;
-//     
-//     GL::bindTexture2D(_texture);
-// 
+    CCASSERT(numberOfQuads>=0 && start>=0, "numberOfQuads and start must be >= 0");
+
+    if(!numberOfQuads)
+        return;
+    
+//    GL::bindTexture2D(_texture);
+    if (_texture) {
+        graphics_->SetTexture(0, _texture);
+    }
 //     auto conf = Configuration::getInstance();
 //     if (conf->supportsShareableVAO() && conf->supportsMapBuffer())
 //     {
@@ -667,16 +682,17 @@ void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads, ssize_t start)
 //         // Using VBO without VAO
 //         //
 // 
-// #define kQuadSize sizeof(_quads[0].bl)
+#define kQuadSize sizeof(_quads[0].bl)
 //         glBindBuffer(GL_ARRAY_BUFFER, _buffersVBO[0]);
-// 
-//         // FIXME:: update is done in draw... perhaps it should be done in a timer
-//         if (_dirty) 
-//         {
-//             glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quads[0]) * _totalQuads , &_quads[0] );
-//             _dirty = false;
-//         }
-// 
+
+        // FIXME:: update is done in draw... perhaps it should be done in a timer
+        if (_dirty) 
+        {
+            //glBufferSubData(GL_ARRAY_BUFFER, 0, sizeof(_quads[0]) * _totalQuads , &_quads[0] );
+            vertexBuffer_->SetData(&_quads[0]);
+            _dirty = false;
+        }
+
 //         GL::enableVertexAttribs(GL::VERTEX_ATTRIB_FLAG_POS_COLOR_TEX);
 // 
 //         // vertices
@@ -691,7 +707,7 @@ void TextureAtlas::drawNumberOfQuads(ssize_t numberOfQuads, ssize_t start)
 //         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, _buffersVBO[1]);
 // 
 //         glDrawElements(GL_TRIANGLES, (GLsizei)numberOfQuads*6, GL_UNSIGNED_SHORT, (GLvoid*) (start*6*sizeof(_indices[0])));
-// 
+        graphics_->Draw(Urho3D::TRIANGLE_LIST, start * 6, numberOfQuads * 6, 0, 0);
 //         glBindBuffer(GL_ARRAY_BUFFER, 0);
 //         glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, 0);
 //     }

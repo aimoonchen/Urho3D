@@ -39,14 +39,20 @@
 #include "platform/CCFileUtils.h"
 #include "renderer/CCRenderer.h"
 // #include "renderer/ccGLStateCache.h"
+#include "renderer/CCGLProgramState.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
 #include "base/CCEventDispatcher.h"
 #include "base/CCEventCustom.h"
 #include "2d/CCFontFNT.h"
+#include "renderer/Texture2DUtils.h"
 #include "Urho3DContext.h"
 #include "renderer/Texture2DUtils.h"
+#include "Urho3DContext.h"
+#include "../../Core/Context.h"
 #include "../../Graphics/Texture2D.h"
+#include "../../Graphics/Graphics.h"
+
 NS_CC_BEGIN
 
 /**
@@ -514,9 +520,9 @@ void Label::reset()
     _shadowEnabled = false;
     _shadowBlurRadius = 0.f;
 
-    _uniformEffectColor = -1;
-    _uniformEffectType = -1;
-    _uniformTextColor = -1;
+//     _uniformEffectColor = -1;
+//     _uniformEffectType = -1;
+//     _uniformTextColor = -1;
 
     _useDistanceField = false;
     _useA8Shader = false;
@@ -556,36 +562,36 @@ static Urho3D::Texture2D* _getTexture(Label* label)
 
 void Label::updateShaderProgram()
 {
-//     switch (_currLabelEffect)
-//     {
-//     case cocos2d::LabelEffect::NORMAL:
-//         if (_useDistanceField)
-//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_NORMAL));
-//         else if (_useA8Shader)
-//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_NORMAL));
-//         else if (_shadowEnabled)
-//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, _getTexture(this)));
-//         else
-//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
-// 
-//         break;
-//     case cocos2d::LabelEffect::OUTLINE: 
-//         setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
-//         _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
-//         _uniformEffectType = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectType");
-//         break;
-//     case cocos2d::LabelEffect::GLOW:
-//         if (_useDistanceField)
-//         {
-//             setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_GLOW));
-//             _uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
-//         }
-//         break;
-//     default:
-//         return;
-//     }
-//     
-//     _uniformTextColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_textColor");
+    switch (_currLabelEffect)
+    {
+    case cocos2d::LabelEffect::NORMAL:
+        if (_useDistanceField)
+            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_NORMAL));
+        else if (_useA8Shader)
+            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_NORMAL));
+        else if (_shadowEnabled)
+            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR, _getTexture(this)));
+        else
+            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
+
+        break;
+    case cocos2d::LabelEffect::OUTLINE: 
+        setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_OUTLINE));
+        //_uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+        //_uniformEffectType = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectType");
+        break;
+    case cocos2d::LabelEffect::GLOW:
+        if (_useDistanceField)
+        {
+            setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_LABEL_DISTANCEFIELD_GLOW));
+            //_uniformEffectColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_effectColor");
+        }
+        break;
+    default:
+        return;
+    }
+    
+    //_uniformTextColor = glGetUniformLocation(getGLProgram()->getProgram(), "u_textColor");
 }
 
 void Label::setFontAtlas(FontAtlas* atlas,bool distanceFieldEnabled /* = false */, bool useA8Shader /* = false */)
@@ -1159,7 +1165,7 @@ void Label::enableShadow(const Color4B& shadowColor /* = Color4B::BLACK */,
 
     if (_currentLabelType == LabelType::BMFONT || _currentLabelType == LabelType::CHARMAP)
     {
-        //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_shadowEnabled ? GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR : GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
+        setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(_shadowEnabled ? GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR : GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, _getTexture(this)));
     }
 }
 
@@ -1494,104 +1500,108 @@ float Label::getBMFontSize()const
     return _bmFontSize;
 }
 
-void Label::onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor)
+void Label::onDrawShadow(GLProgramState* glProgram, const Color4F& shadowColor)
 {
-//     if (_currentLabelType == LabelType::TTF)
-//     {
-//         if (_currLabelEffect == LabelEffect::OUTLINE)
-//         {
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    if (_currentLabelType == LabelType::TTF)
+    {
+        if (_currLabelEffect == LabelEffect::OUTLINE)
+        {
 //             glProgram->setUniformLocationWith1i(_uniformEffectType, 2); // 2: shadow
 //             glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-//         }
-//         else
-//         {
-//             glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-//             if (_currLabelEffect == LabelEffect::GLOW)
-//             {
-//                 glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
-//             }
-//         }
-// 
-//         glProgram->setUniformsForBuiltins(_shadowTransform);
-//         for (auto&& it : _letters)
-//         {
-//             it.second->updateTransform();
-//         }
-//         for (auto&& batchNode : _batchNodes)
-//         {
-//             batchNode->getTextureAtlas()->drawQuads();
-//         }
-//     }
-//     else
-//     {
-//         Color3B oldColor = _realColor;
-//         GLubyte oldOPacity = _displayedOpacity;
-//         _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
-//         setColor(Color3B(shadowColor));
-// 
-//         glProgram->setUniformsForBuiltins(_shadowTransform);
-//         for (auto&& it : _letters)
-//         {
-//             it.second->updateTransform();
-//         }
-//         for (auto&& batchNode : _batchNodes)
-//         {
-//             batchNode->getTextureAtlas()->drawQuads();
-//         }
-// 
-//         _displayedOpacity = oldOPacity;
-//         setColor(oldColor);
-//     }
+            graphics->SetShaderParameter(_uniformEffectType, 2.0f);
+            graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
+        }
+        else
+        {
+            //glProgram->setUniformLocationWith4f(_uniformTextColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+            graphics->SetShaderParameter(_uniformTextColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
+            if (_currLabelEffect == LabelEffect::GLOW)
+            {
+                //glProgram->setUniformLocationWith4f(_uniformEffectColor, shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a);
+                graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ shadowColor.r, shadowColor.g, shadowColor.b, shadowColor.a });
+            }
+        }
+
+        glProgram->setUniformsForBuiltins(_shadowTransform);
+        for (auto&& it : _letters)
+        {
+            it.second->updateTransform();
+        }
+        for (auto&& batchNode : _batchNodes)
+        {
+            batchNode->getTextureAtlas()->drawQuads();
+        }
+    }
+    else
+    {
+        Color3B oldColor = _realColor;
+        GLubyte oldOPacity = _displayedOpacity;
+        _displayedOpacity = shadowColor.a * (oldOPacity / 255.0f) * 255;
+        setColor(Color3B(shadowColor));
+
+        glProgram->setUniformsForBuiltins(_shadowTransform);
+        for (auto&& it : _letters)
+        {
+            it.second->updateTransform();
+        }
+        for (auto&& batchNode : _batchNodes)
+        {
+            batchNode->getTextureAtlas()->drawQuads();
+        }
+
+        _displayedOpacity = oldOPacity;
+        setColor(oldColor);
+    }
 }
 
 void Label::onDraw(const Mat4& transform, bool /*transformUpdated*/)
 {
-//     auto glprogram = getGLProgram();
-//     glprogram->use();
-//     GL::blendFunc(_blendFunc.src, _blendFunc.dst);
-// 
-//     if (_shadowEnabled)
-//     {
-//         if (_boldEnabled)
-//             onDrawShadow(glprogram, _textColorF);
-//         else
-//             onDrawShadow(glprogram, _shadowColor4F);
-//     }
-// 
-//     glprogram->setUniformsForBuiltins(transform);
-//     for (auto&& it : _letters)
-//     {
-//         it.second->updateTransform();
-//     }
-// 
-//     if (_currentLabelType == LabelType::TTF)
-//     {
-//         switch (_currLabelEffect) {
-//         case LabelEffect::OUTLINE:
-//             // draw outline of text
-//             glprogram->setUniformLocationWith1i(_uniformEffectType, 1); // 1: outline
-//             glprogram->setUniformLocationWith4f(_uniformEffectColor,
-//                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
-//             for (auto&& batchNode : _batchNodes)
-//             {
-//                 batchNode->getTextureAtlas()->drawQuads();
-//             }
-// 
-//             // draw text without outline
-//             glprogram->setUniformLocationWith1i(_uniformEffectType, 0); // 0: text
-//             glprogram->setUniformLocationWith4f(_uniformTextColor, _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
-//             break;
-//         case LabelEffect::GLOW:
-//             glprogram->setUniformLocationWith4f(_uniformEffectColor,
-//                 _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a);
-//         case LabelEffect::NORMAL:
-//             glprogram->setUniformLocationWith4f(_uniformTextColor,
-//                 _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a);
-//             break;
-//         default:
-//             break;
-//         }
-//     }
+    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    auto glprogram = getGLProgramState();/*getGLProgram()*/
+    glprogram->apply();
+    //GL::blendFunc(_blendFunc.src, _blendFunc.dst);
+    auto blendMode = BlendCocosToUrho3D(_blendFunc);
+    graphics->SetBlendMode(blendMode);
+    if (_shadowEnabled)
+    {
+        if (_boldEnabled)
+            onDrawShadow(glprogram, _textColorF);
+        else
+            onDrawShadow(glprogram, _shadowColor4F);
+    }
+
+    glprogram->setUniformsForBuiltins(transform);
+    for (auto&& it : _letters)
+    {
+        it.second->updateTransform();
+    }
+
+    if (_currentLabelType == LabelType::TTF)
+    {
+        switch (_currLabelEffect) {
+        case LabelEffect::OUTLINE:
+            // draw outline of text
+            graphics->SetShaderParameter(_uniformEffectType, 1.0f);
+            graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a });
+            for (auto&& batchNode : _batchNodes)
+            {
+                batchNode->getTextureAtlas()->drawQuads();
+            }
+
+            // draw text without outline
+            graphics->SetShaderParameter(_uniformEffectType, 0.0f);
+            graphics->SetShaderParameter(_uniformTextColor, Urho3D::Color{ _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a });
+            break;
+        case LabelEffect::GLOW:
+            graphics->SetShaderParameter(_uniformEffectColor, Urho3D::Color{ _effectColorF.r, _effectColorF.g, _effectColorF.b, _effectColorF.a });
+        case LabelEffect::NORMAL:
+            graphics->SetShaderParameter(_uniformTextColor, Urho3D::Color{ _textColorF.r, _textColorF.g, _textColorF.b, _textColorF.a });
+            break;
+        default:
+            break;
+        }
+    }
 
     for (auto&& batchNode : _batchNodes)
     {

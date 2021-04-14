@@ -37,7 +37,10 @@ THE SOFTWARE.
 
 namespace Urho3D
 {
+class Graphics;
 class Texture2D;
+class VertexBuffer;
+class IndexBuffer;
 }
 
 NS_CC_BEGIN
@@ -252,8 +255,11 @@ private:
 
 protected:
     GLushort*           _indices;
-    GLuint              _VAOname;
-    GLuint              _buffersVBO[2]; //0: vertex  1: indices
+    //GLuint              _VAOname;
+    //GLuint              _buffersVBO[2]; //0: vertex  1: indices
+    Urho3D::Graphics* graphics_{ nullptr };
+    std::unique_ptr<Urho3D::VertexBuffer> vertexBuffer_{nullptr};
+    std::unique_ptr<Urho3D::IndexBuffer> indexBuffer_{nullptr};
     bool                _dirty; //indicates whether or not the array buffer of the VBO needs to be updated
     /** quantity of quads that are going to be drawn */
     ssize_t _totalQuads;

@@ -27,7 +27,7 @@
 #include "base/CCConfiguration.h"
 #include "renderer/CCRenderer.h"
 // #include "renderer/ccGLStateCache.h"
-// #include "renderer/CCGLProgramState.h"
+#include "renderer/CCGLProgramState.h"
 // #include "renderer/CCGLProgramCache.h"
 #include "base/CCDirector.h"
 #include "base/CCEventListenerCustom.h"
@@ -280,7 +280,7 @@ bool DrawNode::init()
 {
     _blendFunc = BlendFunc::ALPHA_PREMULTIPLIED;
 
-    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_LENGTH_TEXTURE_COLOR));
+    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_LENGTH_TEXTURE_COLOR));
     
     ensureCapacity(512);
     ensureCapacityGLPoint(64);
@@ -396,14 +396,17 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
     graphics_->SetVertexBuffer(vertexBuffer_);
     // graphics_->SetIndexBuffer(indexBuffer_);
 
-    Urho3D::ShaderVariation* noTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "DIFFMAP VERTEXCOLOR");
-    Urho3D::ShaderVariation* noTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP VERTEXCOLOR");
-    Urho3D::ShaderVariation* diffMaskTexturePS =
-        graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP ALPHAMASK VERTEXCOLOR");
-    Urho3D::ShaderVariation* alphaTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "ALPHAMAP VERTEXCOLOR");
-
+//     Urho3D::ShaderVariation* noTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR");
+//     Urho3D::ShaderVariation* diffTextureVS = graphics_->GetShader(Urho3D::VS, "Basic", "DIFFMAP VERTEXCOLOR");
+//     Urho3D::ShaderVariation* noTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR");
+//     Urho3D::ShaderVariation* diffTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP VERTEXCOLOR");
+//     Urho3D::ShaderVariation* diffMaskTexturePS =
+//         graphics_->GetShader(Urho3D::PS, "Basic", "DIFFMAP ALPHAMASK VERTEXCOLOR");
+//     Urho3D::ShaderVariation* alphaTexturePS = graphics_->GetShader(Urho3D::PS, "Basic", "ALPHAMAP VERTEXCOLOR");
+    getGLProgramState()->apply(transform);
+    static auto VSP_u_alpha = Urho3D::StringHash("u_alpha");
+    graphics_->SetShaderParameter(VSP_u_alpha, _displayedOpacity / 255.0f);
+    // 
     // for (unsigned i = batchStart; i < batchEnd; ++i)
     for (int i = 0; i < 1 /*batchesTotal*/; ++i)
     {
@@ -411,8 +414,8 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
         // 		if (batch.vertexStart_ == batch.vertexEnd_)
         // 			continue;
 
-        Urho3D::ShaderVariation* ps;
-        Urho3D::ShaderVariation* vs;
+//         Urho3D::ShaderVariation* ps;
+//         Urho3D::ShaderVariation* vs;
 
         auto texture = nullptr;      // _triBatchesToDraw[i].cmd->GetTexture();
         auto blendType = _blendFunc; // _triBatchesToDraw[i].cmd->getBlendType();
@@ -430,11 +433,11 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
             blendMode = Urho3D::BLEND_ADD;
         }
 
-        if (!texture)
-        {
-            ps = noTexturePS;
-            vs = noTextureVS;
-        }
+//         if (!texture)
+//         {
+//             ps = noTexturePS;
+//             vs = noTextureVS;
+//         }
         // 		else
         // 		{
         // 			// If texture contains only an alpha channel, use alpha shader (for fonts)
@@ -449,17 +452,17 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
         // 				ps = diffTexturePS;
         // 		}
 
-        graphics_->SetShaders(vs, ps);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
-            graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
-            graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
-        if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
-            graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
-
-        float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
-        graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
-        graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
+        //graphics_->SetShaders(vs, ps);
+//         if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
+//             graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
+//         if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
+//             graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
+//         if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
+//             graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
+// 
+//         float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+//         graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+//         graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
 
         //         Urho3D::IntRect scissor = batch.scissor_;
         // 		scissor.left_ = (int)(scissor.left_ * uiScale_);
@@ -539,10 +542,8 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
         _dirtyGLLine = false;
     }
 
-    	const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
-    Mat4 matrixMVP = matrixP * transform;
-    matrixMVP.transpose();
-    Urho3D::Matrix4 projection(matrixMVP.m);
+    
+
     auto graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
     graphics_->ClearParameterSources();
     graphics_->SetColorWrite(true);
@@ -576,18 +577,28 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
         blendMode = Urho3D::BLEND_ADD;
     }
 
-    graphics_->SetShaders(graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR"),
-                          graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR"));
-    if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
-        graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
-    if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
-        graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
-    if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
-        graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
-
-    float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
-    graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
-    graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
+//     graphics_->SetShaders(graphics_->GetShader(Urho3D::VS, "Basic", "VERTEXCOLOR"),
+//                           graphics_->GetShader(Urho3D::PS, "Basic", "VERTEXCOLOR"));
+    auto glProgram = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_LENGTH_TEXTURE_COLOR);
+    glProgram->apply();
+    const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
+    Mat4 matrixMVP = matrixP * transform;
+    matrixMVP.transpose();
+    Urho3D::Matrix4 urho3dMVP(matrixMVP.m);
+    static auto VSP_MVP = Urho3D::StringHash("CC_MVPMatrix");
+    static auto VSP_u_alpha = Urho3D::StringHash("u_alpha");
+    graphics_->SetShaderParameter(VSP_MVP, urho3dMVP);
+    graphics_->SetShaderParameter(VSP_u_alpha, _displayedOpacity / 255.0f);
+//     if (graphics_->NeedParameterUpdate(Urho3D::SP_OBJECT, this))
+//         graphics_->SetShaderParameter(Urho3D::VSP_MODEL, Urho3D::Matrix3x4::IDENTITY);
+//     if (graphics_->NeedParameterUpdate(Urho3D::SP_CAMERA, this))
+//         graphics_->SetShaderParameter(Urho3D::VSP_VIEWPROJ, projection);
+//     if (graphics_->NeedParameterUpdate(Urho3D::SP_MATERIAL, this))
+//         graphics_->SetShaderParameter(Urho3D::PSP_MATDIFFCOLOR, Urho3D::Color(1.0f, 1.0f, 1.0f, 1.0f));
+// 
+//     float elapsedTime = GetUrho3DContext()->GetSubsystem<Urho3D::Time>()->GetElapsedTime();
+//     graphics_->SetShaderParameter(Urho3D::VSP_ELAPSEDTIME, elapsedTime);
+//     graphics_->SetShaderParameter(Urho3D::PSP_ELAPSEDTIME, elapsedTime);
 
     //         Urho3D::IntRect scissor = batch.scissor_;
     // 		scissor.left_ = (int)(scissor.left_ * uiScale_);

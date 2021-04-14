@@ -32,6 +32,7 @@
 #include "renderer/CCQuadCommand.h"
 #include "2d/CCFontAtlas.h"
 #include "base/ccTypes.h"
+#include "../../Math/StringHash.h"
 
 NS_CC_BEGIN
 
@@ -654,7 +655,7 @@ protected:
     void computeStringNumLines();
 
     void onDraw(const Mat4& transform, bool transformUpdated);
-    void onDrawShadow(GLProgram* glProgram, const Color4F& shadowColor);
+    void onDrawShadow(GLProgramState* glProgram, const Color4F& shadowColor);
     void drawSelf(bool visibleByCamera, Renderer* renderer, uint32_t flags);
 
     bool multilineTextWrapByChar();
@@ -748,9 +749,15 @@ protected:
     QuadCommand _quadCommand;
     CustomCommand _customCommand;
     Mat4  _shadowTransform;
-    GLint _uniformEffectColor;
-    GLint _uniformEffectType; // 0: None, 1: Outline, 2: Shadow; Only used when outline is enabled.
-    GLint _uniformTextColor;
+
+//     GLint _uniformEffectColor;
+//     GLint _uniformEffectType; // 0: None, 1: Outline, 2: Shadow; Only used when outline is enabled.
+//     GLint _uniformTextColor;
+
+    Urho3D::StringHash _uniformEffectColor{ "u_effectColor" };
+    Urho3D::StringHash _uniformEffectType{ "u_effectType" }; // 0: None, 1: Outline, 2: Shadow; Only used when outline is enabled.
+    Urho3D::StringHash _uniformTextColor{ "u_textColor" };
+
     bool _useDistanceField;
     bool _useA8Shader;
 

@@ -26,10 +26,13 @@
 #include "renderer/CCTrianglesCommand.h"
 // #include "renderer/ccGLStateCache.h"
 // #include "renderer/CCGLProgram.h"
-// #include "renderer/CCGLProgramState.h"
+#include "renderer/CCGLProgramState.h"
 #include "xxhash.h"
 #include "renderer/CCRenderer.h"
 // #include "renderer/CCTexture2D.h"
+// #include "Urho3DContext.h"
+// #include "../../Core/Context.h"
+// #include "../../Graphics/Graphics.h"
 #include "../../Graphics/Texture2D.h"
 
 NS_CC_BEGIN
@@ -117,6 +120,7 @@ void TrianglesCommand::generateMaterialID()
 
 void TrianglesCommand::useMaterial() const
 {
+//    auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
     //Set texture
 //     GL::bindTexture2D(_textureID);
 //     

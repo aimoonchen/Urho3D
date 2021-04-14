@@ -101,7 +101,7 @@ public:
     /**Get the model view matrix.*/
     const Mat4& getModelView() const { return _mv; }
     Urho3D::Texture2D* GetTexture() { return _texture; }
-
+    Urho3D::Texture2D* GetAlphaTexture() { return _alphaTexture; }
 protected:
     /**Generate the material ID by textureID, glProgramState, and blend function.*/
     void generateMaterialID();
@@ -120,7 +120,8 @@ protected:
     Mat4 _mv;
 
     GLuint _alphaTextureID; // ANDROID ETC1 ALPHA supports.
-    Urho3D::Texture2D* _texture{nullptr};
+    Urho3D::Texture2D* _texture{ nullptr };
+    Urho3D::Texture2D* _alphaTexture{ nullptr };
 };
 
 NS_CC_END

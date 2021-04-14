@@ -331,16 +331,16 @@ void Scale9Sprite::setState(Scale9Sprite::State state)
         _brightState = state;
 
         GLProgramState *glState = nullptr;
-//         switch (state)
-//         {
-//             case State::NORMAL:
-//                 glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
-//                 break;
-//             case State::GRAY:
-//                 glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
-//             default:
-//                 break;
-//         }
+        switch (state)
+        {
+            case State::NORMAL:
+                glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, getTexture());
+                break;
+            case State::GRAY:
+                glState = GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_GRAYSCALE, getTexture());
+            default:
+                break;
+        }
 
         setGLProgramState(glState);
         _brightState = state;

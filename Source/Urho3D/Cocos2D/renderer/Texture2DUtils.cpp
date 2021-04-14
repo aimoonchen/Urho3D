@@ -114,5 +114,21 @@ CC_DLL Urho3D::Texture2D* GetUrho3DTexture(const std::string& path)
 	auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
 	return cache->GetResource<Urho3D::Texture2D>(path.c_str());
 }
-
+Urho3D::BlendMode BlendCocosToUrho3D(cocos2d::BlendFunc blendType)
+{
+    Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
+    if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
+    {
+        blendMode = Urho3D::BLEND_PREMULALPHA;
+    }
+    else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
+    {
+        blendMode = Urho3D::BLEND_ALPHA;
+    }
+    else if (blendType == BlendFunc::ADDITIVE)
+    {
+        blendMode = Urho3D::BLEND_ADD;
+    }
+	return blendMode;
+}
 NS_CC_END

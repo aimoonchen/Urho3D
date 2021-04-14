@@ -31,6 +31,7 @@ THE SOFTWARE.
 #include "base/CCDirector.h"
 // #include "renderer/CCTextureCache.h"
 #include "renderer/CCRenderer.h"
+#include "renderer/CCGLProgramState.h"
 // #include "renderer/CCGLProgram.h"
 #include "../../Graphics/Texture2D.h"
 #include "renderer/Texture2DUtils.h"
@@ -105,7 +106,7 @@ bool AtlasNode::initWithTexture(Urho3D::Texture2D* texture, int tileWidth, int t
     _quadsToDraw = itemsToRender;
 
     // shader stuff
-    //setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture));
+    setGLProgramState(GLProgramState::getOrCreateWithGLProgramName(GLProgram::SHADER_NAME_POSITION_TEXTURE_COLOR_NO_MVP, texture));
 
     return true;
 }
