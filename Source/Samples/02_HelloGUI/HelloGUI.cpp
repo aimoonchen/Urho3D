@@ -187,8 +187,8 @@ frame
     //UIConfig::registerFont(UIConfig::defaultFont, "fonts/DroidSansFallback.ttf");
 #endif
     // create a scene. it's an autorelease object
-    //auto scene = BasicsScene::create();
-    auto scene = MenuScene::create();
+    auto scene = BasicsScene::create();
+    //auto scene = MenuScene::create();
 
     // run
     cocos2d::Director::getInstance()->runWithScene(scene);

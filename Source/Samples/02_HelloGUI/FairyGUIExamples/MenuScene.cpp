@@ -22,6 +22,7 @@ void MenuScene::continueInit()
 //     UIPackage::addPackage("UI/Basics");
 //     _view = UIPackage::createObject("Basics", "Main")->as<GComponent>();
 //     _groot->addChild(_view);
+
     UIPackage::addPackage("UI/Basics");
     _view = UIPackage::createObject("Basics", "Demo_Button")->as<GComponent>();
     _groot->addChild(_view);
@@ -30,10 +31,10 @@ void MenuScene::continueInit()
 //     _view = UIPackage::createObject("MainMenu", "Main")->as<GComponent>();
 //     _groot->addChild(_view);
 // 
-//     _view->getChild("n1")->addClickListener([this](EventContext*) {
-//         TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
-//         Director::getInstance()->replaceScene(scene);
-//     });
+// //     _view->getChild("n1")->addClickListener([this](EventContext*) {
+// //         TransitionFade* scene = TransitionFade::create(0.5f, BasicsScene::create());
+// //         Director::getInstance()->replaceScene(scene);
+// //     });
 //     _view->getChild("n2")->addClickListener(
 //         [this](EventContext*) { Director::getInstance()->replaceScene(TransitionDemoScene::create()); });
 //     _view->getChild("n4")->addClickListener(

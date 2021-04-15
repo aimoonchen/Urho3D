@@ -606,7 +606,7 @@ void Renderer::visitRenderQueue(RenderQueue& queue)
 //         }
 //         glDisable(GL_CULL_FACE);
 //         RenderState::StateBlock::_defaultState->setCullFace(false);
-        
+        graphics_->SetCullMode(Urho3D::CULL_NONE);
         for (const auto& zZeroNext : zZeroQueue)
         {
             processRenderCommand(zZeroNext);
@@ -891,18 +891,18 @@ void Renderer::drawBatchedTriangles()
 
     graphics_->ClearParameterSources();
     graphics_->SetColorWrite(true);
-#ifdef URHO3D_OPENGL
-    // Reverse winding if rendering to texture on OpenGL
-    if (surface)
-        graphics_->SetCullMode(Urho3D::CULL_CW);
-    else
-#endif
-        // graphics_->SetCullMode(Urho3D::CULL_CCW);
-        graphics_->SetCullMode(Urho3D::CULL_CW);
+// #ifdef URHO3D_OPENGL
+//     // Reverse winding if rendering to texture on OpenGL
+//     if (surface)
+//         graphics_->SetCullMode(Urho3D::CULL_CW);
+//     else
+// #endif
+//         // graphics_->SetCullMode(Urho3D::CULL_CCW);
+//         graphics_->SetCullMode(Urho3D::CULL_CW);
     graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
     graphics_->SetDepthWrite(false);
     graphics_->SetFillMode(Urho3D::FILL_SOLID);
-    graphics_->SetStencilTest(false);
+//    graphics_->SetStencilTest(false);
     graphics_->SetVertexBuffer(vertexBuffer_);
     graphics_->SetIndexBuffer(indexBuffer_);
 
