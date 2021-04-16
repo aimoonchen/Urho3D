@@ -244,7 +244,9 @@ Renderer::Renderer()
     graphics_ = graphics;
 
     vertexBuffer_ = new Urho3D::VertexBuffer(ctx);
+    vertexBuffer_->SetSize(2048, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
     indexBuffer_ = new Urho3D::IndexBuffer(ctx);
+    indexBuffer_->SetSize(4096, false, true);
 }
 
 Renderer::~Renderer()
@@ -760,10 +762,11 @@ void Renderer::SetVertexData(Urho3D::VertexBuffer* dest)
     // Update quad geometry into the vertex buffer
     // Resize the vertex buffer first if too small or much too large
     unsigned numVertices = _filledVertex; // vertexData.Size() / UI_VERTEX_SIZE;
-    if (dest->GetVertexCount() < numVertices || dest->GetVertexCount() > numVertices * 2)
+    if (dest->GetVertexCount() < numVertices/* || dest->GetVertexCount() > numVertices * 2*/)
     {
-        dest->Release();
-        dest->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+        assert(false);
+//         dest->Release();
+//         dest->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
     }
 
     dest->SetDataRange(&_verts[0], 0, _filledVertex);
@@ -777,10 +780,11 @@ void Renderer::SetIndexData(Urho3D::IndexBuffer* dest)
     // Update quad geometry into the vertex buffer
     // Resize the vertex buffer first if too small or much too large
     unsigned numIndices = _filledIndex; // vertexData.Size() / UI_VERTEX_SIZE;
-    if (dest->GetIndexCount() < numIndices || dest->GetIndexCount() > numIndices * 2)
+    if (dest->GetIndexCount() < numIndices/* || dest->GetIndexCount() > numIndices * 2*/)
     {
-        dest->Release();
-        dest->SetSize(numIndices, false, true);
+        assert(false);
+//         dest->Release();
+//         dest->SetSize(numIndices, false, true);
     }
 
     dest->SetDataRange(&_indices[0], 0, _filledIndex);
@@ -793,12 +797,12 @@ void Renderer::drawBatchedTriangles()
 
     CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_TRIANGLES");
 
-    _filledVertex = 0;
-    _filledIndex = 0;
+//     _filledVertex = 0;
+//     _filledIndex = 0;
 
     /************** 1: Setup up vertices/indices *************/
 
-    _triBatchesToDraw[0].offset = 0;
+    _triBatchesToDraw[0].offset = _filledIndex;
     _triBatchesToDraw[0].indicesToDraw = 0;
     _triBatchesToDraw[0].cmd = nullptr;
 
@@ -926,8 +930,8 @@ void Renderer::drawBatchedTriangles()
     }
 
     _queuedTriangleCommands.clear();
-    _filledVertex = 0;
-    _filledIndex = 0;
+//     _filledVertex = 0;
+//     _filledIndex = 0;
 }
 
 void Renderer::flush()

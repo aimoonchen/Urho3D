@@ -34,6 +34,7 @@
 #include "base/CCEventDispatcher.h"
 #include "2d/CCActionCatmullRom.h"
 #include "platform/CCGL.h"
+#include "renderer/Texture2DUtils.h"
 #include "Urho3DContext.h"
 #include "../../Core/Context.h"
 #include "../../Core/Timer.h"
@@ -122,8 +123,10 @@ DrawNode::DrawNode(GLfloat lineWidth)
     _eventDispatcher->addEventListenerWithSceneGraphPriority(listener, this);
 #endif
     vertexBuffer_ = new Urho3D::VertexBuffer(GetUrho3DContext());
+    vertexBuffer_->SetSize(1600, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
     vertexBufferPoint_ = new Urho3D::VertexBuffer(GetUrho3DContext());
     vertexBufferLine_ = new Urho3D::VertexBuffer(GetUrho3DContext());
+    vertexBufferLine_->SetSize(1600, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
 }
 
 DrawNode::~DrawNode()
@@ -330,10 +333,12 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 //         glBindBuffer(GL_ARRAY_BUFFER, _vbo);
 //         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacity, _buffer, GL_STREAM_DRAW);
         unsigned numVertices = _bufferCount; // vertexData.Size() / UI_VERTEX_SIZE;
-        if (vertexBuffer_->GetVertexCount() < numVertices || vertexBuffer_->GetVertexCount() > numVertices * 2)
-            vertexBuffer_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1,
-                                   true);
-
+        if (vertexBuffer_->GetVertexCount() < numVertices/* || vertexBuffer_->GetVertexCount() > numVertices * 2*/)
+        {
+            assert(false);
+//             vertexBuffer_->Release();
+//             vertexBuffer_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
+        }
         vertexBuffer_->SetDataRange(_buffer, 0, numVertices);
         _dirty = false;
     }
@@ -392,7 +397,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
     graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
     graphics_->SetDepthWrite(false);
     graphics_->SetFillMode(Urho3D::FILL_SOLID);
-    graphics_->SetStencilTest(false);
+    //graphics_->SetStencilTest(false);
     graphics_->SetVertexBuffer(vertexBuffer_);
     // graphics_->SetIndexBuffer(indexBuffer_);
 
@@ -416,22 +421,6 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 
 //         Urho3D::ShaderVariation* ps;
 //         Urho3D::ShaderVariation* vs;
-
-        auto texture = nullptr;      // _triBatchesToDraw[i].cmd->GetTexture();
-        auto blendType = _blendFunc; // _triBatchesToDraw[i].cmd->getBlendType();
-        Urho3D::BlendMode blendMode = Urho3D::BLEND_REPLACE;
-        if (blendType == BlendFunc::ALPHA_PREMULTIPLIED)
-        {
-            blendMode = Urho3D::BLEND_PREMULALPHA;
-        }
-        else if (blendType == BlendFunc::ALPHA_NON_PREMULTIPLIED)
-        {
-            blendMode = Urho3D::BLEND_ALPHA;
-        }
-        else if (blendType == BlendFunc::ADDITIVE)
-        {
-            blendMode = Urho3D::BLEND_ADD;
-        }
 
 //         if (!texture)
 //         {
@@ -481,7 +470,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
         }
 #endif
 
-        graphics_->SetBlendMode(blendMode);
+        graphics_->SetBlendMode(BlendCocosToUrho3D(_blendFunc));
         //		graphics_->SetScissorTest(true, scissor);
         // graphics_->SetTexture(0, texture);
         // 		graphics_->Draw(Urho3D::TRIANGLE_LIST, batch.vertexStart_ / UI_VERTEX_SIZE,
@@ -534,11 +523,11 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 //         glBindBuffer(GL_ARRAY_BUFFER, _vboGLLine);
 //         glBufferData(GL_ARRAY_BUFFER, sizeof(V3F_C4B_T2F)*_bufferCapacityGLLine, _bufferGLLine, GL_STREAM_DRAW);
         unsigned numVertices = _bufferCountGLLine; // vertexData.Size() / UI_VERTEX_SIZE;
-        if (vertexBufferLine_->GetVertexCount() < numVertices || vertexBufferLine_->GetVertexCount() > numVertices * 2)
-            vertexBufferLine_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1,
-                                       true);
+        if (vertexBufferLine_->GetVertexCount() < numVertices/* || vertexBufferLine_->GetVertexCount() > numVertices * 2*/)
+            assert(false);
+            //vertexBufferLine_->SetSize(numVertices, Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1, true);
 
-        vertexBufferLine_->SetData(_bufferGLLine);
+        vertexBufferLine_->SetDataRange(_bufferGLLine, 0, numVertices);
         _dirtyGLLine = false;
     }
 
@@ -559,7 +548,7 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
     graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
     graphics_->SetDepthWrite(false);
     graphics_->SetFillMode(Urho3D::FILL_SOLID);
-    graphics_->SetStencilTest(false);
+    //graphics_->SetStencilTest(false);
     graphics_->SetVertexBuffer(vertexBufferLine_);
 
     auto blendType = _blendFunc; // _triBatchesToDraw[i].cmd->getBlendType();
