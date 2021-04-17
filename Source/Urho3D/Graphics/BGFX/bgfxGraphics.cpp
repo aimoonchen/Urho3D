@@ -946,6 +946,11 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
     {
         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
     }
+    render_state_ &= ~BGFX_STATE_PT_MASK;
+    if (type != TRIANGLE_LIST)
+    {
+        render_state_ |= bgfxRSPrimitiveType(type);
+    }
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
     bgfx::submit(current_view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
@@ -1009,6 +1014,11 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
     if (current_instance_buffer_)
     {
         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+    }
+    render_state_ &= ~BGFX_STATE_PT_MASK;
+    if (type != TRIANGLE_LIST)
+    {
+        render_state_ |= bgfxRSPrimitiveType(type);
     }
     bgfx::setState(render_state_);
     bgfx::setStencil(front_stencil_);
@@ -2273,7 +2283,7 @@ void Graphics::SetStencilTest(bool enable, CompareMode mode, StencilOp pass, Ste
     if (enable) {
         flag |= BGFX_STENCIL_FUNC_REF(stencilRef);
         flag |= BGFX_STENCIL_FUNC_RMASK(compareMask);
-        // flag |= BGFX_STENCIL_FUNC_RMASK_MASK(writeMask);
+        //flag |= BGFX_STENCIL_FUNC_RMASK_MASK(writeMask);
         flag |= bgfxRSStencilCompare(mode);
         flag |= bgfxRSStencilFail(fail);
         flag |= bgfxRSDepthFail(zFail);
@@ -3501,6 +3511,8 @@ uint64_t bgfxRSDepthCompare(Urho3D::CompareMode mode)
     case Urho3D::CMP_GREATEREQUAL:
         flag = BGFX_STATE_DEPTH_TEST_GEQUAL;
         break;
+    case Urho3D::MAX_COMPAREMODES:
+        flag = BGFX_STATE_DEPTH_TEST_NEVER;
     default:
         break;
     }
@@ -3512,19 +3524,14 @@ uint64_t bgfxRSStencilFail(Urho3D::StencilOp fail)
     switch (fail) {
     case Urho3D::OP_KEEP:
         return BGFX_STENCIL_OP_FAIL_S_KEEP;
-        break;
     case Urho3D::OP_ZERO:
         return BGFX_STENCIL_OP_FAIL_S_ZERO;
-        break;
     case Urho3D::OP_REF:
         return BGFX_STENCIL_OP_FAIL_S_REPLACE;
-        break;
     case Urho3D::OP_INCR:
         return BGFX_STENCIL_OP_FAIL_S_INCR;
-        break;
     case Urho3D::OP_DECR:
         return BGFX_STENCIL_OP_FAIL_S_DECR;
-        break;
     default:
         assert(0);
         break;
@@ -3536,19 +3543,14 @@ uint64_t bgfxRSDepthFail(Urho3D::StencilOp fail)
     switch (fail) {
     case Urho3D::OP_KEEP:
         return BGFX_STENCIL_OP_FAIL_Z_KEEP;
-        break;
     case Urho3D::OP_ZERO:
         return BGFX_STENCIL_OP_FAIL_Z_ZERO;
-        break;
     case Urho3D::OP_REF:
         return BGFX_STENCIL_OP_FAIL_Z_REPLACE;
-        break;
     case Urho3D::OP_INCR:
         return BGFX_STENCIL_OP_FAIL_Z_INCR;
-        break;
     case Urho3D::OP_DECR:
         return BGFX_STENCIL_OP_FAIL_Z_DECR;
-        break;
     default:
         assert(0);
         break;
@@ -3560,19 +3562,14 @@ uint64_t bgfxRSDepthPass(Urho3D::StencilOp pass)
     switch (pass) {
     case Urho3D::OP_KEEP:
         return BGFX_STENCIL_OP_PASS_Z_KEEP;
-        break;
     case Urho3D::OP_ZERO:
         return BGFX_STENCIL_OP_PASS_Z_ZERO;
-        break;
     case Urho3D::OP_REF:
         return BGFX_STENCIL_OP_PASS_Z_REPLACE;
-        break;
     case Urho3D::OP_INCR:
         return BGFX_STENCIL_OP_PASS_Z_INCR;
-        break;
     case Urho3D::OP_DECR:
         return BGFX_STENCIL_OP_PASS_Z_DECR;
-        break;
     default:
         assert(0);
         break;
@@ -3584,25 +3581,20 @@ uint64_t bgfxRSStencilCompare(Urho3D::CompareMode mode)
     switch (mode) {
     case Urho3D::CMP_ALWAYS:
         return BGFX_STENCIL_TEST_ALWAYS;
-        break;
     case Urho3D::CMP_EQUAL:
         return BGFX_STENCIL_TEST_EQUAL;
-        break;
     case Urho3D::CMP_NOTEQUAL:
         return BGFX_STENCIL_TEST_NOTEQUAL;
-        break;
     case Urho3D::CMP_LESS:
         return BGFX_STENCIL_TEST_LESS;
-        break;
     case Urho3D::CMP_LESSEQUAL:
         return BGFX_STENCIL_TEST_LEQUAL;
-        break;
     case Urho3D::CMP_GREATER:
         return BGFX_STENCIL_TEST_GREATER;
-        break;
     case Urho3D::CMP_GREATEREQUAL:
         return BGFX_STENCIL_TEST_GEQUAL;
-        break;
+    case Urho3D::MAX_COMPAREMODES:
+        return BGFX_STENCIL_TEST_NEVER;
     default:
         assert(0);
         break;
@@ -3624,26 +3616,41 @@ uint8_t bgfxCubeMapSide(Urho3D::CubeMapFace cubeMapFace)
     switch (cubeMapFace) {
     case Urho3D::FACE_POSITIVE_X:
         return BGFX_CUBE_MAP_POSITIVE_X;
-        break;
     case Urho3D::FACE_NEGATIVE_X:
         return BGFX_CUBE_MAP_NEGATIVE_X;
-        break;
     case Urho3D::FACE_POSITIVE_Y:
         return BGFX_CUBE_MAP_POSITIVE_Y;
-        break;
     case Urho3D::FACE_NEGATIVE_Y:
         return BGFX_CUBE_MAP_NEGATIVE_Y;
-        break;
     case Urho3D::FACE_POSITIVE_Z:
         return BGFX_CUBE_MAP_POSITIVE_Z;
-        break;
     case Urho3D::FACE_NEGATIVE_Z:
         return BGFX_CUBE_MAP_NEGATIVE_Z;
-        break;
     default:
         break;
     }
     return 0xff;
 }
 
+uint64_t bgfxRSPrimitiveType(Urho3D::PrimitiveType type)
+{
+    switch (type)
+    {
+    case Urho3D::TRIANGLE_LIST:
+        return 0;
+    case Urho3D::LINE_LIST:
+        return BGFX_STATE_PT_LINES;
+    case Urho3D::POINT_LIST:
+        return BGFX_STATE_PT_POINTS;
+    case Urho3D::TRIANGLE_STRIP:
+        return BGFX_STATE_PT_TRISTRIP;
+    case Urho3D::LINE_STRIP:
+        return BGFX_STATE_PT_LINESTRIP;
+//     case Urho3D::TRIANGLE_FAN:
+//         return BGFX_STATE_PT_TRISTRIP;
+    default:
+        break;
+    }
+    return 0;
+}
 }

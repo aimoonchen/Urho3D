@@ -76,6 +76,9 @@ public:
     void apply(const Mat4& modelView);
     void apply();
     void setUniformsForBuiltins(const Mat4& modelView);
+    void setUniformsForBuiltins();
+    void setUniforms(const Urho3D::StringHash& name, float value);
+
 private:
     Urho3D::ShaderVariation* vs_{ nullptr };
     Urho3D::ShaderVariation* fs_{ nullptr };

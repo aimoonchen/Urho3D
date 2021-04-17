@@ -44,6 +44,16 @@ GLProgramState::GLProgramState(Urho3D::ShaderVariation* vs, Urho3D::ShaderVariat
     _director = Director::getInstance();
 }
 
+void GLProgramState::setUniforms(const Urho3D::StringHash& name, float value)
+{
+    graphics_->SetShaderParameter(name, value);
+}
+
+void GLProgramState::setUniformsForBuiltins()
+{
+    setUniformsForBuiltins(_director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_MODELVIEW));
+}
+
 void GLProgramState::setUniformsForBuiltins(const Mat4& modelView)
 {
     const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);

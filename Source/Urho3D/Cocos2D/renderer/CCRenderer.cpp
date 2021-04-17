@@ -659,7 +659,8 @@ void Renderer::render()
 {
     //Uncomment this once everything is rendered by new renderer
     //glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
-
+    graphics_->SetStencilTest(false);
+    graphics_->SetBlendMode(Urho3D::BLEND_ALPHA);
     //TODO: setup camera or MVP
     _isRendering = true;
     

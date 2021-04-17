@@ -36,7 +36,7 @@ public:
     StencilClippingSupport();
 
     cocos2d::Node* _stencil;
-    //cocos2d::StencilStateManager* _stencilStateManager;
+    cocos2d::StencilStateManager* _stencilStateManager;
     cocos2d::GroupCommand _groupCommand;
 #if COCOS2D_VERSION >= 0x00040000
     cocos2d::backend::ProgramState* _originStencilProgram;

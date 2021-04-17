@@ -1,10 +1,11 @@
 #include "FUIContainer.h"
-// #include "base/CCStencilStateManager.h"
+#include "base/CCStencilStateManager.h"
 #include "utils/ToolSet.h"
 #include "GComponent.h"
 #include "Urho3DContext.h"
 #include "../../Core/Context.h"
 #include "../../Graphics/Graphics.h"
+
 NS_FGUI_BEGIN
 USING_NS_CC;
 
@@ -37,8 +38,8 @@ RectClippingSupport::RectClippingSupport() :
 
 StencilClippingSupport::StencilClippingSupport() :
     _stencil(nullptr),
-    _originStencilProgram(nullptr)
- //   _stencilStateManager(new StencilStateManager())
+    _originStencilProgram(nullptr),
+    _stencilStateManager(new StencilStateManager())
 {
 }
 
@@ -59,7 +60,7 @@ FUIContainer::~FUIContainer()
             _stencilClippingSupport->_stencil->stopAllActions();
             _stencilClippingSupport->_stencil->release();
         }
-        //CC_SAFE_DELETE(_stencilClippingSupport->_stencilStateManager);
+        CC_SAFE_DELETE(_stencilClippingSupport->_stencilStateManager);
         delete _stencilClippingSupport;
     }
 }
@@ -164,9 +165,9 @@ void FUIContainer::setStencil(cocos2d::Node * stencil)
 
 float FUIContainer::getAlphaThreshold() const
 {
-//     if (_stencilClippingSupport != nullptr)
-//         return _stencilClippingSupport->_stencilStateManager->getAlphaThreshold();
-//     else
+    if (_stencilClippingSupport != nullptr)
+        return _stencilClippingSupport->_stencilStateManager->getAlphaThreshold();
+    else
         return 1;
 }
 
@@ -192,14 +193,14 @@ void FUIContainer::setAlphaThreshold(float alphaThreshold)
 #endif
 #endif
 
-    //_stencilClippingSupport->_stencilStateManager->setAlphaThreshold(alphaThreshold);
+    _stencilClippingSupport->_stencilStateManager->setAlphaThreshold(alphaThreshold);
 }
 
 bool FUIContainer::isInverted() const
 {
-//     if (_stencilClippingSupport != nullptr)
-//         return _stencilClippingSupport->_stencilStateManager->isInverted();
-//     else
+    if (_stencilClippingSupport != nullptr)
+        return _stencilClippingSupport->_stencilStateManager->isInverted();
+    else
         return false;
 }
 
@@ -208,7 +209,7 @@ void FUIContainer::setInverted(bool inverted)
     if (_stencilClippingSupport == nullptr)
         _stencilClippingSupport = new StencilClippingSupport();
 
-    //_stencilClippingSupport->_stencilStateManager->setInverted(inverted);
+    _stencilClippingSupport->_stencilStateManager->setInverted(inverted);
 }
 
 void FUIContainer::onEnter()
@@ -347,14 +348,13 @@ void FUIContainer::onAfterVisitScissor()
     }
     else
     {
-        // revert scissor test
+//         // revert scissor test
 // #if COCOS2D_VERSION >= 0x00040000
 //         Director::getInstance()->getRenderer()->setScissorTest(false);
 // #else
 //         glDisable(GL_SCISSOR_TEST);
 // #endif
-        auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
-        graphics->SetScissorTest(false);
+        GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>()->SetScissorTest(false);
     }
 }
 
@@ -400,7 +400,7 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
         _stencilClippingSupport->_stencilStateManager->onBeforeVisit(_globalZOrder);
 #else
         _stencilClippingSupport->_beforeVisitCmd.init(_globalZOrder);
-        //_stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
+        _stencilClippingSupport->_beforeVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onBeforeVisit, _stencilClippingSupport->_stencilStateManager);
         renderer->addCommand(&_stencilClippingSupport->_beforeVisitCmd);
 #endif
 
@@ -433,7 +433,7 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
         _stencilClippingSupport->_stencil->visit(renderer, _modelViewTransform, flags);
 
         _stencilClippingSupport->_afterDrawStencilCmd.init(_globalZOrder);
-        //_stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
+        _stencilClippingSupport->_afterDrawStencilCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterDrawStencil, _stencilClippingSupport->_stencilStateManager);
         renderer->addCommand(&_stencilClippingSupport->_afterDrawStencilCmd);
 
         int i = 0;
@@ -465,7 +465,7 @@ void FUIContainer::visit(cocos2d::Renderer * renderer, const cocos2d::Mat4 & par
         }
 
         _stencilClippingSupport->_afterVisitCmd.init(_globalZOrder);
-        //_stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
+        _stencilClippingSupport->_afterVisitCmd.func = CC_CALLBACK_0(StencilStateManager::onAfterVisit, _stencilClippingSupport->_stencilStateManager);
         renderer->addCommand(&_stencilClippingSupport->_afterVisitCmd);
 
         renderer->popGroup();

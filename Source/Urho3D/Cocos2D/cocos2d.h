@@ -65,6 +65,8 @@ THE SOFTWARE.
 #include "base/ccUTF8.h"
 #include "base/ccUtils.h"
 #include "base/CCTouch.h"
+#include "base/CCStencilStateManager.h"
+
 // EventDispatcher
 #include "base/CCEventAcceleration.h"
 #include "base/CCEventCustom.h"

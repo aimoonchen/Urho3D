@@ -31,7 +31,7 @@ THE SOFTWARE.
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
 using GLboolean = unsigned char;
-using GLubyte = uint8_t;
+using GLubyte = unsigned char;
 using GLfloat = float;
 using GLenum = unsigned int;
 using GLshort = short;
@@ -40,6 +40,7 @@ using GLint = int;
 using GLsizei = int;
 using GLvoid = void;
 using GLushort = unsigned short;
+using GLclampf = float;
 // #include "GLEW/glew.h"
 // 
 // #define CC_GL_DEPTH24_STENCIL8      GL_DEPTH24_STENCIL8
