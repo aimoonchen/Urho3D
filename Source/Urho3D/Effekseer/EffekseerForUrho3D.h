@@ -1,5 +1,5 @@
 #pragma once
-#include "../../Graphics/Drawable.h"
+#include "../Graphics/Drawable.h"
 
 #include "Effekseer.h"
 #include "EffekseerRendererCommon/EffekseerRenderer.Renderer.h"
@@ -49,14 +49,14 @@ private:
     std::shared_ptr<Effect> effect_ = nullptr;
     ::Effekseer::Handle handle = -1;
 
-    cocos2d::CallbackCommand renderCommand;
+    //cocos2d::CallbackCommand renderCommand;
 
     void beforeRender(EffekseerRenderer::RendererRef, Effekseer::RefPtr<EffekseerRenderer::CommandList>);
     void afterRender(EffekseerRenderer::RendererRef, Effekseer::RefPtr<EffekseerRenderer::CommandList>);
 
 public:
-    static std::unique_ptr<EffectEmitter> create(EffectManager* manager);
-    static std::unique_ptr<EffectEmitter> create(EffectManager* manager, const std::string& filename, float maginification = 1.0f);
+    static std::unique_ptr<EffectEmitter> create(const std::shared_ptr<EffectManager>& manager);
+    static std::unique_ptr<EffectEmitter> create(const std::shared_ptr<EffectManager>& manager, const std::string& filename, float maginification = 1.0f);
     EffectEmitter(Urho3D::Context* context, const std::shared_ptr<EffectManager>& manager);
     virtual ~EffectEmitter();
     Effect* getEffect();
@@ -83,13 +83,15 @@ public:
 //     void onExit() override;
 //    void update(float delta) override;
     void Update(const Urho3D::FrameInfo& frame) override;
-    void draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags) override;
+//    void draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags) override;
 protected:
     void OnNodeSet(Urho3D::Node* node) override;
+    void OnWorldBoundingBoxUpdate() override;
 };
 
-class EffectManager : public Urho3D::RefCount
+class EffectManager : public Urho3D::Object
 {
+    URHO3D_OBJECT(EffectManager, Object);
 	friend class EffectEmitter;
 private:
 	::Effekseer::ManagerRef manager2d = nullptr;
@@ -101,9 +103,9 @@ private:
 	bool isDistorted = false;
 	float time_ = 0.0f;
 	InternalManager* internalManager_ = nullptr;
-	cocos2d::CustomCommand distortionCommand;
-	cocos2d::CustomCommand beginCommand;
-	cocos2d::CustomCommand endCommand;
+// 	cocos2d::CustomCommand distortionCommand;
+// 	cocos2d::CustomCommand beginCommand;
+// 	cocos2d::CustomCommand endCommand;
 	::Effekseer::Handle play(Effect* effect, float x, float y, float z);
 	::Effekseer::Handle play(Effect* effect, float x, float y, float z, int startTime);
 	void setMatrix(::Effekseer::Handle handle, const Urho3D::Matrix4& mat);
@@ -115,8 +117,9 @@ private:
 	void onDestructor();
 
 public:
+    void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 	static std::unique_ptr<EffectManager> create(int visibleWidth, int visibleHeight);
-	EffectManager();
+    EffectManager(Urho3D::Context* context);
 	virtual ~EffectManager();
 	void setIsDistortionEnabled(bool value);
 	void begin(/*cocos2d::Renderer* renderer, */float globalZOrder);

@@ -24,10 +24,10 @@ namespace Urho3D {
 	{
 		context_ = context;
 		SetUrho3DContext(context);
- 		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
- 		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
-// 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
-// 		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
+// 		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
+// 		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
+ 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
+		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
 		
 		cocos_renderder_ = new cocos2d::Renderer;
 		view_impl_ = new cocos2d::GLViewImpl();

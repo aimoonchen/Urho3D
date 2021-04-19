@@ -3,16 +3,18 @@
 #ifdef CC_USE_METAL
 #include "renderer/backend/Device.h"
 #endif
-#include "../../Scene/Node.h"
-#include "../../Graphics/Texture2D.h"
+#include "Urho3DContext.h"
+#include "../Scene/Node.h"
+#include "../Core/CoreEvents.h"
+#include "../Graphics/Texture2D.h"
 
 namespace efk
 {
-	class ImageAccessor : public cocos2d::Image
-	{
-	public:
-		static bool getPngPremultipledAlphaEnabled() { return PNG_PREMULTIPLIED_ALPHA_ENABLED; }
-	};
+// 	class ImageAccessor : public cocos2d::Image
+// 	{
+// 	public:
+// 		static bool getPngPremultipledAlphaEnabled() { return PNG_PREMULTIPLIED_ALPHA_ENABLED; }
+// 	};
 
 	Effekseer::ModelLoaderRef CreateModelLoader(Effekseer::FileInterface*);
 
@@ -122,26 +124,26 @@ namespace efk
 
 	Effekseer::FileReader* EffekseerFile::OpenRead(const EFK_CHAR* path)
 	{
-		char path_[300];
-		::Effekseer::ConvertUtf16ToUtf8(path_, 300, path);
-
-		cocos2d::Data data_ = cocos2d::FileUtils::getInstance()->getDataFromFile(path_);
-
-		if (data_.isNull())
-		{
-			return nullptr;
-		}
+// 		char path_[300];
+// 		::Effekseer::ConvertUtf16ToUtf8(path_, 300, path);
+// 
+// 		cocos2d::Data data_ = cocos2d::FileUtils::getInstance()->getDataFromFile(path_);
+// 
+// 		if (data_.isNull())
+// 		{
+// 			return nullptr;
+// 		}
 
 		std::vector<uint8_t> data;
-		data.resize(data_.getSize());
-		memcpy(data.data(), data_.getBytes(), data.size());
+// 		data.resize(data_.getSize());
+// 		memcpy(data.data(), data_.getBytes(), data.size());
 		return new EffekseerFileReader(data);
 	}
 
 	Effekseer::FileWriter* EffekseerFile::OpenWrite(const EFK_CHAR* path) { return nullptr; }
 
 	static std::map<Effekseer::TextureRef, std::basic_string<EFK_CHAR>> g_glTex2FilePath;
-	static std::map<std::basic_string<EFK_CHAR>, Urho3D::Texture2D*> g_filePath2CTex;
+	static std::map<std::basic_string<EFK_CHAR>, std::shared_ptr<Urho3D::Texture2D>> g_filePath2CTex;
 	static std::map<std::basic_string<EFK_CHAR>, Effekseer::TextureRef> g_filePath2EffectData;
 
 	class TextureLoader : public ::Effekseer::TextureLoader
@@ -172,88 +174,88 @@ namespace efk
 
 	Effekseer::TextureRef TextureLoader::Load(const EFK_CHAR* path, ::Effekseer::TextureType textureType)
 	{
-		auto key = std::basic_string<EFK_CHAR>(path);
-		if (g_filePath2CTex.find(key) != g_filePath2CTex.end())
-		{
-			auto texture = g_filePath2CTex[key];
-			texture->retain();
-			return g_filePath2EffectData[key];
-		}
-
-		std::unique_ptr<Effekseer::FileReader> reader(m_fileInterface->OpenRead(path));
-
-		if (reader.get() != NULL)
-		{
-			size_t size_texture = reader->GetLength();
-			char* data_texture = new char[size_texture];
-			reader->Read(data_texture, size_texture);
-
-			cocos2d::Image* image = new cocos2d::Image();
-			cocos2d::Texture2D* texture = new cocos2d::Texture2D();
-
-			auto backup = ImageAccessor::getPngPremultipledAlphaEnabled();
-			cocos2d::Image::setPNGPremultipliedAlphaEnabled(false);
-
-			if (image != nullptr && texture != nullptr && image->initWithImageData((const uint8_t*)data_texture, size_texture))
-			{
-				if (texture->initWithImage(image))
-				{
-
-#ifdef CC_USE_METAL
-					texture->generateMipmap();
-#else
-					if (texture->getPixelsWide() == ccNextPOT(texture->getPixelsWide()) &&
-						texture->getPixelsHigh() == ccNextPOT(texture->getPixelsHigh()))
-					{
-						texture->generateMipmap();
-					}
-					else
-					{
-						char path8[300];
-						::Effekseer::ConvertUtf16ToUtf8(path8, 300, path);
-						CCLOG("%s : The texture is not shown on a mobile. The size is not power of two.", path8);
-					}
-#endif
-				}
-				else
-				{
-					CC_SAFE_DELETE(texture);
-					CC_SAFE_DELETE(image);
-				}
-			}
-			CC_SAFE_DELETE(image);
-
-			delete[] data_texture;
-
-			Effekseer::TextureRef textureData = Effekseer::MakeRefPtr<Effekseer::Texture>();;
-			UpdateTextureData(textureData, texture);
-			g_filePath2CTex[key] = texture;
-			g_filePath2EffectData[key] = textureData;
-			g_glTex2FilePath[textureData] = key;
-
-			cocos2d::Image::setPNGPremultipliedAlphaEnabled(backup);
-
-			return textureData;
-		}
-		return NULL;
+// 		auto key = std::basic_string<EFK_CHAR>(path);
+// 		if (g_filePath2CTex.find(key) != g_filePath2CTex.end())
+// 		{
+// 			auto texture = g_filePath2CTex[key];
+// 			texture->retain();
+// 			return g_filePath2EffectData[key];
+// 		}
+// 
+// 		std::unique_ptr<Effekseer::FileReader> reader(m_fileInterface->OpenRead(path));
+// 
+// 		if (reader.get() != NULL)
+// 		{
+// 			size_t size_texture = reader->GetLength();
+// 			char* data_texture = new char[size_texture];
+// 			reader->Read(data_texture, size_texture);
+// 
+// 			cocos2d::Image* image = new cocos2d::Image();
+// 			cocos2d::Texture2D* texture = new cocos2d::Texture2D();
+// 
+// 			auto backup = ImageAccessor::getPngPremultipledAlphaEnabled();
+// 			cocos2d::Image::setPNGPremultipliedAlphaEnabled(false);
+// 
+// 			if (image != nullptr && texture != nullptr && image->initWithImageData((const uint8_t*)data_texture, size_texture))
+// 			{
+// 				if (texture->initWithImage(image))
+// 				{
+// 
+// #ifdef CC_USE_METAL
+// 					texture->generateMipmap();
+// #else
+// 					if (texture->getPixelsWide() == ccNextPOT(texture->getPixelsWide()) &&
+// 						texture->getPixelsHigh() == ccNextPOT(texture->getPixelsHigh()))
+// 					{
+// 						texture->generateMipmap();
+// 					}
+// 					else
+// 					{
+// 						char path8[300];
+// 						::Effekseer::ConvertUtf16ToUtf8(path8, 300, path);
+// 						CCLOG("%s : The texture is not shown on a mobile. The size is not power of two.", path8);
+// 					}
+// #endif
+// 				}
+// 				else
+// 				{
+// 					CC_SAFE_DELETE(texture);
+// 					CC_SAFE_DELETE(image);
+// 				}
+// 			}
+// 			CC_SAFE_DELETE(image);
+// 
+// 			delete[] data_texture;
+// 
+// 			Effekseer::TextureRef textureData = Effekseer::MakeRefPtr<Effekseer::Texture>();;
+// 			UpdateTextureData(textureData, texture);
+// 			g_filePath2CTex[key] = texture;
+// 			g_filePath2EffectData[key] = textureData;
+// 			g_glTex2FilePath[textureData] = key;
+// 
+// 			cocos2d::Image::setPNGPremultipliedAlphaEnabled(backup);
+// 
+// 			return textureData;
+// 		}
+ 		return NULL;
 	}
 
 	void TextureLoader::Unload(Effekseer::TextureRef data)
 	{
-		if (data != NULL)
-		{
-			auto path = g_glTex2FilePath[data];
-			auto tex = g_filePath2CTex[path];
-
-			if (tex->getReferenceCount() == 1)
-			{
-				CleanupTextureData(data);
-				g_glTex2FilePath.erase(data);
-				g_filePath2EffectData.erase(path);
-				g_filePath2CTex.erase(path);
-			}
-			tex->release();
-		}
+// 		if (data != NULL)
+// 		{
+// 			auto path = g_glTex2FilePath[data];
+// 			auto tex = g_filePath2CTex[path];
+// 
+// 			if (tex->getReferenceCount() == 1)
+// 			{
+// 				CleanupTextureData(data);
+// 				g_glTex2FilePath.erase(data);
+// 				g_filePath2EffectData.erase(path);
+// 				g_filePath2CTex.erase(path);
+// 			}
+// 			tex->release();
+// 		}
 	}
 
 	class EffekseerSetting;
@@ -496,11 +498,11 @@ namespace efk
 		ES_SAFE_RELEASE(internalManager_);
 	}
 
-	std::unique_ptr<EffectEmitter> EffectEmitter::create(EffectManager* manager) { return std::make_unique<EffectEmitter>(manager); }
+	std::unique_ptr<EffectEmitter> EffectEmitter::create(const std::shared_ptr<EffectManager>& manager) { return std::make_unique<EffectEmitter>(nullptr, manager); }
 
-	std::unique_ptr<EffectEmitter> EffectEmitter::create(EffectManager* manager, const std::string& filename, float maginification)
+	std::unique_ptr<EffectEmitter> EffectEmitter::create(const std::shared_ptr<EffectManager>& manager, const std::string& filename, float maginification)
 	{
-		auto effectEmitter = std::make_unique<EffectEmitter>(manager);
+		auto effectEmitter = std::make_unique<EffectEmitter>(nullptr, manager);
 		std::shared_ptr<Effect> effect = Effect::create(filename, maginification);
 		effectEmitter->setEffect(effect);
 		effectEmitter->playOnEnter = true;
@@ -645,55 +647,55 @@ namespace efk
 // 			cocos2d::Node::update(delta);
 // 		}
 // 	}
-
-	void EffectEmitter::draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags)
-	{
-		if (!manager_->getInternalManager()->GetShown(handle) ||
-			manager_->getInternalManager()->GetTotalInstanceCount() < 1)
-			return; // nothing to draw
-
-#ifdef CC_USE_METAL
-		if (!manager_->isDistorted)
-		{
-			// allow frame buffer texture to be copied for distortion
-			cocos2d::backend::Device::getInstance()->setFrameBufferOnly(false);
-		}
-#endif
-
-		renderCommand.init(_globalZOrder);
-
-		auto renderer2d = manager_->getInternalRenderer();
-		Effekseer::Matrix44 mCamera = renderer2d->GetCameraMatrix();
-		Effekseer::Matrix44 mProj = renderer2d->GetProjectionMatrix();
-		renderCommand.func = [=]() -> void {
-			renderer2d->SetCameraMatrix(mCamera);
-			renderer2d->SetProjectionMatrix(mProj);
-
-#ifdef CC_USE_METAL
-			auto commandList = manager_->getInternalCommandList();
-			beforeRender(renderer2d, commandList);
-#endif
-			renderer2d->SetRestorationOfStatesFlag(true);
-			renderer2d->BeginRendering();
-			manager_->getInternalManager()->DrawHandle(handle);
-			renderer2d->EndRendering();
-
-			// Count drawcall and vertex
-			renderer->addDrawnBatches(renderer2d->GetDrawCallCount());
-			renderer->addDrawnVertices(renderer2d->GetDrawVertexCount());
-			renderer2d->ResetDrawCallCount();
-			renderer2d->ResetDrawVertexCount();
-
-#ifdef CC_USE_METAL
-			afterRender(renderer2d, commandList);
-#endif
-
-		};
-
-		renderer->addCommand(&renderCommand);
-
-		cocos2d::Node::draw(renderer, parentTransform, parentFlags);
-	}
+    
+// 	void EffectEmitter::draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags)
+// 	{
+// 		if (!manager_->getInternalManager()->GetShown(handle) ||
+// 			manager_->getInternalManager()->GetTotalInstanceCount() < 1)
+// 			return; // nothing to draw
+// 
+// #ifdef CC_USE_METAL
+// 		if (!manager_->isDistorted)
+// 		{
+// 			// allow frame buffer texture to be copied for distortion
+// 			cocos2d::backend::Device::getInstance()->setFrameBufferOnly(false);
+// 		}
+// #endif
+// 
+// 		renderCommand.init(_globalZOrder);
+// 
+// 		auto renderer2d = manager_->getInternalRenderer();
+// 		Effekseer::Matrix44 mCamera = renderer2d->GetCameraMatrix();
+// 		Effekseer::Matrix44 mProj = renderer2d->GetProjectionMatrix();
+// 		renderCommand.func = [=]() -> void {
+// 			renderer2d->SetCameraMatrix(mCamera);
+// 			renderer2d->SetProjectionMatrix(mProj);
+// 
+// #ifdef CC_USE_METAL
+// 			auto commandList = manager_->getInternalCommandList();
+// 			beforeRender(renderer2d, commandList);
+// #endif
+// 			renderer2d->SetRestorationOfStatesFlag(true);
+// 			renderer2d->BeginRendering();
+// 			manager_->getInternalManager()->DrawHandle(handle);
+// 			renderer2d->EndRendering();
+// 
+// 			// Count drawcall and vertex
+// 			renderer->addDrawnBatches(renderer2d->GetDrawCallCount());
+// 			renderer->addDrawnVertices(renderer2d->GetDrawVertexCount());
+// 			renderer2d->ResetDrawCallCount();
+// 			renderer2d->ResetDrawVertexCount();
+// 
+// #ifdef CC_USE_METAL
+// 			afterRender(renderer2d, commandList);
+// #endif
+// 
+// 		};
+// 
+// 		renderer->addCommand(&renderCommand);
+// 
+// 		cocos2d::Node::draw(renderer, parentTransform, parentFlags);
+// 	}
 	
 	void EffectEmitter::Update(const Urho3D::FrameInfo& frame)
 	{
@@ -723,6 +725,11 @@ namespace efk
             //cocos2d::Node::update(delta);
 			Drawable::Update(frame);
         }
+	}
+    
+	void EffectEmitter::OnWorldBoundingBoxUpdate()
+	{
+        worldBoundingBox_ = boundingBox_.Transformed(node_->GetWorldTransform());
 	}
 
 	void EffectEmitter::OnNodeSet(Urho3D::Node* node)
@@ -814,12 +821,14 @@ namespace efk
 		internalManager_ = getGlobalInternalManager();
 		internalManager_->registerManager(manager2d);
 
+        SubscribeToEvent(Urho3D::E_UPDATE, URHO3D_HANDLER(EffectManager, HandleUpdate));
+
 		return true;
 	}
 
 	std::unique_ptr<EffectManager> EffectManager::create(int visibleWidth, int visibleHeight)
 	{
-		auto ret = std::make_unique<EffectManager>();
+		auto ret = std::make_unique<EffectManager>(GetUrho3DContext());
 		if (ret->Initialize(visibleWidth, visibleHeight))
 		{
 			return ret;
@@ -827,7 +836,9 @@ namespace efk
 		return nullptr;
 	}
 
-	EffectManager::EffectManager() {}
+	EffectManager::EffectManager(Urho3D::Context* context)
+        : Object(context)
+	{}
 
 	EffectManager::~EffectManager()
 	{
