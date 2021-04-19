@@ -618,33 +618,33 @@ namespace efk
 
 	void EffectEmitter::stopRoot() { manager_->getInternalManager()->StopRoot(handle); }
 
-	void EffectEmitter::update(float delta)
-	{
-		auto m = manager_->getInternalManager();
-		if (!m->Exists(handle))
-		{
-			if (isLooping)
-			{
-				play();
-			}
-			else if (removeOnStop && isPlayedAtLeastOnce)
-			{
-				auto transform = node_->GetWorldTransform().ToMatrix4();// this->getNodeToWorldTransform();
-				manager_->setMatrix(handle, transform);
-				cocos2d::Node::update(delta);
-
-				this->removeFromParent();
-				return;
-			}
-		}
-
-		{
-			auto transform = node_->GetWorldTransform().ToMatrix4();// this->getNodeToWorldTransform();
-			manager_->setMatrix(handle, transform);
-
-			cocos2d::Node::update(delta);
-		}
-	}
+// 	void EffectEmitter::update(float delta)
+// 	{
+// 		auto m = manager_->getInternalManager();
+// 		if (!m->Exists(handle))
+// 		{
+// 			if (isLooping)
+// 			{
+// 				play();
+// 			}
+// 			else if (removeOnStop && isPlayedAtLeastOnce)
+// 			{
+// 				auto transform = node_->GetWorldTransform().ToMatrix4();// this->getNodeToWorldTransform();
+// 				manager_->setMatrix(handle, transform);
+// 				cocos2d::Node::update(delta);
+// 
+// 				this->removeFromParent();
+// 				return;
+// 			}
+// 		}
+// 
+// 		{
+// 			auto transform = node_->GetWorldTransform().ToMatrix4();// this->getNodeToWorldTransform();
+// 			manager_->setMatrix(handle, transform);
+// 
+// 			cocos2d::Node::update(delta);
+// 		}
+// 	}
 
 	void EffectEmitter::draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags)
 	{
@@ -695,6 +695,36 @@ namespace efk
 		cocos2d::Node::draw(renderer, parentTransform, parentFlags);
 	}
 	
+	void EffectEmitter::Update(const Urho3D::FrameInfo& frame)
+	{
+        auto m = manager_->getInternalManager();
+        if (!m->Exists(handle))
+        {
+            if (isLooping)
+            {
+                play();
+            }
+            else if (removeOnStop && isPlayedAtLeastOnce)
+            {
+                auto transform = node_->GetWorldTransform().ToMatrix4(); // this->getNodeToWorldTransform();
+                manager_->setMatrix(handle, transform);
+                //cocos2d::Node::update(delta);
+				Drawable::Update(frame);
+				Remove();
+                //this->removeFromParent();
+                return;
+            }
+        }
+
+        {
+            auto transform = node_->GetWorldTransform().ToMatrix4(); // this->getNodeToWorldTransform();
+            manager_->setMatrix(handle, transform);
+
+            //cocos2d::Node::update(delta);
+			Drawable::Update(frame);
+        }
+	}
+
 	void EffectEmitter::OnNodeSet(Urho3D::Node* node)
 	{
 		if (node)

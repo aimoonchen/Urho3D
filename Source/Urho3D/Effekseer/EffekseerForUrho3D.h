@@ -6,6 +6,7 @@
 
 namespace Urho3D {
     class Node;
+    class FrameInfo;
 }
 namespace efk
 {
@@ -80,7 +81,8 @@ public:
     void stopRoot();
 //     void onEnter() override;
 //     void onExit() override;
-    void update(float delta) override;
+//    void update(float delta) override;
+    void Update(const Urho3D::FrameInfo& frame) override;
     void draw(/*cocos2d::Renderer* renderer, */const Urho3D::Matrix4& parentTransform, uint32_t parentFlags) override;
 protected:
     void OnNodeSet(Urho3D::Node* node) override;
