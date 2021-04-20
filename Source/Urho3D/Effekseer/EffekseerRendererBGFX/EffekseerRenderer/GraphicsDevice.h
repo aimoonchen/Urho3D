@@ -123,7 +123,7 @@ public:
 
 	std::string GetDeviceName() const override
 	{
-		return "OpenGL";
+		return "BGFX";
 	}
 
 	Effekseer::Backend::TextureRef CreateTexture(bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed);

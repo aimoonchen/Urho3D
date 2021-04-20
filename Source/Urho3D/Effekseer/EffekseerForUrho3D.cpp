@@ -759,12 +759,12 @@ namespace efk
 
 	::Effekseer::Handle EffectManager::play(Effect* effect, float x, float y, float z)
 	{
-		return manager2d->Play(effect->getInternalPtr(), x, y, z);
+		return manager_->Play(effect->getInternalPtr(), x, y, z);
 	}
 
 	::Effekseer::Handle EffectManager::play(Effect* effect, float x, float y, float z, int startTime)
 	{
-		return manager2d->Play(effect->getInternalPtr(), Effekseer::Vector3D(x, y, z), startTime);
+		return manager_->Play(effect->getInternalPtr(), Effekseer::Vector3D(x, y, z), startTime);
 	}
 
 	void EffectManager::setMatrix(::Effekseer::Handle handle, const Urho3D::Matrix4& mat)
@@ -779,14 +779,14 @@ namespace efk
 		memcpy(mat_.Value[2], p, size);
 		p += 4;
 		memcpy(mat_.Value[3], p, size);
-		manager2d->SetMatrix(handle, mat_);
+		manager_->SetMatrix(handle, mat_);
 	}
 
-	void EffectManager::setPotation(::Effekseer::Handle handle, float x, float y, float z) { manager2d->SetLocation(handle, x, y, z); }
+	void EffectManager::setPotation(::Effekseer::Handle handle, float x, float y, float z) { manager_->SetLocation(handle, x, y, z); }
 
-	void EffectManager::setRotation(::Effekseer::Handle handle, float x, float y, float z) { manager2d->SetRotation(handle, x, y, z); }
+	void EffectManager::setRotation(::Effekseer::Handle handle, float x, float y, float z) { manager_->SetRotation(handle, x, y, z); }
 
-	void EffectManager::setScale(::Effekseer::Handle handle, float x, float y, float z) { manager2d->SetScale(handle, x, y, z); }
+	void EffectManager::setScale(::Effekseer::Handle handle, float x, float y, float z) { manager_->SetScale(handle, x, y, z); }
 
 	bool EffectManager::Initialize(int visibleWidth, int visibleHeight)
 	{
@@ -799,30 +799,30 @@ namespace efk
 
 		CreateRenderer(spriteSize);
 
-		manager2d = ::Effekseer::Manager::Create(8000);
+		manager_ = ::Effekseer::Manager::Create(8000);
 
 		// set camera and projection matrix for 2d
 		// If you special camera or 3d, please set yourself with setCameraMatrix and setProjectionMatrix
-		renderer2d->SetProjectionMatrix(::Effekseer::Matrix44().OrthographicRH(visibleWidth, visibleHeight, 1.0f, 400.0f));
+		renderer_->SetProjectionMatrix(::Effekseer::Matrix44().OrthographicRH(visibleWidth, visibleHeight, 1.0f, 400.0f));
 
-		renderer2d->SetCameraMatrix(
+		renderer_->SetCameraMatrix(
 			::Effekseer::Matrix44().LookAtRH(::Effekseer::Vector3D(visibleWidth / 2.0f, visibleHeight / 2.0f, 200.0f),
 				::Effekseer::Vector3D(visibleWidth / 2.0f, visibleHeight / 2.0f, -200.0f),
 				::Effekseer::Vector3D(0.0f, 1.0f, 0.0f)));
 
-		distortingCallback = CreateDistortingCallback(renderer2d, commandList_);
+		distortingCallback = CreateDistortingCallback(renderer_, commandList_);
 
-		manager2d->SetSpriteRenderer(renderer2d->CreateSpriteRenderer());
-		manager2d->SetRibbonRenderer(renderer2d->CreateRibbonRenderer());
-		manager2d->SetRingRenderer(renderer2d->CreateRingRenderer());
-		manager2d->SetModelRenderer(renderer2d->CreateModelRenderer());
-		manager2d->SetTrackRenderer(renderer2d->CreateTrackRenderer());
+		manager_->SetSpriteRenderer(renderer_->CreateSpriteRenderer());
+		manager_->SetRibbonRenderer(renderer_->CreateRibbonRenderer());
+		manager_->SetRingRenderer(renderer_->CreateRingRenderer());
+		manager_->SetModelRenderer(renderer_->CreateModelRenderer());
+		manager_->SetTrackRenderer(renderer_->CreateTrackRenderer());
 
 		internalManager_ = getGlobalInternalManager();
-		internalManager_->registerManager(manager2d);
+		internalManager_->registerManager(manager_);
 
-        SubscribeToEvent(Urho3D::E_UPDATE, URHO3D_HANDLER(EffectManager, HandleUpdate));
-
+        //SubscribeToEvent(Urho3D::E_UPDATE, URHO3D_HANDLER(EffectManager, HandleUpdate));
+		SubscribeToEvent(Urho3D::E_RENDERUPDATE, URHO3D_HANDLER(EffectManager, HandleRenderUpdate));
 		return true;
 	}
 
@@ -843,7 +843,7 @@ namespace efk
 	EffectManager::~EffectManager()
 	{
 		if (distortingCallback != nullptr &&
-			renderer2d->GetDistortingCallback() != distortingCallback)
+			renderer_->GetDistortingCallback() != distortingCallback)
 		{
 			delete distortingCallback;
 			distortingCallback = nullptr;
@@ -851,20 +851,26 @@ namespace efk
 
 		onDestructor();
 
-		if (manager2d != nullptr)
+		if (manager_ != nullptr)
 		{
-			internalManager_->unregisterManager(manager2d);
-			manager2d = nullptr;
+			internalManager_->unregisterManager(manager_);
+			manager_ = nullptr;
 		}
 
-		if (renderer2d != nullptr)
+		if (renderer_ != nullptr)
 		{
-			renderer2d = nullptr;
+			renderer_ = nullptr;
 		}
 
 		memoryPool_.Reset();
 		commandList_.Reset();
 		ES_SAFE_RELEASE(internalManager_);
+	}
+	
+	void EffectManager::HandleRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData)
+	{
+		float timeStep = eventData[Urho3D::RenderUpdate::P_TIMESTEP].GetFloat();
+		Update(timeStep);
 	}
 
 	void EffectManager::setIsDistortionEnabled(bool value)
@@ -872,11 +878,11 @@ namespace efk
 		isDistortionEnabled = value;
 		if (isDistortionEnabled)
 		{
-			renderer2d->SetDistortingCallback(distortingCallback);
+			renderer_->SetDistortingCallback(distortingCallback);
 		}
 		else
 		{
-			renderer2d->SetDistortingCallback(nullptr);
+			renderer_->SetDistortingCallback(nullptr);
 		}
 	}
 
@@ -889,7 +895,7 @@ namespace efk
 		else
 		{
 			isDistorted = true;
-			ResetBackground(renderer2d);
+			ResetBackground(renderer_);
 		}
 
 		newFrame();
@@ -941,13 +947,25 @@ namespace efk
 		getInternalRenderer()->SetProjectionMatrix(mat_);
 	}
 
-	void EffectManager::update(float delta)
+	void EffectManager::Update(float delta)
 	{
-		manager2d->Update();
+		// Stabilize in a variable frame environment
+        float deltaFrames = delta * 60.0f;
+        int iterations = std::max(1, (int)roundf(deltaFrames));
+        float advance = deltaFrames / iterations;
+        for (int i = 0; i < iterations; i++)
+        {
+            manager_->Update(advance);
+        }
 		time_ += delta;
-		renderer2d->SetTime(time_);
+		renderer_->SetTime(time_);
 	}
-
+	void EffectManager::Render()
+	{
+		renderer_->BeginRendering();
+		manager_->Draw();
+		renderer_->EndRendering();
+	}
 	NetworkServer* NetworkServer::create() { return new NetworkServer(); }
 
 	NetworkServer::NetworkServer() { internalManager_ = getGlobalInternalManager(); }

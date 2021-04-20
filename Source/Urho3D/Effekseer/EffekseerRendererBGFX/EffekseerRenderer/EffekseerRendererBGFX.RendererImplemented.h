@@ -5,6 +5,11 @@
 #include "EffekseerRendererBGFX.Renderer.h"
 #include "GraphicsDevice.h"
 
+namespace Urho3D
+{
+	class Graphics;
+}
+
 namespace EffekseerRendererBGFX
 {
 
@@ -38,6 +43,7 @@ class RendererImplemented : public Renderer, public ::Effekseer::ReferenceObject
 
 private:
 	Backend::GraphicsDeviceRef graphicsDevice_ = nullptr;
+	Urho3D::Graphics* graphics_{};
 	struct BGFXBuffer
 	{
 		VertexBuffer* m_vertexBuffer{ nullptr };
@@ -75,7 +81,7 @@ private:
 	int32_t GetIndexSpriteCount() const;
 
 public:
-	RendererImplemented(int32_t squareMaxCount, Backend::GraphicsDeviceRef graphicsDevice);
+	RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics);
 
 	~RendererImplemented();
 

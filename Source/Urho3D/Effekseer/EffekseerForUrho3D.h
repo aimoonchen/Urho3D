@@ -94,8 +94,8 @@ class EffectManager : public Urho3D::Object
     URHO3D_OBJECT(EffectManager, Object);
 	friend class EffectEmitter;
 private:
-	::Effekseer::ManagerRef manager2d = nullptr;
-	::EffekseerRenderer::RendererRef renderer2d = nullptr;
+	::Effekseer::ManagerRef manager_ = nullptr;
+	::EffekseerRenderer::RendererRef renderer_ = nullptr;
 	::EffekseerRenderer::DistortingCallback* distortingCallback = NULL;
 	::Effekseer::RefPtr<::EffekseerRenderer::SingleFrameMemoryPool> memoryPool_ = nullptr;
 	::Effekseer::RefPtr<::EffekseerRenderer::CommandList> commandList_ = nullptr;
@@ -117,7 +117,8 @@ private:
 	void onDestructor();
 
 public:
-    void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    //void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
+    void HandleRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 	static std::unique_ptr<EffectManager> create(int visibleWidth, int visibleHeight);
     EffectManager(Urho3D::Context* context);
 	virtual ~EffectManager();
@@ -125,9 +126,10 @@ public:
 	void begin(/*cocos2d::Renderer* renderer, */float globalZOrder);
 	void end(/*cocos2d::Renderer* renderer, */float globalZOrder);
 	void newFrame();
-	void update(float delta = 1.0f / 60.0f);
-	::Effekseer::ManagerRef getInternalManager() { return manager2d; }
-	::EffekseerRenderer::RendererRef getInternalRenderer() { return renderer2d; }
+	void Update(float delta = 1.0f / 60.0f);
+    void Render();
+	::Effekseer::ManagerRef getInternalManager() { return manager_; }
+	::EffekseerRenderer::RendererRef getInternalRenderer() { return renderer_; }
 	void setCameraMatrix(const Urho3D::Matrix4& mat);
 	void setProjectionMatrix(const Urho3D::Matrix4& mat);
 	Effekseer::RefPtr<::EffekseerRenderer::CommandList> getInternalCommandList() { return commandList_; }

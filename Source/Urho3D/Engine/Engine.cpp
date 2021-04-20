@@ -63,6 +63,7 @@
 #ifdef URHO3D_URHO2D
 #include "../Urho2D/Urho2D.h"
 #endif
+#include "../Effekseer/EffekseerForUrho3D.h"
 
 #if defined(__EMSCRIPTEN__) && defined(URHO3D_TESTING)
 #include <emscripten/emscripten.h>
@@ -141,7 +142,7 @@ Engine::Engine(Context* context) :
     context_->RegisterSubsystem(new Audio(context_));
     context_->RegisterSubsystem(new UI(context_));
     context_->RegisterSubsystem(new GUI(context_));
-
+    context_->RegisterSubsystem(new efk::EffectManager(context_));
     // Register object factories for libraries which are not automatically registered along with subsystem creation
     RegisterSceneLibrary(context_);
 
@@ -720,6 +721,7 @@ void Engine::Render()
         return;
 
     GetSubsystem<Renderer>()->Render();
+    GetSubsystem<efk::EffectManager>()->Render();
     GetSubsystem<UI>()->Render();
     GetSubsystem<GUI>()->Render();
     graphics->EndFrame();

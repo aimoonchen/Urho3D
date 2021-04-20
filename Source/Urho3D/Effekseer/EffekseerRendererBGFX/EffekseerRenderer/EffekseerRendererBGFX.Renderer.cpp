@@ -39,6 +39,7 @@
 //#include "ShaderHeader/sprite_unlit_vs.h"
 
 #include "GraphicsDevice.h"
+#include "../Graphics/Graphics.h"
 
 namespace EffekseerRendererBGFX
 {
@@ -121,14 +122,15 @@ int32_t RendererImplemented::GetIndexSpriteCount() const
 	return (int32_t)(vsSize / size / 4 + 1);
 }
 
-RendererImplemented::RendererImplemented(int32_t squareMaxCount, Backend::GraphicsDeviceRef graphicsDevice)
+RendererImplemented::RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics)
 	: m_squareMaxCount(squareMaxCount)
 	, m_renderState(nullptr)
 	, m_restorationOfStates(true)
 	, m_standardRenderer(nullptr)
 	, m_distortingCallback(nullptr)
+	, graphics_ {graphics}
 {
-	graphicsDevice_ = graphicsDevice;
+	//graphicsDevice_ = graphicsDevice;
 	bgfx_buffer_.resize(static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1);
 }
 
@@ -751,7 +753,8 @@ void RendererImplemented::SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t si
 	//if (m_currentVertexArray == nullptr || m_currentVertexArray->GetVertexBuffer() == nullptr)
 	//{
 		//GLExt::glBindBuffer(GL_ARRAY_BUFFER, vertexBuffer->GetInterface());
-		bgfx::setVertexBuffer(0, vertexBuffer->GetInterface());
+		//bgfx::setVertexBuffer(0, vertexBuffer->GetInterface());
+	graphics_->SetVertexBuffer(vertexBuffer->GetInterface());
 	//}
 }
 /*
