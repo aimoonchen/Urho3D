@@ -131,7 +131,66 @@ RendererImplemented::RendererImplemented(int32_t squareMaxCount, Urho3D::Graphic
 	, graphics_ {graphics}
 {
 	//graphicsDevice_ = graphicsDevice;
-	bgfx_buffer_.resize(static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1);
+    auto shaderTypeCount = static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1;
+    bgfx_buffer_.resize(shaderTypeCount);
+    s_bgfx_context_.resize(shaderTypeCount);
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Unlit)].vertex_layout_ =
+        Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+//         .vertex_layout_.begin()
+//         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+//         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+//         .end();
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Lit)].vertex_layout_ =
+        Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_NORMAL | Urho3D::MASK_TANGENT |
+        Urho3D::MASK_TEXCOORD1 | Urho3D::MASK_TEXCOORD2;
+            //         .m_vertexLayout.begin()
+//         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+//         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+//         .end();
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].vertex_layout_ =
+        s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Lit)].vertex_layout_;
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedUnlit)].vertex_layout_ =
+        Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+    //         .m_vertexLayout.begin()
+//         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+//         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord1, 4, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+//         .end();
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedLit)].vertex_layout_ =
+        Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+    //         .m_vertexLayout.begin()
+//         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+//         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord4, 4, bgfx::AttribType::Float)
+//         .end();
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)].vertex_layout_ =
+        s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedLit)].vertex_layout_;
+    s_bgfx_context_[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material)].vertex_layout_ =
+        Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+    //         .m_vertexLayout.begin()
+//         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+//         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+//         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+//         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+//         .end();
 }
 
 RendererImplemented::~RendererImplemented()
@@ -650,7 +709,7 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
 
 		// generate a vertex buffer
 		{
-			bgfxBuffer.m_vertexBuffer = VertexBuffer::Create(calculate_stride(EffekseerRenderer::RendererShaderType(i)) * m_squareMaxCount * 4, true, *s_bgfx_context_[i].vertex_layout_);
+			bgfxBuffer.m_vertexBuffer = VertexBuffer::Create(calculate_stride(EffekseerRenderer::RendererShaderType(i)) * m_squareMaxCount * 4, true, s_bgfx_context_[i].vertex_layout_);
 			if (bgfxBuffer.m_vertexBuffer == nullptr)
 				return;
 		}

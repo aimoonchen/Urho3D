@@ -22,7 +22,8 @@ Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceR
 struct bgfx_context
 {
 	bgfx::ProgramHandle program_;
-	bgfx::VertexLayout* vertex_layout_;
+	//bgfx::VertexLayout* vertex_layout_;
+    unsigned int vertex_layout_;
 	std::unordered_map<std::string, bgfx::UniformHandle> uniforms_;
 };
 

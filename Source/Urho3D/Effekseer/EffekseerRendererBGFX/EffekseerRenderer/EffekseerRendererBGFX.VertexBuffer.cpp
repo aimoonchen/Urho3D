@@ -1,8 +1,11 @@
 #include "EffekseerRendererBGFX.VertexBuffer.h"
 
+#include "Urho3DContext.h"
+#include "../../../Graphics/VertexBuffer.h"
+
 namespace EffekseerRendererBGFX {
 
-VertexBuffer::VertexBuffer(int size, bool isDynamic, const bgfx::VertexLayout& layout)
+VertexBuffer::VertexBuffer(int size, bool isDynamic, unsigned int elementMask/*const bgfx::VertexLayout& layout*/)
 	: VertexBufferBase(size, isDynamic)
 	, m_vertexRingStart(0)
 	, m_vertexRingOffset(0)
@@ -10,28 +13,32 @@ VertexBuffer::VertexBuffer(int size, bool isDynamic, const bgfx::VertexLayout& l
 {
 	m_resource = new uint8_t[m_size];
 	memset(m_resource, 0, (size_t)m_size);
-	m_stride = layout.getStride();
-	m_buffer = bgfx::createDynamicVertexBuffer(
-		bgfx::makeRef(m_resource, m_size),
-		layout
-	);
+//	m_stride = layout.getStride();
+// 	m_buffer = bgfx::createDynamicVertexBuffer(
+// 		bgfx::makeRef(m_resource, m_size),
+// 		layout
+// 	);
+    m_buffer = new Urho3D::VertexBuffer(GetUrho3DContext());
+    m_buffer->SetSize(size / 24, elementMask, isDynamic);
+    m_stride = m_buffer->GetVertexSize();
 }
 
 VertexBuffer::~VertexBuffer()
 {
 	delete[] m_resource;
-	bgfx::destroy(m_buffer);
+	//bgfx::destroy(m_buffer);
+    delete m_buffer;
 }
 
-VertexBuffer* VertexBuffer::Create(int size, bool isDynamic, const bgfx::VertexLayout& layout)
+VertexBuffer* VertexBuffer::Create(int size, bool isDynamic, unsigned int elementMask/*const bgfx::VertexLayout& layout*/)
 {
-	return new VertexBuffer(size, isDynamic, layout);
+    return new VertexBuffer(size, isDynamic, elementMask /*layout*/);
 }
 
-bgfx::DynamicVertexBufferHandle VertexBuffer::GetInterface()
-{
-	return m_buffer;
-}
+// bgfx::DynamicVertexBufferHandle VertexBuffer::GetInterface()
+// {
+// 	return m_buffer;
+// }
 
 void VertexBuffer::Lock()
 {
@@ -92,7 +99,8 @@ bool VertexBuffer::TryRingBufferLock(int32_t size, int32_t& offset, void*& data,
 void VertexBuffer::Unlock()
 {
 	assert(m_isLock || m_ringBufferLock);
-	bgfx::update(m_buffer, m_vertexRingStart / m_stride, bgfx::copy(m_resource, m_offset));
+	//bgfx::update(m_buffer, m_vertexRingStart / m_stride, bgfx::copy(m_resource, m_offset));
+    m_buffer->SetDataRange(m_resource, m_vertexRingStart / m_stride, m_offset / m_stride);
 	if (m_isLock)
 	{
 		m_vertexRingOffset += m_offset;
@@ -104,7 +112,7 @@ void VertexBuffer::Unlock()
 
 bool VertexBuffer::IsValid()
 {
-	return bgfx::isValid(m_buffer);
+	return m_buffer->GetGPUObjectHandle() != bgfx::kInvalidHandle; // bgfx::isValid(m_buffer);
 }
 
 } // namespace EffekseerRendererBGFX

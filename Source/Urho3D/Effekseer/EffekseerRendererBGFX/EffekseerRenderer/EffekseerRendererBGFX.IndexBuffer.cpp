@@ -1,8 +1,10 @@
 #include "EffekseerRendererBGFX.IndexBuffer.h"
-
+#include "Urho3DContext.h"
+#include "../../../Graphics/IndexBuffer.h"
 namespace EffekseerRendererBGFX
 {
-IndexBuffer::IndexBuffer(bgfx::DynamicIndexBufferHandle buffer, int maxCount, bool isDynamic, int32_t stride)
+IndexBuffer::IndexBuffer(/*bgfx::DynamicIndexBufferHandle buffer*/ Urho3D::IndexBuffer* buffer, int maxCount,
+                         bool isDynamic, int32_t stride)
 	: IndexBufferBase(maxCount, isDynamic)
 	, m_buffer(buffer)
 {
@@ -13,16 +15,18 @@ IndexBuffer::IndexBuffer(bgfx::DynamicIndexBufferHandle buffer, int maxCount, bo
 IndexBuffer::~IndexBuffer()
 {
 	delete[] m_resource;
-	bgfx::destroy(m_buffer);
+	//bgfx::destroy(m_buffer);
+    delete m_buffer;
 }
 
 IndexBuffer* IndexBuffer::Create(int maxCount, bool isDynamic, int32_t stride)
 {
-	uint16_t flags = 0
-		| ((stride == 4) ? BGFX_BUFFER_INDEX32 : 0);
-	auto ib = bgfx::createDynamicIndexBuffer(maxCount, flags);
-
-	return new IndexBuffer(ib, maxCount, isDynamic, stride);
+// 	uint16_t flags = 0
+// 		| ((stride == 4) ? BGFX_BUFFER_INDEX32 : 0);
+// 	auto ib = bgfx::createDynamicIndexBuffer(maxCount, flags);
+    auto buffer = new Urho3D::IndexBuffer(GetUrho3DContext());
+    buffer->SetSize(maxCount, stride > 2, isDynamic);
+    return new IndexBuffer(buffer /*ib*/, maxCount, isDynamic, stride);
 }
 
 void IndexBuffer::Lock()
@@ -36,14 +40,15 @@ void IndexBuffer::Lock()
 void IndexBuffer::Unlock()
 {
 	assert(m_isLock);
-	const bgfx::Memory* mem = bgfx::makeRef(m_resource, m_indexCount * stride_);
-	bgfx::update(m_buffer, 0, mem);
+// 	const bgfx::Memory* mem = bgfx::makeRef(m_resource, m_indexCount * stride_);
+// 	bgfx::update(m_buffer, 0, mem);
+    m_buffer->SetData(m_resource);
 	m_isLock = false;
 }
 
 bool IndexBuffer::IsValid()
 {
-	return bgfx::isValid(m_buffer);
+	return m_buffer->GetGPUObjectHandle() != bgfx::kInvalidHandle; // bgfx::isValid(m_buffer);
 }
 
 } // namespace EffekseerRendererBGFX
