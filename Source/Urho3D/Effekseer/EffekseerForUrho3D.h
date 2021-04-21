@@ -6,7 +6,7 @@
 
 namespace Urho3D {
     class Node;
-    class FrameInfo;
+    struct FrameInfo;
 }
 namespace efk
 {
@@ -112,11 +112,12 @@ private:
 	void setPotation(::Effekseer::Handle handle, float x, float y, float z);
 	void setRotation(::Effekseer::Handle handle, float x, float y, float z);
 	void setScale(::Effekseer::Handle handle, float x, float y, float z);
-	bool Initialize(int visibleWidth, int visibleHeight);
+	
 	void CreateRenderer(int32_t spriteSize);
 	void onDestructor();
 
 public:
+    bool Initialize(int visibleWidth, int visibleHeight);
     //void HandleUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
     void HandleRenderUpdate(Urho3D::StringHash eventType, Urho3D::VariantMap& eventData);
 	static std::unique_ptr<EffectManager> create(int visibleWidth, int visibleHeight);
@@ -127,7 +128,7 @@ public:
 	void end(/*cocos2d::Renderer* renderer, */float globalZOrder);
 	void newFrame();
 	void Update(float delta = 1.0f / 60.0f);
-    void Render();
+    void Render(/*const Urho3D::Matrix4& viewMat*/);
 	::Effekseer::ManagerRef getInternalManager() { return manager_; }
 	::EffekseerRenderer::RendererRef getInternalRenderer() { return renderer_; }
 	void setCameraMatrix(const Urho3D::Matrix4& mat);

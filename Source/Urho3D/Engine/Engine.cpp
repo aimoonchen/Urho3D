@@ -721,7 +721,12 @@ void Engine::Render()
         return;
 
     GetSubsystem<Renderer>()->Render();
-    GetSubsystem<efk::EffectManager>()->Render();
+    efk::EffectManager* em = GetSubsystem<efk::EffectManager>();
+    if (!em) {
+        em = new efk::EffectManager(context_);
+        em->Initialize(graphics->GetWidth(), graphics->GetHeight());
+    }
+    em->Render();
     GetSubsystem<UI>()->Render();
     GetSubsystem<GUI>()->Render();
     graphics->EndFrame();

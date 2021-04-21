@@ -19,6 +19,7 @@ class GraphicsDevice;
 
 namespace EffekseerRenderer
 {
+
 class Renderer;
 using RendererRef = ::Effekseer::RefPtr<Renderer>;
 class DistortingCallback
@@ -147,7 +148,7 @@ public:
 
 	virtual Effekseer::Backend::GraphicsDeviceRef GetGraphicsDevice() const;
 };
-
+*/
 } // namespace EffekseerRenderer
 
 namespace EffekseerRendererBGFX

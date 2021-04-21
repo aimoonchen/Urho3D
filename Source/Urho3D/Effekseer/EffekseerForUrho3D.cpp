@@ -787,7 +787,7 @@ namespace efk
 	void EffectManager::setRotation(::Effekseer::Handle handle, float x, float y, float z) { manager_->SetRotation(handle, x, y, z); }
 
 	void EffectManager::setScale(::Effekseer::Handle handle, float x, float y, float z) { manager_->SetScale(handle, x, y, z); }
-
+    
 	bool EffectManager::Initialize(int visibleWidth, int visibleHeight)
 	{
 		// large buffer make application slow on Android
@@ -803,10 +803,10 @@ namespace efk
 
 		// set camera and projection matrix for 2d
 		// If you special camera or 3d, please set yourself with setCameraMatrix and setProjectionMatrix
-		renderer_->SetProjectionMatrix(::Effekseer::Matrix44().OrthographicRH(visibleWidth, visibleHeight, 1.0f, 400.0f));
+		renderer_->SetProjectionMatrix(::Effekseer::Matrix44().OrthographicLH(visibleWidth, visibleHeight, 1.0f, 400.0f));
 
 		renderer_->SetCameraMatrix(
-			::Effekseer::Matrix44().LookAtRH(::Effekseer::Vector3D(visibleWidth / 2.0f, visibleHeight / 2.0f, 200.0f),
+			::Effekseer::Matrix44().LookAtLH(::Effekseer::Vector3D(visibleWidth / 2.0f, visibleHeight / 2.0f, 200.0f),
 				::Effekseer::Vector3D(visibleWidth / 2.0f, visibleHeight / 2.0f, -200.0f),
 				::Effekseer::Vector3D(0.0f, 1.0f, 0.0f)));
 
@@ -817,6 +817,11 @@ namespace efk
 		manager_->SetRingRenderer(renderer_->CreateRingRenderer());
 		manager_->SetModelRenderer(renderer_->CreateModelRenderer());
 		manager_->SetTrackRenderer(renderer_->CreateTrackRenderer());
+		//
+		manager_->SetTextureLoader(renderer_->CreateTextureLoader());
+        manager_->SetModelLoader(renderer_->CreateModelLoader());
+        manager_->SetMaterialLoader(renderer_->CreateMaterialLoader());
+        manager_->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
 
 		internalManager_ = getGlobalInternalManager();
 		internalManager_->registerManager(manager_);
@@ -838,7 +843,8 @@ namespace efk
 
 	EffectManager::EffectManager(Urho3D::Context* context)
         : Object(context)
-	{}
+	{
+	}
 
 	EffectManager::~EffectManager()
 	{
@@ -960,8 +966,10 @@ namespace efk
 		time_ += delta;
 		renderer_->SetTime(time_);
 	}
-	void EffectManager::Render()
+	void EffectManager::Render(/*const Urho3D::Matrix4& viewMat*/)
 	{
+//         Effekseer::Matrix44 matrix = EffekseerGodot::ToEfkMatrix44(camera_transform.inverse());
+//         renderer_->SetCameraMatrix(matrix);
 		renderer_->BeginRendering();
 		manager_->Draw();
 		renderer_->EndRendering();
