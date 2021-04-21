@@ -1,5 +1,5 @@
 #pragma once
-#include <bgfx/bgfx.h>
+//#include <bgfx/bgfx.h>
 #include <Effekseer.h>
 #include <assert.h>
 #include <float.h>

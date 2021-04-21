@@ -259,6 +259,8 @@ bool VertexBuffer::SetDataRange(const void* data, unsigned start, unsigned count
     return true;
 }
 
+bool VertexBuffer::IsValid() const { return GetGPUObjectHandle() != bgfx::kInvalidHandle; }
+
 void* VertexBuffer::Lock(unsigned start, unsigned count, bool discard)
 {
     if (lockState_ != LOCK_NONE)

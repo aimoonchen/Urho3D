@@ -5,6 +5,11 @@
 #include <string>
 #include <vector>
 
+namespace Urho3D
+{
+	class Texture2D;
+}
+
 namespace EffekseerRendererBGFX {
 	namespace Backend {
 		class Texture;
@@ -12,7 +17,8 @@ namespace EffekseerRendererBGFX {
 		class Texture : public Effekseer::Backend::Texture
 		{
 		private:
-			bgfx::TextureHandle buffer_{ BGFX_INVALID_HANDLE };
+			//bgfx::TextureHandle buffer_{ BGFX_INVALID_HANDLE };
+			Urho3D::Texture2D* buffer_{ nullptr };
 			//GraphicsDevice* graphicsDevice_ = nullptr;
 			std::function<void()> onDisposed_;
 			bool InitInternal(const Effekseer::Backend::TextureParameter& param);
@@ -22,8 +28,8 @@ namespace EffekseerRendererBGFX {
 			bool Init(const Effekseer::Backend::TextureParameter& param);
 			bool Init(const Effekseer::Backend::RenderTextureParameter& param);
 			bool Init(const Effekseer::Backend::DepthTextureParameter& param);
-			bool Init(bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed);
-			bgfx::TextureHandle GetBuffer() const { return buffer_; }
+			bool Init(Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed);
+			Urho3D::Texture2D* GetBuffer() const { return buffer_; }
 		};
 	}
 } // namespace EffekseerRendererBGFX

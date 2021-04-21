@@ -1,7 +1,11 @@
 #pragma once
 
 #include <Effekseer.h>
-#include <bgfx/c99/bgfx.h>
+
+namespace Urho3D
+{
+	class Texture2D;
+}
 
 namespace Effekseer
 {
@@ -161,7 +165,7 @@ namespace EffekseerRendererBGFX
 ::Effekseer::MaterialLoaderRef CreateMaterialLoader(Effekseer::Backend::GraphicsDeviceRef graphicsDevice,
 												  ::Effekseer::FileInterface* fileInterface = nullptr);
 
-Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed);
+Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, /*bgfx::TextureHandle*/Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed);
 
 
 class Renderer;

@@ -77,7 +77,7 @@ public:
     /// Return render surface.
     /// @property
     RenderSurface* GetRenderSurface() const { return renderSurface_; }
-
+    bool IsValid() const;
 protected:
     /// Create the GPU texture.
     bool Create() override;

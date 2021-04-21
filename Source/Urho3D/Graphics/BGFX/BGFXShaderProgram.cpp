@@ -498,5 +498,8 @@ uint16_t ShaderProgram::GetUniform(StringHash param)
     }
     return BGFX_INVALID_HANDLE;
 }
-
+bool ShaderProgram::IsValid() const
+{
+    return GetGPUObjectHandle() != bgfx::kInvalidHandle;
+}
 }

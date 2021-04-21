@@ -423,4 +423,5 @@ bool Texture2D::Create()
     return success;
 }
 
+bool Texture2D::IsValid() const { return GetGPUObjectHandle() != bgfx::kInvalidHandle; }
 }

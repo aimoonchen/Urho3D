@@ -89,6 +89,7 @@ public:
 
     /// Return shared array pointer to the CPU memory shadow data.
     SharedArrayPtr<unsigned char> GetShadowDataShared() const { return shadowData_; }
+    bool IsValid() const;
 
 private:
     /// Create buffer.

@@ -139,6 +139,8 @@ public:
     /// Update offsets of vertex elements.
     static void UpdateOffsets(PODVector<VertexElement>& elements);
 
+    bool IsValid() const;
+
 private:
     /// Update offsets of vertex elements.
     void UpdateOffsets();

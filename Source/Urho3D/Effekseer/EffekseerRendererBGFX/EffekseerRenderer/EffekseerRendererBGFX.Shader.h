@@ -3,8 +3,15 @@
 
 #include "../../EffekseerRendererCommon/EffekseerRenderer.ShaderBase.h"
 
+#include "../../../Math/StringHash.h"
+
 #include <string>
 #include <vector>
+
+namespace Urho3D
+{
+	class ShaderProgram;
+}
 
 namespace EffekseerRendererBGFX {
 
@@ -38,34 +45,35 @@ private:
 	struct ConstantLayout
 	{
 		eConstantType Type;
-		bgfx::UniformHandle ID;
+		//bgfx::UniformHandle ID;
+		Urho3D::StringHash ID;
 		int32_t Offset;
 		int32_t Count;
 	};
-
-	bgfx::ProgramHandle m_program;
-
+	Urho3D::Graphics* graphics_{ nullptr };
+	//bgfx::ProgramHandle m_program;
+	Urho3D::ShaderProgram* m_program;
 	uint8_t* m_vertexConstantBuffer;
 	uint8_t* m_pixelConstantBuffer;
 
 	std::vector<ConstantLayout> m_vertexConstantLayout;
 	std::vector<ConstantLayout> m_pixelConstantLayout;
 
-	std::array<bgfx::UniformHandle, Effekseer::TextureSlotMax> m_textureSlots;
+	std::array<Urho3D::StringHash/*bgfx::UniformHandle*/, Effekseer::TextureSlotMax> m_textureSlots;
 	std::array<bool, Effekseer::TextureSlotMax> m_textureSlotEnables;
 
 	bool isTransposeEnabled_ = false;
-
-	Shader(bgfx::ProgramHandle programHandle);
+	
+	Shader(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* programHandle);
 public:
-	std::unordered_map<std::string, bgfx::UniformHandle> uniforms_;
+	std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/> uniforms_;
 	virtual ~Shader();
 
-	static Shader* Create(bgfx::ProgramHandle program);
+	static Shader* Create(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* program);
 
-	bgfx::ProgramHandle GetInterface() const;
+	/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* GetInterface() const;
 
-	void SetUniforms(std::unordered_map<std::string, bgfx::UniformHandle>&& uniforms);
+	void SetUniforms(std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/>&& uniforms);
 	void BeginScene();
 	void EndScene();
 
@@ -81,13 +89,13 @@ public:
 		return m_pixelConstantBuffer;
 	}
 
-	void AddVertexConstantLayout(eConstantType type, bgfx::UniformHandle id, int32_t offset, int32_t count = 1);
-	void AddPixelConstantLayout(eConstantType type, bgfx::UniformHandle id, int32_t offset, int32_t count = 1);
+	void AddVertexConstantLayout(eConstantType type, Urho3D::StringHash/*bgfx::UniformHandle*/ id, int32_t offset, int32_t count = 1);
+	void AddPixelConstantLayout(eConstantType type, Urho3D::StringHash/*bgfx::UniformHandle*/ id, int32_t offset, int32_t count = 1);
 
 	void SetConstantBuffer() override;
 
-	void SetTextureSlot(int32_t index, bgfx::UniformHandle value);
-	bgfx::UniformHandle GetTextureSlot(int32_t index);
+	void SetTextureSlot(int32_t index, Urho3D::StringHash/*bgfx::UniformHandle*/ value);
+	/*bgfx::UniformHandle*/Urho3D::StringHash GetTextureSlot(int32_t index);
 	bool GetTextureSlotEnable(int32_t index);
 
 	void SetIsTransposeEnabled(bool isTransposeEnabled)

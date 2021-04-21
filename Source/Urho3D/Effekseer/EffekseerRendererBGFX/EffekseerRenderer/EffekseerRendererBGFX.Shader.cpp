@@ -1,17 +1,21 @@
 //#include "bgfx_utils.h"
 #include "EffekseerRendererBGFX.Shader.h"
 #include "EffekseerRendererBGFX.Renderer.h"
+#include "../../../Cocos2d/Urho3DContext.h"
+#include "../../../Core/Context.h"
+#include "../../../Graphics/Graphics.h"
+#include "../../../Graphics/ShaderProgram.h"
 
 namespace EffekseerRendererBGFX {
 
-Shader::Shader(bgfx::ProgramHandle programHandle)
+Shader::Shader(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* programHandle)
 	: m_vertexConstantBuffer(nullptr)
 	, m_pixelConstantBuffer(nullptr)
 	, m_program{ programHandle }
 {
-	m_textureSlots.fill(BGFX_INVALID_HANDLE/*0*/);
+	//m_textureSlots.fill(BGFX_INVALID_HANDLE/*0*/);
 	m_textureSlotEnables.fill(false);
-
+	graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
 	//baseInstance_ = GLExt::glGetUniformLocation(m_program, "SPIRV_Cross_BaseInstance");
 }
 
@@ -21,21 +25,21 @@ Shader::~Shader()
 	ES_SAFE_DELETE_ARRAY(m_pixelConstantBuffer);
 }
 
-Shader* Shader::Create(bgfx::ProgramHandle program)
+Shader* Shader::Create(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* program)
 {
-	if (bgfx::isValid(program)) {
+	if (program->IsValid()) {
 		return new Shader(program);
 	} else {
 		return nullptr;
 	}
 }
 
-void Shader::SetUniforms(std::unordered_map<std::string, bgfx::UniformHandle>&& uniforms)
+void Shader::SetUniforms(std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/>&& uniforms)
 {
 	uniforms_ = std::move(uniforms);
 }
 
-bgfx::ProgramHandle Shader::GetInterface() const
+/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* Shader::GetInterface() const
 {
 	return m_program;
 }
@@ -62,7 +66,7 @@ void Shader::SetPixelConstantBufferSize(int32_t size)
 	m_pixelConstantBuffer = new uint8_t[size];
 }
 
-void Shader::AddVertexConstantLayout(eConstantType type, bgfx::UniformHandle id, int32_t offset, int32_t count)
+void Shader::AddVertexConstantLayout(eConstantType type, Urho3D::StringHash/*bgfx::UniformHandle*/ id, int32_t offset, int32_t count)
 {
 	ConstantLayout l;
 	l.Type = type;
@@ -72,7 +76,7 @@ void Shader::AddVertexConstantLayout(eConstantType type, bgfx::UniformHandle id,
 	m_vertexConstantLayout.push_back(l);
 }
 
-void Shader::AddPixelConstantLayout(eConstantType type, bgfx::UniformHandle id, int32_t offset, int32_t count)
+void Shader::AddPixelConstantLayout(eConstantType type, Urho3D::StringHash/*bgfx::UniformHandle*/ id, int32_t offset, int32_t count)
 {
 	ConstantLayout l;
 	l.Type = type;
@@ -100,9 +104,10 @@ void Shader::SetConstantBuffer()
 			//::Effekseer::Matrix44 mat;
 			//memcpy(mat.Values, data, sizeof(float) * 16);
 			//mat.Transpose();
-			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
-				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
-			}
+// 			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
+// 				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
+// 			}
+			graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Matrix4*)data);
 		}
 
 		else if (m_vertexConstantLayout[i].Type == CONSTANT_TYPE_VECTOR4)
@@ -110,9 +115,10 @@ void Shader::SetConstantBuffer()
 			uint8_t* data = (uint8_t*)m_vertexConstantBuffer;
 			data += m_vertexConstantLayout[i].Offset;
 			//GLExt::glUniform4fv(m_vertexConstantLayout[i].ID, m_vertexConstantLayout[i].Count, (const GLfloat*)data);
-			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
-				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
-			}
+// 			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
+// 				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
+// 			}
+			graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Vector4*)data);
 		}
 	}
 
@@ -126,9 +132,10 @@ void Shader::SetConstantBuffer()
 			//::Effekseer::Matrix44 mat;
 			//memcpy(mat.Values, data, sizeof(float) * 16);
 			//mat.Transpose();
-			if (bgfx::isValid(m_pixelConstantLayout[i].ID)) {
-				bgfx::setUniform(m_pixelConstantLayout[i].ID, data, m_pixelConstantLayout[i].Count);
-			}
+// 			if (bgfx::isValid(m_pixelConstantLayout[i].ID)) {
+// 				bgfx::setUniform(m_pixelConstantLayout[i].ID, data, m_pixelConstantLayout[i].Count);
+// 			}
+			graphics_->SetShaderParameter(m_pixelConstantLayout[i].ID, *(Urho3D::Matrix4*)data);
 		}
 
 		else if (m_pixelConstantLayout[i].Type == CONSTANT_TYPE_VECTOR4)
@@ -136,25 +143,26 @@ void Shader::SetConstantBuffer()
 			uint8_t* data = (uint8_t*)m_pixelConstantBuffer;
 			data += m_pixelConstantLayout[i].Offset;
 			//GLExt::glUniform4fv(m_pixelConstantLayout[i].ID, m_pixelConstantLayout[i].Count, (const GLfloat*)data);
-			if (bgfx::isValid(m_pixelConstantLayout[i].ID)) {
-				bgfx::setUniform(m_pixelConstantLayout[i].ID, data, m_pixelConstantLayout[i].Count);
-			}
+// 			if (bgfx::isValid(m_pixelConstantLayout[i].ID)) {
+// 				bgfx::setUniform(m_pixelConstantLayout[i].ID, data, m_pixelConstantLayout[i].Count);
+// 			}
+			graphics_->SetShaderParameter(m_pixelConstantLayout[i].ID, *(Urho3D::Vector4*)data);
 		}
 	}
 
 	//GLCheckError();
 }
 
-void Shader::SetTextureSlot(int32_t index, bgfx::UniformHandle value)
+void Shader::SetTextureSlot(int32_t index, Urho3D::StringHash/*bgfx::UniformHandle*/ value)
 {
-	if (bgfx::isValid(value))
-	{
+// 	if (bgfx::isValid(value))
+// 	{
 		m_textureSlots[index] = value;
 		m_textureSlotEnables[index] = true;
-	}
+//	}
 }
 
-bgfx::UniformHandle Shader::GetTextureSlot(int32_t index)
+/*bgfx::UniformHandle*/Urho3D::StringHash Shader::GetTextureSlot(int32_t index)
 {
 	return m_textureSlots[index];
 }
@@ -166,7 +174,7 @@ bool Shader::GetTextureSlotEnable(int32_t index)
 
 bool Shader::IsValid() const
 {
-	return bgfx::isValid(m_program);
+	return m_program->IsValid();
 }
 
 } // namespace EffekseerRendererBGFX

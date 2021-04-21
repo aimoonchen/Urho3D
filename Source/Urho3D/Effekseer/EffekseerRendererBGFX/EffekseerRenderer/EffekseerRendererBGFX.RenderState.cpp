@@ -3,11 +3,17 @@
 #include "EffekseerRendererBGFX.Renderer.h"
 #include "EffekseerRendererBGFX.RendererImplemented.h"
 
+#include "../../../Cocos2d/Urho3DContext.h"
+#include "../../../Core/Context.h"
+#include "../../../Graphics/Graphics.h"
+#include "bgfx/bgfx.h"
+
 namespace EffekseerRendererBGFX {
 
 RenderState::RenderState(RendererImplemented* renderer)
 	: m_renderer(renderer)
 {
+	graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
 	//if (m_renderer->GetDeviceType() == OpenGLDeviceType::OpenGL3 || m_renderer->GetDeviceType() == OpenGLDeviceType::OpenGLES3)
 	//{
 	//	GLExt::glGenSamplers(Effekseer::TextureSlotMax, m_samplers.data());
@@ -41,16 +47,18 @@ void RenderState::Update(bool forced)
 		//| BGFX_STATE_DEPTH_TEST_LESS
 		| BGFX_STATE_FRONT_CCW
 		| BGFX_STATE_MSAA;
-
+	graphics_->SetDepthWrite(false);
 	if (m_active.DepthTest != m_next.DepthTest || forced)
 	{
 		if (m_next.DepthTest)
 		{
-			state |= BGFX_STATE_DEPTH_TEST_LESS;
+			//state |= BGFX_STATE_DEPTH_TEST_LESS;
+			graphics_->SetDepthTest(Urho3D::CMP_LESS);
 		}
-		else
-		{
-			state |= BGFX_STATE_DEPTH_TEST_ALWAYS;
+        else
+        {
+			//state |= BGFX_STATE_DEPTH_TEST_ALWAYS;
+			graphics_->SetDepthTest(Urho3D::MAX_COMPAREMODES);
 		}
 	}
 
@@ -59,7 +67,8 @@ void RenderState::Update(bool forced)
 	{
 		if (m_next.DepthWrite)
 		{
-			state |= BGFX_STATE_WRITE_Z;
+			//state |= BGFX_STATE_WRITE_Z;
+			graphics_->SetDepthWrite(true);
 		}
 	}
 
@@ -71,13 +80,15 @@ void RenderState::Update(bool forced)
 			{
 //				glEnable(GL_CULL_FACE);
 //				glCullFace(GL_FRONT);
-				state |= BGFX_STATE_CULL_CCW;
+				//state |= BGFX_STATE_CULL_CCW;
+				graphics_->SetCullMode(Urho3D::CULL_CW);
 			}
 			else if (m_next.CullingType == Effekseer::CullingType::Back)
 			{
 //				glEnable(GL_CULL_FACE);
 //				glCullFace(GL_BACK);
-				state |= BGFX_STATE_CULL_CCW;
+				//state |= BGFX_STATE_CULL_CCW;
+				graphics_->SetCullMode(Urho3D::CULL_CW);
 			}
 			else if (m_next.CullingType == Effekseer::CullingType::Double)
 			{
@@ -91,13 +102,15 @@ void RenderState::Update(bool forced)
 			{
 //				glEnable(GL_CULL_FACE);
 //				glCullFace(GL_BACK);
-				state |= BGFX_STATE_CULL_CW;
+				//state |= BGFX_STATE_CULL_CW;
+				graphics_->SetCullMode(Urho3D::CULL_CCW);
 			}
 			else if (m_next.CullingType == Effekseer::CullingType::Back)
 			{
 //				glEnable(GL_CULL_FACE);
 //				glCullFace(GL_FRONT);
-				state |= BGFX_STATE_CULL_CW;
+				//state |= BGFX_STATE_CULL_CW;
+				graphics_->SetCullMode(Urho3D::CULL_CCW);
 			}
 			else if (m_next.CullingType == Effekseer::CullingType::Double)
 			{
@@ -119,34 +132,39 @@ void RenderState::Update(bool forced)
 			{
 				//GLExt::glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
 				//GLExt::glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ONE);
-				state |= BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_MAX);
-				state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+				uint64_t state1 = BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_MAX);
+				state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+				graphics_->SetBlendModeEx(state1);
 			}
 			else if (m_next.AlphaBlend == ::Effekseer::AlphaBlendType::Sub)
 			{
 				//GLExt::glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
 				//GLExt::glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
-				state |= BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_REVSUB, BGFX_STATE_BLEND_EQUATION_ADD);
-				state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
+				uint64_t state1 = BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_REVSUB, BGFX_STATE_BLEND_EQUATION_ADD);
+				state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
+				graphics_->SetBlendModeEx(state1);
 			}
 			else
 			{
 				//GLExt::glBlendEquationSeparate(GL_FUNC_ADD, GL_FUNC_ADD);
-				state |= BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_ADD);
+				//state |= BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_ADD);
 				if (m_next.AlphaBlend == ::Effekseer::AlphaBlendType::Blend)
 				{
 					//GLExt::glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE_MINUS_SRC_ALPHA, GL_ONE, GL_ONE);
-					state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+					//state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_INV_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+					graphics_->SetBlendMode(Urho3D::BLEND_ALPHA);
 				}
 				else if (m_next.AlphaBlend == ::Effekseer::AlphaBlendType::Add)
 				{
 					//GLExt::glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ONE, GL_ONE);
-					state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+					//state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+					graphics_->SetBlendMode(Urho3D::BLEND_ADD);
 				}
 				else if (m_next.AlphaBlend == ::Effekseer::AlphaBlendType::Mul)
 				{
 					//GLExt::glBlendFuncSeparate(GL_ZERO, GL_SRC_COLOR, GL_ZERO, GL_ONE);
-					state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_SRC_COLOR, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
+					//state |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_SRC_COLOR, BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
+					graphics_->SetBlendMode(Urho3D::BLEND_MULTIPLY);
 				}
 			}
 		}

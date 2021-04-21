@@ -39,8 +39,10 @@
 //#include "ShaderHeader/sprite_unlit_vs.h"
 
 #include "GraphicsDevice.h"
-#include "../Graphics/Graphics.h"
-
+#include "../../../Cocos2d/Urho3DContext.h"
+#include "../../../Core/Context.h"
+#include "../../../Graphics/Graphics.h"
+#include "../../../Graphics/Texture2D.h"
 namespace EffekseerRendererBGFX
 {
 
@@ -86,7 +88,7 @@ namespace EffekseerRendererBGFX
 	return ::Effekseer::MakeRefPtr<MaterialLoader>(graphicsDevice.DownCast<Backend::GraphicsDevice>(), fileInterface);
 }
 
-Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed)
+Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, /*bgfx::TextureHandle*/Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed)
 {
 	auto gd = graphicsDevice.DownCast<Backend::GraphicsDevice>();
 	return gd->CreateTexture(buffer, hasMipmap, onDisposed);
@@ -101,8 +103,9 @@ RendererRef Renderer::Create(int32_t squareMaxCount/*, OpenGLDeviceType deviceTy
 
 RendererRef Renderer::Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount)
 {
-	auto g = graphicsDevice.DownCast<Backend::GraphicsDevice>();
-
+	//auto g = graphicsDevice.DownCast<Backend::GraphicsDevice>();
+	
+	auto g = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
 	auto renderer = ::Effekseer::MakeRefPtr<RendererImplemented>(squareMaxCount, g);
 	if (renderer->Initialize())
 	{
@@ -289,7 +292,7 @@ void RendererImplemented::GenerateIndexDataStride()
 	}
 }
 
-static bgfx::UniformHandle GetValidUniform(Shader* shader, const char* name)
+static /*bgfx::UniformHandle*/Urho3D::StringHash GetValidUniform(Shader* shader, const char* name)
 {
 	auto& uniforms = shader->uniforms_;
 	auto it = uniforms.find(name);
@@ -297,7 +300,7 @@ static bgfx::UniformHandle GetValidUniform(Shader* shader, const char* name)
 		return it->second;
 	}
 	else {
-		return { UINT16_MAX };
+		return { /*UINT16_MAX*/ };
 	}
 };
 
@@ -781,7 +784,7 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
 	return ::Effekseer::MakeRefPtr<MaterialLoader>(GetIntetnalGraphicsDevice(), fileInterface);
 }
 
-void RendererImplemented::SetBackground(bgfx::TextureHandle background, bool hasMipmap)
+void RendererImplemented::SetBackground(Urho3D::Texture2D* background, bool hasMipmap)
 {
 	//if (m_backgroundGL == nullptr)
 	//{
@@ -889,7 +892,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 	//{
 		//GLExt::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->GetInterface());
 		auto indexBuffer = GetIndexBuffer();
-		bgfx::setIndexBuffer(indexBuffer->GetInterface(), vertexOffset / 4 * 6, spriteCount * 6);
+		//bgfx::setIndexBuffer(indexBuffer->GetInterface(), vertexOffset / 4 * 6, spriteCount * 6);
+		graphics_->SetIndexBuffer(indexBuffer->GetInterface());
 		indexBufferCurrentStride_ = indexBuffer->GetStride();
 	//}
 	//else
@@ -1087,7 +1091,7 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 
 	for (int32_t i = 0; i < count; i++)
 	{
-		/*GLuint*/bgfx::TextureHandle id;
+		/*GLuint*//*bgfx::TextureHandle*/Urho3D::Texture2D* id;
 		if (textures[i] != nullptr)
 		{
 			auto texture = static_cast<Backend::Texture*>(textures[i].Get());
@@ -1099,19 +1103,20 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 
 		if (textures[i] != nullptr)
 		{
-			m_renderState->GetActiveState().TextureIDs[i] = id.idx;
+			//m_renderState->GetActiveState().TextureIDs[i] = id.idx;
 			currentTextures_[i] = textures[i];
 		}
 		else
 		{
-			m_renderState->GetActiveState().TextureIDs[i] = 0;
+			//m_renderState->GetActiveState().TextureIDs[i] = 0;
 			currentTextures_[i].Reset();
 		}
 
 		if (shader->GetTextureSlotEnable(i))
 		{
 			//GLExt::glUniform1i(shader->GetTextureSlot(i), i);
-			bgfx::setTexture(i, shader->GetTextureSlot(i), id);
+			//bgfx::setTexture(i, shader->GetTextureSlot(i), id);
+			graphics_->SetTexture(i, id);
 		}
 	}
 	//GLExt::glActiveTexture(GL_TEXTURE0);

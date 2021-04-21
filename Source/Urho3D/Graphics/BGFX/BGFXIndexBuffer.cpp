@@ -223,6 +223,11 @@ void IndexBuffer::Unlock()
     }
 }
 
+bool IndexBuffer::IsValid() const
+{
+    return GetGPUObjectHandle() != bgfx::kInvalidHandle;
+}
+
 bool IndexBuffer::Create()
 {
     if (!indexCount_)

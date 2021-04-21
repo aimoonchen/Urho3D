@@ -2043,6 +2043,14 @@ void Graphics::SetBlendMode(BlendMode mode, bool alphaToCoverage)
 //     }
 }
 
+void Graphics::SetBlendModeEx(uint64_t mode)
+{
+    render_state_ &= ~BGFX_STATE_BLEND_MASK;
+    render_state_ &= ~BGFX_STATE_BLEND_EQUATION_MASK;
+    render_state_ &= ~BGFX_STATE_BLEND_ALPHA_TO_COVERAGE;
+    render_state_ |= mode;
+}
+
 void Graphics::SetColorWrite(bool enable)
 {
     render_state_ &= ~(BGFX_STATE_WRITE_RGB | BGFX_STATE_WRITE_A);
@@ -2916,6 +2924,16 @@ unsigned Graphics::GetDepthStencilFormat()
 unsigned Graphics::GetReadableDepthFormat()
 {
     return bgfx::TextureFormat::D24;
+}
+
+unsigned Graphics::GetD32()
+{
+    return bgfx::TextureFormat::D32;
+}
+
+unsigned Graphics::GetBGRAFormat()
+{
+    return bgfx::TextureFormat::BGRA8;
 }
 
 unsigned Graphics::GetFormat(const String& formatName)

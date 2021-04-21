@@ -8,6 +8,7 @@
 namespace Urho3D
 {
 	class Graphics;
+	class Texture2D;
 }
 
 namespace EffekseerRendererBGFX
@@ -110,7 +111,7 @@ public:
 	::Effekseer::ModelLoaderRef CreateModelLoader(::Effekseer::FileInterface* fileInterface = nullptr) override;
 	::Effekseer::MaterialLoaderRef CreateMaterialLoader(::Effekseer::FileInterface* fileInterface = nullptr) override;
 
-	void SetBackground(bgfx::TextureHandle background, bool hasMipmap) override;
+	void SetBackground(/*bgfx::TextureHandle*/Urho3D::Texture2D* background, bool hasMipmap) override;
 	EffekseerRenderer::DistortingCallback* GetDistortingCallback() override;
 	void SetDistortingCallback(EffekseerRenderer::DistortingCallback* callback) override;
 	EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>* GetStandardRenderer() { return m_standardRenderer; }

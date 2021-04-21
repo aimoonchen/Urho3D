@@ -6,7 +6,10 @@
 #include <functional>
 #include <set>
 
-
+namespace Urho3D
+{
+	class Texture2D;
+}
 namespace EffekseerRendererBGFX
 {
 namespace Backend
@@ -126,7 +129,7 @@ public:
 		return "BGFX";
 	}
 
-	Effekseer::Backend::TextureRef CreateTexture(bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed);
+	Effekseer::Backend::TextureRef CreateTexture(/*bgfx::TextureHandle*/Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed);
 };
 
 } // namespace Backend

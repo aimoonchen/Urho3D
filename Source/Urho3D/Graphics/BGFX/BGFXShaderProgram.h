@@ -90,6 +90,8 @@ public:
     uint16_t GetUniform(StringHash param);
     const std::vector<std::pair<TextureUnit, uint16_t>>& GetSamplers() const { return samplers_; };
 
+    bool IsValid() const;
+
 private:
     /// Vertex shader.
     WeakPtr<ShaderVariation> vertexShader_;

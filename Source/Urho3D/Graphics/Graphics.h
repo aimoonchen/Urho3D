@@ -298,6 +298,7 @@ public:
     void SetViewport(const IntRect& rect);
     /// Set blending and alpha-to-coverage modes. Alpha-to-coverage is not supported on Direct3D9.
     void SetBlendMode(BlendMode mode, bool alphaToCoverage = false);
+    void SetBlendModeEx(uint64_t mode);
     /// Set color write on/off.
     void SetColorWrite(bool enable);
     /// Set hardware culling mode.
@@ -690,7 +691,8 @@ public:
     static unsigned GetReadableDepthFormat();
     /// Return the API-specific texture format from a textual description, for example "rgb".
     static unsigned GetFormat(const String& formatName);
-
+    static unsigned GetD32();
+    static unsigned GetBGRAFormat();
     /// Return UV offset required for pixel perfect rendering.
     static const Vector2& GetPixelUVOffset() { return pixelUVOffset; }
 

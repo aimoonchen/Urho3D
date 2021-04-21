@@ -1,6 +1,6 @@
 #include "EffekseerRendererBGFX.VertexBuffer.h"
 
-#include "Urho3DContext.h"
+#include "../../../Cocos2d/Urho3DContext.h"
 #include "../../../Graphics/VertexBuffer.h"
 
 namespace EffekseerRendererBGFX {
@@ -112,7 +112,7 @@ void VertexBuffer::Unlock()
 
 bool VertexBuffer::IsValid()
 {
-	return m_buffer->GetGPUObjectHandle() != bgfx::kInvalidHandle; // bgfx::isValid(m_buffer);
+	return m_buffer->IsValid(); // bgfx::isValid(m_buffer);
 }
 
 } // namespace EffekseerRendererBGFX

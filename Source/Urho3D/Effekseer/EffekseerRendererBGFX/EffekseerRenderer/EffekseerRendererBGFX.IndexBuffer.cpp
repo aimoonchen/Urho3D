@@ -1,5 +1,5 @@
 #include "EffekseerRendererBGFX.IndexBuffer.h"
-#include "Urho3DContext.h"
+#include "../../../Cocos2d/Urho3DContext.h"
 #include "../../../Graphics/IndexBuffer.h"
 namespace EffekseerRendererBGFX
 {
@@ -48,7 +48,7 @@ void IndexBuffer::Unlock()
 
 bool IndexBuffer::IsValid()
 {
-	return m_buffer->GetGPUObjectHandle() != bgfx::kInvalidHandle; // bgfx::isValid(m_buffer);
+	return m_buffer->IsValid(); // bgfx::isValid(m_buffer);
 }
 
 } // namespace EffekseerRendererBGFX
