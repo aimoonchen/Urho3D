@@ -120,17 +120,17 @@ DynamicTexture::DynamicTexture()
 
 DynamicTexture::~DynamicTexture()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	vs->free_rid(m_imageTexture);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->free_rid(m_imageTexture);
 }
 
 void DynamicTexture::Init(int32_t width, int32_t height)
 {
-	auto vs = godot::VisualServer::get_singleton();
-	godot::Ref<godot::Image> image;
-	image.instance();
-	image->create(width, height, false, godot::Image::FORMAT_RGBAF);
-	m_imageTexture = vs->texture_create_from_image(image, 0);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	godot::Ref<godot::Image> image;
+// 	image.instance();
+// 	image->create(width, height, false, godot::Image::FORMAT_RGBAF);
+// 	m_imageTexture = vs->texture_create_from_image(image, 0);
 }
 
 const DynamicTexture::LockedRect* DynamicTexture::Lock(int32_t x, int32_t y, int32_t width, int32_t height)
@@ -138,8 +138,8 @@ const DynamicTexture::LockedRect* DynamicTexture::Lock(int32_t x, int32_t y, int
 	assert(m_lockedRect.ptr == nullptr);
 	assert(m_lockedRect.width == 0 && m_lockedRect.height == 0);
 
-	m_rectData.resize(width * height * sizeof(Urho3D::Color));
-	m_lockedRect.ptr = (float*)m_rectData.write().ptr();
+// 	m_rectData.resize(width * height * sizeof(Urho3D::Color));
+// 	m_lockedRect.ptr = (float*)m_rectData.write().ptr();
 	m_lockedRect.pitch = width * sizeof(Urho3D::Color);
 	m_lockedRect.x = x;
 	m_lockedRect.y = y;
@@ -153,17 +153,17 @@ void DynamicTexture::Unlock()
 	assert(m_lockedRect.ptr != nullptr);
 	assert(m_lockedRect.width > 0 && m_lockedRect.height > 0);
 
-	godot::Ref<godot::Image> image;
-	image.instance();
-	image->create_from_data(m_lockedRect.width, m_lockedRect.height, 
-		false, godot::Image::FORMAT_RGBAF, m_rectData);
-
-	auto vs = godot::VisualServer::get_singleton();
-	vs->texture_set_data_partial(m_imageTexture, image, 
-		0, 0, m_lockedRect.width, m_lockedRect.height, 
-		m_lockedRect.x, m_lockedRect.y, 0, 0);
-
-	m_rectData.resize(0);
+// 	godot::Ref<godot::Image> image;
+// 	image.instance();
+// 	image->create_from_data(m_lockedRect.width, m_lockedRect.height, 
+// 		false, godot::Image::FORMAT_RGBAF, m_rectData);
+// 
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->texture_set_data_partial(m_imageTexture, image, 
+// 		0, 0, m_lockedRect.width, m_lockedRect.height, 
+// 		m_lockedRect.x, m_lockedRect.y, 0, 0);
+// 
+// 	m_rectData.resize(0);
 	m_lockedRect = {};
 }
 
@@ -197,7 +197,7 @@ inline Urho3D::Vector3 ConvertVector3(const EffekseerRenderer::VertexFloat3& v)
 inline Urho3D::Vector2 ConvertVector2(const EffekseerRenderer::VertexFloat3& v,
 	const Urho3D::Vector2& baseScale)
 {
-	return Urho3D::Vector2(v.X * baseScale.x, v.Y * baseScale.y);
+	return Urho3D::Vector2(v.X * baseScale.x_, v.Y * baseScale.y_);
 }
 
 inline EffekseerRenderer::VertexFloat3 ConvertPackedVector3(const EffekseerRenderer::VertexColor& v)
@@ -264,84 +264,84 @@ inline void CopyCustomData(float*& dst, const uint8_t*& src, int32_t count)
 
 RenderCommand::RenderCommand()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	m_immediate = vs->immediate_create();
-	m_instance = vs->instance_create();
-	m_material = vs->material_create();
-	vs->instance_geometry_set_material_override(m_instance, m_material);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	m_immediate = vs->immediate_create();
+// 	m_instance = vs->instance_create();
+// 	m_material = vs->material_create();
+// 	vs->instance_geometry_set_material_override(m_instance, m_material);
 }
 
 RenderCommand::~RenderCommand()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	vs->free_rid(m_instance);
-	vs->free_rid(m_immediate);
-	vs->free_rid(m_material);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->free_rid(m_instance);
+// 	vs->free_rid(m_immediate);
+// 	vs->free_rid(m_material);
 }
 
 void RenderCommand::Reset()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	vs->immediate_clear(m_immediate);
-	vs->instance_set_base(m_instance, godot::RID());
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->immediate_clear(m_immediate);
+// 	vs->instance_set_base(m_instance, godot::RID());
 }
 
-void RenderCommand::DrawSprites(godot::World* world, int32_t priority)
+void RenderCommand::DrawSprites(/*godot::World* world, int32_t priority*/)
 {
-	auto vs = godot::VisualServer::get_singleton();
-
-	vs->instance_set_base(m_instance, m_immediate);
-	vs->instance_set_scenario(m_instance, world->get_scenario());
-	vs->material_set_render_priority(m_material, priority);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	vs->instance_set_base(m_instance, m_immediate);
+// 	vs->instance_set_scenario(m_instance, world->get_scenario());
+// 	vs->material_set_render_priority(m_material, priority);
 }
 
-void RenderCommand::DrawModel(godot::World* world, godot::RID mesh, int32_t priority)
+void RenderCommand::DrawModel(/*godot::World* world, godot::RID mesh, int32_t priority*/)
 {
-	auto vs = godot::VisualServer::get_singleton();
-
-	vs->instance_set_base(m_instance, mesh);
-	vs->instance_set_scenario(m_instance, world->get_scenario());
-	vs->material_set_render_priority(m_material, priority);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	vs->instance_set_base(m_instance, mesh);
+// 	vs->instance_set_scenario(m_instance, world->get_scenario());
+// 	vs->material_set_render_priority(m_material, priority);
 }
 
 EffekseerUrho3D::RenderCommand2D::RenderCommand2D()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	m_canvasItem = vs->canvas_item_create();
-	m_material = vs->material_create();
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	m_canvasItem = vs->canvas_item_create();
+// 	m_material = vs->material_create();
 }
 
 EffekseerUrho3D::RenderCommand2D::~RenderCommand2D()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	vs->free_rid(m_canvasItem);
-	vs->free_rid(m_material);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->free_rid(m_canvasItem);
+// 	vs->free_rid(m_material);
 }
 
 void EffekseerUrho3D::RenderCommand2D::Reset()
 {
-	auto vs = godot::VisualServer::get_singleton();
-	vs->canvas_item_clear(m_canvasItem);
-	vs->canvas_item_set_parent(m_canvasItem, godot::RID());
+// 	auto vs = godot::VisualServer::get_singleton();
+// 	vs->canvas_item_clear(m_canvasItem);
+// 	vs->canvas_item_set_parent(m_canvasItem, godot::RID());
 }
 
-void EffekseerUrho3D::RenderCommand2D::DrawSprites(godot::Node2D* parent)
+void EffekseerUrho3D::RenderCommand2D::DrawSprites(/*godot::Node2D* parent*/)
 {
-	auto vs = godot::VisualServer::get_singleton();
-
-	vs->canvas_item_set_parent(m_canvasItem, parent->get_canvas_item());
-	vs->canvas_item_set_transform(m_canvasItem, parent->get_global_transform().affine_inverse());
-	vs->canvas_item_set_material(m_canvasItem, m_material);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	vs->canvas_item_set_parent(m_canvasItem, parent->get_canvas_item());
+// 	vs->canvas_item_set_transform(m_canvasItem, parent->get_global_transform().affine_inverse());
+// 	vs->canvas_item_set_material(m_canvasItem, m_material);
 }
 
-void RenderCommand2D::DrawModel(godot::Node2D* parent, godot::RID mesh)
+void RenderCommand2D::DrawModel(/*godot::Node2D* parent, godot::RID mesh*/)
 {
-	auto vs = godot::VisualServer::get_singleton();
-
-	vs->canvas_item_set_parent(m_canvasItem, parent->get_canvas_item());
-	vs->canvas_item_set_transform(m_canvasItem, parent->get_global_transform().affine_inverse());
-	vs->canvas_item_add_mesh(m_canvasItem, mesh);
-	vs->canvas_item_set_material(m_canvasItem, m_material);
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	vs->canvas_item_set_parent(m_canvasItem, parent->get_canvas_item());
+// 	vs->canvas_item_set_transform(m_canvasItem, parent->get_global_transform().affine_inverse());
+// 	vs->canvas_item_add_mesh(m_canvasItem, mesh);
+// 	vs->canvas_item_set_material(m_canvasItem, m_material);
 }
 
 //----------------------------------------------------------------------------------
@@ -602,7 +602,7 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		auto& command = m_renderCommands[m_renderCount];
 
 		// Transfer vertex data
-		TransferVertexToImmediate3D(command.GetImmediate(), GetVertexBuffer()->Refer(), spriteCount, state);
+		TransferVertexToImmediate3D(/*command.GetImmediate(), */GetVertexBuffer()->Refer(), spriteCount, state);
 
 		// Setup material
 		m_currentShader->ApplyToMaterial(renderType, command.GetMaterial(), m_renderState->GetActiveState());
@@ -619,37 +619,38 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		command.DrawSprites(emitter->get_world().ptr(), (int32_t)m_renderCount);
 		m_renderCount++;
 
-	} else if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter2D>(godotObj)) {
-		if (m_renderCount2D >= m_renderCommand2Ds.size()) return;
-
-		auto& command = m_renderCommand2Ds[m_renderCount2D];
-
-		// Transfer vertex data
-		auto srt = EffekseerUrho3D::ToSRT(emitter->get_global_transform());
-		TransferVertexToCanvasItem2D(command.GetCanvasItem(), GetVertexBuffer()->Refer(), 
-			spriteCount, srt.scale.abs(), state);
-
-		// Setup material
-		m_currentShader->ApplyToMaterial(Shader::RenderType::CanvasItem, command.GetMaterial(), m_renderState->GetActiveState());
-
-		if (m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::Lit || 
-			m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
-			m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::Material)
-		{
-			vs->material_set_param(command.GetMaterial(), "UVTangentTexture", m_uvTangentTexture.GetRID());
-		}
-		if (state.CustomData1Count > 0)
-		{
-			vs->material_set_param(command.GetMaterial(), "CustomData1", m_customData1Texture.GetRID());
-		}
-		if (state.CustomData2Count > 0)
-		{
-			vs->material_set_param(command.GetMaterial(), "CustomData2", m_customData2Texture.GetRID());
-		}
-
-		command.DrawSprites(emitter);
-		m_renderCount2D++;
 	}
+// 	else if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter2D>(godotObj)) {
+// 		if (m_renderCount2D >= m_renderCommand2Ds.size()) return;
+// 
+// 		auto& command = m_renderCommand2Ds[m_renderCount2D];
+// 
+// 		// Transfer vertex data
+// 		auto srt = EffekseerUrho3D::ToSRT(emitter->get_global_transform());
+// 		TransferVertexToCanvasItem2D(command.GetCanvasItem(), GetVertexBuffer()->Refer(), 
+// 			spriteCount, srt.scale.abs(), state);
+// 
+// 		// Setup material
+// 		m_currentShader->ApplyToMaterial(Shader::RenderType::CanvasItem, command.GetMaterial(), m_renderState->GetActiveState());
+// 
+// 		if (m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::Lit || 
+// 			m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::BackDistortion ||
+// 			m_currentShader->GetShaderType() == EffekseerRenderer::RendererShaderType::Material)
+// 		{
+// 			vs->material_set_param(command.GetMaterial(), "UVTangentTexture", m_uvTangentTexture.GetRID());
+// 		}
+// 		if (state.CustomData1Count > 0)
+// 		{
+// 			vs->material_set_param(command.GetMaterial(), "CustomData1", m_customData1Texture.GetRID());
+// 		}
+// 		if (state.CustomData2Count > 0)
+// 		{
+// 			vs->material_set_param(command.GetMaterial(), "CustomData2", m_customData2Texture.GetRID());
+// 		}
+// 
+// 		command.DrawSprites(emitter);
+// 		m_renderCount2D++;
+// 	}
 
 	impl->drawcallCount++;
 	impl->drawvertexCount += spriteCount * 4;
@@ -668,54 +669,54 @@ void RendererImplemented::SetModel(Effekseer::ModelRef model)
 //----------------------------------------------------------------------------------
 void RendererImplemented::DrawPolygon(int32_t vertexCount, int32_t indexCount)
 {
-	assert(m_currentShader != nullptr);
-	assert(m_currentModel != nullptr);
-
-	auto vs = godot::VisualServer::get_singleton();
-
-	const auto& state = m_standardRenderer->GetState();
-	godot::Object* godotObj = reinterpret_cast<godot::Object*>(GetImpl()->CurrentHandleUserData);
-
-	if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter>(godotObj)) {
-		if (m_renderCount >= m_renderCommands.size()) return;
-
-		const bool softparticleEnabled = !(
-			state.SoftParticleDistanceFar == 0.0f &&
-			state.SoftParticleDistanceNear == 0.0f &&
-			state.SoftParticleDistanceNearOffset == 0.0f);
-		const Shader::RenderType renderType = (softparticleEnabled) ? 
-			Shader::RenderType::SpatialDepthFade : Shader::RenderType::SpatialLightweight;
-
-		auto& command = m_renderCommands[m_renderCount];
-
-		// Setup material
-		m_currentShader->ApplyToMaterial(renderType, command.GetMaterial(), m_renderState->GetActiveState());
-
-		auto mesh = m_currentModel.DownCast<Model>()->GetRID();
-		command.DrawModel(emitter->get_world().ptr(), mesh, (int32_t)m_renderCount);
-		m_renderCount++;
-
-	} else if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter2D>(godotObj)) {
-		if (m_renderCount2D >= m_renderCommand2Ds.size()) return;
-
-		auto& command = m_renderCommand2Ds[m_renderCount2D];
-
-		// Transfer vertex data
-		auto srt = EffekseerUrho3D::ToSRT(emitter->get_global_transform());
-		bool flip = (srt.scale.x < 0.0f) ^ (srt.scale.y < 0.0f) ^ emitter->get_flip_h() ^ emitter->get_flip_v();
-		TransferModelToCanvasItem2D(command.GetCanvasItem(), m_currentModel.Get(), srt.scale.abs(), flip, state);
-		
-		// Setup material
-		m_currentShader->ApplyToMaterial(Shader::RenderType::CanvasItem, command.GetMaterial(), m_renderState->GetActiveState());
-
-		//auto mesh = m_currentModel.DownCast<Model>()->GetRID();
-		//command.DrawModel(node2d, mesh);
-		command.DrawSprites(emitter);
-		m_renderCount2D++;
-	}
-
-	impl->drawcallCount++;
-	impl->drawvertexCount += vertexCount;
+// 	assert(m_currentShader != nullptr);
+// 	assert(m_currentModel != nullptr);
+// 
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	const auto& state = m_standardRenderer->GetState();
+// 	godot::Object* godotObj = reinterpret_cast<godot::Object*>(GetImpl()->CurrentHandleUserData);
+// 
+// 	if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter>(godotObj)) {
+// 		if (m_renderCount >= m_renderCommands.size()) return;
+// 
+// 		const bool softparticleEnabled = !(
+// 			state.SoftParticleDistanceFar == 0.0f &&
+// 			state.SoftParticleDistanceNear == 0.0f &&
+// 			state.SoftParticleDistanceNearOffset == 0.0f);
+// 		const Shader::RenderType renderType = (softparticleEnabled) ? 
+// 			Shader::RenderType::SpatialDepthFade : Shader::RenderType::SpatialLightweight;
+// 
+// 		auto& command = m_renderCommands[m_renderCount];
+// 
+// 		// Setup material
+// 		m_currentShader->ApplyToMaterial(renderType, command.GetMaterial(), m_renderState->GetActiveState());
+// 
+// 		auto mesh = m_currentModel.DownCast<Model>()->GetRID();
+// 		command.DrawModel(emitter->get_world().ptr(), mesh, (int32_t)m_renderCount);
+// 		m_renderCount++;
+// 
+// 	} else if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter2D>(godotObj)) {
+// 		if (m_renderCount2D >= m_renderCommand2Ds.size()) return;
+// 
+// 		auto& command = m_renderCommand2Ds[m_renderCount2D];
+// 
+// 		// Transfer vertex data
+// 		auto srt = EffekseerUrho3D::ToSRT(emitter->get_global_transform());
+// 		bool flip = (srt.scale.x < 0.0f) ^ (srt.scale.y < 0.0f) ^ emitter->get_flip_h() ^ emitter->get_flip_v();
+// 		TransferModelToCanvasItem2D(command.GetCanvasItem(), m_currentModel.Get(), srt.scale.abs(), flip, state);
+// 		
+// 		// Setup material
+// 		m_currentShader->ApplyToMaterial(Shader::RenderType::CanvasItem, command.GetMaterial(), m_renderState->GetActiveState());
+// 
+// 		//auto mesh = m_currentModel.DownCast<Model>()->GetRID();
+// 		//command.DrawModel(node2d, mesh);
+// 		command.DrawSprites(emitter);
+// 		m_renderCount2D++;
+// 	}
+// 
+// 	impl->drawcallCount++;
+// 	impl->drawvertexCount += vertexCount;
 }
 
 void RendererImplemented::DrawPolygonInstanced(int32_t vertexCount, int32_t indexCount, int32_t instanceCount)
@@ -799,7 +800,7 @@ void RendererImplemented::DeleteProxyTexture(Effekseer::Backend::TextureRef& tex
 	texture = nullptr;
 }
 
-void RendererImplemented::TransferVertexToImmediate3D(godot::RID immediate, 
+void RendererImplemented::TransferVertexToImmediate3D(/*godot::RID immediate,*/ 
 	const void* vertexData, int32_t spriteCount, const EffekseerRenderer::StandardRendererState& state)
 {
 	using namespace EffekseerRenderer;
@@ -948,10 +949,11 @@ void RendererImplemented::TransferVertexToImmediate3D(godot::RID immediate,
 	vs->immediate_end(immediate);
 }
 
-void RendererImplemented::TransferVertexToCanvasItem2D(godot::RID canvas_item, 
+void RendererImplemented::TransferVertexToCanvasItem2D(/*godot::RID canvas_item,*/ 
 	const void* vertexData, int32_t spriteCount, Urho3D::Vector2 baseScale, 
 	const EffekseerRenderer::StandardRendererState& state)
 {
+    /*
 	using namespace EffekseerRenderer;
 
 	auto vs = godot::VisualServer::get_singleton();
@@ -1072,12 +1074,14 @@ void RendererImplemented::TransferVertexToCanvasItem2D(godot::RID canvas_item,
 	}
 
 	vs->canvas_item_add_triangle_array(canvas_item, indexArray, pointArray, colorArray, uvArray);
+	*/
 }
 
-void RendererImplemented::TransferModelToCanvasItem2D(godot::RID canvas_item, 
+void RendererImplemented::TransferModelToCanvasItem2D(/*godot::RID canvas_item,*/ 
 	Effekseer::Model* model, Urho3D::Vector2 baseScale, bool flipPolygon,
 	const EffekseerRenderer::StandardRendererState& state)
 {
+    /*
 	using namespace EffekseerRenderer;
 
 	auto vs = godot::VisualServer::get_singleton();
@@ -1184,6 +1188,7 @@ void RendererImplemented::TransferModelToCanvasItem2D(godot::RID canvas_item,
 	}
 
 	vs->canvas_item_add_triangle_array(canvas_item, indexArray, pointArray, colorArray, uvArray);
+	*/
 }
 
 } // namespace EffekseerUrho3D

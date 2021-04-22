@@ -16,6 +16,7 @@ class Renderer;
 
 namespace Urho3D {
 
+class Camera;
 class EffekseerEffect;
 
 class EffekseerSystem : public Object
@@ -52,12 +53,17 @@ public:
 	int get_total_instance_count() const;
 
 	const Effekseer::ManagerRef& get_manager() { return m_manager; }
+    // void HandleUpdate(StringHash eventType, VariantMap& eventData);
+    void HandleRenderUpdate(StringHash eventType, VariantMap& eventData);
+    void Render();
+    void SetCamera(Camera* camera);
 
 private:
 	static EffekseerSystem* s_instance;
 
 	Effekseer::ManagerRef m_manager;
 	EffekseerUrho3D::RendererRef m_renderer;
+    Camera* main_camera_{ nullptr };
 };
 
 }

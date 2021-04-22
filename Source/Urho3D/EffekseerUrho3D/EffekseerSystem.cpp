@@ -5,6 +5,8 @@
 // #include <Transform.hpp>
 // #include <GDScript.hpp>
 // #include <VisualServer.hpp>
+#include "../Core/CoreEvents.h"
+#include "../Graphics/Camera.h"
 
 #include "RendererUrho3D/EffekseerUrho3D.Renderer.h"
 #include "LoaderUrho3D/EffekseerUrho3D.TextureLoader.h"
@@ -80,11 +82,43 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	m_manager->SetRingRenderer(m_renderer->CreateRingRenderer());
 	m_manager->SetModelRenderer(m_renderer->CreateModelRenderer());
 	//m_manager->SetSoundPlayer(Effekseer::MakeRefPtr<EffekseerUrho3D::SoundPlayer>(sound));
+
+	// SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(EffekseerSystem, HandleUpdate));
+    SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(EffekseerSystem, HandleRenderUpdate));
 }
 
 EffekseerSystem::~EffekseerSystem()
 {
 	s_instance = nullptr;
+}
+
+void EffekseerSystem::HandleRenderUpdate(StringHash eventType, VariantMap& eventData)
+{
+    float timeStep = eventData[RenderUpdate::P_TIMESTEP].GetFloat();
+    _process(timeStep);
+}
+
+void EffekseerSystem::Render()
+{
+//	Effekseer::Matrix44 matrix = EffekseerUrho3D::ToEfkMatrix44(camera_transform /*.inverse()*/);
+
+	m_renderer->SetCameraMatrix(EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetView().ToMatrix4()));
+    m_renderer->BeginRendering();
+    m_manager->Draw();
+    m_renderer->EndRendering();
+}
+
+void EffekseerSystem::SetCamera(Camera* camera)
+{
+	main_camera_ = camera;
+    Matrix4 projection = camera->GetGPUProjection();
+#ifdef URHO3D_OPENGL
+    // Add constant depth bias manually to the projection matrix due to glPolygonOffset() inconsistency
+    float constantBias = 2.0f * 0.0f/*graphics_->GetDepthConstantBias()*/;
+    projection.m22_ += projection.m32_ * constantBias;
+    projection.m23_ += projection.m33_ * constantBias;
+#endif
+    m_renderer->SetCameraMatrix(EffekseerUrho3D::ToEfkMatrix44(projection));
 }
 
 void EffekseerSystem::_init()

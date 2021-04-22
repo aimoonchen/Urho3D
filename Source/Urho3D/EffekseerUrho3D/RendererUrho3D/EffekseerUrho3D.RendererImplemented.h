@@ -30,17 +30,17 @@ public:
 	RenderCommand();
 	~RenderCommand();
 	void Reset();
-	void DrawSprites(godot::World* world, int32_t priority);
-	void DrawModel(godot::World* world, godot::RID mesh, int32_t priority);
+	void DrawSprites(/*godot::World* world, int32_t priority*/);
+	void DrawModel(/*godot::World* world, godot::RID mesh, int32_t priority*/);
 
-	godot::RID GetImmediate() { return m_immediate; }
-	godot::RID GetInstance() { return m_instance; }
-	godot::RID GetMaterial() { return m_material; }
+// 	godot::RID GetImmediate() { return m_immediate; }
+// 	godot::RID GetInstance() { return m_instance; }
+// 	godot::RID GetMaterial() { return m_material; }
 
 private:
-	godot::RID m_immediate;
-	godot::RID m_instance;
-	godot::RID m_material;
+// 	godot::RID m_immediate;
+// 	godot::RID m_instance;
+// 	godot::RID m_material;
 };
 
 /**
@@ -52,15 +52,15 @@ public:
 	~RenderCommand2D();
 
 	void Reset();
-	void DrawSprites(godot::Node2D* parent);
-	void DrawModel(godot::Node2D* parent, godot::RID mesh);
+	void DrawSprites(/*godot::Node2D* parent*/);
+	void DrawModel(/*godot::Node2D* parent, godot::RID mesh*/);
 
-	godot::RID GetCanvasItem() { return m_canvasItem; }
-	godot::RID GetMaterial() { return m_material; }
+// 	godot::RID GetCanvasItem() { return m_canvasItem; }
+// 	godot::RID GetMaterial() { return m_material; }
 
 private:
-	godot::RID m_canvasItem;
-	godot::RID m_material;
+// 	godot::RID m_canvasItem;
+// 	godot::RID m_material;
 };
 
 //----------------------------------------------------------------------------------
@@ -88,11 +88,11 @@ public:
 	const LockedRect* Lock(int32_t x, int32_t y, int32_t width, int32_t height);
 	void Unlock();
 
-	godot::RID GetRID() { return m_imageTexture; }
+//	godot::RID GetRID() { return m_imageTexture; }
 
 private:
-	godot::RID m_imageTexture;
-	godot::PoolByteArray m_rectData;
+// 	godot::RID m_imageTexture;
+// 	godot::PoolByteArray m_rectData;
 	LockedRect m_lockedRect{};
 };
 
@@ -266,15 +266,15 @@ public:
 	virtual int Release() override { return Effekseer::ReferenceObject::Release(); }
 
 private:
-	void TransferVertexToImmediate3D(godot::RID immediate, 
+	void TransferVertexToImmediate3D(/*godot::RID immediate,*/ 
 		const void* vertexData, int32_t spriteCount, 
 		const EffekseerRenderer::StandardRendererState& state);
 
-	void TransferVertexToCanvasItem2D(godot::RID canvas_item, 
+	void TransferVertexToCanvasItem2D(/*godot::RID canvas_item,*/ 
 		const void* vertexData, int32_t spriteCount, Urho3D::Vector2 baseScale, 
 		const EffekseerRenderer::StandardRendererState& state);
 
-	void TransferModelToCanvasItem2D(godot::RID canvas_item, Effekseer::Model* model, 
+	void TransferModelToCanvasItem2D(/*godot::RID canvas_item,*/ Effekseer::Model* model, 
 		Urho3D::Vector2 baseScale, bool flipPolygon,
 		const EffekseerRenderer::StandardRendererState& state);
 };
