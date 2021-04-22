@@ -51,7 +51,7 @@ void Shader::BeginScene()
 
 void Shader::EndScene()
 {
-	bgfx::submit(0, m_program);
+	//bgfx::submit(0, m_program);
 }
 
 void Shader::SetVertexConstantBufferSize(int32_t size)

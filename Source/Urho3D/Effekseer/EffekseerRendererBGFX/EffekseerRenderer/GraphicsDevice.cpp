@@ -170,7 +170,7 @@ namespace EffekseerRendererBGFX {
 			return true;
 		}
 
-		Effekseer::Backend::TextureRef GraphicsDevice::CreateTexture(bgfx::TextureHandle buffer, bool hasMipmap, const std::function<void()>& onDisposed)
+		Effekseer::Backend::TextureRef GraphicsDevice::CreateTexture(/*bgfx::TextureHandle*/Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed)
 		{
 			auto ret = Effekseer::MakeRefPtr<Texture>(/*this*/);
 

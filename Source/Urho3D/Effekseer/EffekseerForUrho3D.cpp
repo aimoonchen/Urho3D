@@ -968,7 +968,7 @@ namespace efk
 	}
 	void EffectManager::Render(/*const Urho3D::Matrix4& viewMat*/)
 	{
-//         Effekseer::Matrix44 matrix = EffekseerGodot::ToEfkMatrix44(camera_transform.inverse());
+//         Effekseer::Matrix44 matrix = EffekseerUrho3D::ToEfkMatrix44(camera_transform.inverse());
 //         renderer_->SetCameraMatrix(matrix);
 		renderer_->BeginRendering();
 		manager_->Draw();
