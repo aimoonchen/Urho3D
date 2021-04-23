@@ -54,6 +54,8 @@
 #include "../Graphics/Zone.h"
 #include "../IO/FileSystem.h"
 #include "../IO/Log.h"
+#include "../EffekseerUrho3D/EffekseerEffect.h"
+#include "../EffekseerUrho3D/EffekseerEmitter.h"
 
 #include <SDL/SDL.h>
 
@@ -630,6 +632,8 @@ void RegisterGraphicsLibrary(Context* context)
     DebugRenderer::RegisterObject(context);
     Octree::RegisterObject(context);
     Zone::RegisterObject(context);
+    EffekseerEffect::RegisterObject(context);
+    EffekseerEmitter::RegisterObject(context);
 }
 
 }

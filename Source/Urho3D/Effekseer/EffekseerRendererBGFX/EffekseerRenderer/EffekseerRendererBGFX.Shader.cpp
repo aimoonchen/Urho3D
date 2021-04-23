@@ -8,10 +8,10 @@
 
 namespace EffekseerRendererBGFX {
 
-Shader::Shader(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* programHandle)
+Shader::Shader(Urho3D::ShaderProgram* program)
 	: m_vertexConstantBuffer(nullptr)
 	, m_pixelConstantBuffer(nullptr)
-	, m_program{ programHandle }
+	, m_program{ program }
 {
 	//m_textureSlots.fill(BGFX_INVALID_HANDLE/*0*/);
 	m_textureSlotEnables.fill(false);
@@ -25,13 +25,28 @@ Shader::~Shader()
 	ES_SAFE_DELETE_ARRAY(m_pixelConstantBuffer);
 }
 
-Shader* Shader::Create(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* program)
+Shader* Shader::Create(const char* filename)
 {
-	if (program->IsValid()) {
-		return new Shader(program);
-	} else {
+	if (!filename)
+	{
 		return nullptr;
 	}
+	auto graphics = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    auto vs = graphics->GetShader(Urho3D::VS, filename, "");
+    auto fs = graphics->GetShader(Urho3D::PS, filename, "");
+	graphics->SetShaders(vs, fs);
+	auto program = graphics->GetShaderProgram();
+	Shader* newShader = nullptr;
+	if (program->IsValid()) {
+		newShader = new Shader(program);
+		newShader->m_vs = vs;
+		newShader->m_fs = fs;
+	}
+	return newShader;
+}
+bool Shader::HasUniform(Urho3D::StringHash name)
+{
+	return m_program->GetUniform(name) != UINT16_MAX;
 }
 
 void Shader::SetUniforms(std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/>&& uniforms)
@@ -47,6 +62,7 @@ void Shader::SetUniforms(std::unordered_map<std::string, Urho3D::StringHash/*bgf
 void Shader::BeginScene()
 {
 	//GLExt::glUseProgram(m_program);
+	graphics_->SetShaders(m_vs, m_fs);
 }
 
 void Shader::EndScene()

@@ -5,8 +5,13 @@
 // #include <Transform.hpp>
 // #include <GDScript.hpp>
 // #include <VisualServer.hpp>
+#include "../Core/Context.h"
 #include "../Core/CoreEvents.h"
 #include "../Graphics/Camera.h"
+#include "../Graphics/Graphics.h"
+#include "../Cocos2d/Urho3DContext.h"
+
+#include "../Effekseer/EffekseerRendererBGFX/EffekseerRenderer/EffekseerRendererBGFX.Renderer.h"
 
 #include "RendererUrho3D/EffekseerUrho3D.Renderer.h"
 #include "LoaderUrho3D/EffekseerUrho3D.TextureLoader.h"
@@ -63,7 +68,10 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 // 	}
 // 	Ref<Reference> sound = EffekseerUrho3D::ScriptNew(soundScript);
 	
+	SetUrho3DContext(context);
+
 	m_manager = Effekseer::Manager::Create(instanceMaxCount);
+	m_manager->SetCoordinateSystem(Effekseer::CoordinateSystem::LH);
 #ifndef __EMSCRIPTEN__
 	m_manager->LaunchWorkerThreads(2);
 #endif
@@ -73,7 +81,8 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	m_manager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerUrho3D::CurveLoader>());
 	//m_manager->SetSoundLoader(Effekseer::MakeRefPtr<EffekseerUrho3D::SoundLoader>(sound));
 
-	m_renderer = EffekseerUrho3D::Renderer::Create(squareMaxCount, drawMaxCount);
+	//m_renderer = EffekseerUrho3D::Renderer::Create(squareMaxCount, drawMaxCount);
+	m_renderer = EffekseerRendererBGFX::Renderer::Create(context->GetSubsystem<Graphics>(), squareMaxCount/*, drawMaxCount*/);
 	m_renderer->SetProjectionMatrix(Effekseer::Matrix44().Indentity());
 
 	m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
@@ -150,7 +159,7 @@ void EffekseerSystem::_process(float delta)
 
 void EffekseerSystem::_update_draw()
 {
-	m_renderer->ResetState();
+	//m_renderer->ResetState();
 }
 
 void EffekseerSystem::draw3D(Effekseer::Handle handle, const Urho3D::Matrix4& camera_transform)

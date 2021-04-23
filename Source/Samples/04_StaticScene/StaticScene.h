@@ -61,4 +61,6 @@ private:
     void SubscribeToEvents();
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
+
+    Node* test_emitter_{nullptr};
 };

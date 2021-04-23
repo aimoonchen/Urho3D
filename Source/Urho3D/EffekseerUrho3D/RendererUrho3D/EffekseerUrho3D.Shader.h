@@ -6,11 +6,23 @@
 #include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.ShaderBase.h"
 #include "EffekseerUrho3D.RendererImplemented.h"
 
+namespace Urho3D
+{
+	class Graphics;
+	class ShaderVariation;
+	class ShaderProgram;
+}
+
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
 namespace EffekseerUrho3D
 {
+enum eConstantType
+{
+    CONSTANT_TYPE_MATRIX44 = 0,
+    CONSTANT_TYPE_VECTOR4 = 100,
+};
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
@@ -85,11 +97,17 @@ public:
 		return m_constantBuffers[1].data();
 	}
 
-	void SetConstantBuffer() {}
+	void SetConstantBuffer() override;
 
-	void ApplyToMaterial(RenderType renderType, godot::RID material, EffekseerRenderer::RenderStateBase::State& state);
+	//void ApplyToMaterial(RenderType renderType, godot::RID material, EffekseerRenderer::RenderStateBase::State& state);
 
 	EffekseerRenderer::RendererShaderType GetShaderType() { return m_shaderType; }
+
+	void AddVertexConstantLayout(eConstantType type, Urho3D::StringHash /*bgfx::UniformHandle*/ id, int32_t offset,
+                                 int32_t count = 1);
+    void AddPixelConstantLayout(eConstantType type, Urho3D::StringHash /*bgfx::UniformHandle*/ id, int32_t offset,
+                                int32_t count = 1);
+
 
 private:
 	std::vector<uint8_t> m_constantBuffers[2];
@@ -98,12 +116,28 @@ private:
 	EffekseerRenderer::RendererShaderType m_shaderType = EffekseerRenderer::RendererShaderType::Unlit;
 
 	struct InternalShader {
-		godot::RID rid[2][2][3][5];
+		//godot::RID rid[2][2][3][5];
 		std::vector<ParamDecl> paramDecls;
 	};
 	InternalShader m_internals[(size_t)RenderType::Max];
 
 	Shader(const char* name, EffekseerRenderer::RendererShaderType shaderType);
+
+	// Urho3D impl
+	Urho3D::Graphics* graphics_{ nullptr };
+	Urho3D::ShaderProgram* m_program{ nullptr };
+	Urho3D::ShaderVariation* m_vs{ nullptr };
+    Urho3D::ShaderVariation* m_fs{ nullptr };
+    struct ConstantLayout
+    {
+        eConstantType Type;
+        // bgfx::UniformHandle ID;
+        Urho3D::StringHash ID;
+        int32_t Offset;
+        int32_t Count;
+    };
+    std::vector<ConstantLayout> m_vertexConstantLayout;
+    std::vector<ConstantLayout> m_pixelConstantLayout;
 };
 
 //----------------------------------------------------------------------------------

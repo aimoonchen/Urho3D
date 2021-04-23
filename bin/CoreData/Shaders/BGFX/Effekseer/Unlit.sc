@@ -25,8 +25,8 @@ void main()
 	v_texcoord0 = uv1;
 }
 #elif defined(COMPILEPS)
-SAMPLER2D(Sampler_sampler_colorTex, 0);
-SAMPLER2D(Sampler_sampler_depthTex, 1);
+SAMPLER2D(sColorTex, 0);
+SAMPLER2D(sDepthTex, 1);
 uniform vec4 fLightDirection;
 uniform vec4 fLightColor;
 uniform vec4 fLightAmbient;
@@ -60,14 +60,14 @@ float SoftParticle(float backgroundZ, float meshZ, vec4 softparticleParam, vec4 
 
 void main()
 {
-	vec4 Output = texture2D(Sampler_sampler_colorTex, v_texcoord0) * v_color0;
+	vec4 Output = texture2D(sColorTex, v_texcoord0) * v_color0;
     vec4 screenPos = v_ppos / vec4_splat(v_ppos.w);
     vec2 screenUV = (screenPos.xy + vec2_splat(1.0)) / vec2_splat(2.0);
     screenUV.y = 1.0 - screenUV.y;
     screenUV.y = 1.0 - screenUV.y;
     if (!(softParticleParam.w == 0.0))
     {
-        float backgroundZ = texture2D(Sampler_sampler_depthTex, screenUV).x;
+        float backgroundZ = texture2D(sDepthTex, screenUV).x;
         float param = backgroundZ;
         float param_1 = screenPos.z;
         vec4 param_2 = softParticleParam;

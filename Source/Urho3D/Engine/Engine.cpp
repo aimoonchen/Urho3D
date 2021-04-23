@@ -142,7 +142,6 @@ Engine::Engine(Context* context) :
     context_->RegisterSubsystem(new Audio(context_));
     context_->RegisterSubsystem(new UI(context_));
     context_->RegisterSubsystem(new GUI(context_));
-    context_->RegisterSubsystem(new EffekseerSystem(context_));
     // Register object factories for libraries which are not automatically registered along with subsystem creation
     RegisterSceneLibrary(context_);
 
@@ -287,6 +286,8 @@ bool Engine::Initialize(const VariantMap& parameters)
                 GetParameter(parameters, EP_SOUND_INTERPOLATION, true).GetBool()
             );
         }
+        //
+        context_->RegisterSubsystem(new EffekseerSystem(context_));
     }
 
     // Init FPU state of main thread

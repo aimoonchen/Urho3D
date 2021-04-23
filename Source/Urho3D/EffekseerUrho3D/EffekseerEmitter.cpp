@@ -1,6 +1,8 @@
 // #include <Viewport.hpp>
 // #include <VisualServer.hpp>
 // #include "GDLibrary.h"
+#include "../Core/Context.h"
+#include "../Scene/Node.h"
 #include "EffekseerSystem.h"
 #include "EffekseerEmitter.h"
 #include "Utils/EffekseerUrho3D.Utils.h"
@@ -36,10 +38,39 @@ void EffekseerEmitter::_register_methods()
 EffekseerEmitter::EffekseerEmitter(Urho3D::Context* context)
 	: Drawable(context, DRAWABLE_GEOMETRY)
 {
+
 }
 
 EffekseerEmitter::~EffekseerEmitter()
 {
+}
+
+extern const char* GEOMETRY_CATEGORY;
+void EffekseerEmitter::RegisterObject(Context* context)
+{
+	context->RegisterFactory<EffekseerEmitter>(GEOMETRY_CATEGORY);
+}
+
+void EffekseerEmitter::OnWorldBoundingBoxUpdate()
+{
+    worldBoundingBox_ = boundingBox_.Transformed(node_->GetWorldTransform());
+}
+
+void EffekseerEmitter::Update(const FrameInfo& frame)
+{
+    auto system = EffekseerSystem::get_instance();
+    auto manager = system->get_manager();
+
+    for (auto it = m_handles.begin(); it != m_handles.end();) {
+        auto handle = *it;
+        if (!manager->Exists(handle)) {
+            //m_handles.remove(i);
+			it = m_handles.erase(it);
+            continue;
+        }
+        manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(node_->GetWorldTransform() /*get_global_transform()*/));
+        ++it;
+    }
 }
 
 void EffekseerEmitter::_init()
@@ -106,7 +137,7 @@ void EffekseerEmitter::play()
 	if (m_effect/*.is_valid()*/) {
 		Effekseer::Handle handle = manager->Play(m_effect->get_native(), Effekseer::Vector3D(0, 0, 0));
 		if (handle >= 0) {
-			manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(Urho3D::Matrix4::IDENTITY/*get_global_transform()*/));
+			manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(node_->GetWorldTransform()/*get_global_transform()*/));
 			manager->SetUserData(handle, this);
 
 			if (m_paused) {
@@ -201,7 +232,7 @@ Color EffekseerEmitter::get_color() const
 	return EffekseerUrho3D::ToGdColor(m_color);
 }
 
-void EffekseerEmitter::set_effect(std::shared_ptr<EffekseerEffect> effect)
+void EffekseerEmitter::SetEffect(EffekseerEffect* effect)
 {
 	m_effect = effect;
 	m_effect->setup();

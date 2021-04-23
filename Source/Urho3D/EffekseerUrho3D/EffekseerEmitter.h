@@ -16,6 +16,8 @@ public:
 	EffekseerEmitter(Urho3D::Context* context);
 
 	~EffekseerEmitter();
+	static void RegisterObject(Context* context);
+	void Update(const FrameInfo& frame) override;
 
 	void _init();
 
@@ -49,17 +51,21 @@ public:
 
 	Color get_color() const;
 
-	void set_effect(std::shared_ptr<EffekseerEffect> effect);
+	void SetEffect(EffekseerEffect* effect);
 
-	std::shared_ptr<EffekseerEffect> get_effect() const { return m_effect; }
+	EffekseerEffect* get_effect() const { return m_effect; }
 
 	void set_autoplay(bool autoplay) { m_autoplay = autoplay; }
 
 	bool is_autoplay() const { return m_autoplay; }
 
+protected:
+    /// Recalculate the world-space bounding box.
+    void OnWorldBoundingBoxUpdate() override;
+
 private:
 	//Ref<EffekseerEffect> m_effect;
-	std::shared_ptr<EffekseerEffect> m_effect;
+	EffekseerEffect* m_effect;
 	bool m_autoplay = true;
 	//Array m_handles;
 	std::vector<Effekseer::Handle> m_handles;

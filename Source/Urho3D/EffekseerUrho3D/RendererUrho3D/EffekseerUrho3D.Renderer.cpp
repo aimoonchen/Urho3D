@@ -233,10 +233,10 @@ inline EffekseerRenderer::VertexFloat3 Cross(const EffekseerRenderer::VertexFloa
 	return result;
 }
 
-inline godot::Plane ConvertTangent(const EffekseerRenderer::VertexFloat3& t)
-{
-	return godot::Plane(t.X, t.Y, t.Z, 1.0f);
-}
+// inline godot::Plane ConvertTangent(const EffekseerRenderer::VertexFloat3& t)
+// {
+// 	return godot::Plane(t.X, t.Y, t.Z, 1.0f);
+// }
 
 inline void CopyVertexTexture(float*& dst, float x, float y, float z, float w)
 {
@@ -582,44 +582,44 @@ void RendererImplemented::SetLayout(Shader* shader)
 //----------------------------------------------------------------------------------
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
-	assert(m_currentShader != nullptr);
-
-	auto vs = godot::VisualServer::get_singleton();
-
-	const auto& state = m_standardRenderer->GetState();
-	godot::Object* godotObj = reinterpret_cast<godot::Object*>(GetImpl()->CurrentHandleUserData);
-	
-	if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter>(godotObj)) {
-		if (m_renderCount >= m_renderCommands.size()) return;
-
-		const bool softparticleEnabled = !(
-			state.SoftParticleDistanceFar == 0.0f &&
-			state.SoftParticleDistanceNear == 0.0f &&
-			state.SoftParticleDistanceNearOffset == 0.0f);
-		const Shader::RenderType renderType = (softparticleEnabled) ? 
-			Shader::RenderType::SpatialDepthFade : Shader::RenderType::SpatialLightweight;
-
-		auto& command = m_renderCommands[m_renderCount];
-
-		// Transfer vertex data
-		TransferVertexToImmediate3D(/*command.GetImmediate(), */GetVertexBuffer()->Refer(), spriteCount, state);
-
-		// Setup material
-		m_currentShader->ApplyToMaterial(renderType, command.GetMaterial(), m_renderState->GetActiveState());
-
-		if (state.CustomData1Count > 0)
-		{
-			vs->material_set_param(command.GetMaterial(), "CustomData1", m_customData1Texture.GetRID());
-		}
-		if (state.CustomData2Count > 0)
-		{
-			vs->material_set_param(command.GetMaterial(), "CustomData2", m_customData2Texture.GetRID());
-		}
-
-		command.DrawSprites(emitter->get_world().ptr(), (int32_t)m_renderCount);
-		m_renderCount++;
-
-	}
+// 	assert(m_currentShader != nullptr);
+// 
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	const auto& state = m_standardRenderer->GetState();
+// 	godot::Object* godotObj = reinterpret_cast<godot::Object*>(GetImpl()->CurrentHandleUserData);
+// 	
+// 	if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter>(godotObj)) {
+// 		if (m_renderCount >= m_renderCommands.size()) return;
+// 
+// 		const bool softparticleEnabled = !(
+// 			state.SoftParticleDistanceFar == 0.0f &&
+// 			state.SoftParticleDistanceNear == 0.0f &&
+// 			state.SoftParticleDistanceNearOffset == 0.0f);
+// 		const Shader::RenderType renderType = (softparticleEnabled) ? 
+// 			Shader::RenderType::SpatialDepthFade : Shader::RenderType::SpatialLightweight;
+// 
+// 		auto& command = m_renderCommands[m_renderCount];
+// 
+// 		// Transfer vertex data
+// 		TransferVertexToImmediate3D(/*command.GetImmediate(), */GetVertexBuffer()->Refer(), spriteCount, state);
+// 
+// 		// Setup material
+// 		m_currentShader->ApplyToMaterial(renderType, command.GetMaterial(), m_renderState->GetActiveState());
+// 
+// 		if (state.CustomData1Count > 0)
+// 		{
+// 			vs->material_set_param(command.GetMaterial(), "CustomData1", m_customData1Texture.GetRID());
+// 		}
+// 		if (state.CustomData2Count > 0)
+// 		{
+// 			vs->material_set_param(command.GetMaterial(), "CustomData2", m_customData2Texture.GetRID());
+// 		}
+// 
+// 		command.DrawSprites(emitter->get_world().ptr(), (int32_t)m_renderCount);
+// 		m_renderCount++;
+// 
+// 	}
 // 	else if (auto emitter = godot::Object::cast_to<godot::EffekseerEmitter2D>(godotObj)) {
 // 		if (m_renderCount2D >= m_renderCommand2Ds.size()) return;
 // 
@@ -774,14 +774,14 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 //----------------------------------------------------------------------------------
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count)
 {
-	auto& state = m_renderState->GetActiveState();
-	
-	state.TextureIDs.fill(0);
-	for (int32_t i = 0; i < count; i++)
-	{
-		state.TextureIDs[i] = (textures[i] != nullptr) ? 
-			RIDToInt64(textures[i].DownCast<Texture>()->GetRID()) : 0;
-	}
+// 	auto& state = m_renderState->GetActiveState();
+// 	
+// 	state.TextureIDs.fill(0);
+// 	for (int32_t i = 0; i < count; i++)
+// 	{
+// 		state.TextureIDs[i] = (textures[i] != nullptr) ? 
+// 			RIDToInt64(textures[i].DownCast<Texture>()->GetRID()) : 0;
+// 	}
 }
 
 void RendererImplemented::ResetRenderState()
@@ -803,150 +803,150 @@ void RendererImplemented::DeleteProxyTexture(Effekseer::Backend::TextureRef& tex
 void RendererImplemented::TransferVertexToImmediate3D(/*godot::RID immediate,*/ 
 	const void* vertexData, int32_t spriteCount, const EffekseerRenderer::StandardRendererState& state)
 {
-	using namespace EffekseerRenderer;
-
-	auto vs = godot::VisualServer::get_singleton();
-
-	vs->immediate_begin(immediate, godot::Mesh::PRIMITIVE_TRIANGLE_STRIP);
-
-	RendererShaderType shaderType = m_currentShader->GetShaderType();
-
-	if (shaderType == RendererShaderType::Unlit)
-	{
-		const SimpleVertex* vertices = (const SimpleVertex*)vertexData;
-		for (int32_t i = 0; i < spriteCount; i++)
-		{
-			// Generate degenerate triangles
-			vs->immediate_color(immediate, Urho3D::Color());
-			vs->immediate_uv(immediate, Urho3D::Vector2());
-			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 0].Pos));
-
-			for (int32_t j = 0; j < 4; j++)
-			{
-				auto& v = vertices[i * 4 + j];
-				vs->immediate_color(immediate, ConvertColor(v.Col));
-				vs->immediate_uv(immediate, ConvertUV(v.UV));
-				vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
-			}
-
-			vs->immediate_color(immediate, Urho3D::Color());
-			vs->immediate_uv(immediate, Urho3D::Vector2());
-			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 3].Pos));
-		}
-	}
-	else if (shaderType == RendererShaderType::BackDistortion || shaderType == RendererShaderType::Lit)
-	{
-		const LightingVertex* vertices = (const LightingVertex*)vertexData;
-		for (int32_t i = 0; i < spriteCount; i++)
-		{
-			// Generate degenerate triangles
-			vs->immediate_color(immediate, Urho3D::Color());
-			vs->immediate_uv(immediate, Urho3D::Vector2());
-			vs->immediate_normal(immediate, Urho3D::Vector3());
-			vs->immediate_tangent(immediate, godot::Plane());
-			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 0].Pos));
-
-			for (int32_t j = 0; j < 4; j++)
-			{
-				auto& v = vertices[i * 4 + j];
-				vs->immediate_color(immediate, ConvertColor(v.Col));
-				vs->immediate_uv(immediate, ConvertUV(v.UV));
-				vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
-				vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
-				vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
-			}
-
-			vs->immediate_color(immediate, Urho3D::Color());
-			vs->immediate_uv(immediate, Urho3D::Vector2());
-			vs->immediate_normal(immediate, Urho3D::Vector3());
-			vs->immediate_tangent(immediate, godot::Plane());
-			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 3].Pos));
-		}
-	}
-	else if (shaderType == RendererShaderType::Material)
-	{
-		const int32_t stride = sizeof(DynamicVertex) + (state.CustomData1Count + state.CustomData2Count) * sizeof(float);
-		const int32_t customData1Count = state.CustomData1Count;
-		const int32_t customData2Count = state.CustomData2Count;
-
-		if (customData1Count > 0 || customData2Count > 0)
-		{
-			const int32_t width = CUSTOM_DATA_TEXTURE_WIDTH;
-			const int32_t height = (spriteCount * 4 + width - 1) / width;
-			const uint8_t* vertexPtr = (const uint8_t*)vertexData;
-			float* customData1TexPtr = (customData1Count > 0) ? m_customData1Texture.Lock(0, m_vertexTextureOffset / width, width, height)->ptr : nullptr;
-			float* customData2TexPtr = (customData2Count > 0) ? m_customData2Texture.Lock(0, m_vertexTextureOffset / width, width, height)->ptr : nullptr;
-			
-			for (int32_t i = 0; i < spriteCount; i++)
-			{
-				// Generate degenerate triangles
-				vs->immediate_color(immediate, Urho3D::Color());
-				vs->immediate_uv(immediate, Urho3D::Vector2());
-				vs->immediate_uv2(immediate, Urho3D::Vector2());
-				vs->immediate_normal(immediate, Urho3D::Vector3());
-				vs->immediate_tangent(immediate, godot::Plane());
-				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
-
-				for (int32_t j = 0; j < 4; j++)
-				{
-					auto& v = *(const DynamicVertex*)vertexPtr;
-					vs->immediate_color(immediate, ConvertColor(v.Col));
-					vs->immediate_uv(immediate, ConvertUV(v.UV));
-					vs->immediate_uv2(immediate, ConvertVertexTextureUV(m_vertexTextureOffset++, width));
-					vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
-					vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
-					vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
-					vertexPtr += sizeof(DynamicVertex);
-
-					if (customData1TexPtr) CopyCustomData(customData1TexPtr, vertexPtr, customData1Count);
-					if (customData2TexPtr) CopyCustomData(customData2TexPtr, vertexPtr, customData2Count);
-				}
-
-				vs->immediate_color(immediate, Urho3D::Color());
-				vs->immediate_uv(immediate, Urho3D::Vector2());
-				vs->immediate_uv2(immediate, Urho3D::Vector2());
-				vs->immediate_normal(immediate, Urho3D::Vector3());
-				vs->immediate_tangent(immediate, godot::Plane());
-				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
-			}
-
-			if (customData1TexPtr) m_customData1Texture.Unlock();
-			if (customData2TexPtr) m_customData2Texture.Unlock();
-			m_vertexTextureOffset = (m_vertexTextureOffset + width - 1) / width * width;
-		}
-		else
-		{
-			const uint8_t* vertexPtr = (const uint8_t*)vertexData;
-			for (int32_t i = 0; i < spriteCount; i++)
-			{
-				// Generate degenerate triangles
-				vs->immediate_color(immediate, Urho3D::Color());
-				vs->immediate_uv(immediate, Urho3D::Vector2());
-				vs->immediate_normal(immediate, Urho3D::Vector3());
-				vs->immediate_tangent(immediate, godot::Plane());
-				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
-
-				for (int32_t j = 0; j < 4; j++)
-				{
-					auto& v = *(const DynamicVertex*)vertexPtr;
-					vs->immediate_color(immediate, ConvertColor(v.Col));
-					vs->immediate_uv(immediate, ConvertUV(v.UV));
-					vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
-					vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
-					vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
-					vertexPtr += sizeof(DynamicVertex);
-				}
-
-				vs->immediate_color(immediate, Urho3D::Color());
-				vs->immediate_uv(immediate, Urho3D::Vector2());
-				vs->immediate_normal(immediate, Urho3D::Vector3());
-				vs->immediate_tangent(immediate, godot::Plane());
-				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
-			}
-		}
-	}
-
-	vs->immediate_end(immediate);
+// 	using namespace EffekseerRenderer;
+// 
+// 	auto vs = godot::VisualServer::get_singleton();
+// 
+// 	vs->immediate_begin(immediate, godot::Mesh::PRIMITIVE_TRIANGLE_STRIP);
+// 
+// 	RendererShaderType shaderType = m_currentShader->GetShaderType();
+// 
+// 	if (shaderType == RendererShaderType::Unlit)
+// 	{
+// 		const SimpleVertex* vertices = (const SimpleVertex*)vertexData;
+// 		for (int32_t i = 0; i < spriteCount; i++)
+// 		{
+// 			// Generate degenerate triangles
+// 			vs->immediate_color(immediate, Urho3D::Color());
+// 			vs->immediate_uv(immediate, Urho3D::Vector2());
+// 			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 0].Pos));
+// 
+// 			for (int32_t j = 0; j < 4; j++)
+// 			{
+// 				auto& v = vertices[i * 4 + j];
+// 				vs->immediate_color(immediate, ConvertColor(v.Col));
+// 				vs->immediate_uv(immediate, ConvertUV(v.UV));
+// 				vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
+// 			}
+// 
+// 			vs->immediate_color(immediate, Urho3D::Color());
+// 			vs->immediate_uv(immediate, Urho3D::Vector2());
+// 			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 3].Pos));
+// 		}
+// 	}
+// 	else if (shaderType == RendererShaderType::BackDistortion || shaderType == RendererShaderType::Lit)
+// 	{
+// 		const LightingVertex* vertices = (const LightingVertex*)vertexData;
+// 		for (int32_t i = 0; i < spriteCount; i++)
+// 		{
+// 			// Generate degenerate triangles
+// 			vs->immediate_color(immediate, Urho3D::Color());
+// 			vs->immediate_uv(immediate, Urho3D::Vector2());
+// 			vs->immediate_normal(immediate, Urho3D::Vector3());
+// 			vs->immediate_tangent(immediate, godot::Plane());
+// 			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 0].Pos));
+// 
+// 			for (int32_t j = 0; j < 4; j++)
+// 			{
+// 				auto& v = vertices[i * 4 + j];
+// 				vs->immediate_color(immediate, ConvertColor(v.Col));
+// 				vs->immediate_uv(immediate, ConvertUV(v.UV));
+// 				vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
+// 				vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
+// 				vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
+// 			}
+// 
+// 			vs->immediate_color(immediate, Urho3D::Color());
+// 			vs->immediate_uv(immediate, Urho3D::Vector2());
+// 			vs->immediate_normal(immediate, Urho3D::Vector3());
+// 			vs->immediate_tangent(immediate, godot::Plane());
+// 			vs->immediate_vertex(immediate, ConvertVector3(vertices[i * 4 + 3].Pos));
+// 		}
+// 	}
+// 	else if (shaderType == RendererShaderType::Material)
+// 	{
+// 		const int32_t stride = sizeof(DynamicVertex) + (state.CustomData1Count + state.CustomData2Count) * sizeof(float);
+// 		const int32_t customData1Count = state.CustomData1Count;
+// 		const int32_t customData2Count = state.CustomData2Count;
+// 
+// 		if (customData1Count > 0 || customData2Count > 0)
+// 		{
+// 			const int32_t width = CUSTOM_DATA_TEXTURE_WIDTH;
+// 			const int32_t height = (spriteCount * 4 + width - 1) / width;
+// 			const uint8_t* vertexPtr = (const uint8_t*)vertexData;
+// 			float* customData1TexPtr = (customData1Count > 0) ? m_customData1Texture.Lock(0, m_vertexTextureOffset / width, width, height)->ptr : nullptr;
+// 			float* customData2TexPtr = (customData2Count > 0) ? m_customData2Texture.Lock(0, m_vertexTextureOffset / width, width, height)->ptr : nullptr;
+// 			
+// 			for (int32_t i = 0; i < spriteCount; i++)
+// 			{
+// 				// Generate degenerate triangles
+// 				vs->immediate_color(immediate, Urho3D::Color());
+// 				vs->immediate_uv(immediate, Urho3D::Vector2());
+// 				vs->immediate_uv2(immediate, Urho3D::Vector2());
+// 				vs->immediate_normal(immediate, Urho3D::Vector3());
+// 				vs->immediate_tangent(immediate, godot::Plane());
+// 				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
+// 
+// 				for (int32_t j = 0; j < 4; j++)
+// 				{
+// 					auto& v = *(const DynamicVertex*)vertexPtr;
+// 					vs->immediate_color(immediate, ConvertColor(v.Col));
+// 					vs->immediate_uv(immediate, ConvertUV(v.UV));
+// 					vs->immediate_uv2(immediate, ConvertVertexTextureUV(m_vertexTextureOffset++, width));
+// 					vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
+// 					vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
+// 					vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
+// 					vertexPtr += sizeof(DynamicVertex);
+// 
+// 					if (customData1TexPtr) CopyCustomData(customData1TexPtr, vertexPtr, customData1Count);
+// 					if (customData2TexPtr) CopyCustomData(customData2TexPtr, vertexPtr, customData2Count);
+// 				}
+// 
+// 				vs->immediate_color(immediate, Urho3D::Color());
+// 				vs->immediate_uv(immediate, Urho3D::Vector2());
+// 				vs->immediate_uv2(immediate, Urho3D::Vector2());
+// 				vs->immediate_normal(immediate, Urho3D::Vector3());
+// 				vs->immediate_tangent(immediate, godot::Plane());
+// 				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
+// 			}
+// 
+// 			if (customData1TexPtr) m_customData1Texture.Unlock();
+// 			if (customData2TexPtr) m_customData2Texture.Unlock();
+// 			m_vertexTextureOffset = (m_vertexTextureOffset + width - 1) / width * width;
+// 		}
+// 		else
+// 		{
+// 			const uint8_t* vertexPtr = (const uint8_t*)vertexData;
+// 			for (int32_t i = 0; i < spriteCount; i++)
+// 			{
+// 				// Generate degenerate triangles
+// 				vs->immediate_color(immediate, Urho3D::Color());
+// 				vs->immediate_uv(immediate, Urho3D::Vector2());
+// 				vs->immediate_normal(immediate, Urho3D::Vector3());
+// 				vs->immediate_tangent(immediate, godot::Plane());
+// 				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr)).Pos));
+// 
+// 				for (int32_t j = 0; j < 4; j++)
+// 				{
+// 					auto& v = *(const DynamicVertex*)vertexPtr;
+// 					vs->immediate_color(immediate, ConvertColor(v.Col));
+// 					vs->immediate_uv(immediate, ConvertUV(v.UV));
+// 					vs->immediate_normal(immediate, ConvertVector3(Normalize(UnpackVector3DF(v.Normal))));
+// 					vs->immediate_tangent(immediate, ConvertTangent(Normalize(UnpackVector3DF(v.Tangent))));
+// 					vs->immediate_vertex(immediate, ConvertVector3(v.Pos));
+// 					vertexPtr += sizeof(DynamicVertex);
+// 				}
+// 
+// 				vs->immediate_color(immediate, Urho3D::Color());
+// 				vs->immediate_uv(immediate, Urho3D::Vector2());
+// 				vs->immediate_normal(immediate, Urho3D::Vector3());
+// 				vs->immediate_tangent(immediate, godot::Plane());
+// 				vs->immediate_vertex(immediate, ConvertVector3((*(const DynamicVertex*)(vertexPtr - stride)).Pos));
+// 			}
+// 		}
+// 	}
+// 
+// 	vs->immediate_end(immediate);
 }
 
 void RendererImplemented::TransferVertexToCanvasItem2D(/*godot::RID canvas_item,*/ 

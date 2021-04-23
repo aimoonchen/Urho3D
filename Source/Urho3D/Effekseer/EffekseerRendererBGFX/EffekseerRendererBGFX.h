@@ -148,7 +148,7 @@ public:
 
 	virtual Effekseer::Backend::GraphicsDeviceRef GetGraphicsDevice() const;
 };
-*/
+
 } // namespace EffekseerRenderer
 
 namespace EffekseerRendererBGFX
@@ -169,26 +169,26 @@ namespace EffekseerRendererBGFX
 Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, /*bgfx::TextureHandle*/Urho3D::Texture2D* buffer, bool hasMipmap, const std::function<void()>& onDisposed);
 
 
-class Renderer;
-using RendererRef = ::Effekseer::RefPtr<Renderer>;
-
-class Renderer : public ::EffekseerRenderer::Renderer
-{
-protected:
-	Renderer()
-	{
-	}
-	virtual ~Renderer()
-	{
-	}
-public:
-	static RendererRef Create(int32_t squareMaxCount/*, OpenGLDeviceType deviceType = OpenGLDeviceType::OpenGL2, bool isExtensionsEnabled = true*/);
-	static RendererRef Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount);
-
-	virtual int32_t GetSquareMaxCount() const = 0;
-	virtual void SetSquareMaxCount(int32_t count) = 0;
-	virtual void SetBackground(bgfx::TextureHandle background, bool hasMipmap = false) = 0;
-	virtual bool IsVertexArrayObjectSupported() const = 0;
-};
+// class Renderer;
+// using RendererRef = ::Effekseer::RefPtr<Renderer>;
+// 
+// class Renderer : public ::EffekseerRenderer::Renderer
+// {
+// protected:
+// 	Renderer()
+// 	{
+// 	}
+// 	virtual ~Renderer()
+// 	{
+// 	}
+// public:
+// 	static RendererRef Create(Urho3D::Graphics* graphicsDevice, int32_t squareMaxCount/*, OpenGLDeviceType deviceType = OpenGLDeviceType::OpenGL2, bool isExtensionsEnabled = true*/);
+// 	static RendererRef Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount);
+// 
+// 	virtual int32_t GetSquareMaxCount() const = 0;
+// 	virtual void SetSquareMaxCount(int32_t count) = 0;
+// 	virtual void SetBackground(/*bgfx::TextureHandle*/Urho3D::Texture2D* background, bool hasMipmap = false) = 0;
+// 	virtual bool IsVertexArrayObjectSupported() const = 0;
+// };
 
 } // namespace EffekseerRendererBGFX

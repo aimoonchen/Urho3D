@@ -11,6 +11,7 @@
 namespace Urho3D
 {
 	class ShaderProgram;
+	class ShaderVariation;
 }
 
 namespace EffekseerRendererBGFX {
@@ -52,6 +53,7 @@ private:
 	};
 	Urho3D::Graphics* graphics_{ nullptr };
 	//bgfx::ProgramHandle m_program;
+	
 	Urho3D::ShaderProgram* m_program;
 	uint8_t* m_vertexConstantBuffer;
 	uint8_t* m_pixelConstantBuffer;
@@ -64,13 +66,16 @@ private:
 
 	bool isTransposeEnabled_ = false;
 	
-	Shader(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* programHandle);
+	Shader(Urho3D::ShaderProgram* program);
 public:
+    Urho3D::ShaderVariation* m_vs;
+    Urho3D::ShaderVariation* m_fs;
 	std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/> uniforms_;
 	virtual ~Shader();
 
-	static Shader* Create(/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* program);
+	static Shader* Create(const char* filename);
 
+	bool HasUniform(Urho3D::StringHash name);
 	/*bgfx::ProgramHandle*/Urho3D::ShaderProgram* GetInterface() const;
 
 	void SetUniforms(std::unordered_map<std::string, Urho3D::StringHash/*bgfx::UniformHandle*/>&& uniforms);

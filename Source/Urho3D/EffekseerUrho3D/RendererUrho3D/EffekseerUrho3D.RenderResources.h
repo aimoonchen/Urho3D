@@ -4,6 +4,10 @@
 #include <Effekseer.h>
 //#include <Resource.hpp>
 
+namespace Urho3D
+{
+	class Texture2D;
+}
 namespace EffekseerUrho3D
 {
 	
@@ -15,6 +19,7 @@ public:
 private:
 	friend class TextureLoader;
 
+	Urho3D::Texture2D* urho3d_texture_{ nullptr };
 // 	godot::Ref<godot::Resource> godotTexture_;
 // 	godot::RID textureRid_;
 };

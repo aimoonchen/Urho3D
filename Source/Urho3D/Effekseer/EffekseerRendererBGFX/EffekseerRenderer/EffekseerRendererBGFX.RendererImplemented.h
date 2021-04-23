@@ -82,7 +82,7 @@ private:
 	int32_t GetIndexSpriteCount() const;
 
 public:
-	RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics);
+	RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics, Backend::GraphicsDeviceRef graphicsDevice);
 
 	~RendererImplemented();
 

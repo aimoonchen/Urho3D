@@ -5,6 +5,7 @@
 
 namespace Urho3D
 {
+	class Graphics;
 	class ShaderProgram;
 	class Texture2D;
 }
@@ -45,8 +46,8 @@ protected:
 	virtual ~Renderer() {}
 public:
 	static std::vector<bgfx_context> s_bgfx_context_;
-	static RendererRef Create(int32_t squareMaxCount/*, OpenGLDeviceType deviceType = OpenGLDeviceType::OpenGL2, bool isExtensionsEnabled = true*/);
-	static RendererRef Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount);
+	static RendererRef Create(Urho3D::Graphics* graphicsDevice, int32_t squareMaxCount/*, OpenGLDeviceType deviceType = OpenGLDeviceType::OpenGL2, bool isExtensionsEnabled = true*/);
+	static RendererRef Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount, Urho3D::Graphics* graphics);
 	virtual int32_t GetSquareMaxCount() const = 0;
 	virtual void SetSquareMaxCount(int32_t count) = 0;
 	virtual void SetBackground(/*bgfx::TextureHandle*/ Urho3D::Texture2D* background, bool hasMipmap = false) = 0;

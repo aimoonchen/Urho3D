@@ -9,10 +9,11 @@
 // #include <Transform.hpp>
 // #include <Color.hpp>
 // #include <Script.hpp>
-#include "../Math/Vector2.h"
-#include "../Math/Vector3.h"
-#include "../Math/Matrix4.h"
-#include "../Math/Color.h"
+#include "../../Math/Vector2.h"
+#include "../../Math/Vector3.h"
+#include "../../Math/Matrix3x4.h"
+#include "../../Math/Matrix4.h"
+#include "../../Math/Color.h"
 
 namespace EffekseerUrho3D
 {
@@ -117,10 +118,27 @@ inline Effekseer::Matrix44 ToEfkMatrix44(const Urho3D::Matrix4& transform)
 // 	matrix.Values[3][3] = 1.0f;
 // 	return matrix;
 // }
-
-inline Effekseer::Matrix43 ToEfkMatrix43(const Urho3D::Matrix4& transform)
+inline Effekseer::Matrix43 ToEfkMatrix43(const Urho3D::Matrix3x4& transform)
 {
 	Effekseer::Matrix43 matrix;
+	matrix.Value[0][0] = transform.m00_;
+	matrix.Value[0][1] = transform.m10_;
+	matrix.Value[0][2] = transform.m20_;
+	matrix.Value[1][0] = transform.m01_;
+	matrix.Value[1][1] = transform.m11_;
+	matrix.Value[1][2] = transform.m21_;
+	matrix.Value[2][0] = transform.m02_;
+	matrix.Value[2][1] = transform.m12_;
+	matrix.Value[2][2] = transform.m22_;
+	matrix.Value[3][0] = transform.m03_;
+	matrix.Value[3][1] = transform.m13_;
+	matrix.Value[3][2] = transform.m23_;
+	return matrix;
+}
+
+// inline Effekseer::Matrix43 ToEfkMatrix43(const Urho3D::Matrix4& transform)
+// {
+// 	Effekseer::Matrix43 matrix;
 // 	matrix.Value[0][0] = transform.basis[0][0];
 // 	matrix.Value[0][1] = transform.basis[0][1];
 // 	matrix.Value[0][2] = transform.basis[0][2];
@@ -133,8 +151,8 @@ inline Effekseer::Matrix43 ToEfkMatrix43(const Urho3D::Matrix4& transform)
 // 	matrix.Value[3][0] = transform.origin.x;
 // 	matrix.Value[3][1] = transform.origin.y;
 // 	matrix.Value[3][2] = transform.origin.z;
-	return matrix;
-}
+// 	return matrix;
+// }
 
 // inline Effekseer::Matrix43 ToEfkMatrix43(const godot::Transform2D& transform, 
 // 	const Urho3D::Vector3& orientation, bool flipH, bool flipV)

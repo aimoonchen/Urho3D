@@ -38,7 +38,8 @@
 #include <Urho3D/UI/UI.h>
 
 #include "StaticScene.h"
-
+#include "Urho3D/EffekseerUrho3D/EffekseerEmitter.h"
+#include "Urho3D/EffekseerUrho3D/EffekseerSystem.h"
 #include <memory>
 
 #include <Urho3D/DebugNew.h>
@@ -109,25 +110,31 @@ void StaticScene::CreateScene()
     // distance (you'll see the model get simpler as it moves further away). Finally, rendering a large number of the
     // same object with the same material allows instancing to be used, if the GPU supports it. This reduces the amount
     // of CPU work in rendering the scene.
-    const unsigned NUM_OBJECTS = 200;
+    const unsigned NUM_OBJECTS = 1;// 200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
-        Node* mushroomNode = scene_->CreateChild("Mushroom");
-        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-        mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-        mushroomNode->SetScale(0.5f + Random(2.0f));
-        auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+        //Node* mushroomNode = scene_->CreateChild("Mushroom");
+        test_emitter_ = scene_->CreateChild("Mushroom");
+        auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
+        ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
+        ee->play();
+        ee->set_paused(true);
+//         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+//         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+//         mushroomNode->SetScale(0.5f + Random(2.0f));
+//         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
+//         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+//         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
     }
 
     // Create a scene node for the camera, which we will move around
     // The camera will use default settings (1000 far clip distance, 45 degrees FOV, set aspect ratio automatically)
     cameraNode_ = scene_->CreateChild("Camera");
-    cameraNode_->CreateComponent<Camera>();
+    auto cam = cameraNode_->CreateComponent<Camera>();
 
     // Set an initial position for the camera scene node above the plane
     cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -14.0f));
+    EffekseerSystem::get_instance()->SetCamera(cam);
 }
 
 void StaticScene::CreateInstructions()
@@ -204,7 +211,9 @@ void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     // Take the frame time step, which is stored as a float
     float timeStep = eventData[P_TIMESTEP].GetFloat();
-
+    auto oldpos = test_emitter_->GetPosition();
+    oldpos.x_ += 0.02;
+    test_emitter_->SetPosition(oldpos);
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
 }

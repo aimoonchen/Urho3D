@@ -2,19 +2,28 @@
 
 // #include <Godot.hpp>
 // #include <Resource.hpp>
-#include <Effekseer.h>
+#include "../Container/Str.h"
+#include "../Resource/Resource.h"
+#include "../Effekseer/Effekseer/Effekseer.h"
 
 namespace Urho3D {
 
-class EffekseerEffect// : public Resource
+class Context;
+
+class EffekseerEffect : public Resource
 {
-	//GODOT_CLASS(EffekseerEffect, Resource)
+	URHO3D_OBJECT(EffekseerEffect, Resource);
 
 public:
 	static void _register_methods();
 
-	EffekseerEffect();
+	EffekseerEffect(Context* context);
 	~EffekseerEffect();
+
+	static void RegisterObject(Context* context);
+	bool BeginLoad(Deserializer& source) override;
+	bool EndLoad() override;
+	bool Save(Serializer& dest) const override { return true; }
 
 	void _init();
 
@@ -48,6 +57,7 @@ private:
 	void get_material_path(char16_t* path, size_t path_size);
 
 	String m_data_path;
+	std::vector<char> m_data_bytes;
 // 	PoolByteArray m_data_bytes;
 // 	Dictionary m_subresources;
 	float m_scale = 1.0f;

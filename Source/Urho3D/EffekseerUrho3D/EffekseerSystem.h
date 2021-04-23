@@ -5,7 +5,7 @@
 // #include <Camera.hpp>
 // #include <Camera2D.hpp>
 // #include <Node.hpp>
-#include <Effekseer.h>
+#include "../Effekseer/Effekseer/Effekseer.h"
 #include "RendererUrho3D/EffekseerUrho3D.Renderer.h"
 #include "SoundUrho3D/EffekseerUrho3D.SoundPlayer.h"
 #include "../Core/Object.h"
@@ -62,7 +62,8 @@ private:
 	static EffekseerSystem* s_instance;
 
 	Effekseer::ManagerRef m_manager;
-	EffekseerUrho3D::RendererRef m_renderer;
+	//EffekseerUrho3D::RendererRef m_renderer;
+	EffekseerRenderer::RendererRef m_renderer;
     Camera* main_camera_{ nullptr };
 };
 

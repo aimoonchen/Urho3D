@@ -83,31 +83,31 @@ void ModelRenderer::InitRenderer()
 	//for (auto& shader : {shader_ad_lit_, shader_lit_})
 	//{
 	//	shader->GetAttribIdList(NumAttribs_Model, g_model_attribs);
-	//	shader->SetTextureSlot(0, shader->GetUniformId("s_sampler_colorTex"));
+	//	shader->SetTextureSlot(0, shader->GetUniformId("sColorTex"));
 	//	shader->SetTextureSlot(1, shader->GetUniformId("Sampler_sampler_normalTex"));
 	//}
 	//applyPSAdvancedRendererParameterTexture(shader_ad_lit_, 2);
-	//shader_lit_->SetTextureSlot(2, shader_lit_->GetUniformId("s_sampler_depthTex"));
-	//shader_ad_lit_->SetTextureSlot(7, shader_ad_lit_->GetUniformId("s_sampler_depthTex"));
+	//shader_lit_->SetTextureSlot(2, shader_lit_->GetUniformId("sDepthTex"));
+	//shader_ad_lit_->SetTextureSlot(7, shader_ad_lit_->GetUniformId("sDepthTex"));
 
 	//for (auto& shader : {shader_ad_unlit_, shader_unlit_})
 	//{
 	//	shader->GetAttribIdList(NumAttribs_Model, g_model_attribs);
-	//	shader->SetTextureSlot(0, shader->GetUniformId("s_sampler_colorTex"));
+	//	shader->SetTextureSlot(0, shader->GetUniformId("sColorTex"));
 	//}
 	//applyPSAdvancedRendererParameterTexture(shader_ad_unlit_, 1);
-	//shader_unlit_->SetTextureSlot(1, shader_unlit_->GetUniformId("s_sampler_depthTex"));
-	//shader_ad_unlit_->SetTextureSlot(6, shader_ad_unlit_->GetUniformId("s_sampler_depthTex"));
+	//shader_unlit_->SetTextureSlot(1, shader_unlit_->GetUniformId("sDepthTex"));
+	//shader_ad_unlit_->SetTextureSlot(6, shader_ad_unlit_->GetUniformId("sDepthTex"));
 
 	//for (auto& shader : {shader_ad_distortion_, shader_distortion_})
 	//{
 	//	shader->GetAttribIdList(NumAttribs_Model, g_model_attribs);
-	//	shader->SetTextureSlot(0, shader->GetUniformId("s_sampler_colorTex"));
+	//	shader->SetTextureSlot(0, shader->GetUniformId("sColorTex"));
 	//	shader->SetTextureSlot(1, shader->GetUniformId("Sampler_sampler_backTex"));
 	//}
 	//applyPSAdvancedRendererParameterTexture(shader_ad_distortion_, 2);
-	//shader_distortion_->SetTextureSlot(2, shader_distortion_->GetUniformId("s_sampler_depthTex"));
-	//shader_ad_distortion_->SetTextureSlot(7, shader_ad_distortion_->GetUniformId("s_sampler_depthTex"));
+	//shader_distortion_->SetTextureSlot(2, shader_distortion_->GetUniformId("sDepthTex"));
+	//shader_ad_distortion_->SetTextureSlot(7, shader_ad_distortion_->GetUniformId("sDepthTex"));
 
 	//Shader* shaders[4];
 	//shaders[0] = shader_ad_lit_;

@@ -96,17 +96,15 @@ Effekseer::Backend::TextureRef CreateTexture(Effekseer::Backend::GraphicsDeviceR
 
 std::vector<bgfx_context> Renderer::s_bgfx_context_;
 
-RendererRef Renderer::Create(int32_t squareMaxCount/*, OpenGLDeviceType deviceType, bool isExtensionsEnabled*/)
+RendererRef Renderer::Create(Urho3D::Graphics* graphicsDevice, int32_t squareMaxCount/*, OpenGLDeviceType deviceType, bool isExtensionsEnabled*/)
 {
-	return Create(CreateGraphicsDevice(/*deviceType, isExtensionsEnabled*/), squareMaxCount);
+	return Create(CreateGraphicsDevice(), squareMaxCount, graphicsDevice);
 }
 
-RendererRef Renderer::Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount)
+RendererRef Renderer::Create(Effekseer::Backend::GraphicsDeviceRef graphicsDevice, int32_t squareMaxCount, Urho3D::Graphics* graphics)
 {
-	//auto g = graphicsDevice.DownCast<Backend::GraphicsDevice>();
-	
-	auto g = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
-	auto renderer = ::Effekseer::MakeRefPtr<RendererImplemented>(squareMaxCount, g);
+	auto g = graphicsDevice.DownCast<Backend::GraphicsDevice>();
+	auto renderer = ::Effekseer::MakeRefPtr<RendererImplemented>(squareMaxCount, graphics, g);
 	if (renderer->Initialize())
 	{
 		return renderer;
@@ -125,7 +123,7 @@ int32_t RendererImplemented::GetIndexSpriteCount() const
 	return (int32_t)(vsSize / size / 4 + 1);
 }
 
-RendererImplemented::RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics)
+RendererImplemented::RendererImplemented(int32_t squareMaxCount, Urho3D::Graphics* graphics, Backend::GraphicsDeviceRef graphicsDevice)
 	: m_squareMaxCount(squareMaxCount)
 	, m_renderState(nullptr)
 	, m_restorationOfStates(true)
@@ -133,7 +131,7 @@ RendererImplemented::RendererImplemented(int32_t squareMaxCount, Urho3D::Graphic
 	, m_distortingCallback(nullptr)
 	, graphics_ {graphics}
 {
-	//graphicsDevice_ = graphicsDevice;
+	graphicsDevice_ = graphicsDevice;
     auto shaderTypeCount = static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1;
     bgfx_buffer_.resize(shaderTypeCount);
     s_bgfx_context_.resize(shaderTypeCount);
@@ -294,14 +292,23 @@ void RendererImplemented::GenerateIndexDataStride()
 
 static /*bgfx::UniformHandle*/Urho3D::StringHash GetValidUniform(Shader* shader, const char* name)
 {
-	auto& uniforms = shader->uniforms_;
-	auto it = uniforms.find(name);
-	if (it != uniforms.end()) {
-		return it->second;
+	auto uniform_name = Urho3D::StringHash(name);
+	if (shader->HasUniform(uniform_name))
+	{
+		return uniform_name;
 	}
-	else {
-		return { /*UINT16_MAX*/ };
+	else
+	{
+		return "";
 	}
+// 	auto& uniforms = shader->uniforms_;
+// 	auto it = uniforms.find(name);
+// 	if (it != uniforms.end()) {
+// 		return it->second;
+// 	}
+// 	else {
+// 		return { /*UINT16_MAX*/ };
+// 	}
 };
 
 bool RendererImplemented::Initialize()
@@ -342,8 +349,7 @@ bool RendererImplemented::Initialize()
 	auto shaderCount = static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1;
 	shaders_.resize(shaderCount);
 	for (int i = 0; i < shaderCount; i++) {
-		shaders_[i] = Shader::Create(s_bgfx_context_[i].program_);
-		shaders_[i]->uniforms_ = std::move(s_bgfx_context_[i].uniforms_);
+		shaders_[i] = Shader::Create("Effekseer/Unlit");
 	}
 // 	shader_ad_unlit_ = Shader::Create("vs_sprite_unlit", "fs_model_unlit");
 // 	if (shader_ad_unlit_ == nullptr)
@@ -406,13 +412,13 @@ bool RendererImplemented::Initialize()
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"), sizeof(Effekseer::Matrix44));
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"), sizeof(Effekseer::Matrix44) * 2);
-		shader->SetTextureSlot(0, GetValidUniform(shader, "s_sampler_colorTex"));
+		shader->SetTextureSlot(0, GetValidUniform(shader, "sColorTex"));
 		AssignPixelConstantBuffer(shader);
 	}
 
 	applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-	shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "s_sampler_depthTex"));
-	shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "s_sampler_depthTex"));
+	shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sDepthTex"));
+	shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sDepthTex"));
 
 	//vao_unlit_ = VertexArray::Create(graphicsDevice_, shader_unlit_, GetVertexBuffer(), GetIndexBuffer());
 	//vao_ad_unlit_ = VertexArray::Create(graphicsDevice_, shader_ad_unlit_, GetVertexBuffer(), GetIndexBuffer());
@@ -455,7 +461,7 @@ bool RendererImplemented::Initialize()
 	//	shader->AddVertexConstantLayout(
 	//		CONSTANT_TYPE_VECTOR4, BGFX(create_uniform)("mUVInversed", BGFX_UNIFORM_TYPE_VEC4)/*shader->GetUniformId("CBVS0.mUVInversed")*/, sizeof(Effekseer::Matrix44) * 2);
 
-	//	shader->SetTextureSlot(0, BGFX(create_uniform)("s_sampler_colorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("s_sampler_colorTex")*/);
+	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sColorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("sColorTex")*/);
 	//	shader->SetTextureSlot(1, BGFX(create_uniform)("Sampler_sampler_backTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("Sampler_sampler_backTex")*/);
 
 	//	shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4,
@@ -466,8 +472,8 @@ bool RendererImplemented::Initialize()
 	//}
 
 	//applyPSAdvancedRendererParameterTexture(shader_ad_distortion_, 2);
-	//shader_distortion_->SetTextureSlot(2, BGFX(create_uniform)("s_sampler_depthTex", bgfx::UniformType::Sampler)/*shader_distortion_->GetUniformId("s_sampler_depthTex")*/);
-	//shader_ad_distortion_->SetTextureSlot(7, BGFX(create_uniform)("s_sampler_depthTex", bgfx::UniformType::Sampler)/*shader_ad_distortion_->GetUniformId("s_sampler_depthTex")*/);
+	//shader_distortion_->SetTextureSlot(2, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_distortion_->GetUniformId("sDepthTex")*/);
+	//shader_ad_distortion_->SetTextureSlot(7, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_ad_distortion_->GetUniformId("sDepthTex")*/);
 
 	//// Lit
 	//for (auto shader : {shader_ad_lit_, shader_lit_})
@@ -483,15 +489,15 @@ bool RendererImplemented::Initialize()
 	//	shader->AddVertexConstantLayout(
 	//		CONSTANT_TYPE_VECTOR4, BGFX(create_uniform)("mUVInversed", BGFX_UNIFORM_TYPE_VEC4)/*shader->GetUniformId("CBVS0.mUVInversed")*/, sizeof(Effekseer::Matrix44) * 2);
 
-	//	shader->SetTextureSlot(0, BGFX(create_uniform)("s_sampler_colorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("s_sampler_colorTex")*/);
+	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sColorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("sColorTex")*/);
 	//	shader->SetTextureSlot(1, BGFX(create_uniform)("Sampler_sampler_normalTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("Sampler_sampler_normalTex")*/);
 
 	//	AssignPixelConstantBuffer(shader);
 	//}
 
 	//applyPSAdvancedRendererParameterTexture(shader_ad_lit_, 2);
-	//shader_lit_->SetTextureSlot(2, BGFX(create_uniform)("s_sampler_depthTex", bgfx::UniformType::Sampler)/*shader_lit_->GetUniformId("s_sampler_depthTex")*/);
-	//shader_ad_lit_->SetTextureSlot(7, BGFX(create_uniform)("s_sampler_depthTex", bgfx::UniformType::Sampler)/*shader_ad_lit_->GetUniformId("s_sampler_depthTex")*/);
+	//shader_lit_->SetTextureSlot(2, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_lit_->GetUniformId("sDepthTex")*/);
+	//shader_ad_lit_->SetTextureSlot(7, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_ad_lit_->GetUniformId("sDepthTex")*/);
 
 
 	//m_vao_wire_frame = VertexArray::Create(graphicsDevice_, shader_unlit_, GetVertexBuffer(), m_indexBufferForWireframe);
@@ -831,6 +837,7 @@ void RendererImplemented::SetVertexBuffer(bgfx::DynamicVertexBufferHandle vertex
 */
 void RendererImplemented::SetIndexBuffer(IndexBuffer* indexBuffer)
 {
+	graphics_->SetIndexBuffer(indexBuffer->GetInterface());
 	//if (m_currentVertexArray == nullptr || m_currentVertexArray->GetIndexBuffer() == nullptr)
 	//{
 	//	//GLExt::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->GetInterface());
@@ -893,7 +900,8 @@ void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 		//GLExt::glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, indexBuffer->GetInterface());
 		auto indexBuffer = GetIndexBuffer();
 		//bgfx::setIndexBuffer(indexBuffer->GetInterface(), vertexOffset / 4 * 6, spriteCount * 6);
-		graphics_->SetIndexBuffer(indexBuffer->GetInterface());
+		
+		graphics_->Draw(Urho3D::TRIANGLE_LIST, vertexOffset / 4 * 6, spriteCount * 6, 0, 0);
 		indexBufferCurrentStride_ = indexBuffer->GetStride();
 	//}
 	//else

@@ -1,6 +1,10 @@
 // #include <Image.hpp>
 // #include <ImageTexture.hpp>
 // #include <ResourceLoader.hpp>
+#include "../../Core/Context.h"
+#include "../../Graphics/Texture2D.h"
+#include "../../Resource/ResourceCache.h"
+#include "../../Cocos2d/Urho3DContext.h"
 #include "EffekseerUrho3D.TextureLoader.h"
 #include "../RendererUrho3D/EffekseerUrho3D.RenderResources.h"
 #include "../Utils/EffekseerUrho3D.Utils.h"
@@ -10,25 +14,26 @@ namespace EffekseerUrho3D
 
 Effekseer::TextureRef TextureLoader::Load(const char16_t* path, Effekseer::TextureType textureType)
 {
-	/*
-	Urho3D::String gdpath = ToGdString(path);
-
+	static auto* cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+	Urho3D::String urho3dPath = ToGdString(path);
+	auto texture = cache->GetResource<Urho3D::Texture2D>(urho3dPath);
 	// Load by Godot
-	auto loader = godot::ResourceLoader::get_singleton();
-	auto resource = loader->load(gdpath);
-	if (!resource.is_valid())
-	{
-		return nullptr;
-	}
-
-	auto texture = (godot::ImageTexture*)resource.ptr();
-	texture->set_flags(godot::Texture::FLAG_MIPMAPS);
+// 	auto loader = godot::ResourceLoader::get_singleton();
+// 	auto resource = loader->load(gdpath);
+// 	if (!resource.is_valid())
+// 	{
+// 		return nullptr;
+// 	}
+// 
+// 	auto texture = (godot::ImageTexture*)resource.ptr();
+// 	texture->set_flags(godot::Texture::FLAG_MIPMAPS);
 
 	auto backend = Effekseer::MakeRefPtr<Texture>();
-	backend->size_[0] = (int32_t)texture->get_width();
-	backend->size_[1] = (int32_t)texture->get_height();
-	backend->godotTexture_ = resource;
-	backend->textureRid_ = resource->get_rid();
+	backend->size_[0] = (int32_t)texture->GetWidth();
+	backend->size_[1] = (int32_t)texture->GetHeight();
+	backend->urho3d_texture_ = texture;
+	//backend->godotTexture_ = resource;
+	//backend->textureRid_ = resource->get_rid();
 
 	//auto format = texture->get_format();
 	//switch (format)
@@ -45,8 +50,6 @@ Effekseer::TextureRef TextureLoader::Load(const char16_t* path, Effekseer::Textu
 	auto result = Effekseer::MakeRefPtr<Effekseer::Texture>();
 	result->SetBackend(backend);
 	return result;
-	*/
-	return nullptr;
 }
 
 void TextureLoader::Unload(Effekseer::TextureRef textureData)

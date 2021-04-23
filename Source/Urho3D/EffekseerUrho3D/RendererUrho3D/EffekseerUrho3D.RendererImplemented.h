@@ -3,6 +3,7 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
+
 #include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
 #include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h"
 #include "EffekseerUrho3D.Base.h"
@@ -13,7 +14,7 @@
 
 namespace Urho3D
 {
-class Node2D;
+	class Vector2;
 }
 
 namespace EffekseerUrho3D
@@ -117,7 +118,7 @@ private:
 	std::array<std::unique_ptr<Shader>, 6> m_shaders;
 
 	Shader* m_currentShader = nullptr;
-	godot::World* m_world = nullptr;
+	//godot::World* m_world = nullptr;
 
 	std::vector<RenderCommand> m_renderCommands;
 	size_t m_renderCount = 0;
