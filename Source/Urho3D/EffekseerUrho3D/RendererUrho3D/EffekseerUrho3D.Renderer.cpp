@@ -8,6 +8,10 @@
 // #include <Viewport.hpp>
 // #include <Mesh.hpp>
 // #include <Image.hpp>
+#include "../../Core/Context.h"
+#include "../../Graphics/Graphics.h"
+#include "../../Graphics/Texture2D.h"
+
 #include "../EffekseerEmitter.h"
 #include "../EffekseerEmitter2D.h"
 #include "../Utils/EffekseerUrho3D.Utils.h"
@@ -347,9 +351,9 @@ void RenderCommand2D::DrawModel(/*godot::Node2D* parent, godot::RID mesh*/)
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-RendererRef Renderer::Create(int32_t squareMaxCount, int32_t drawMaxCount)
+RendererRef Renderer::Create(Urho3D::Context* context, int32_t squareMaxCount, int32_t drawMaxCount)
 {
-	auto renderer = Effekseer::MakeRefPtr<RendererImplemented>(squareMaxCount);
+    auto renderer = Effekseer::MakeRefPtr<RendererImplemented>(context, squareMaxCount);
 	if (renderer->Initialize(drawMaxCount))
 	{
 		return renderer;
@@ -360,9 +364,11 @@ RendererRef Renderer::Create(int32_t squareMaxCount, int32_t drawMaxCount)
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
-RendererImplemented::RendererImplemented(int32_t squareMaxCount)
-	: m_squareMaxCount(squareMaxCount)
+RendererImplemented::RendererImplemented(Urho3D::Context* context, int32_t squareMaxCount)
+    : context_{ context }
+	, m_squareMaxCount(squareMaxCount)
 {
+    graphics_ = context->GetSubsystem<Urho3D::Graphics>();
 	// dummy
 	m_background = Effekseer::MakeRefPtr<Texture>();
 }
@@ -377,38 +383,66 @@ RendererImplemented::~RendererImplemented()
 	assert(GetRef() == 0);
 }
 
+static Urho3D::StringHash GetValidUniform(Shader* shader, const char* name)
+{
+    auto uniform_name = Urho3D::StringHash(name);
+    if (shader->HasUniform(uniform_name))
+    {
+        return uniform_name;
+    }
+    else
+    {
+        return "";
+    }
+    // 	auto& uniforms = shader->uniforms_;
+    // 	auto it = uniforms.find(name);
+    // 	if (it != uniforms.end()) {
+    // 		return it->second;
+    // 	}
+    // 	else {
+    // 		return { /*UINT16_MAX*/ };
+    // 	}
+};
+
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
 bool RendererImplemented::Initialize(int32_t drawMaxCount)
 {
+    if (GetIndexSpriteCount() * 4 > 65536)
+    {
+        indexBufferStride_ = 4;
+    }
+
+    SetSquareMaxCount(m_squareMaxCount);
+
 	m_renderState.reset(new RenderState());
 
 	// generate a vertex buffer
 	{
-		m_vertexBuffer = VertexBuffer::Create(this, EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, true);
-		if (m_vertexBuffer == nullptr)
-			return false;
+// 		m_vertexBuffer = VertexBuffer::Create(this, EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4, true);
+// 		if (m_vertexBuffer == nullptr)
+// 			return false;
 	}
 	{
 		using namespace EffekseerRenderer;
 		using namespace EffekseerUrho3D::StandardShaders;
 
-		m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create("Sprite_Basic_Unlit", RendererShaderType::Unlit);
+		m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Unlit"*/, RendererShaderType::Unlit);
 		m_shaders[(size_t)RendererShaderType::Unlit]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::Unlit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialLightweight, Unlit::Lightweight::code, Unlit::Lightweight::decl);
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialDepthFade, Unlit::SoftParticle::code, Unlit::SoftParticle::decl);
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::CanvasItem, Unlit::CanvasItem::code, Unlit::CanvasItem::decl);
 
-		m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create("Sprite_Basic_Lighting", RendererShaderType::Lit);
+		m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Lighting"*/, RendererShaderType::Lit);
 		m_shaders[(size_t)RendererShaderType::Lit]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::Lit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialLightweight, Lighting::Lightweight::code, Lighting::Lightweight::decl);
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialDepthFade, Lighting::SoftParticle::code, Lighting::SoftParticle::decl);
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::CanvasItem, Lighting::CanvasItem::code, Lighting::CanvasItem::decl);
 
-		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create("Sprite_Basic_Distortion", RendererShaderType::BackDistortion);
+		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Distortion"*/, RendererShaderType::BackDistortion);
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialLightweight, Distortion::Lightweight::code, Distortion::Lightweight::decl);
@@ -424,6 +458,36 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 	m_customData1Texture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
 	m_customData2Texture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
 	m_uvTangentTexture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
+
+	auto applyPSAdvancedRendererParameterTexture = [](Shader* shader, int32_t offset) -> void {
+        shader->SetTextureSlot(0 + offset, GetValidUniform(shader, "s_sampler_alphaTex"));
+        shader->SetTextureSlot(1 + offset, GetValidUniform(shader, "s_sampler_uvDistortionTex"));
+        shader->SetTextureSlot(2 + offset, GetValidUniform(shader, "s_sampler_blendTex"));
+        shader->SetTextureSlot(3 + offset, GetValidUniform(shader, "s_sampler_blendAlphaTex"));
+        shader->SetTextureSlot(4 + offset, GetValidUniform(shader, "s_sampler_blendUVDistortionTex"));
+    };
+
+	auto shader_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Unlit)].get();
+    auto shader_ad_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedUnlit)].get();
+    for (auto& shader : {shader_ad_unlit, shader_unlit})
+    {
+        shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
+        shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBuffer));
+
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mflipbookParameter"),
+                                        sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"),
+                                        sizeof(Effekseer::Matrix44));
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"),
+                                        sizeof(Effekseer::Matrix44) * 2);
+        shader->SetTextureSlot(0, GetValidUniform(shader, "sColorTex"));
+        AssignPixelConstantBuffer(shader);
+    }
+
+    applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
+    shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sDepthTex"));
+    shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sDepthTex"));
 
 	return true;
 }
@@ -460,7 +524,7 @@ void RendererImplemented::ResetState()
 bool RendererImplemented::BeginRendering()
 {
 	impl->CalculateCameraProjectionMatrix();
-
+    currentTextures_.clear();
 	// ステート初期設定
 	m_renderState->GetActiveState().Reset();
 	m_renderState->Update(true);
@@ -487,7 +551,9 @@ bool RendererImplemented::EndRendering()
 //----------------------------------------------------------------------------------
 VertexBuffer* RendererImplemented::GetVertexBuffer()
 {
-	return m_vertexBuffer.Get();
+    auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
+    return m_buffers[static_cast<int>(shaderType)].m_vertexBuffer.Get();
+	//return m_vertexBuffer.Get();
 }
 
 //----------------------------------------------------------------------------------
@@ -495,13 +561,16 @@ VertexBuffer* RendererImplemented::GetVertexBuffer()
 //----------------------------------------------------------------------------------
 IndexBuffer* RendererImplemented::GetIndexBuffer()
 {
+    auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
 	if (GetRenderMode() == ::Effekseer::RenderMode::Wireframe)
 	{
-		return m_indexBufferForWireframe.Get();
+        return m_buffers[static_cast<int>(shaderType)].m_indexBufferForWireframe.Get();
+		//return m_indexBufferForWireframe.Get();
 	}
 	else
 	{
-		return m_indexBuffer.Get();
+        return m_buffers[static_cast<int>(shaderType)].m_indexBuffer.Get();
+		//return m_indexBuffer.Get();
 	}
 }
 
@@ -582,6 +651,9 @@ void RendererImplemented::SetLayout(Shader* shader)
 //----------------------------------------------------------------------------------
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
+    auto indexBuffer = GetIndexBuffer();
+    graphics_->Draw(Urho3D::TRIANGLE_LIST, vertexOffset / 4 * 6, spriteCount * 6, 0, 0);
+    indexBufferCurrentStride_ = indexBuffer->GetStride();
 // 	assert(m_currentShader != nullptr);
 // 
 // 	auto vs = godot::VisualServer::get_singleton();
@@ -740,6 +812,7 @@ Shader* RendererImplemented::GetShader(::EffekseerRenderer::RendererShaderType t
 
 void RendererImplemented::BeginShader(Shader* shader)
 {
+    shader->BeginScene();
 	m_currentShader = shader;
 }
 
@@ -748,6 +821,7 @@ void RendererImplemented::BeginShader(Shader* shader)
 //----------------------------------------------------------------------------------
 void RendererImplemented::EndShader(Shader* shader)
 {
+    shader->EndScene();
 	m_currentShader = nullptr;
 }
 
@@ -769,19 +843,55 @@ void RendererImplemented::SetPixelBufferToShader(const void* data, int32_t size,
 	memcpy(p, data, size);
 }
 
+void RendererImplemented::SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size)
+{
+    graphics_->SetVertexBuffer(vertexBuffer->GetInterface());
+}
+
+void RendererImplemented::SetIndexBuffer(IndexBuffer* indexBuffer)
+{
+    graphics_->SetIndexBuffer(indexBuffer->GetInterface());
+}
+
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
 void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::TextureRef* textures, int32_t count)
 {
-// 	auto& state = m_renderState->GetActiveState();
-// 	
-// 	state.TextureIDs.fill(0);
-// 	for (int32_t i = 0; i < count; i++)
-// 	{
+	auto& state = m_renderState->GetActiveState();
+	
+	state.TextureIDs.fill(0);
+	for (int32_t i = 0; i < count; i++)
+	{
 // 		state.TextureIDs[i] = (textures[i] != nullptr) ? 
 // 			RIDToInt64(textures[i].DownCast<Texture>()->GetRID()) : 0;
-// 	}
+        Urho3D::Texture2D* urho3dTexture;
+		if (textures[i] != nullptr)
+		{
+			auto texture = static_cast<EffekseerUrho3D::Texture*>(textures[i].Get());
+            urho3dTexture = texture->GetUrho3DTexture();
+		}
+		// GLExt::glActiveTexture(GL_TEXTURE0 + i);
+		// glBindTexture(GL_TEXTURE_2D, id);
+
+		if (textures[i] != nullptr)
+		{
+			// m_renderState->GetActiveState().TextureIDs[i] = id.idx;
+			currentTextures_[i] = textures[i];
+		}
+		else
+		{
+			// m_renderState->GetActiveState().TextureIDs[i] = 0;
+			currentTextures_[i].Reset();
+		}
+
+		if (shader->GetTextureSlotEnable(i))
+		{
+			// GLExt::glUniform1i(shader->GetTextureSlot(i), i);
+			// bgfx::setTexture(i, shader->GetTextureSlot(i), id);
+            graphics_->SetTexture(i, urho3dTexture);
+		}
+ 	}
 }
 
 void RendererImplemented::ResetRenderState()
@@ -1191,6 +1301,309 @@ void RendererImplemented::TransferModelToCanvasItem2D(/*godot::RID canvas_item,*
 	*/
 }
 
+int32_t RendererImplemented::GetIndexSpriteCount() const
+{
+    int vsSize = EffekseerRenderer::GetMaximumVertexSizeInAllTypes() * m_squareMaxCount * 4;
+
+    size_t size = sizeof(EffekseerRenderer::SimpleVertex);
+    size = (std::min)(size, sizeof(EffekseerRenderer::DynamicVertex));
+    size = (std::min)(size, sizeof(EffekseerRenderer::LightingVertex));
+
+    return (int32_t)(vsSize / size / 4 + 1);
+}
+
+void RendererImplemented::GenerateIndexData()
+{
+    if (indexBufferStride_ == 2)
+    {
+        GenerateIndexDataStride<uint16_t>();
+    }
+    else if (indexBufferStride_ == 4)
+    {
+        GenerateIndexDataStride<uint32_t>();
+    }
+}
+
+template <typename T> void RendererImplemented::GenerateIndexDataStride()
+{
+    for (auto& buffers : m_buffers)
+    {
+        auto indexBuffer = buffers.m_indexBuffer;
+        // generate an index buffer
+        if (indexBuffer != nullptr)
+        {
+            indexBuffer->Lock();
+            for (int i = 0; i < GetIndexSpriteCount(); i++)
+            {
+                std::array<T, 6> buf;
+                buf[0] = (T)(3 + 4 * i);
+                buf[1] = (T)(1 + 4 * i);
+                buf[2] = (T)(0 + 4 * i);
+                buf[3] = (T)(3 + 4 * i);
+                buf[4] = (T)(0 + 4 * i);
+                buf[5] = (T)(2 + 4 * i);
+                memcpy(indexBuffer->GetBufferDirect(6), buf.data(), sizeof(T) * 6);
+            }
+            indexBuffer->Unlock();
+        }
+
+        auto indexBufferForWireframe = buffers.m_indexBufferForWireframe;
+        // generate an index buffer for a wireframe
+        if (indexBufferForWireframe != nullptr)
+        {
+            indexBufferForWireframe->Lock();
+            for (int i = 0; i < GetIndexSpriteCount(); i++)
+            {
+                std::array<T, 8> buf;
+                buf[0] = (T)(0 + 4 * i);
+                buf[1] = (T)(1 + 4 * i);
+                buf[2] = (T)(2 + 4 * i);
+                buf[3] = (T)(3 + 4 * i);
+                buf[4] = (T)(0 + 4 * i);
+                buf[5] = (T)(2 + 4 * i);
+                buf[6] = (T)(1 + 4 * i);
+                buf[7] = (T)(3 + 4 * i);
+                memcpy(indexBufferForWireframe->GetBufferDirect(8), buf.data(), sizeof(T) * 8);
+            }
+            indexBufferForWireframe->Unlock();
+        }
+    }
+}
+
+void RendererImplemented::SetSquareMaxCount(int32_t count)
+{
+    m_squareMaxCount = count;
+
+    auto calculate_stride = [](EffekseerRenderer::RendererShaderType shaderType) {
+        size_t stride = 0;
+        if (shaderType == EffekseerRenderer::RendererShaderType::Material)
+        {
+            stride = sizeof(EffekseerRenderer::DynamicVertexWithCustomData);
+        }
+        else if (shaderType == EffekseerRenderer::RendererShaderType::Lit ||
+                 shaderType == EffekseerRenderer::RendererShaderType::BackDistortion)
+        {
+            stride = sizeof(EffekseerRenderer::LightingVertex);
+        }
+        else if (shaderType == EffekseerRenderer::RendererShaderType::Unlit)
+        {
+            stride = sizeof(EffekseerRenderer::SimpleVertex);
+        }
+        else if (shaderType == EffekseerRenderer::RendererShaderType::AdvancedLit ||
+                 shaderType == EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)
+        {
+            stride = sizeof(EffekseerRenderer::AdvancedLightingVertex);
+        }
+        else if (shaderType == EffekseerRenderer::RendererShaderType::AdvancedUnlit)
+        {
+            stride = sizeof(EffekseerRenderer::AdvancedSimpleVertex);
+        }
+
+        return static_cast<int32_t>(stride);
+    };
+    auto get_vertex_layout = [](EffekseerRenderer::RendererShaderType shaderType) {
+        uint32_t layoutMask = 0;
+        switch (shaderType)
+        {
+        case EffekseerRenderer::RendererShaderType::Unlit:
+            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+            //         .vertex_layout_.begin()
+            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            //         .end();
+            break;
+        case EffekseerRenderer::RendererShaderType::Lit:
+        case EffekseerRenderer::RendererShaderType::BackDistortion:
+            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_NORMAL | Urho3D::MASK_TANGENT |
+                         Urho3D::MASK_TEXCOORD1 | Urho3D::MASK_TEXCOORD2;
+            //         .m_vertexLayout.begin()
+            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+            //         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+            //         .end();
+            break;
+        case EffekseerRenderer::RendererShaderType::AdvancedUnlit:
+            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+            //         .m_vertexLayout.begin()
+            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord1, 4, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+            //         .end();
+            break;
+        case EffekseerRenderer::RendererShaderType::AdvancedLit:
+        case EffekseerRenderer::RendererShaderType::AdvancedBackDistortion:
+            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+            //         .m_vertexLayout.begin()
+            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+            //         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord4, 4, bgfx::AttribType::Float)
+            //         .end();
+            break;
+        case EffekseerRenderer::RendererShaderType::Material:
+            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
+            //         .m_vertexLayout.begin()
+            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
+            //         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
+            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
+            //         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
+            //         .end();
+            break;
+        default:
+            break;
+        }
+        return layoutMask;
+    };
+
+    size_t shaderTypeCount = static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1;
+    for (size_t i = 0; i < m_buffers.size(); i++)
+    {
+        auto& buffer = m_buffers[i];
+        if (buffer.m_vertexBuffer != nullptr)
+            AddRef();
+        if (buffer.m_indexBuffer != nullptr)
+            AddRef();
+//         ES_SAFE_DELETE(bgfxBuffer.m_vertexBuffer);
+//         ES_SAFE_DELETE(bgfxBuffer.m_indexBuffer);
+
+        // generate a vertex buffer
+        {
+            buffer.m_vertexBuffer =
+                VertexBuffer::Create(context_, calculate_stride(EffekseerRenderer::RendererShaderType(i)) * m_squareMaxCount * 4, true,
+                get_vertex_layout(EffekseerRenderer::RendererShaderType(i)));
+            if (buffer.m_vertexBuffer == nullptr)
+                return;
+        }
+
+        // generate an index buffer
+        {
+            buffer.m_indexBuffer =
+                IndexBuffer::Create(context_, GetIndexSpriteCount() * 6, true, indexBufferStride_);
+            if (buffer.m_indexBuffer == nullptr)
+                return;
+        }
+
+        // generate an index buffer for a wireframe
+        {
+            buffer.m_indexBufferForWireframe =
+                IndexBuffer::Create(context_, GetIndexSpriteCount() * 8, true, indexBufferStride_);
+            if (buffer.m_indexBufferForWireframe == nullptr)
+                return;
+        }
+    }
+    // generate index data
+    GenerateIndexData();
+}
+void AssignPixelConstantBuffer(Shader* shader)
+{
+    int psOffset = 0;
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightDirection"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightColor"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightAmbient"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fUVDistortionParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fBlendTextureParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fCameraFrontDirection"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffBeginColor"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffEndColor"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEmissiveScaling"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEdgeColor"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEdgeParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "softParticleParam"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam1"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam2"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+}
+
+void AssignDistortionPixelConstantBuffer(Shader* shader)
+{
+    int psOffset = 0;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "g_scale"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversedBack"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fUVDistortionParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fBlendTextureParameter"), psOffset);
+
+    psOffset += sizeof(float[4]) * 1;
+
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "softParticleParam"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam1"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam2"), psOffset);
+    psOffset += sizeof(float[4]) * 1;
+}
 } // namespace EffekseerUrho3D
 //----------------------------------------------------------------------------------
 //

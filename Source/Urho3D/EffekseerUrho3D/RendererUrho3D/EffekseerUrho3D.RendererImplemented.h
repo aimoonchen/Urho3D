@@ -14,6 +14,8 @@
 
 namespace Urho3D
 {
+class Context;
+class Graphics;
 	class Vector2;
 }
 
@@ -110,11 +112,11 @@ class RendererImplemented
 	using StandardRenderer = EffekseerRenderer::StandardRenderer<RendererImplemented, Shader>;
 
 private:
-	VertexBufferRef m_vertexBuffer;
-	IndexBufferRef m_indexBuffer;
-	IndexBufferRef m_indexBufferForWireframe;
+// 	VertexBufferRef m_vertexBuffer;
+// 	IndexBufferRef m_indexBuffer;
+// 	IndexBufferRef m_indexBufferForWireframe;
 	int32_t m_squareMaxCount = 0;
-
+    
 	std::array<std::unique_ptr<Shader>, 6> m_shaders;
 
 	Shader* m_currentShader = nullptr;
@@ -136,11 +138,31 @@ private:
 
 	Effekseer::Backend::TextureRef m_background;
 
+	//
+    std::vector<::Effekseer::Backend::TextureRef> currentTextures_;
+    Urho3D::Context* context_{nullptr};
+    Urho3D::Graphics* graphics_{nullptr};
+	struct Buffers
+    {
+        VertexBufferRef m_vertexBuffer;
+        IndexBufferRef m_indexBuffer;
+        IndexBufferRef m_indexBufferForWireframe;
+    };
+    std::array<Buffers, 6> m_buffers;
+    int32_t indexBufferStride_ = 2;
+    int32_t indexBufferCurrentStride_ = 0;
+    int32_t GetIndexSpriteCount() const;
+    void GenerateIndexData();
+    template <typename T> void GenerateIndexDataStride();
+    
 public:
+    const std::vector<::Effekseer::Backend::TextureRef>& GetCurrentTextures() const { return currentTextures_; }
+    Urho3D::Context* GetUrho3DContext() const { return context_; }
+    Urho3D::Graphics* GetUrho3DGraphics() const { return graphics_; }
 	/**
 		@brief	コンストラクタ
 	*/
-	RendererImplemented(int32_t squareMaxCount);
+    RendererImplemented(Urho3D::Context* context, int32_t squareMaxCount);
 
 	/**
 		@brief	デストラクタ
@@ -193,6 +215,8 @@ public:
 	*/
 	int32_t GetSquareMaxCount() const override { return m_squareMaxCount; }
 
+    void SetSquareMaxCount(int32_t count);
+
 	::EffekseerRenderer::RenderStateBase* GetRenderState() { return m_renderState.get(); } 
 
 	/**
@@ -237,8 +261,8 @@ public:
 
 	StandardRenderer* GetStandardRenderer() { return m_standardRenderer.get(); }
 
-	void SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size) {}
-	void SetIndexBuffer(IndexBuffer* indexBuffer) {}
+	void SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size);
+    void SetIndexBuffer(IndexBuffer* indexBuffer);
 
 	void SetVertexBuffer(Effekseer::Backend::VertexBufferRef vertexBuffer, int32_t size) {}
 	void SetIndexBuffer(Effekseer::Backend::IndexBufferRef indexBuffer) {}
@@ -279,7 +303,9 @@ private:
 		Urho3D::Vector2 baseScale, bool flipPolygon,
 		const EffekseerRenderer::StandardRendererState& state);
 };
+void AssignPixelConstantBuffer(Shader* shader);
 
+void AssignDistortionPixelConstantBuffer(Shader* shader);
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------

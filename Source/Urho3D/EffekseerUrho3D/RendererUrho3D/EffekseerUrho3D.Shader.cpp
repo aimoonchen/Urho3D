@@ -1,7 +1,5 @@
 ﻿// #include <VisualServer.hpp>
 // #include <Texture.hpp>
-#include "../../Cocos2d/Urho3DContext.h"
-#include "../../Core/Context.h"
 #include "../../Graphics/Graphics.h"
 #include "../../Graphics/ShaderProgram.h"
 #include "EffekseerUrho3D.Shader.h"
@@ -43,20 +41,21 @@ static const char* DepthWriteMode[] = {
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-std::unique_ptr<Shader> Shader::Create(const char* name, EffekseerRenderer::RendererShaderType shaderType)
+std::unique_ptr<Shader> Shader::Create(Urho3D::Graphics* graphics, const char* name,
+                                       EffekseerRenderer::RendererShaderType shaderType)
 {
-	return std::unique_ptr<Shader>(new Shader(name, shaderType));
+    return std::unique_ptr<Shader>(new Shader(graphics, name, shaderType));
 }
 
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-Shader::Shader(const char* name, EffekseerRenderer::RendererShaderType shaderType)
+Shader::Shader(Urho3D::Graphics* graphics, const char* name, EffekseerRenderer::RendererShaderType shaderType)
 {
 	m_name = name;
 	m_shaderType = shaderType;
 	//
-	graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
+    graphics_ = graphics;
     m_vs = graphics_->GetShader(Urho3D::VS, name, "");
 	m_fs = graphics_->GetShader(Urho3D::PS, name, "");
 	graphics_->SetShaders(m_vs, m_fs);
@@ -233,6 +232,34 @@ void Shader::SetConstantBuffer()
         }
     }
 }
+
+void Shader::BeginScene()
+{
+    // GLExt::glUseProgram(m_program);
+    graphics_->SetShaders(m_vs, m_fs);
+}
+
+void Shader::EndScene()
+{
+    // bgfx::submit(0, m_program);
+}
+
+bool Shader::HasUniform(Urho3D::StringHash name) { return m_program->GetUniform(name) != UINT16_MAX; }
+
+void Shader::SetTextureSlot(int32_t index, Urho3D::StringHash /*bgfx::UniformHandle*/ value)
+{
+    // 	if (bgfx::isValid(value))
+    // 	{
+    m_textureSlots[index] = value;
+    m_textureSlotEnables[index] = true;
+    //	}
+}
+
+Urho3D::StringHash Shader::GetTextureSlot(int32_t index) { return m_textureSlots[index]; }
+
+bool Shader::GetTextureSlotEnable(int32_t index) { return m_textureSlotEnables[index]; }
+
+bool Shader::IsValid() const { return m_program->IsValid(); }
 
 //-----------------------------------------------------------------------------------
 //

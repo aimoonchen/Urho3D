@@ -213,7 +213,7 @@ void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
     float timeStep = eventData[P_TIMESTEP].GetFloat();
     auto oldpos = test_emitter_->GetPosition();
     oldpos.x_ += 0.02;
-    test_emitter_->SetPosition(oldpos);
+    //test_emitter_->SetPosition(oldpos);
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
 }

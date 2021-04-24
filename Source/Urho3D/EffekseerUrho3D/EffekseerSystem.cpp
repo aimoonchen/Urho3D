@@ -81,8 +81,8 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	m_manager->SetCurveLoader(Effekseer::MakeRefPtr<EffekseerUrho3D::CurveLoader>());
 	//m_manager->SetSoundLoader(Effekseer::MakeRefPtr<EffekseerUrho3D::SoundLoader>(sound));
 
-	//m_renderer = EffekseerUrho3D::Renderer::Create(squareMaxCount, drawMaxCount);
-	m_renderer = EffekseerRendererBGFX::Renderer::Create(context->GetSubsystem<Graphics>(), squareMaxCount/*, drawMaxCount*/);
+	m_renderer = EffekseerUrho3D::Renderer::Create(context, squareMaxCount, drawMaxCount);
+	//m_renderer = EffekseerRendererBGFX::Renderer::Create(context->GetSubsystem<Graphics>(), squareMaxCount/*, drawMaxCount*/);
 	m_renderer->SetProjectionMatrix(Effekseer::Matrix44().Indentity());
 
 	m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());

@@ -1,5 +1,5 @@
 ﻿#pragma once
-
+#include "../../Math/StringHash.h"
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
@@ -59,7 +59,8 @@ public:
 
 	virtual ~Shader();
 
-	static std::unique_ptr<Shader> Create(const char* name, EffekseerRenderer::RendererShaderType shaderType);
+	static std::unique_ptr<Shader> Create(Urho3D::Graphics* graphics, const char* name,
+                                          EffekseerRenderer::RendererShaderType shaderType);
 
 	template <size_t N>
 	bool Compile(RenderType renderType, const char* code, const ParamDecl (&paramDecls)[N])
@@ -99,6 +100,11 @@ public:
 
 	void SetConstantBuffer() override;
 
+	bool HasUniform(Urho3D::StringHash name);
+	void SetTextureSlot(int32_t index, Urho3D::StringHash /*bgfx::UniformHandle*/ value);
+    /*bgfx::UniformHandle*/ Urho3D::StringHash GetTextureSlot(int32_t index);
+    bool GetTextureSlotEnable(int32_t index);
+    bool IsValid() const ;
 	//void ApplyToMaterial(RenderType renderType, godot::RID material, EffekseerRenderer::RenderStateBase::State& state);
 
 	EffekseerRenderer::RendererShaderType GetShaderType() { return m_shaderType; }
@@ -107,7 +113,8 @@ public:
                                  int32_t count = 1);
     void AddPixelConstantLayout(eConstantType type, Urho3D::StringHash /*bgfx::UniformHandle*/ id, int32_t offset,
                                 int32_t count = 1);
-
+    void BeginScene();
+    void EndScene();
 
 private:
 	std::vector<uint8_t> m_constantBuffers[2];
@@ -121,7 +128,7 @@ private:
 	};
 	InternalShader m_internals[(size_t)RenderType::Max];
 
-	Shader(const char* name, EffekseerRenderer::RendererShaderType shaderType);
+	Shader(Urho3D::Graphics* graphics, const char* name, EffekseerRenderer::RendererShaderType shaderType);
 
 	// Urho3D impl
 	Urho3D::Graphics* graphics_{ nullptr };
@@ -138,6 +145,8 @@ private:
     };
     std::vector<ConstantLayout> m_vertexConstantLayout;
     std::vector<ConstantLayout> m_pixelConstantLayout;
+    std::array<Urho3D::StringHash, Effekseer::TextureSlotMax> m_textureSlots;
+    std::array<bool, Effekseer::TextureSlotMax> m_textureSlotEnables;
 };
 
 //----------------------------------------------------------------------------------

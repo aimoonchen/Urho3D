@@ -15,6 +15,7 @@ class Texture : public Effekseer::Backend::Texture
 {
 public:
 	//godot::RID GetRID() const { return textureRid_; }
+    Urho3D::Texture2D* GetUrho3DTexture() const { return urho3d_texture_; }
 
 private:
 	friend class TextureLoader;

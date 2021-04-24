@@ -38,7 +38,7 @@ namespace EffekseerUrho3D
 	auto shaderDataList = shaderGenerator.Generate(materialFile);
 
 	{
-		auto shader = Shader::Create("Custom_Sprite", RendererShaderType::Material);
+		auto shader = Shader::Create(nullptr, "Custom_Sprite", RendererShaderType::Material);
 		shader->SetVertexConstantBufferSize(shaderDataList[0].VertexConstantBufferSize);
 		shader->SetPixelConstantBufferSize(shaderDataList[0].PixelConstantBufferSize);
 		shader->Compile(Shader::RenderType::SpatialLightweight, shaderDataList[0].CodeSpatial.c_str(), std::vector<Shader::ParamDecl>(shaderDataList[0].ParamDecls));
@@ -46,7 +46,7 @@ namespace EffekseerUrho3D
 		material->UserPtr = shader.release();
 	}
 	{
-		auto shader = Shader::Create("Model_Custom", RendererShaderType::Material);
+        auto shader = Shader::Create(nullptr, "Model_Custom", RendererShaderType::Material);
 		shader->SetVertexConstantBufferSize(shaderDataList[1].VertexConstantBufferSize);
 		shader->SetPixelConstantBufferSize(shaderDataList[1].PixelConstantBufferSize);
 		shader->Compile(Shader::RenderType::SpatialLightweight, shaderDataList[1].CodeSpatial.c_str(), std::vector<Shader::ParamDecl>(shaderDataList[1].ParamDecls));

@@ -96,21 +96,21 @@ ModelRenderer::ModelRenderer(RendererImplemented* renderer)
 	using namespace EffekseerRenderer;
 	using namespace EffekseerUrho3D::ModelShaders;
 
-	m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create("Model_Basic_Unlit", RendererShaderType::Unlit);
+	m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create(renderer->GetUrho3DGraphics(), "Model_Basic_Unlit", RendererShaderType::Unlit);
 	m_shaders[(size_t)RendererShaderType::Unlit]->SetVertexConstantBufferSize(sizeof(ModelRendererVertexConstantBuffer<40>));
 	m_shaders[(size_t)RendererShaderType::Unlit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 	m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialLightweight, Unlit::Lightweight::code, Unlit::Lightweight::decl);
 	m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialDepthFade, Unlit::SoftParticle::code, Unlit::SoftParticle::decl);
 	m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::CanvasItem, Unlit::CanvasItem::code, Unlit::CanvasItem::decl);
 
-	m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create("Model_Basic_Lighting", RendererShaderType::Lit);
+	m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create(renderer->GetUrho3DGraphics(), "Model_Basic_Lighting", RendererShaderType::Lit);
 	m_shaders[(size_t)RendererShaderType::Lit]->SetVertexConstantBufferSize(sizeof(ModelRendererVertexConstantBuffer<40>));
 	m_shaders[(size_t)RendererShaderType::Lit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 	m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialLightweight, Lighting::Lightweight::code, Lighting::Lightweight::decl);
 	m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialDepthFade, Lighting::SoftParticle::code, Lighting::SoftParticle::decl);
 	m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::CanvasItem, Lighting::CanvasItem::code, Lighting::CanvasItem::decl);
 
-	m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create("Model_Basic_Distortion", RendererShaderType::BackDistortion);
+	m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(renderer->GetUrho3DGraphics(), "Model_Basic_Distortion", RendererShaderType::BackDistortion);
 	m_shaders[(size_t)RendererShaderType::BackDistortion]->SetVertexConstantBufferSize(sizeof(ModelRendererVertexConstantBuffer<40>));
 	m_shaders[(size_t)RendererShaderType::BackDistortion]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 	m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialLightweight, Distortion::Lightweight::code, Distortion::Lightweight::decl);

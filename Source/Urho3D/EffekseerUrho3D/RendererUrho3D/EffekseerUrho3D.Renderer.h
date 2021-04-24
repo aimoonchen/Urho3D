@@ -7,6 +7,10 @@
 #include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.Renderer.h"
 #include "EffekseerUrho3D.Base.h"
 
+namespace Urho3D
+{
+class Context;
+}
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
@@ -38,7 +42,7 @@ public:
 		@param	squareMaxCount	最大描画スプライト数
 		@return	インスタンス
 	*/
-	static RendererRef Create(int32_t squareMaxCount, int32_t drawMaxCount);
+    static RendererRef Create(Urho3D::Context* context, int32_t squareMaxCount, int32_t drawMaxCount);
 
 	/**
 		@brief	状態リセット
