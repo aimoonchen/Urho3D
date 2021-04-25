@@ -115,10 +115,11 @@ void StaticScene::CreateScene()
     {
         //Node* mushroomNode = scene_->CreateChild("Mushroom");
         test_emitter_ = scene_->CreateChild("Mushroom");
+        test_emitter_->SetPosition(Vector3(0.0f, 4.0f, 6.0f));
         auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
         ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
-        ee->play(50);
-        ee->set_paused(true);
+        ee->play();
+//        ee->set_paused(true);
 //         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
 //         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
 //         mushroomNode->SetScale(0.5f + Random(2.0f));
@@ -207,14 +208,13 @@ void StaticScene::SubscribeToEvents()
 
 void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
-    return;
     using namespace Update;
 
     // Take the frame time step, which is stored as a float
     float timeStep = eventData[P_TIMESTEP].GetFloat();
     auto oldpos = test_emitter_->GetPosition();
     oldpos.x_ += 0.02;
-    //test_emitter_->SetPosition(oldpos);
+    test_emitter_->SetPosition(oldpos);
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
 }

@@ -416,7 +416,7 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 
     SetSquareMaxCount(m_squareMaxCount);
 
-	m_renderState.reset(new RenderState());
+	m_renderState.reset(new RenderState(this));
 
 	// generate a vertex buffer
 	{

@@ -6,6 +6,11 @@
 #include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
 #include "EffekseerUrho3D.Base.h"
 
+namespace Urho3D
+{
+	class Graphics;
+}
+
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
@@ -23,9 +28,12 @@ private:
 	static const int32_t AlphaTypeCount = 5;
 	static const int32_t TextureFilterCount = 2;
 	static const int32_t TextureWrapCount = 2;
+	Urho3D::Graphics* graphics_{ nullptr };
+    RendererImplemented* m_renderer;
+    bool m_isCCW = true;
 
 public:
-	RenderState();
+	RenderState(RendererImplemented* renderer);
 	virtual ~RenderState();
 
 	void Update(bool forced);
