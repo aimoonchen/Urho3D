@@ -31,7 +31,7 @@ public:
 
 	void _update_draw();
 
-	void play();
+	void play(int32_t startFrame = 0);
 
 	void stop();
 

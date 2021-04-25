@@ -127,7 +127,7 @@ void EffekseerSystem::SetCamera(Camera* camera)
     projection.m22_ += projection.m32_ * constantBias;
     projection.m23_ += projection.m33_ * constantBias;
 #endif
-    m_renderer->SetCameraMatrix(EffekseerUrho3D::ToEfkMatrix44(projection));
+    m_renderer->SetProjectionMatrix(EffekseerUrho3D::ToEfkMatrix44(projection));
 }
 
 void EffekseerSystem::_init()

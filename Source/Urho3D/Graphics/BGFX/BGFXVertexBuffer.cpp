@@ -243,7 +243,7 @@ bool VertexBuffer::SetDataRange(const void* data, unsigned start, unsigned count
     {
         if (dynamic_)
         {
-            bgfx::update(bgfx::DynamicVertexBufferHandle{object_.handle_}, start * (size_t)vertexSize_,
+            bgfx::update(bgfx::DynamicVertexBufferHandle{object_.handle_}, start/* * (size_t)vertexSize_*/,
                          bgfx::copy(data, count * vertexSize_));
         }
         else

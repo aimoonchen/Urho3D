@@ -77,7 +77,8 @@ inline Urho3D::Vector3 ToGdVector3(Effekseer::Vector3D v)
 inline Effekseer::Matrix44 ToEfkMatrix44(const Urho3D::Matrix4& transform)
 {
 	Effekseer::Matrix44 matrix;
-	memcpy(matrix.Values, &transform.m00_, 16 * sizeof(16));
+	auto mat = transform.Transpose();
+	memcpy(matrix.Values, &mat.m00_, 16 * sizeof(16));
 // 	matrix.Values[0][0] = transform.basis[0][0];
 // 	matrix.Values[0][1] = transform.basis[0][1];
 // 	matrix.Values[0][2] = transform.basis[0][2];

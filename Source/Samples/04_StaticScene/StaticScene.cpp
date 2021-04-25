@@ -117,7 +117,7 @@ void StaticScene::CreateScene()
         test_emitter_ = scene_->CreateChild("Mushroom");
         auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
         ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
-        ee->play();
+        ee->play(50);
         ee->set_paused(true);
 //         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
 //         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
@@ -207,6 +207,7 @@ void StaticScene::SubscribeToEvents()
 
 void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 {
+    return;
     using namespace Update;
 
     // Take the frame time step, which is stored as a float

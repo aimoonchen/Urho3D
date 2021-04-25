@@ -129,13 +129,13 @@ void EffekseerEmitter::_update_draw()
 // 	}
 }
 
-void EffekseerEmitter::play()
+void EffekseerEmitter::play(int32_t startFrame)
 {
 	auto system = EffekseerSystem::get_instance();
 	auto manager = system->get_manager();
 
 	if (m_effect/*.is_valid()*/) {
-		Effekseer::Handle handle = manager->Play(m_effect->get_native(), Effekseer::Vector3D(0, 0, 0));
+		Effekseer::Handle handle = manager->Play(m_effect->get_native(), Effekseer::Vector3D(0, 0, 0), startFrame);
 		if (handle >= 0) {
 			manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(node_->GetWorldTransform()/*get_global_transform()*/));
 			manager->SetUserData(handle, this);

@@ -144,7 +144,7 @@ bool IndexBuffer::SetDataRange(const void* data, unsigned start, unsigned count,
     {
         if (dynamic_)
         {
-            bgfx::update(bgfx::DynamicIndexBufferHandle{object_.handle_}, start * (size_t)indexSize_,
+            bgfx::update(bgfx::DynamicIndexBufferHandle{object_.handle_}, start/* * (size_t)indexSize_*/,
                          bgfx::copy(data, count * indexSize_));
         }
         else

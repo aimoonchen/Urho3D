@@ -412,13 +412,13 @@ bool RendererImplemented::Initialize()
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"), sizeof(Effekseer::Matrix44));
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"), sizeof(Effekseer::Matrix44) * 2);
-		shader->SetTextureSlot(0, GetValidUniform(shader, "sColorTex"));
+		shader->SetTextureSlot(0, GetValidUniform(shader, "sDiffMap"));
 		AssignPixelConstantBuffer(shader);
 	}
 
 	applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-	shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sDepthTex"));
-	shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sDepthTex"));
+	shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sNormalMap"));
+	shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
 
 	//vao_unlit_ = VertexArray::Create(graphicsDevice_, shader_unlit_, GetVertexBuffer(), GetIndexBuffer());
 	//vao_ad_unlit_ = VertexArray::Create(graphicsDevice_, shader_ad_unlit_, GetVertexBuffer(), GetIndexBuffer());
@@ -461,7 +461,7 @@ bool RendererImplemented::Initialize()
 	//	shader->AddVertexConstantLayout(
 	//		CONSTANT_TYPE_VECTOR4, BGFX(create_uniform)("mUVInversed", BGFX_UNIFORM_TYPE_VEC4)/*shader->GetUniformId("CBVS0.mUVInversed")*/, sizeof(Effekseer::Matrix44) * 2);
 
-	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sColorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("sColorTex")*/);
+	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sDiffMap", bgfx::UniformType::Sampler)/*shader->GetUniformId("sDiffMap")*/);
 	//	shader->SetTextureSlot(1, BGFX(create_uniform)("Sampler_sampler_backTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("Sampler_sampler_backTex")*/);
 
 	//	shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4,
@@ -472,8 +472,8 @@ bool RendererImplemented::Initialize()
 	//}
 
 	//applyPSAdvancedRendererParameterTexture(shader_ad_distortion_, 2);
-	//shader_distortion_->SetTextureSlot(2, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_distortion_->GetUniformId("sDepthTex")*/);
-	//shader_ad_distortion_->SetTextureSlot(7, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_ad_distortion_->GetUniformId("sDepthTex")*/);
+	//shader_distortion_->SetTextureSlot(2, BGFX(create_uniform)("sNormalMap", bgfx::UniformType::Sampler)/*shader_distortion_->GetUniformId("sNormalMap")*/);
+	//shader_ad_distortion_->SetTextureSlot(7, BGFX(create_uniform)("sNormalMap", bgfx::UniformType::Sampler)/*shader_ad_distortion_->GetUniformId("sNormalMap")*/);
 
 	//// Lit
 	//for (auto shader : {shader_ad_lit_, shader_lit_})
@@ -489,15 +489,15 @@ bool RendererImplemented::Initialize()
 	//	shader->AddVertexConstantLayout(
 	//		CONSTANT_TYPE_VECTOR4, BGFX(create_uniform)("mUVInversed", BGFX_UNIFORM_TYPE_VEC4)/*shader->GetUniformId("CBVS0.mUVInversed")*/, sizeof(Effekseer::Matrix44) * 2);
 
-	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sColorTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("sColorTex")*/);
+	//	shader->SetTextureSlot(0, BGFX(create_uniform)("sDiffMap", bgfx::UniformType::Sampler)/*shader->GetUniformId("sDiffMap")*/);
 	//	shader->SetTextureSlot(1, BGFX(create_uniform)("Sampler_sampler_normalTex", bgfx::UniformType::Sampler)/*shader->GetUniformId("Sampler_sampler_normalTex")*/);
 
 	//	AssignPixelConstantBuffer(shader);
 	//}
 
 	//applyPSAdvancedRendererParameterTexture(shader_ad_lit_, 2);
-	//shader_lit_->SetTextureSlot(2, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_lit_->GetUniformId("sDepthTex")*/);
-	//shader_ad_lit_->SetTextureSlot(7, BGFX(create_uniform)("sDepthTex", bgfx::UniformType::Sampler)/*shader_ad_lit_->GetUniformId("sDepthTex")*/);
+	//shader_lit_->SetTextureSlot(2, BGFX(create_uniform)("sNormalMap", bgfx::UniformType::Sampler)/*shader_lit_->GetUniformId("sNormalMap")*/);
+	//shader_ad_lit_->SetTextureSlot(7, BGFX(create_uniform)("sNormalMap", bgfx::UniformType::Sampler)/*shader_ad_lit_->GetUniformId("sNormalMap")*/);
 
 
 	//m_vao_wire_frame = VertexArray::Create(graphicsDevice_, shader_unlit_, GetVertexBuffer(), m_indexBufferForWireframe);

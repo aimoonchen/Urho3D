@@ -468,8 +468,8 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
     };
 
 	auto shader_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Unlit)].get();
-    auto shader_ad_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedUnlit)].get();
-    for (auto& shader : {shader_ad_unlit, shader_unlit})
+    //auto shader_ad_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedUnlit)].get();
+    for (auto& shader : {/*shader_ad_unlit, */shader_unlit})
     {
         shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
         shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBuffer));
@@ -481,13 +481,13 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
                                         sizeof(Effekseer::Matrix44));
         shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"),
                                         sizeof(Effekseer::Matrix44) * 2);
-        shader->SetTextureSlot(0, GetValidUniform(shader, "sColorTex"));
+        shader->SetTextureSlot(0, GetValidUniform(shader, "sDiffMap"));
         AssignPixelConstantBuffer(shader);
     }
 
-    applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-    shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sDepthTex"));
-    shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sDepthTex"));
+    //applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
+    shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sNormalMap"));
+    //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
 
 	return true;
 }
@@ -861,6 +861,7 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 	auto& state = m_renderState->GetActiveState();
 	
 	state.TextureIDs.fill(0);
+	currentTextures_.resize(count);
 	for (int32_t i = 0; i < count; i++)
 	{
 // 		state.TextureIDs[i] = (textures[i] != nullptr) ? 
