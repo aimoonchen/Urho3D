@@ -866,7 +866,7 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 	{
 // 		state.TextureIDs[i] = (textures[i] != nullptr) ? 
 // 			RIDToInt64(textures[i].DownCast<Texture>()->GetRID()) : 0;
-        Urho3D::Texture2D* urho3dTexture;
+        Urho3D::Texture2D* urho3dTexture{ nullptr };
 		if (textures[i] != nullptr)
 		{
 			auto texture = static_cast<EffekseerUrho3D::Texture*>(textures[i].Get());

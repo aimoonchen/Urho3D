@@ -50,7 +50,24 @@ void EffekseerEmitter::RegisterObject(Context* context)
 {
 	context->RegisterFactory<EffekseerEmitter>(GEOMETRY_CATEGORY);
 }
-
+// void EffekseerEmitter::OnNodeSet(Urho3D::Node* node)
+// {
+//     if (node)
+//     {
+//         Drawable::OnNodeSet(node);
+// 
+//         if (m_autoplay)
+//         {
+//             play();
+//         }
+//     }
+//     else
+//     {
+//         stop();
+// 
+//         Drawable::OnNodeSet(node);
+//     }
+// }
 void EffekseerEmitter::OnWorldBoundingBoxUpdate()
 {
     worldBoundingBox_ = boundingBox_.Transformed(node_->GetWorldTransform());
@@ -64,8 +81,12 @@ void EffekseerEmitter::Update(const FrameInfo& frame)
     for (auto it = m_handles.begin(); it != m_handles.end();) {
         auto handle = *it;
         if (!manager->Exists(handle)) {
-            //m_handles.remove(i);
-			it = m_handles.erase(it);
+			if (m_looping)
+			{
+                ;//play();
+			}
+            // m_handles.remove(i);
+            it = m_handles.erase(it);
             continue;
         }
         manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(node_->GetWorldTransform() /*get_global_transform()*/));

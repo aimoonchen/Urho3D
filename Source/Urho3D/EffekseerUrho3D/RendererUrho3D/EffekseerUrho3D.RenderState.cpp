@@ -49,7 +49,7 @@ void RenderState::Update(bool forced)
         else
         {
             // state |= BGFX_STATE_DEPTH_TEST_ALWAYS;
-            graphics_->SetDepthTest(Urho3D::MAX_COMPAREMODES);
+            graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
         }
     }
 
@@ -84,6 +84,7 @@ void RenderState::Update(bool forced)
             {
                 //				glDisable(GL_CULL_FACE);
                 //				glCullFace(GL_FRONT_AND_BACK);
+                graphics_->SetCullMode(Urho3D::CULL_NONE);
             }
         }
         else
@@ -106,6 +107,7 @@ void RenderState::Update(bool forced)
             {
                 //				glDisable(GL_CULL_FACE);
                 //				glCullFace(GL_FRONT_AND_BACK);
+                graphics_->SetCullMode(Urho3D::CULL_NONE);
             }
         }
     }

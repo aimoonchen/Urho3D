@@ -118,6 +118,7 @@ void StaticScene::CreateScene()
         test_emitter_->SetPosition(Vector3(0.0f, 4.0f, 6.0f));
         auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
         ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
+        //ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Base/Laser03.efk"));
         ee->play();
 //        ee->set_paused(true);
 //         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));

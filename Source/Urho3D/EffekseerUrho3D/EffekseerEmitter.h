@@ -59,18 +59,24 @@ public:
 
 	bool is_autoplay() const { return m_autoplay; }
 
+	bool is_looping() { return m_looping; }
+
+    void set_looping(bool value) { m_looping = value; }
+
 protected:
+    //void OnNodeSet(Urho3D::Node* node) override;
     /// Recalculate the world-space bounding box.
     void OnWorldBoundingBoxUpdate() override;
 
 private:
 	//Ref<EffekseerEffect> m_effect;
-	EffekseerEffect* m_effect;
+    EffekseerEffect* m_effect{ nullptr };
 	bool m_autoplay = true;
 	//Array m_handles;
 	std::vector<Effekseer::Handle> m_handles;
 	bool m_paused = false;
 	float m_speed = 1.0f;
+    bool m_looping = false;
 	Effekseer::Color m_color = {255, 255, 255, 255};
 };
 
