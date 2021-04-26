@@ -139,6 +139,8 @@ if (NOT ANDROID AND NOT ARM AND NOT WEB)
     endif ()
 endif ()
 
+add_subdirectory (ThirdParty/Effekseer)
+
 add_subdirectory (Urho3D)
 
 if (URHO3D_CLANG_TOOLS)

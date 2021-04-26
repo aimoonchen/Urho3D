@@ -11,8 +11,6 @@
 #include "../Graphics/Graphics.h"
 #include "../Cocos2d/Urho3DContext.h"
 
-#include "../Effekseer/EffekseerRendererBGFX/EffekseerRenderer/EffekseerRendererBGFX.Renderer.h"
-
 #include "RendererUrho3D/EffekseerUrho3D.Renderer.h"
 #include "LoaderUrho3D/EffekseerUrho3D.TextureLoader.h"
 #include "LoaderUrho3D/EffekseerUrho3D.ModelLoader.h"

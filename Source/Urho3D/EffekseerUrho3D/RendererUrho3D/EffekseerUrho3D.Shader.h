@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.ShaderBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.ShaderBase.h"
 #include "EffekseerUrho3D.RendererImplemented.h"
 
 namespace Urho3D

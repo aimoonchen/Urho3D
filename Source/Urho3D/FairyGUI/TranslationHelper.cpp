@@ -4,7 +4,7 @@
 #if defined(ENGINEX_VERSION)
 #include "pugixml/pugixml_imp.hpp"
 #else
-#include "tinyxml2/tinyxml2.h"
+#include "external/tinyxml2/tinyxml2.h"
 #endif
 #include "utils/ByteBuffer.h"
 

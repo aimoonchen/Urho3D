@@ -28,7 +28,7 @@ THE SOFTWARE.
 
 #include <cmath>
 #include <stdlib.h>
-#include "md5/md5.h"
+#include "external/md5/md5.h"
 
 #include "base/CCDirector.h"
 // #include "base/CCAsyncTaskPool.h"

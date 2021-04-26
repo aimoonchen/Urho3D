@@ -4,7 +4,7 @@
 // #include <Resource.hpp>
 #include "../Container/Str.h"
 #include "../Resource/Resource.h"
-#include "../Effekseer/Effekseer/Effekseer.h"
+#include "Effekseer.h"
 
 namespace Urho3D {
 

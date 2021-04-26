@@ -26,11 +26,11 @@
 #include "EffekseerUrho3D.ModelRenderer.h"
 #include "EffekseerUrho3D.RenderResources.h"
 
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.Renderer_Impl.h"
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.RibbonRendererBase.h"
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.RingRendererBase.h"
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.SpriteRendererBase.h"
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.TrackRendererBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.Renderer_Impl.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.RibbonRendererBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.RingRendererBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.SpriteRendererBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.TrackRendererBase.h"
 
 //----------------------------------------------------------------------------------
 //

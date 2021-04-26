@@ -4,7 +4,7 @@
 // Include
 //----------------------------------------------------------------------------------
 //#include <World.hpp>
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.Renderer.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.Renderer.h"
 #include "EffekseerUrho3D.Base.h"
 
 namespace Urho3D

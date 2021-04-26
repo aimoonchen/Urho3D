@@ -5,7 +5,7 @@
 // #include <Camera.hpp>
 // #include <Camera2D.hpp>
 // #include <Node.hpp>
-#include "../Effekseer/Effekseer/Effekseer.h"
+#include "Effekseer.h"
 #include "RendererUrho3D/EffekseerUrho3D.Renderer.h"
 #include "SoundUrho3D/EffekseerUrho3D.SoundPlayer.h"
 #include "../Core/Object.h"

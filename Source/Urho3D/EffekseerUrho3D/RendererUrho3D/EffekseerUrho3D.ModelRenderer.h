@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.ModelRendererBase.h"
 #include "EffekseerUrho3D.RendererImplemented.h"
 
 //-----------------------------------------------------------------------------------

@@ -4,8 +4,8 @@
 // Include
 //----------------------------------------------------------------------------------
 
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.RenderStateBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.StandardRenderer.h"
 #include "EffekseerUrho3D.Base.h"
 #include "EffekseerUrho3D.Renderer.h"
 #include "EffekseerUrho3D.RenderState.h"

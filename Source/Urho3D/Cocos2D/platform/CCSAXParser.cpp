@@ -28,8 +28,8 @@
 #include <vector> // because its based on windows 8 build :P
 
 #include "platform/CCFileUtils.h"
-#include "tinyxml2.h"
-#include "rapidxml/rapidxml_sax3.hpp"
+#include "external/tinyxml2/tinyxml2.h"
+#include "external/rapidxml/rapidxml_sax3.hpp"
 
 NS_CC_BEGIN
 

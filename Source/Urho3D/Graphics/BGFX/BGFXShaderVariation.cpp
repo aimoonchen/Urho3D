@@ -30,7 +30,7 @@
 #include "../../IO/Log.h"
 
 #include "bgfx/bgfx.h"
-#include "../../../ThirdParty/bgfx/shaderc/shaderc.h"
+#include "shaderc/shaderc.h"
 
 #include "../../DebugNew.h"
 

@@ -3,7 +3,7 @@
 //----------------------------------------------------------------------------------
 // Include
 //----------------------------------------------------------------------------------
-#include "../../Effekseer/EffekseerRendererCommon/EffekseerRenderer.IndexBufferBase.h"
+#include "../EffekseerRendererCommon/EffekseerRenderer.IndexBufferBase.h"
 #include "EffekseerUrho3D.Base.h"
 
 namespace Urho3D
