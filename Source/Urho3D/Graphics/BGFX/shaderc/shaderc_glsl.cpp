@@ -294,7 +294,7 @@ namespace bgfx { namespace glsl
 				if (!textureName.isEmpty())
 				{
 					Uniform un;
-                    un.type = nameToUniformTypeEnumEx("int"); // int for sampler
+					un.type = nameToUniformTypeEnumEx("int");	// int for sampler
 					const char* varNameEnd = textureName.getPtr() - 1;
 					parse.set(parse.getPtr(), varNameEnd - 1);
 					const char* varNameBeg = parse.getPtr();
@@ -346,9 +346,11 @@ namespace bgfx { namespace glsl
 			bx::write(_writer, un.regCount);
 			bx::write(_writer, un.texComponent);
 			bx::write(_writer, un.texDimension);
+			bx::write(_writer, un.texFormat);
 
 			BX_TRACE("%s, %s, %d, %d, %d"
-				, un.name.c_str(), getUniformTypeNameEx(un.type)
+				, un.name.c_str()
+				, getUniformTypeNameEx(un.type)
 				, un.num
 				, un.regIndex
 				, un.regCount

@@ -773,6 +773,7 @@ restart:
                         OnFocus(fe->m_has_focus);
 					}
                     break;
+
 				default:
 					break;
 				}

@@ -551,7 +551,11 @@ bool RendererImplemented::EndRendering()
 //----------------------------------------------------------------------------------
 VertexBuffer* RendererImplemented::GetVertexBuffer()
 {
-    auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
+	auto shaderType = EffekseerRenderer::RendererShaderType::Unlit;
+	if (m_standardRenderer) {
+		shaderType = m_standardRenderer->GetState().Collector.ShaderType;
+	}
+    //auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
     return m_buffers[static_cast<int>(shaderType)].m_vertexBuffer.Get();
 	//return m_vertexBuffer.Get();
 }

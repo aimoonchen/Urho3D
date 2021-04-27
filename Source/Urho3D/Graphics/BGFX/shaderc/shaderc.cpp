@@ -13,7 +13,7 @@ extern "C"
 #include <fpp.h>
 } // extern "C"
 
-#define BGFX_SHADER_BIN_VERSION 9
+#define BGFX_SHADER_BIN_VERSION 11
 #define BGFX_CHUNK_MAGIC_CSH BX_MAKEFOURCC('C', 'S', 'H', BGFX_SHADER_BIN_VERSION)
 #define BGFX_CHUNK_MAGIC_FSH BX_MAKEFOURCC('F', 'S', 'H', BGFX_SHADER_BIN_VERSION)
 #define BGFX_CHUNK_MAGIC_VSH BX_MAKEFOURCC('V', 'S', 'H', BGFX_SHADER_BIN_VERSION)
@@ -1454,6 +1454,14 @@ namespace bgfx
 
 				compiled = true;
 			}
+			else if (profile->lang == ShadingLang::Metal)
+			{
+				compiled = compileMetalShader(_options, BX_MAKEFOURCC('M', 'T', 'L', 0), input, _writer);
+			}
+			else if (profile->lang == ShadingLang::SpirV)
+			{
+				compiled = compileSPIRVShader(_options, profile->id, input, _writer);
+			}
 			else if (profile->lang == ShadingLang::PSSL)
 			{
 				compiled = compilePSSLShader(_options, 0, input, _writer);
@@ -1660,7 +1668,7 @@ namespace bgfx
 						// not as GLSL language 1.2 specs shadow2D/Proj.
 						preprocessor.writef(
 							"#define shadow2D(_sampler, _coord) bgfxShadow2D(_sampler, _coord).x\n"
-							"#define shadow2DProj(_sampler, _coord) bgfxShadow2DProj(_sampler, _coord)\n"
+							"#define shadow2DProj(_sampler, _coord) bgfxShadow2DProj(_sampler, _coord).x\n"
 							);
 					}
 
@@ -2289,7 +2297,7 @@ namespace bgfx
 									{
 										bx::stringPrintf(code
 											, "#define bgfxShadow2D     shadow2D\n"
-											  "#define bgfxShadow2DProj shadow2DProj\n"
+											  "#define bgfxShadow2DProj shader2DProj\n"
 											);
 									}
 								}
@@ -2768,6 +2776,7 @@ namespace bgfx
         current_size_ += _size;
         return _size;
 	}
+
 } // namespace bgfx
 
 // int main(int _argc, const char* _argv[])
