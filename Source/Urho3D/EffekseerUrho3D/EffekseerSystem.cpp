@@ -107,6 +107,10 @@ void EffekseerSystem::HandleRenderUpdate(StringHash eventType, VariantMap& event
 
 void EffekseerSystem::Render()
 {
+	if (!main_camera_)
+	{
+		return;
+	}
 //	Effekseer::Matrix44 matrix = EffekseerUrho3D::ToEfkMatrix44(camera_transform /*.inverse()*/);
 
 	m_renderer->SetCameraMatrix(EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetView().ToMatrix4()));

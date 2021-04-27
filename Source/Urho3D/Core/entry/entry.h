@@ -324,7 +324,7 @@ namespace entry
 	uint32_t getNumApps();
 
 	///
-	URHO3D_API int runApp(AppI* _app, int _argc, const char* const* _argv);
+	/*URHO3D_API*/ int runApp(AppI* _app, int _argc, const char* const* _argv);
 
 } // namespace entry
 
