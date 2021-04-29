@@ -69,10 +69,10 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include "../BGFX/BGFXGraphics.h"
 
-#ifdef GL_ES_VERSION_2_0
-#define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
-#define glClearDepth glClearDepthf
-#endif
+// #ifdef GL_ES_VERSION_2_0
+// #define GL_DEPTH_COMPONENT24 GL_DEPTH_COMPONENT24_OES
+// #define glClearDepth glClearDepthf
+// #endif
 
 #ifdef __EMSCRIPTEN__
 #include "../../Input/Input.h"
@@ -174,84 +174,84 @@ EMSCRIPTEN_BINDINGS(Module) {
 namespace Urho3D
 {
 
-static const unsigned glCmpFunc[] =
-{
-    GL_ALWAYS,
-    GL_EQUAL,
-    GL_NOTEQUAL,
-    GL_LESS,
-    GL_LEQUAL,
-    GL_GREATER,
-    GL_GEQUAL
-};
-
-static const unsigned glSrcBlend[] =
-{
-    GL_ONE,
-    GL_ONE,
-    GL_DST_COLOR,
-    GL_SRC_ALPHA,
-    GL_SRC_ALPHA,
-    GL_ONE,
-    GL_ONE_MINUS_DST_ALPHA,
-    GL_ONE,
-    GL_SRC_ALPHA
-};
-
-static const unsigned glDestBlend[] =
-{
-    GL_ZERO,
-    GL_ONE,
-    GL_ZERO,
-    GL_ONE_MINUS_SRC_ALPHA,
-    GL_ONE,
-    GL_ONE_MINUS_SRC_ALPHA,
-    GL_DST_ALPHA,
-    GL_ONE,
-    GL_ONE
-};
-
-static const unsigned glBlendOp[] =
-{
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_ADD,
-    GL_FUNC_REVERSE_SUBTRACT,
-    GL_FUNC_REVERSE_SUBTRACT
-};
-
-#ifndef GL_ES_VERSION_2_0
-static const unsigned glFillMode[] =
-{
-    GL_FILL,
-    GL_LINE,
-    GL_POINT
-};
-
-static const unsigned glStencilOps[] =
-{
-    GL_KEEP,
-    GL_ZERO,
-    GL_REPLACE,
-    GL_INCR_WRAP,
-    GL_DECR_WRAP
-};
-#endif
-
-static const unsigned glElementTypes[] =
-{
-    GL_INT,
-    GL_FLOAT,
-    GL_FLOAT,
-    GL_FLOAT,
-    GL_FLOAT,
-    GL_UNSIGNED_BYTE,
-    GL_UNSIGNED_BYTE
-};
+// static const unsigned glCmpFunc[] =
+// {
+//     GL_ALWAYS,
+//     GL_EQUAL,
+//     GL_NOTEQUAL,
+//     GL_LESS,
+//     GL_LEQUAL,
+//     GL_GREATER,
+//     GL_GEQUAL
+// };
+// 
+// static const unsigned glSrcBlend[] =
+// {
+//     GL_ONE,
+//     GL_ONE,
+//     GL_DST_COLOR,
+//     GL_SRC_ALPHA,
+//     GL_SRC_ALPHA,
+//     GL_ONE,
+//     GL_ONE_MINUS_DST_ALPHA,
+//     GL_ONE,
+//     GL_SRC_ALPHA
+// };
+// 
+// static const unsigned glDestBlend[] =
+// {
+//     GL_ZERO,
+//     GL_ONE,
+//     GL_ZERO,
+//     GL_ONE_MINUS_SRC_ALPHA,
+//     GL_ONE,
+//     GL_ONE_MINUS_SRC_ALPHA,
+//     GL_DST_ALPHA,
+//     GL_ONE,
+//     GL_ONE
+// };
+// 
+// static const unsigned glBlendOp[] =
+// {
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_ADD,
+//     GL_FUNC_REVERSE_SUBTRACT,
+//     GL_FUNC_REVERSE_SUBTRACT
+// };
+// 
+// #ifndef GL_ES_VERSION_2_0
+// static const unsigned glFillMode[] =
+// {
+//     GL_FILL,
+//     GL_LINE,
+//     GL_POINT
+// };
+// 
+// static const unsigned glStencilOps[] =
+// {
+//     GL_KEEP,
+//     GL_ZERO,
+//     GL_REPLACE,
+//     GL_INCR_WRAP,
+//     GL_DECR_WRAP
+// };
+// #endif
+// 
+// static const unsigned glElementTypes[] =
+// {
+//     GL_INT,
+//     GL_FLOAT,
+//     GL_FLOAT,
+//     GL_FLOAT,
+//     GL_FLOAT,
+//     GL_UNSIGNED_BYTE,
+//     GL_UNSIGNED_BYTE
+// };
 
 static const unsigned glElementComponents[] =
 {
@@ -264,19 +264,19 @@ static const unsigned glElementComponents[] =
     4
 };
 
-#ifdef GL_ES_VERSION_2_0
-static unsigned glesDepthStencilFormat = GL_DEPTH_COMPONENT16;
-static unsigned glesReadableDepthFormat = GL_DEPTH_COMPONENT;
-#endif
+// #ifdef GL_ES_VERSION_2_0
+// static unsigned glesDepthStencilFormat = GL_DEPTH_COMPONENT16;
+// static unsigned glesReadableDepthFormat = GL_DEPTH_COMPONENT;
+// #endif
 
 static String extensions;
 
-bool CheckExtension(const String& name)
-{
-    if (extensions.Empty())
-        extensions = (const char*)glGetString(GL_EXTENSIONS);
-    return extensions.Contains(name);
-}
+// bool CheckExtension(const String& name)
+// {
+//     if (extensions.Empty())
+//         extensions = (const char*)glGetString(GL_EXTENSIONS);
+//     return extensions.Contains(name);
+// }
 
 static void GetGLPrimitiveType(unsigned elementCount, PrimitiveType type, unsigned& primitiveCount)
 {
@@ -322,12 +322,12 @@ Graphics::Graphics(Context* context) :
     shaderPath_("Shaders/BGFX/"),
     shaderExtension_(".sc"),
     orientations_("LandscapeLeft LandscapeRight"),
-    render_state_{BGFX_STATE_CULL_CW | BGFX_STATE_FRONT_CCW},
-#ifndef GL_ES_VERSION_2_0
-    apiName_("GL2")
-#else
-    apiName_("GLES2")
-#endif
+    render_state_{BGFX_STATE_CULL_CW | BGFX_STATE_FRONT_CCW}
+// #ifndef GL_ES_VERSION_2_0
+//     apiName_("GL2")
+// #else
+//     apiName_("GLES2")
+// #endif
 {
     SetTextureUnitMappings();
     ResetCachedState();
@@ -537,9 +537,9 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
 
     CheckFeatureSupport();
 
-#ifdef URHO3D_LOGGING
-    URHO3D_LOGINFOF("Adapter used %s %s", (const char *) glGetString(GL_VENDOR), (const char *) glGetString(GL_RENDERER));
-#endif
+// #ifdef URHO3D_LOGGING
+//     URHO3D_LOGINFOF("Adapter used %s %s", (const char *) glGetString(GL_VENDOR), (const char *) glGetString(GL_RENDERER));
+// #endif
 
     OnScreenModeChanged();
 
@@ -928,7 +928,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
         }
         else
         {
-            URHO3D_LOGERROR("texture unit %d invalid.", unit);
+            URHO3D_LOGERRORF("texture unit %d invalid.", unit);
         }
     }
 
@@ -992,7 +992,7 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
         if (textures_[unit]) {
             bgfx::setTexture(unit, {handle}, {textures_[unit]->GetGPUObjectHandle()});
         } else {
-            URHO3D_LOGERROR("texture unit %d invalid.", unit);
+            URHO3D_LOGERRORF("texture unit %d invalid.", unit);
         }
     }
 
@@ -1269,20 +1269,20 @@ void Graphics::SetShaders(ShaderVariation* vs, ShaderVariation* ps)
 #ifndef GL_ES_VERSION_2_0
     if (false/*gl3Support && impl_->shaderProgram_*/)
     {
-        const SharedPtr<ConstantBuffer>* constantBuffers = impl_->shaderProgram_->GetConstantBuffers();
-        for (unsigned i = 0; i < MAX_SHADER_PARAMETER_GROUPS * 2; ++i)
-        {
-            ConstantBuffer* buffer = constantBuffers[i].Get();
-            if (buffer != impl_->constantBuffers_[i])
-            {
-                unsigned object = buffer ? buffer->GetGPUObjectName() : 0;
-                glBindBufferBase(GL_UNIFORM_BUFFER, i, object);
-                // Calling glBindBufferBase also affects the generic buffer binding point
-                impl_->boundUBO_ = object;
-                impl_->constantBuffers_[i] = buffer;
-                ShaderProgram::ClearGlobalParameterSource((ShaderParameterGroup)(i % MAX_SHADER_PARAMETER_GROUPS));
-            }
-        }
+//         const SharedPtr<ConstantBuffer>* constantBuffers = impl_->shaderProgram_->GetConstantBuffers();
+//         for (unsigned i = 0; i < MAX_SHADER_PARAMETER_GROUPS * 2; ++i)
+//         {
+//             ConstantBuffer* buffer = constantBuffers[i].Get();
+//             if (buffer != impl_->constantBuffers_[i])
+//             {
+//                 unsigned object = buffer ? buffer->GetGPUObjectName() : 0;
+//                 glBindBufferBase(GL_UNIFORM_BUFFER, i, object);
+//                 // Calling glBindBufferBase also affects the generic buffer binding point
+//                 impl_->boundUBO_ = object;
+//                 impl_->constantBuffers_[i] = buffer;
+//                 ShaderProgram::ClearGlobalParameterSource((ShaderParameterGroup)(i % MAX_SHADER_PARAMETER_GROUPS));
+//             }
+//         }
 
         SetShaderParameter(VSP_CLIPPLANE, useClipPlane_ ? clipPlane_ : Vector4(0.0f, 0.0f, 0.0f, 1.0f));
     }
@@ -2340,7 +2340,7 @@ bool Graphics::IsInitialized() const
 
 bool Graphics::GetDither() const
 {
-    return glIsEnabled(GL_DITHER) ? true : false;
+    return /*glIsEnabled(GL_DITHER) ? true : */false;
 }
 
 bool Graphics::IsDeviceLost() const
@@ -2361,12 +2361,12 @@ PODVector<int> Graphics::GetMultiSampleLevels() const
     // No multisampling always supported
     ret.Push(1);
 
-#ifndef GL_ES_VERSION_2_0
-    int maxSamples = 0;
-    glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
-    for (int i = 2; i <= maxSamples && i <= 16; i *= 2)
-        ret.Push(i);
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//     int maxSamples = 0;
+//     glGetIntegerv(GL_MAX_SAMPLES, &maxSamples);
+//     for (int i = 2; i <= maxSamples && i <= 16; i *= 2)
+//         ret.Push(i);
+// #endif
 
     return ret;
 }
@@ -3267,7 +3267,7 @@ void Graphics::ResetCachedState()
     // Set initial state to match Direct3D
     if (impl_->context_)
     {
-        glEnable(GL_DEPTH_TEST);
+        //glEnable(GL_DEPTH_TEST);
         SetCullMode(CULL_CCW);
         SetDepthTest(CMP_LESSEQUAL);
         SetDepthWrite(true);
@@ -3293,7 +3293,7 @@ void Graphics::SetTextureUnitMappings()
     textureUnits_["LightSpotMap"] = TU_LIGHTSHAPE;
     textureUnits_["LightCubeMap"] = TU_LIGHTSHAPE;
     textureUnits_["ShadowMap"] = TU_SHADOWMAP;
-#ifndef GL_ES_VERSION_2_0
+//#ifndef GL_ES_VERSION_2_0
     textureUnits_["VolumeMap"] = TU_VOLUMEMAP;
     textureUnits_["FaceSelectCubeMap"] = TU_FACESELECT;
     textureUnits_["IndirectionCubeMap"] = TU_INDIRECTION;
@@ -3301,29 +3301,29 @@ void Graphics::SetTextureUnitMappings()
     textureUnits_["LightBuffer"] = TU_LIGHTBUFFER;
     textureUnits_["ZoneCubeMap"] = TU_ZONE;
     textureUnits_["ZoneVolumeMap"] = TU_ZONE;
-#endif
+//#endif
 }
 
 unsigned Graphics::CreateFramebuffer()
 {
     unsigned newFbo = 0;
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-        glGenFramebuffersEXT(1, &newFbo);
-    else
-#endif
-        glGenFramebuffers(1, &newFbo);
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//         glGenFramebuffersEXT(1, &newFbo);
+//     else
+// #endif
+//         glGenFramebuffers(1, &newFbo);
     return newFbo;
 }
 
 void Graphics::DeleteFramebuffer(unsigned fbo)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-        glDeleteFramebuffersEXT(1, &fbo);
-    else
-#endif
-        glDeleteFramebuffers(1, &fbo);
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//         glDeleteFramebuffersEXT(1, &fbo);
+//     else
+// #endif
+//         glDeleteFramebuffers(1, &fbo);
 }
 
 void Graphics::BindFramebuffer(unsigned fbo)
@@ -3339,96 +3339,101 @@ void Graphics::BindFramebuffer(unsigned fbo)
 
 void Graphics::BindColorAttachment(unsigned index, unsigned target, unsigned object, bool isRenderBuffer)
 {
-    if (!object)
-        isRenderBuffer = false;
-
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, target, object, 0);
-        else
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, object);
-    }
-    else
-#endif
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target, object, 0);
-        else
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, object);
-    }
+    assert(false);
+//     if (!object)
+//         isRenderBuffer = false;
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, target, object, 0);
+//         else
+//             glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_COLOR_ATTACHMENT0_EXT + index, GL_RENDERBUFFER_EXT, object);
+//     }
+//     else
+// #endif
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, target, object, 0);
+//         else
+//             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_COLOR_ATTACHMENT0 + index, GL_RENDERBUFFER, object);
+//     }
 }
 
 void Graphics::BindDepthAttachment(unsigned object, bool isRenderBuffer)
 {
-    if (!object)
-        isRenderBuffer = false;
-
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, object, 0);
-        else
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, object);
-    }
-    else
-#endif
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, object, 0);
-        else
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, object);
-    }
+    assert(false);
+//     if (!object)
+//         isRenderBuffer = false;
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_TEXTURE_2D, object, 0);
+//         else
+//             glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_DEPTH_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, object);
+//     }
+//     else
+// #endif
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_TEXTURE_2D, object, 0);
+//         else
+//             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_DEPTH_ATTACHMENT, GL_RENDERBUFFER, object);
+//     }
 }
 
 void Graphics::BindStencilAttachment(unsigned object, bool isRenderBuffer)
 {
-    if (!object)
-        isRenderBuffer = false;
-
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, object, 0);
-        else
-            glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, object);
-    }
-    else
-#endif
-    {
-        if (!isRenderBuffer)
-            glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, object, 0);
-        else
-            glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, object);
-    }
+    assert(false);
+//     if (!object)
+//         isRenderBuffer = false;
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2DEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_TEXTURE_2D, object, 0);
+//         else
+//             glFramebufferRenderbufferEXT(GL_FRAMEBUFFER_EXT, GL_STENCIL_ATTACHMENT_EXT, GL_RENDERBUFFER_EXT, object);
+//     }
+//     else
+// #endif
+//     {
+//         if (!isRenderBuffer)
+//             glFramebufferTexture2D(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_TEXTURE_2D, object, 0);
+//         else
+//             glFramebufferRenderbuffer(GL_FRAMEBUFFER, GL_STENCIL_ATTACHMENT, GL_RENDERBUFFER, object);
+//     }
 }
 
 bool Graphics::CheckFramebuffer()
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!gl3Support)
-        return glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT;
-    else
-#endif
-        return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
+    return false;
+// #ifndef GL_ES_VERSION_2_0
+//     if (!gl3Support)
+//         return glCheckFramebufferStatusEXT(GL_FRAMEBUFFER_EXT) == GL_FRAMEBUFFER_COMPLETE_EXT;
+//     else
+// #endif
+//         return glCheckFramebufferStatus(GL_FRAMEBUFFER) == GL_FRAMEBUFFER_COMPLETE;
 }
 
 void Graphics::SetVertexAttribDivisor(unsigned location, unsigned divisor)
 {
-#ifndef GL_ES_VERSION_2_0
-    if (gl3Support && instancingSupport_)
-        glVertexAttribDivisor(location, divisor);
-    else if (instancingSupport_)
-        glVertexAttribDivisorARB(location, divisor);
-#else
-#ifdef __EMSCRIPTEN__
-    if (instancingSupport_)
-        glVertexAttribDivisorANGLE(location, divisor);
-#endif
-#endif
+    assert(false);
+// #ifndef GL_ES_VERSION_2_0
+//     if (gl3Support && instancingSupport_)
+//         glVertexAttribDivisor(location, divisor);
+//     else if (instancingSupport_)
+//         glVertexAttribDivisorARB(location, divisor);
+// #else
+// #ifdef __EMSCRIPTEN__
+//     if (instancingSupport_)
+//         glVertexAttribDivisorANGLE(location, divisor);
+// #endif
+// #endif
 }
 
 void* Graphics::AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance)

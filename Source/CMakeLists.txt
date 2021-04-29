@@ -68,7 +68,7 @@ if (URHO3D_LIB_TYPE STREQUAL SHARED AND NOT WIN32 AND NOT ANDROID AND NOT IOS AN
 endif ()
 
 # Add targets
-foreach (TARGET ETCPACK FreeType LZ4 PugiXml rapidjson SDL StanHull STB)
+foreach (TARGET ETCPACK FreeType LZ4 PugiXml rapidjson SDL StanHull STB Effekseer sol2)
     add_subdirectory (ThirdParty/${TARGET})
 endforeach ()
 
@@ -81,7 +81,6 @@ endif ()
 
 if (URHO3D_LUA)
     add_subdirectory (ThirdParty/Lua${JIT})
-    add_subdirectory (ThirdParty/toluapp/src/lib)
 endif ()
 
 if (URHO3D_NETWORK)
@@ -129,17 +128,15 @@ if (URHO3D_TRACY_PROFILING)
 endif ()
 
 if (NOT ANDROID AND NOT ARM AND NOT WEB)
-    if (URHO3D_OPENGL)
-        add_subdirectory (ThirdParty/GLEW)
-    elseif (NOT URHO3D_D3D11)
-        add_subdirectory (ThirdParty/MojoShader)
-    endif ()
+    # if (URHO3D_OPENGL)
+    #     add_subdirectory (ThirdParty/GLEW)
+    # elseif (NOT URHO3D_D3D11)
+    #     add_subdirectory (ThirdParty/MojoShader)
+    # endif ()
     if (NOT CMAKE_SYSTEM_NAME STREQUAL Linux)
         add_subdirectory (ThirdParty/LibCpuId)
     endif ()
 endif ()
-
-add_subdirectory (ThirdParty/Effekseer)
 
 add_subdirectory (Urho3D)
 

@@ -113,20 +113,20 @@ void StaticScene::CreateScene()
     const unsigned NUM_OBJECTS = 1;// 200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
-        //Node* mushroomNode = scene_->CreateChild("Mushroom");
-        test_emitter_ = scene_->CreateChild("Mushroom");
-        test_emitter_->SetPosition(Vector3(0.0f, 4.0f, 6.0f));
-        auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
-        //ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
-        ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
-        ee->play();
-//        ee->set_paused(true);
-//         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
-//         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
-//         mushroomNode->SetScale(0.5f + Random(2.0f));
-//         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
-//         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
-//         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+//         test_emitter_ = scene_->CreateChild("Mushroom");
+//         test_emitter_->SetPosition(Vector3(0.0f, 4.0f, 6.0f));
+//         auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
+//         // ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
+//         ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
+//         ee->play();
+        //        ee->set_paused(true);
+        Node* mushroomNode = scene_->CreateChild("Mushroom");
+        mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
+        mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+        mushroomNode->SetScale(0.5f + Random(2.0f));
+        auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
+        mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
+        mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
     }
 
     // Create a scene node for the camera, which we will move around
@@ -213,9 +213,12 @@ void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     // Take the frame time step, which is stored as a float
     float timeStep = eventData[P_TIMESTEP].GetFloat();
-    auto oldpos = test_emitter_->GetPosition();
-    oldpos.x_ += 0.02;
-    test_emitter_->SetPosition(oldpos);
+    if (test_emitter_)
+    {
+        auto oldpos = test_emitter_->GetPosition();
+        oldpos.x_ += 0.02;
+        test_emitter_->SetPosition(oldpos);
+    }
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
 }

@@ -180,7 +180,7 @@ bool ShaderProgram::Link()
                     }
                     else
                     {
-                        URHO3D_LOGERROR("Can't found texture unit : \"%s\"\n", &info.name[1]);
+                        URHO3D_LOGERRORF("Can't found texture unit : \"%s\"\n", &info.name[1]);
                     }
                 }
             }

@@ -22,14 +22,16 @@
 
 #include "../Precompiled.h"
 
+#include "lua.hpp"
+
 #include "../IO/Log.h"
 #include "../IO/VectorBuffer.h"
 #include "../LuaScript/LuaFunction.h"
 #include "../LuaScript/LuaScript.h"
 #include "../LuaScript/LuaScriptInstance.h"
 
-#include <toluapp/tolua++.h>
-#include "../LuaScript/ToluaUtils.h"
+// #include <toluapp/tolua++.h>
+// #include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
@@ -129,23 +131,23 @@ void LuaFunction::PushDouble(double value)
 
 void LuaFunction::PushString(const String& string)
 {
-    assert(numArguments_ >= 0);
-    ++numArguments_;
-    tolua_pushurho3dstring(luaState_, string);
+//     assert(numArguments_ >= 0);
+//     ++numArguments_;
+//     tolua_pushurho3dstring(luaState_, string);
 }
 
 void LuaFunction::PushUserType(void* userType, const char* typeName)
 {
-    assert(numArguments_ >= 0);
-    ++numArguments_;
-    tolua_pushusertype(luaState_, userType, typeName);
+//     assert(numArguments_ >= 0);
+//     ++numArguments_;
+//     tolua_pushusertype(luaState_, userType, typeName);
 }
 
 void LuaFunction::PushVariant(const Variant& variant, const char* asType)
 {
-    assert(numArguments_ >= 0);
-    ++numArguments_;
-    ToluaPushVariant(luaState_, &variant, asType);
+//     assert(numArguments_ >= 0);
+//     ++numArguments_;
+//     ToluaPushVariant(luaState_, &variant, asType);
 }
 
 void LuaFunction::PushLuaTable(const char* tableName)

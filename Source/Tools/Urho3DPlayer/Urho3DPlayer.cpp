@@ -39,8 +39,9 @@
 
 #include <Urho3D/DebugNew.h>
 
-URHO3D_DEFINE_APPLICATION_MAIN(Urho3DPlayer);
-
+//URHO3D_DEFINE_APPLICATION_MAIN(Urho3DPlayer);
+URHO3D_DEFINE_APPLICATION_MAIN(Urho3DPlayer, "Urho3DPlayer", "Loading textures.",
+                               "https://bkaradzic.github.io/bgfx/examples.html#bump");
 Urho3DPlayer::Urho3DPlayer(Context* context) :
     Application(context),
     commandLineRead_(false)

@@ -139,9 +139,12 @@ else ()
 endif ()
 if (URHO3D_OPENGL)
     # Exclude the opposite source directory
-    list (APPEND EXCLUDED_SOURCE_DIRS Graphics/Direct3D9 Graphics/Direct3D11)
+    list (APPEND EXCLUDED_SOURCE_DIRS Graphics/Direct3D9 Graphics/Direct3D11 Graphics/BGFX)
+elseif(URHO3D_BGFX)
+    list (APPEND EXCLUDED_SOURCE_DIRS Graphics/Direct3D9 Graphics/Direct3D11 Graphics/OpenGL)
 else ()
     list (APPEND EXCLUDED_SOURCE_DIRS Graphics/OpenGL)
+    list (APPEND EXCLUDED_SOURCE_DIRS Graphics/BGFX)
     if (URHO3D_D3D11)
         list (APPEND EXCLUDED_SOURCE_DIRS Graphics/Direct3D9)
     else ()
@@ -302,56 +305,56 @@ if (URHO3D_BINDINGS)
         WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}
         COMMENT "Generating source files for binding script subsystems")
 endif ()
-if (URHO3D_LUA)
-    # The host tool must be built natively
-    if (CMAKE_CROSSCOMPILING OR URHO3D_LUAJIT)
-        check_native_compiler_exist ()
-        # When cross-compiling or using LuaJIT, build the tolua++ host tool as external project using normal Lua (there is not much point using LuaJIT for the tool building even when technically it can)
-        include (ExternalProject)
-        if (ANDROID AND DEFINED ENV{TRAVIS})
-            set (TRAVIS_ANDROID_FIX -DURHO3D_DEPLOYMENT_TARGET=generic)
-        endif ()
-        if (IOS OR TVOS)
-            set (ALTERNATE_COMMAND CMAKE_COMMAND /usr/bin/env -i PATH=$ENV{PATH} CC=${SAVED_CC} CXX=${SAVED_CXX} CI=$ENV{CI} ${CMAKE_COMMAND} BUILD_COMMAND bash -c "sed -i '' 's/\$$\(EFFECTIVE_PLATFORM_NAME\)//g' CMakeScripts/install_postBuildPhase.make*")
-        else ()
-            set (ALTERNATE_COMMAND CMAKE_COMMAND ${CMAKE_COMMAND} -E env CC=${SAVED_CC} CXX=${SAVED_CXX} CI=$ENV{CI} ${CMAKE_COMMAND})
-        endif ()
-        ExternalProject_Add (tolua++
-            SOURCE_DIR ${CMAKE_SOURCE_DIR}/Source/ThirdParty/toluapp/src/bin
-            CMAKE_ARGS -D URHO3D_DEPLOYMENT_TARGET=generic -D DEST_RUNTIME_DIR=${CMAKE_BINARY_DIR}/bin/tool -D BAKED_CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} -D URHO3D_UPDATE_SOURCE_TREE=${URHO3D_UPDATE_SOURCE_TREE} -D CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
-            ${TRAVIS_ANDROID_FIX}
-            ${ALTERNATE_COMMAND})
-        add_make_clean_files (${CMAKE_BINARY_DIR}/bin/tool/tolua++)
-    else ()
-        # Otherwise, build it internally as per normal
-        add_subdirectory (../ThirdParty/toluapp/src/bin ../ThirdParty/toluapp/src/bin)
-    endif ()
-    # Use the host tool to generate source files for tolua++ API binding
-    file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated)
-    file (GLOB API_PKG_FILES LuaScript/pkgs/*.pkg)
-    foreach (DIR IK Navigation Network Database Physics Urho2D)
-        string (TOUPPER URHO3D_${DIR} OPT)
-        if (NOT ${OPT})
-            list (REMOVE_ITEM API_PKG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/LuaScript/pkgs/${DIR}LuaAPI.pkg)
-        endif ()
-    endforeach ()
-    foreach (API_PKG_FILE ${API_PKG_FILES})
-        get_filename_component (NAME ${API_PKG_FILE} NAME)
-        string (REGEX REPLACE LuaAPI\\.pkg$ "" DIR ${NAME})
-        set (GEN_CPP_FILE ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated/${DIR}LuaAPI.cpp)
-        list (APPEND LUA_GEN_CPP_FILES ${GEN_CPP_FILE})
-        file (GLOB PKG_FILES LuaScript/pkgs/${DIR}/*.pkg)
-        add_custom_command (OUTPUT ${GEN_CPP_FILE}
-            COMMAND ${CMAKE_BINARY_DIR}/bin/tool/tolua++ -E ${CMAKE_PROJECT_NAME} -L ToCppHook.lua -o ${GEN_CPP_FILE} ${NAME}
-            DEPENDS tolua++ ${API_PKG_FILE} ${PKG_FILES} LuaScript/pkgs/ToCppHook.lua
-            WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/LuaScript/pkgs
-            COMMENT "Generating tolua++ API binding on the fly for ${DIR}")
-    endforeach ()
-    source_group ("Source Files\\LuaScript\\Generated" FILES ${LUA_GEN_CPP_FILES})
-    if (URHO3D_LINT)
-        execute_process (COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/.clang-tidy ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated)
-    endif ()
-endif ()
+# if (URHO3D_LUA)
+#     # The host tool must be built natively
+#     if (CMAKE_CROSSCOMPILING OR URHO3D_LUAJIT)
+#         check_native_compiler_exist ()
+#         # When cross-compiling or using LuaJIT, build the tolua++ host tool as external project using normal Lua (there is not much point using LuaJIT for the tool building even when technically it can)
+#         include (ExternalProject)
+#         if (ANDROID AND DEFINED ENV{TRAVIS})
+#             set (TRAVIS_ANDROID_FIX -DURHO3D_DEPLOYMENT_TARGET=generic)
+#         endif ()
+#         if (IOS OR TVOS)
+#             set (ALTERNATE_COMMAND CMAKE_COMMAND /usr/bin/env -i PATH=$ENV{PATH} CC=${SAVED_CC} CXX=${SAVED_CXX} CI=$ENV{CI} ${CMAKE_COMMAND} BUILD_COMMAND bash -c "sed -i '' 's/\$$\(EFFECTIVE_PLATFORM_NAME\)//g' CMakeScripts/install_postBuildPhase.make*")
+#         else ()
+#             set (ALTERNATE_COMMAND CMAKE_COMMAND ${CMAKE_COMMAND} -E env CC=${SAVED_CC} CXX=${SAVED_CXX} CI=$ENV{CI} ${CMAKE_COMMAND})
+#         endif ()
+#         ExternalProject_Add (tolua++
+#             SOURCE_DIR ${CMAKE_SOURCE_DIR}/Source/ThirdParty/toluapp/src/bin
+#             CMAKE_ARGS -D URHO3D_DEPLOYMENT_TARGET=generic -D DEST_RUNTIME_DIR=${CMAKE_BINARY_DIR}/bin/tool -D BAKED_CMAKE_SOURCE_DIR=${CMAKE_SOURCE_DIR} -D URHO3D_UPDATE_SOURCE_TREE=${URHO3D_UPDATE_SOURCE_TREE} -D CMAKE_MAKE_PROGRAM=${CMAKE_MAKE_PROGRAM}
+#             ${TRAVIS_ANDROID_FIX}
+#             ${ALTERNATE_COMMAND})
+#         add_make_clean_files (${CMAKE_BINARY_DIR}/bin/tool/tolua++)
+#     else ()
+#         # Otherwise, build it internally as per normal
+#         add_subdirectory (../ThirdParty/toluapp/src/bin ../ThirdParty/toluapp/src/bin)
+#     endif ()
+#     # Use the host tool to generate source files for tolua++ API binding
+#     file (MAKE_DIRECTORY ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated)
+#     file (GLOB API_PKG_FILES LuaScript/pkgs/*.pkg)
+#     foreach (DIR IK Navigation Network Database Physics Urho2D)
+#         string (TOUPPER URHO3D_${DIR} OPT)
+#         if (NOT ${OPT})
+#             list (REMOVE_ITEM API_PKG_FILES ${CMAKE_CURRENT_SOURCE_DIR}/LuaScript/pkgs/${DIR}LuaAPI.pkg)
+#         endif ()
+#     endforeach ()
+#     foreach (API_PKG_FILE ${API_PKG_FILES})
+#         get_filename_component (NAME ${API_PKG_FILE} NAME)
+#         string (REGEX REPLACE LuaAPI\\.pkg$ "" DIR ${NAME})
+#         set (GEN_CPP_FILE ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated/${DIR}LuaAPI.cpp)
+#         list (APPEND LUA_GEN_CPP_FILES ${GEN_CPP_FILE})
+#         file (GLOB PKG_FILES LuaScript/pkgs/${DIR}/*.pkg)
+#         add_custom_command (OUTPUT ${GEN_CPP_FILE}
+#             COMMAND ${CMAKE_BINARY_DIR}/bin/tool/tolua++ -E ${CMAKE_PROJECT_NAME} -L ToCppHook.lua -o ${GEN_CPP_FILE} ${NAME}
+#             DEPENDS tolua++ ${API_PKG_FILE} ${PKG_FILES} LuaScript/pkgs/ToCppHook.lua
+#             WORKING_DIRECTORY ${CMAKE_CURRENT_SOURCE_DIR}/LuaScript/pkgs
+#             COMMENT "Generating tolua++ API binding on the fly for ${DIR}")
+#     endforeach ()
+#     source_group ("Source Files\\LuaScript\\Generated" FILES ${LUA_GEN_CPP_FILES})
+#     if (URHO3D_LINT)
+#         execute_process (COMMAND ${CMAKE_COMMAND} -E copy ${CMAKE_CURRENT_SOURCE_DIR}/../ThirdParty/.clang-tidy ${CMAKE_CURRENT_BINARY_DIR}/LuaScript/generated)
+#     endif ()
+# endif ()
 
 # Aggregate all source files
 list (APPEND SOURCE_FILES ${GEN_CPP_FILES} ${LUA_GEN_CPP_FILES} librevision.h Urho3D.h ${SYMBOLIC_SOURCES})
@@ -359,6 +362,7 @@ list (APPEND SOURCE_FILES ${GEN_CPP_FILES} ${LUA_GEN_CPP_FILES} librevision.h Ur
 # Define dependency libs
 # Add include directories to find the precompiled header, export header, and installed headers from third-party libs
 set (INCLUDE_DIRS ${CMAKE_CURRENT_BINARY_DIR} ${CMAKE_CURRENT_SOURCE_DIR} ${THIRD_PARTY_INCLUDE_DIR})
+
 if (URHO3D_PHYSICS)
     # Bullet library depends on its own include dir to be added in the header search path
     # This is more practical than patching its header files in many places to make them work with relative path
@@ -373,6 +377,11 @@ if (URHO3D_LUA)
     # This is more practical than patching its header files in many places to make them work with relative path
     list (APPEND INCLUDE_DIRS ${THIRD_PARTY_INCLUDE_DIR}/Lua${JIT})
 endif ()
+
+list (APPEND INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/Cocos2d)
+list (APPEND INCLUDE_DIRS ${CMAKE_CURRENT_SOURCE_DIR}/FairyGUI)
+list (APPEND INCLUDE_DIRS ${THIRD_PARTY_INCLUDE_DIR}/Effekseer)
+
 # Workaround for GCC 5.4 and above when building a SHARED lib type for Linux platform to fix the undefined symbol "__cpu_model" issue (see #1519)
 if (CMAKE_COMPILER_IS_GNUCXX AND CMAKE_CXX_COMPILER_VERSION VERSION_GREATER 5.3.1 AND CMAKE_SYSTEM_NAME STREQUAL Linux AND URHO3D_LIB_TYPE STREQUAL SHARED)  # 5.3.1 was the last known good version
     list (APPEND LIBS gcc)
@@ -395,7 +404,7 @@ if (URHO3D_CLANG_TOOLS)
     set (ANNOTATE_NONSCRIPTABLE "__attribute__((annotate(\"nonscriptable\")))")
 endif ()
 set (APPENDIX "${APPENDIX}\n#define NONSCRIPTABLE ${ANNOTATE_NONSCRIPTABLE}\n\n")
-foreach (DEFINE URHO3D_STATIC_DEFINE URHO3D_OPENGL URHO3D_D3D11 URHO3D_SSE URHO3D_DATABASE_ODBC URHO3D_DATABASE_SQLITE URHO3D_LUAJIT URHO3D_TESTING CLANG_PRE_STANDARD)
+foreach (DEFINE URHO3D_STATIC_DEFINE URHO3D_BGFX URHO3D_OPENGL URHO3D_D3D11 URHO3D_SSE URHO3D_DATABASE_ODBC URHO3D_DATABASE_SQLITE URHO3D_LUAJIT URHO3D_TESTING CLANG_PRE_STANDARD)
     if (${DEFINE})
         set (APPENDIX "${APPENDIX}#define ${DEFINE}\n")
     endif ()
@@ -471,7 +480,7 @@ if (APPLE)
     set_property (TARGET ${TARGET_NAME} APPEND PROPERTY LINK_LIBRARIES -force_load)
 elseif (MSVC)
     foreach (THIRD_PARTY_LIB ${STATIC_LIBRARY_TARGETS})
-        if (NOT ${THIRD_PARTY_LIB} MATCHES boost|rapidjson|STB)  # Exclude header-only "fake" static libs
+        if (NOT ${THIRD_PARTY_LIB} MATCHES boost|rapidjson|STB|sol2)  # Exclude header-only "fake" static libs
             # Must be specified for each library https://github.com/urho3d/Urho3D/issues/2760
             set_property (TARGET ${TARGET_NAME} APPEND PROPERTY LINK_OPTIONS /WHOLEARCHIVE:${THIRD_PARTY_LIB})  # Require VS 2015 Update 2 onward
         endif ()
@@ -483,7 +492,7 @@ endif ()
 
 foreach (TARGET ${STATIC_LIBRARY_TARGETS})
     set (ARCHIVE $<TARGET_FILE:${TARGET}>)
-    if (NOT ${TARGET} MATCHES boost|rapidjson|STB)  # Exclude header-only "fake" static lib targets
+    if (NOT ${TARGET} MATCHES boost|rapidjson|STB|sol2)  # Exclude header-only "fake" static lib targets
         set_property (TARGET ${TARGET_NAME} APPEND PROPERTY LINK_LIBRARIES ${ARCHIVE})      # Should work for all compiler toolchains while building shared library
         if (URHO3D_LIB_TYPE STREQUAL STATIC)
             if (XCODE OR MSVC)  # Only works in Xcode and MSVC while building static library

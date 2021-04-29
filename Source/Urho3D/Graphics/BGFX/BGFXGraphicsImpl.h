@@ -29,34 +29,34 @@
 #include "../../Graphics/Texture2D.h"
 #include "../../Math/Color.h"
 
-#if defined(IOS) || defined(TVOS)
-#include <OpenGLES/ES2/gl.h>
-#include <OpenGLES/ES2/glext.h>
-#elif defined(__ANDROID__) || defined (__arm__) || defined(__aarch64__) || defined (__EMSCRIPTEN__)
-#include <GLES2/gl2.h>
-#include <GLES2/gl2ext.h>
-#else
-#include <GLEW/glew.h>
-#endif
+// #if defined(IOS) || defined(TVOS)
+// #include <OpenGLES/ES2/gl.h>
+// #include <OpenGLES/ES2/glext.h>
+// #elif defined(__ANDROID__) || defined (__arm__) || defined(__aarch64__) || defined (__EMSCRIPTEN__)
+// #include <GLES2/gl2.h>
+// #include <GLES2/gl2ext.h>
+// #else
+// #include <GLEW/glew.h>
+// #endif
 
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83f1
-#endif
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
-#endif
-#ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
-#define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
-#endif
-#ifndef GL_ETC1_RGB8_OES
-#define GL_ETC1_RGB8_OES 0x8d64
-#endif
-#ifndef GL_ETC2_RGB8_OES
-#define GL_ETC2_RGB8_OES 0x9274
-#endif
-#ifndef GL_ETC2_RGBA8_OES
-#define GL_ETC2_RGBA8_OES 0x9278
-#endif
+// #ifndef GL_COMPRESSED_RGBA_S3TC_DXT1_EXT
+// #define GL_COMPRESSED_RGBA_S3TC_DXT1_EXT 0x83f1
+// #endif
+// #ifndef GL_COMPRESSED_RGBA_S3TC_DXT3_EXT
+// #define GL_COMPRESSED_RGBA_S3TC_DXT3_EXT 0x83f2
+// #endif
+// #ifndef GL_COMPRESSED_RGBA_S3TC_DXT5_EXT
+// #define GL_COMPRESSED_RGBA_S3TC_DXT5_EXT 0x83f3
+// #endif
+// #ifndef GL_ETC1_RGB8_OES
+// #define GL_ETC1_RGB8_OES 0x8d64
+// #endif
+// #ifndef GL_ETC2_RGB8_OES
+// #define GL_ETC2_RGB8_OES 0x9274
+// #endif
+// #ifndef GL_ETC2_RGBA8_OES
+// #define GL_ETC2_RGBA8_OES 0x9278
+// #endif
 #ifndef COMPRESSED_RGB_PVRTC_4BPPV1_IMG
 #define COMPRESSED_RGB_PVRTC_4BPPV1_IMG 0x8c00
 #endif

@@ -41,10 +41,10 @@ namespace Urho3D
 
 void Texture3D::OnDeviceLost()
 {
-    if (object_.name_ && !graphics_->IsDeviceLost())
-        glDeleteTextures(1, &object_.name_);
-
-    GPUObject::OnDeviceLost();
+//     if (object_.name_ && !graphics_->IsDeviceLost())
+//         glDeleteTextures(1, &object_.name_);
+// 
+//     GPUObject::OnDeviceLost();
 }
 
 void Texture3D::OnDeviceReset()
@@ -68,91 +68,91 @@ void Texture3D::OnDeviceReset()
 
 void Texture3D::Release()
 {
-    if (object_.name_)
-    {
-        if (!graphics_ || graphics_->IsDeviceLost())
-            return;
-
-        for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
-        {
-            if (graphics_->GetTexture(i) == this)
-                graphics_->SetTexture(i, nullptr);
-        }
-
-        glDeleteTextures(1, &object_.name_);
-        object_.name_ = 0;
-    }
+//     if (object_.name_)
+//     {
+//         if (!graphics_ || graphics_->IsDeviceLost())
+//             return;
+// 
+//         for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
+//         {
+//             if (graphics_->GetTexture(i) == this)
+//                 graphics_->SetTexture(i, nullptr);
+//         }
+// 
+//         glDeleteTextures(1, &object_.name_);
+//         object_.name_ = 0;
+//     }
 }
 
 bool Texture3D::SetData(unsigned level, int x, int y, int z, int width, int height, int depth, const void* data)
 {
-    URHO3D_PROFILE(SetTextureData);
-
-    if (!object_.name_ || !graphics_)
-    {
-        URHO3D_LOGERROR("No texture created, can not set data");
-        return false;
-    }
-
-    if (!data)
-    {
-        URHO3D_LOGERROR("Null source for setting data");
-        return false;
-    }
-
-    if (level >= levels_)
-    {
-        URHO3D_LOGERROR("Illegal mip level for setting data");
-        return false;
-    }
-
-    if (graphics_->IsDeviceLost())
-    {
-        URHO3D_LOGWARNING("Texture data assignment while device is lost");
-        dataPending_ = true;
-        return true;
-    }
-
-    if (IsCompressed())
-    {
-        x &= ~3u;
-        y &= ~3u;
-    }
-
-    int levelWidth = GetLevelWidth(level);
-    int levelHeight = GetLevelHeight(level);
-    int levelDepth = GetLevelDepth(level);
-    if (x < 0 || x + width > levelWidth || y < 0 || y + height > levelHeight || z < 0 || z + depth > levelDepth || width <= 0 ||
-        height <= 0 || depth <= 0)
-    {
-        URHO3D_LOGERROR("Illegal dimensions for setting data");
-        return false;
-    }
-
-    graphics_->SetTextureForUpdate(this);
-
-#ifndef GL_ES_VERSION_2_0
-    bool wholeLevel = x == 0 && y == 0 && z == 0 && width == levelWidth && height == levelHeight && depth == levelDepth;
-    unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
-
-    if (!IsCompressed())
-    {
-        if (wholeLevel)
-            glTexImage3D(target_, level, format, width, height, depth, 0, GetExternalFormat(format_), GetDataType(format_), data);
-        else
-            glTexSubImage3D(target_, level, x, y, z, width, height, depth, GetExternalFormat(format_), GetDataType(format_), data);
-    }
-    else
-    {
-        if (wholeLevel)
-            glCompressedTexImage3D(target_, level, format, width, height, depth, 0, GetDataSize(width, height, depth), data);
-        else
-            glCompressedTexSubImage3D(target_, level, x, y, z, width, height, depth, format, GetDataSize(width, height, depth),
-                data);
-    }
-#endif
-
-    graphics_->SetTexture(0, nullptr);
+//     URHO3D_PROFILE(SetTextureData);
+// 
+//     if (!object_.name_ || !graphics_)
+//     {
+//         URHO3D_LOGERROR("No texture created, can not set data");
+//         return false;
+//     }
+// 
+//     if (!data)
+//     {
+//         URHO3D_LOGERROR("Null source for setting data");
+//         return false;
+//     }
+// 
+//     if (level >= levels_)
+//     {
+//         URHO3D_LOGERROR("Illegal mip level for setting data");
+//         return false;
+//     }
+// 
+//     if (graphics_->IsDeviceLost())
+//     {
+//         URHO3D_LOGWARNING("Texture data assignment while device is lost");
+//         dataPending_ = true;
+//         return true;
+//     }
+// 
+//     if (IsCompressed())
+//     {
+//         x &= ~3u;
+//         y &= ~3u;
+//     }
+// 
+//     int levelWidth = GetLevelWidth(level);
+//     int levelHeight = GetLevelHeight(level);
+//     int levelDepth = GetLevelDepth(level);
+//     if (x < 0 || x + width > levelWidth || y < 0 || y + height > levelHeight || z < 0 || z + depth > levelDepth || width <= 0 ||
+//         height <= 0 || depth <= 0)
+//     {
+//         URHO3D_LOGERROR("Illegal dimensions for setting data");
+//         return false;
+//     }
+// 
+//     graphics_->SetTextureForUpdate(this);
+// 
+// #ifndef GL_ES_VERSION_2_0
+//     bool wholeLevel = x == 0 && y == 0 && z == 0 && width == levelWidth && height == levelHeight && depth == levelDepth;
+//     unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
+// 
+//     if (!IsCompressed())
+//     {
+//         if (wholeLevel)
+//             glTexImage3D(target_, level, format, width, height, depth, 0, GetExternalFormat(format_), GetDataType(format_), data);
+//         else
+//             glTexSubImage3D(target_, level, x, y, z, width, height, depth, GetExternalFormat(format_), GetDataType(format_), data);
+//     }
+//     else
+//     {
+//         if (wholeLevel)
+//             glCompressedTexImage3D(target_, level, format, width, height, depth, 0, GetDataSize(width, height, depth), data);
+//         else
+//             glCompressedTexSubImage3D(target_, level, x, y, z, width, height, depth, format, GetDataSize(width, height, depth),
+//                 data);
+//     }
+// #endif
+// 
+//     graphics_->SetTexture(0, nullptr);
     return true;
 }
 
@@ -297,97 +297,99 @@ bool Texture3D::SetData(Image* image, bool useAlpha)
 
 bool Texture3D::GetData(unsigned level, void* dest) const
 {
-#ifndef GL_ES_VERSION_2_0
-    if (!object_.name_ || !graphics_)
-    {
-        URHO3D_LOGERROR("No texture created, can not get data");
-        return false;
-    }
-
-    if (!dest)
-    {
-        URHO3D_LOGERROR("Null destination for getting data");
-        return false;
-    }
-
-    if (level >= levels_)
-    {
-        URHO3D_LOGERROR("Illegal mip level for getting data");
-        return false;
-    }
-
-    if (graphics_->IsDeviceLost())
-    {
-        URHO3D_LOGWARNING("Getting texture data while device is lost");
-        return false;
-    }
-
-    graphics_->SetTextureForUpdate(const_cast<Texture3D*>(this));
-
-    if (!IsCompressed())
-        glGetTexImage(target_, level, GetExternalFormat(format_), GetDataType(format_), dest);
-    else
-        glGetCompressedTexImage(target_, level, dest);
-
-    graphics_->SetTexture(0, nullptr);
-    return true;
-#else
-    URHO3D_LOGERROR("Getting texture data not supported");
+// #ifndef GL_ES_VERSION_2_0
+//     if (!object_.name_ || !graphics_)
+//     {
+//         URHO3D_LOGERROR("No texture created, can not get data");
+//         return false;
+//     }
+// 
+//     if (!dest)
+//     {
+//         URHO3D_LOGERROR("Null destination for getting data");
+//         return false;
+//     }
+// 
+//     if (level >= levels_)
+//     {
+//         URHO3D_LOGERROR("Illegal mip level for getting data");
+//         return false;
+//     }
+// 
+//     if (graphics_->IsDeviceLost())
+//     {
+//         URHO3D_LOGWARNING("Getting texture data while device is lost");
+//         return false;
+//     }
+// 
+//     graphics_->SetTextureForUpdate(const_cast<Texture3D*>(this));
+// 
+//     if (!IsCompressed())
+//         glGetTexImage(target_, level, GetExternalFormat(format_), GetDataType(format_), dest);
+//     else
+//         glGetCompressedTexImage(target_, level, dest);
+// 
+//     graphics_->SetTexture(0, nullptr);
+//     return true;
+// #else
+//     URHO3D_LOGERROR("Getting texture data not supported");
+//     return false;
+// #endif
     return false;
-#endif
 }
 
 bool Texture3D::Create()
 {
-    Release();
-
-#ifdef GL_ES_VERSION_2_0
-    URHO3D_LOGERROR("Failed to create 3D texture, currently unsupported on OpenGL ES 2");
+//     Release();
+// 
+// #ifdef GL_ES_VERSION_2_0
+//     URHO3D_LOGERROR("Failed to create 3D texture, currently unsupported on OpenGL ES 2");
+//     return false;
+// #else
+//     if (!graphics_ || !width_ || !height_ || !depth_)
+//         return false;
+// 
+//     if (graphics_->IsDeviceLost())
+//     {
+//         URHO3D_LOGWARNING("Texture creation while device is lost");
+//         return true;
+//     }
+// 
+//     unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
+//     unsigned externalFormat = GetExternalFormat(format_);
+//     unsigned dataType = GetDataType(format_);
+// 
+//     glGenTextures(1, &object_.name_);
+// 
+//     // Ensure that our texture is bound to OpenGL texture unit 0
+//     graphics_->SetTextureForUpdate(this);
+// 
+//     // If not compressed, create the initial level 0 texture with null data
+//     bool success = true;
+// 
+//     if (!IsCompressed())
+//     {
+//         glGetError();
+//         glTexImage3D(target_, 0, format, width_, height_, depth_, 0, externalFormat, dataType, nullptr);
+//         if (glGetError())
+//         {
+//             URHO3D_LOGERROR("Failed to create texture");
+//             success = false;
+//         }
+//     }
+// 
+//     // Set mipmapping
+//     levels_ = CheckMaxLevels(width_, height_, depth_, requestedLevels_);
+//     glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
+//     glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
+// 
+//     // Set initial parameters, then unbind the texture
+//     UpdateParameters();
+//     graphics_->SetTexture(0, nullptr);
+// 
+//     return success;
+// #endif
     return false;
-#else
-    if (!graphics_ || !width_ || !height_ || !depth_)
-        return false;
-
-    if (graphics_->IsDeviceLost())
-    {
-        URHO3D_LOGWARNING("Texture creation while device is lost");
-        return true;
-    }
-
-    unsigned format = GetSRGB() ? GetSRGBFormat(format_) : format_;
-    unsigned externalFormat = GetExternalFormat(format_);
-    unsigned dataType = GetDataType(format_);
-
-    glGenTextures(1, &object_.name_);
-
-    // Ensure that our texture is bound to OpenGL texture unit 0
-    graphics_->SetTextureForUpdate(this);
-
-    // If not compressed, create the initial level 0 texture with null data
-    bool success = true;
-
-    if (!IsCompressed())
-    {
-        glGetError();
-        glTexImage3D(target_, 0, format, width_, height_, depth_, 0, externalFormat, dataType, nullptr);
-        if (glGetError())
-        {
-            URHO3D_LOGERROR("Failed to create texture");
-            success = false;
-        }
-    }
-
-    // Set mipmapping
-    levels_ = CheckMaxLevels(width_, height_, depth_, requestedLevels_);
-    glTexParameteri(target_, GL_TEXTURE_BASE_LEVEL, 0);
-    glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
-
-    // Set initial parameters, then unbind the texture
-    UpdateParameters();
-    graphics_->SetTexture(0, nullptr);
-
-    return success;
-#endif
 }
 
 }

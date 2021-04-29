@@ -39,44 +39,50 @@
 
 extern "C"
 {
-#include <lualib.h>
+#include "lualib.h"
+#include "lauxlib.h"
+#include "lua.h"
 }
 
-#include <toluapp/tolua++.h>
-#include "../LuaScript/ToluaUtils.h"
+//#include <toluapp/tolua++.h>
+// #include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
-extern int tolua_AudioLuaAPI_open(lua_State*);
-extern int tolua_CoreLuaAPI_open(lua_State*);
-extern int tolua_EngineLuaAPI_open(lua_State*);
-extern int tolua_GraphicsLuaAPI_open(lua_State*);
-extern int tolua_InputLuaAPI_open(lua_State*);
-extern int tolua_IOLuaAPI_open(lua_State*);
-extern int tolua_MathLuaAPI_open(lua_State*);
+extern int sol2_AudioLuaAPI_open(lua_State*);
+extern int sol2_CoreLuaAPI_open(lua_State*);
+extern int sol2_EngineLuaAPI_open(lua_State*);
+extern int sol2_GraphicsLuaAPI_open(lua_State*);
+extern int sol2_InputLuaAPI_open(lua_State*);
+extern int sol2_IOLuaAPI_open(lua_State*);
+extern int sol2_MathLuaAPI_open(lua_State*);
 #ifdef URHO3D_NAVIGATION
-extern int tolua_NavigationLuaAPI_open(lua_State*);
+extern int sol2_NavigationLuaAPI_open(lua_State*);
 #endif
 #ifdef URHO3D_NETWORK
-extern int tolua_NetworkLuaAPI_open(lua_State*);
+extern int sol2_NetworkLuaAPI_open(lua_State*);
 #endif
 #ifdef URHO3D_DATABASE
-extern int tolua_DatabaseLuaAPI_open(lua_State*);
+extern int sol2_DatabaseLuaAPI_open(lua_State*);
 #endif
 #ifdef URHO3D_IK
-extern int tolua_IKLuaAPI_open(lua_State*);
+extern int sol2_IKLuaAPI_open(lua_State*);
 #endif
 #ifdef URHO3D_PHYSICS
-extern int tolua_PhysicsLuaAPI_open(lua_State*);
+extern int sol2_PhysicsLuaAPI_open(lua_State*);
 #endif
-extern int tolua_ResourceLuaAPI_open(lua_State*);
-extern int tolua_SceneLuaAPI_open(lua_State*);
-extern int tolua_UILuaAPI_open(lua_State*);
+extern int sol2_ResourceLuaAPI_open(lua_State*);
+extern int sol2_SceneLuaAPI_open(lua_State*);
+extern int sol2_UILuaAPI_open(lua_State*);
 #ifdef URHO3D_URHO2D
-extern int tolua_Urho2DLuaAPI_open(lua_State*);
+extern int sol2_Urho2DLuaAPI_open(lua_State*);
 #endif
-extern int tolua_LuaScriptLuaAPI_open(lua_State*);
+extern int sol2_LuaScriptLuaAPI_open(lua_State*);
 
+/// Set context.
+void SetContext(lua_State* L, Urho3D::Context* context);
+/// Return context.
+Urho3D::Context* GetContext(lua_State* L);
 namespace Urho3D
 {
 
@@ -99,7 +105,7 @@ LuaScript::LuaScript(Context* context) :
     luaL_openlibs(luaState_);
     RegisterLoader();
     ReplacePrint();
-
+    /*
     tolua_MathLuaAPI_open(luaState_);
     tolua_CoreLuaAPI_open(luaState_);
     tolua_IOLuaAPI_open(luaState_);
@@ -129,7 +135,7 @@ LuaScript::LuaScript(Context* context) :
     tolua_Urho2DLuaAPI_open(luaState_);
 #endif
     tolua_LuaScriptLuaAPI_open(luaState_);
-
+    */
     SetContext(luaState_, context_);
 
     eventInvoker_ = new LuaScriptEventInvoker(context_);
@@ -338,7 +344,7 @@ void LuaScript::RegisterLoader()
     lua_getfield(luaState_, -1, "loaders");
 
     // Add LuaScript::Loader to the end of the table
-    lua_pushinteger(luaState_, lua_objlen(luaState_, -1) + 1);
+    lua_pushinteger(luaState_, lua_rawlen(luaState_, -1) + 1);
     lua_pushcfunction(luaState_, &LuaScript::Loader);
     lua_settable(luaState_, -3);
     lua_pop(luaState_, 2);
@@ -383,16 +389,20 @@ int LuaScript::Loader(lua_State* L)
 
 void LuaScript::ReplacePrint()
 {
-    static const struct luaL_reg reg[] =
-    {
-        {"print", &LuaScript::Print},
-        {nullptr, nullptr}
-    };
+//     static const struct luaL_reg reg[] =
+//     {
+//         {"print", &LuaScript::Print},
+//         {nullptr, nullptr}
+//     };
 
     lua_getglobal(luaState_, "_G");
-    luaL_register(luaState_, nullptr, reg);
+    //luaL_register(luaState_, nullptr, reg);
+    luaL_requiref(luaState_, "print", &LuaScript::Print, 1);
     lua_pop(luaState_, 1);
 }
+
+#define LUA_QL(x) "'" x "'"
+//#define LUA_QS LUA_QL("%s")
 
 int LuaScript::Print(lua_State* L)
 {

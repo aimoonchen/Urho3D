@@ -46,7 +46,7 @@ namespace Urho3D
 
 RenderSurface::RenderSurface(Texture* parentTexture) :      // NOLINT(hicpp-member-init)
     parentTexture_(parentTexture),
-    target_(GL_TEXTURE_2D),
+    //target_(GL_TEXTURE_2D),
     //renderBuffer_(0),
     framebuffer_handle_{ bgfx::kInvalidHandle }
 {

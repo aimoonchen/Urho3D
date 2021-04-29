@@ -331,17 +331,17 @@ bool Texture2D::Create()
             else
             {
                 // Multisample without autoresolve: create a texture only
-#ifndef GL_ES_VERSION_2_0
-                if (!Graphics::GetGL3Support() && !GLEW_ARB_texture_multisample)
-                {
-                    URHO3D_LOGERROR("Multisampled texture extension not available");
-                    return false;
-                }
-
-                target_ = GL_TEXTURE_2D_MULTISAMPLE;
-                if (renderSurface_)
-                    renderSurface_->target_ = GL_TEXTURE_2D_MULTISAMPLE;
-#endif
+// #ifndef GL_ES_VERSION_2_0
+//                 if (!Graphics::GetGL3Support() && !GLEW_ARB_texture_multisample)
+//                 {
+//                     URHO3D_LOGERROR("Multisampled texture extension not available");
+//                     return false;
+//                 }
+// 
+//                 target_ = GL_TEXTURE_2D_MULTISAMPLE;
+//                 if (renderSurface_)
+//                     renderSurface_->target_ = GL_TEXTURE_2D_MULTISAMPLE;
+// #endif
             }
         }
     }
