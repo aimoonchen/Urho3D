@@ -363,6 +363,8 @@ return -1; /* EINVAL - Clock ID is unknown */
 #define WIN_PTHREADS_TIME_H
 #endif
 
+#include <stdlib.h>
+
 /* clock_gettime is not implemented on OSX prior to 10.12 */
 static int
 _civet_clock_gettime(int clk_id, struct timespec *t)
@@ -432,7 +434,6 @@ return _civet_clock_gettime(clk_id, t);
 #include <stddef.h>
 #include <stdint.h>
 #include <stdio.h>
-#include <stdlib.h>
 #include <string.h>
 #include <time.h>
 
