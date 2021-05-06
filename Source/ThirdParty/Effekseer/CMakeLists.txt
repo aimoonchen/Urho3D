@@ -24,12 +24,12 @@
 set (TARGET_NAME Effekseer)
 
 # Define source files
-define_source_files (RECURSE GLOB_CPP_PATTERNS Effekseer/*.cpp GLOB_H_PATTERNS *.h Effekseer/*.h Effekseer/*.hpp)
+define_source_files (RECURSE GLOB_CPP_PATTERNS src/*.cpp GLOB_H_PATTERNS src/*.h src/*.hpp)
 
 # Define dependency libs
-set (INCLUDE_DIRS .)
+set (INCLUDE_DIRS src)
 
 # Setup target
 setup_library ()
 
-install_header_files (DIRECTORY . DESTINATION ${DEST_INCLUDE_DIR}/ThirdParty/Effekseer FILES_MATCHING PATTERN *.h)  # Note: the trailing slash is significant
+install_header_files (DIRECTORY src/ DESTINATION ${DEST_INCLUDE_DIR}/ThirdParty/Effekseer FILES_MATCHING PATTERN *.h)  # Note: the trailing slash is significant
