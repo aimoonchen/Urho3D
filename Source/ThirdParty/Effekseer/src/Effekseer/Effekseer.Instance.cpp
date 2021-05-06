@@ -419,10 +419,16 @@ void Instance::FirstUpdate()
 	else if (m_pEffectNode->TranslationType == ParameterTranslationType_FCurve)
 	{
 		assert(m_pEffectNode->TranslationFCurve != nullptr);
+		const auto coordinateSystem = m_pEffectNode->GetEffect()->GetSetting()->GetCoordinateSystem();
 
 		translation_values.fcruve.offset = m_pEffectNode->TranslationFCurve->GetOffsets(rand);
 
 		prevPosition_ = translation_values.fcruve.offset + m_pEffectNode->TranslationFCurve->GetValues(m_LivingTime, m_LivedTime);
+
+		if (coordinateSystem == CoordinateSystem::LH)
+		{
+			prevPosition_.SetZ(-prevPosition_.GetZ());
+		}
 	}
 	else if (m_pEffectNode->TranslationType == ParameterTranslationType_NurbsCurve)
 	{
@@ -1083,8 +1089,6 @@ void Instance::Update(float deltaFrame, bool shown)
 
 			for (int i = 0; i < m_pEffectNode->GetChildrenCount(); i++, group = group->NextUsedByInstance)
 			{
-				auto child = (EffectNodeImplemented*)m_pEffectNode->GetChild(i);
-
 				if (maxGenerationChildrenCount[i] <= m_generatedChildrenCount[i] && group->GetInstanceCount() == 0)
 				{
 					maxcreate_count++;
@@ -1245,6 +1249,7 @@ void Instance::CalculateMatrix(float deltaFrame)
 
 	// if( m_sequenceNumber == ((ManagerImplemented*)m_pManager)->GetSequenceNumber() ) return;
 	m_sequenceNumber = ((ManagerImplemented*)m_pManager)->GetSequenceNumber();
+	const auto coordinateSystem = m_pEffectNode->GetEffect()->GetSetting()->GetCoordinateSystem();
 
 	assert(m_pEffectNode != nullptr);
 	assert(m_pContainer != nullptr);
@@ -1290,6 +1295,11 @@ void Instance::CalculateMatrix(float deltaFrame)
 			assert(m_pEffectNode->TranslationFCurve != nullptr);
 			auto fcurve = m_pEffectNode->TranslationFCurve->GetValues(m_LivingTime, m_LivedTime);
 			localPosition = fcurve + translation_values.fcruve.offset;
+
+			if (coordinateSystem == CoordinateSystem::LH)
+			{
+				localPosition.SetZ(-localPosition.GetZ());
+			}
 		}
 		else if (m_pEffectNode->TranslationType == ParameterTranslationType_NurbsCurve)
 		{
@@ -1701,7 +1711,7 @@ RectF Instance::GetUV(const int32_t index) const
 	}
 	else if (UVType == ParameterRendererCommon::UV_ANIMATION)
 	{
-		auto uvTimeOffset = uvTimeOffsets[index];
+		auto uvTimeOffset = static_cast<float>(uvTimeOffsets[index]);
 
 		float time{};
 		int frameLength = UV.Animation.FrameLength;
@@ -1763,8 +1773,6 @@ RectF Instance::GetUV(const int32_t index) const
 	else if (UVType == ParameterRendererCommon::UV_FCURVE)
 	{
 		auto& uvAreaOffset = uvAreaOffsets[index];
-
-		auto time = (int32_t)m_LivingTime;
 
 		auto fcurvePos = UV.FCurve.Position->GetValues(m_LivingTime, m_LivedTime);
 		auto fcurveSize = UV.FCurve.Size->GetValues(m_LivingTime, m_LivedTime);
@@ -1860,6 +1868,11 @@ std::array<float, 4> Instance::GetCustomData(int32_t index) const
 									(values[1] + instanceCustomData->fcurveColor.offset[1]) / 255.0f,
 									(values[2] + instanceCustomData->fcurveColor.offset[2]) / 255.0f,
 									(values[3] + instanceCustomData->fcurveColor.offset[3]) / 255.0f};
+	}
+	else if (parameterCustomData->Type == ParameterCustomDataType::DynamicInput)
+	{
+		auto instanceGlobal = this->m_pContainer->GetRootInstance();
+		return instanceGlobal->GetDynamicInputParameters();
 	}
 	else
 	{

@@ -276,8 +276,12 @@ void EffectFactory::OnLoadingResource(Effect* effect, const void* data, int32_t 
 
 	for (int32_t ind = 0; ind < effect->GetProceduralModelCount(); ind++)
 	{
-		auto model = resourceMgr->GenerateProceduralModel(effect->GetProceduralModelParameter(ind));
-		SetProceduralModel(effect, ind, model);
+		const auto param = effect->GetProceduralModelParameter(ind);
+		if (param != nullptr)
+		{
+			auto model = resourceMgr->GenerateProceduralModel(*param);
+			SetProceduralModel(effect, ind, model);
+		}
 	}
 }
 
@@ -1290,7 +1294,7 @@ bool EffectImplemented::Reload(ManagerRef* managers,
 	auto originalMag = this->GetMaginification() / this->m_maginificationExternal;
 	auto originalMagExt = this->m_maginificationExternal;
 
-	isReloadingOnRenderingThread = true;
+	isReloadingOnRenderingThread = reloadingThreadType == ReloadingThreadType::Render;
 	Reset();
 	Load(data, size, originalMag * originalMagExt, matPath, reloadingThreadType);
 
@@ -1353,7 +1357,7 @@ bool EffectImplemented::Reload(
 		lockCount++;
 	}
 
-	isReloadingOnRenderingThread = true;
+	isReloadingOnRenderingThread = reloadingThreadType == ReloadingThreadType::Render;
 	Reset();
 	Load(data, size, m_maginificationExternal, materialPath, reloadingThreadType);
 	isReloadingOnRenderingThread = false;

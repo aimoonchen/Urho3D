@@ -163,12 +163,9 @@ void ManagerImplemented::StopStoppingEffects()
 
 				if (pRootInstance && pRootInstance->GetState() == INSTANCE_STATE_ACTIVE && !pRootInstance->IsFirstTime())
 				{
-					int maxcreate_count = 0;
 					bool canRemoved = true;
 					for (int i = 0; i < pRootInstance->m_pEffectNode->GetChildrenCount(); i++)
 					{
-						auto child = (EffectNodeImplemented*)pRootInstance->m_pEffectNode->GetChild(i);
-
 						if (pRootInstance->maxGenerationChildrenCount[i] > pRootInstance->m_generatedChildrenCount[i])
 						{
 							canRemoved = false;
@@ -1726,6 +1723,10 @@ void ManagerImplemented::StopWithoutRemoveDrawSet(DrawSet& drawSet)
 
 void ManagerImplemented::ResetAndPlayWithDataSet(DrawSet& drawSet, float frame)
 {
+	assert(drawSet.ParameterPointer != nullptr);
+	auto effect = drawSet.ParameterPointer->GetRoot();
+	assert(effect != nullptr);
+
 	auto pGlobal = drawSet.GlobalPointer;
 	auto e = static_cast<EffectImplemented*>(drawSet.ParameterPointer.Get());
 
@@ -2260,9 +2261,6 @@ void ManagerImplemented::EndReloadEffect(const EffectRef& effect, bool doLockThr
 			continue;
 		}
 
-		auto e = static_cast<EffectImplemented*>(effect.Get());
-		auto pGlobal = ds.GlobalPointer;
-
 		ResetAndPlayWithDataSet(ds, ds.GlobalPointer->GetUpdatedFrame());
 	}
 
@@ -2348,7 +2346,7 @@ void ManagerImplemented::RequestToPlaySound(Instance* instance, const EffectNode
 	{
 		InstanceGlobal* instanceGlobal = instance->GetInstanceGlobal();
 		IRandObject& rand = instance->GetRandObject();
-			
+
 		SoundPlayer::InstanceParameter parameter;
 		parameter.Data = node->GetEffect()->GetWave(node->Sound.WaveId);
 		parameter.Volume = node->Sound.Volume.getValue(rand);

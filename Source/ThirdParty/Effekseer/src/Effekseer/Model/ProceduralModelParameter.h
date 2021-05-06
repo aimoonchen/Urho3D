@@ -2,28 +2,16 @@
 #define __EFFEKSEER_PROCEDUAL_MODEL_PARAMETER_H__
 
 #include "../Effekseer.Color.h"
+#include "../Utils/BinaryVersion.h"
 #include "../Utils/Effekseer.BinaryReader.h"
 #include <stdint.h>
 #include <stdio.h>
-#include "../Utils/BinaryVersion.h"
 
 namespace Effekseer
 {
 
-static bool operator==(const std::array<float, 2>& lhs, const std::array<float, 2>& rhs)
-{
-	for (size_t i = 0; i < lhs.size(); i++)
-	{
-		if (lhs[i] != rhs[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-static bool operator<(const std::array<float, 2>& lhs, const std::array<float, 2>& rhs)
+/*
+inline bool operator<(const std::array<float, 2>& lhs, const std::array<float, 2>& rhs)
 {
 	for (size_t i = 0; i < lhs.size(); i++)
 	{
@@ -36,20 +24,7 @@ static bool operator<(const std::array<float, 2>& lhs, const std::array<float, 2
 	return false;
 }
 
-static bool operator==(const std::array<float, 3>& lhs, const std::array<float, 3>& rhs)
-{
-	for (size_t i = 0; i < lhs.size(); i++)
-	{
-		if (lhs[i] != rhs[i])
-		{
-			return false;
-		}
-	}
-
-	return true;
-}
-
-static bool operator<(const std::array<float, 3>& lhs, const std::array<float, 3>& rhs)
+inline bool operator<(const std::array<float, 3>& lhs, const std::array<float, 3>& rhs)
 {
 	for (size_t i = 0; i < lhs.size(); i++)
 	{
@@ -61,6 +36,7 @@ static bool operator<(const std::array<float, 3>& lhs, const std::array<float, 3
 
 	return false;
 }
+*/
 
 enum class ProceduralModelType : int32_t
 {
@@ -92,8 +68,8 @@ enum class ProceduralModelAxisType : int32_t
 
 struct ProceduralModelParameter
 {
-	ProceduralModelType Type;
-	ProceduralModelPrimitiveType PrimitiveType;
+	ProceduralModelType Type = ProceduralModelType::Mesh;
+	ProceduralModelPrimitiveType PrimitiveType = ProceduralModelPrimitiveType::Sphere;
 	ProceduralModelAxisType AxisType = ProceduralModelAxisType::Y;
 
 	union
@@ -181,7 +157,6 @@ struct ProceduralModelParameter
 	std::array<float, 2> UVPosition = {0.0f, 0.5f};
 	std::array<float, 2> UVSize = {1.0f, 1.0f};
 
-
 	bool operator<(const ProceduralModelParameter& rhs) const
 	{
 		if (Type != rhs.Type)
@@ -246,6 +221,9 @@ struct ProceduralModelParameter
 				return Sphere.Radius < rhs.Sphere.Radius;
 
 			if (Sphere.DepthMin != rhs.Sphere.DepthMin)
+				return Sphere.DepthMin < rhs.Sphere.DepthMin;
+
+			if (Sphere.DepthMax != rhs.Sphere.DepthMax)
 				return Sphere.DepthMax < rhs.Sphere.DepthMax;
 		}
 		else if (PrimitiveType == ProceduralModelPrimitiveType::Cone)

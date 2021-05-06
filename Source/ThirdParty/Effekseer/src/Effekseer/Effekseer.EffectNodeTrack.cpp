@@ -131,7 +131,7 @@ void EffectNodeTrack::BeginRenderingGroup(InstanceGroup* group, Manager* manager
 			m_instanceParameter.FlipbookIndexAndNextRate = groupFirst->m_flipbookIndexAndNextRate;
 
 			m_instanceParameter.AlphaThreshold = groupFirst->m_AlphaThreshold;
-			
+
 			if (m_nodeParameter.EnableViewOffset == true)
 			{
 				m_instanceParameter.ViewOffsetDistance = groupFirst->translation_values.view_offset.distance;
@@ -228,7 +228,7 @@ void EffectNodeTrack::InitializeRenderedInstanceGroup(InstanceGroup& instanceGro
 void EffectNodeTrack::InitializeRenderedInstance(Instance& instance, InstanceGroup& instanceGroup, Manager* manager)
 {
 	auto& instValues = instanceGroup.rendererValues.track;
-	IRandObject* rand = &instance.GetRandObject();
+
 	// Calculate only center
 	int32_t time = (int32_t)instance.m_LivingTime;
 	int32_t livedTime = (int32_t)instance.m_LivedTime;

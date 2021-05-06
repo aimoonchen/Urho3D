@@ -586,6 +586,7 @@ enum ParameterCustomDataType : int32_t
 	FCurve2D = 23,
 	Fixed4D = 40,
 	FCurveColor = 53,
+	DynamicInput = 60,
 	Unknown,
 };
 
@@ -680,6 +681,9 @@ struct ParameterCustomData
 		{
 			FCurveColor.Values = new FCurveVectorColor();
 			pos += FCurveColor.Values->Load(pos, version);
+		}
+		else if (Type == ParameterCustomDataType::DynamicInput)
+		{
 		}
 		else
 		{
@@ -1275,9 +1279,9 @@ struct ParameterAlphaCutoff
 		FCurveScalar* Threshold;
 	} FCurve;
 
-	float EdgeThreshold;
-	Color EdgeColor;
-	float EdgeColorScaling;
+	float EdgeThreshold = 0.0f;
+	Color EdgeColor = Color(0, 0, 0, 0);
+	float EdgeColorScaling = 0.0f;
 
 	ParameterAlphaCutoff()
 		: Type(ParameterAlphaCutoff::EType::FIXED)
@@ -1336,7 +1340,7 @@ struct ParameterAlphaCutoff
 			int32_t temp = 0;
 			memcpy(&temp, pos, sizeof(int32_t));
 			pos += sizeof(int32_t);
-			EdgeColorScaling = temp;
+			EdgeColorScaling = static_cast<float>(temp);
 		}
 	}
 };
