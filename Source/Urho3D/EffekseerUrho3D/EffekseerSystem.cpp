@@ -44,7 +44,7 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	s_instance = this;
 
 	int32_t instanceMaxCount = 2000;
-	int32_t squareMaxCount = 8000;
+	int32_t squareMaxCount = 4000;// 8000;
 	int32_t drawMaxCount = 128;
 // 	Ref<Script> soundScript;
 // 
