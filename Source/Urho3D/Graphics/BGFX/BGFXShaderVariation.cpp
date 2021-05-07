@@ -220,9 +220,9 @@ bool ShaderVariation::Create()
             auto shaderPath = owner_->GetShaderPath();
 //              std::string defaultVarying = ("C:/GitProjects/Urho3D/bin/CoreData/" +
 //                                           shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc").CString();
-            std::string defaultVarying = ("D:/Github/Urho3D/bin/CoreData/" +
-                                          shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc")
-                                             .CString();
+            // std::string defaultVarying = ("D:/Github/Urho3D/bin/CoreData/" +
+            //                               shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc")
+            //                                  .CString();
             const char* varyingdef =
                 defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);
