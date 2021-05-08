@@ -37,106 +37,114 @@
 #include "../Resource/ResourceCache.h"
 #include "../Scene/Scene.h"
 
-extern "C"
-{
-#include "lualib.h"
-#include "lauxlib.h"
-#include "lua.h"
-}
+#include <sol/sol.hpp>
+// extern "C"
+// {
+// #include "lualib.h"
+// #include "lauxlib.h"
+// #include "lua.h"
+// }
 
 //#include <toluapp/tolua++.h>
 // #include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
-extern int sol2_AudioLuaAPI_open(lua_State*);
-extern int sol2_CoreLuaAPI_open(lua_State*);
-extern int sol2_EngineLuaAPI_open(lua_State*);
-extern int sol2_GraphicsLuaAPI_open(lua_State*);
-extern int sol2_InputLuaAPI_open(lua_State*);
-extern int sol2_IOLuaAPI_open(lua_State*);
-extern int sol2_MathLuaAPI_open(lua_State*);
+extern int sol2_AudioLuaAPI_open(sol::state*);
+extern int sol2_CoreLuaAPI_open(sol::state*);
+extern int sol2_EngineLuaAPI_open(sol::state*);
+extern int sol2_GraphicsLuaAPI_open(sol::state*);
+extern int sol2_InputLuaAPI_open(sol::state*);
+extern int sol2_IOLuaAPI_open(sol::state*);
+extern int sol2_MathLuaAPI_open(sol::state*);
 #ifdef URHO3D_NAVIGATION
-extern int sol2_NavigationLuaAPI_open(lua_State*);
+extern int sol2_NavigationLuaAPI_open(sol::state*);
 #endif
 #ifdef URHO3D_NETWORK
-extern int sol2_NetworkLuaAPI_open(lua_State*);
+extern int sol2_NetworkLuaAPI_open(sol::state*);
 #endif
 #ifdef URHO3D_DATABASE
-extern int sol2_DatabaseLuaAPI_open(lua_State*);
+extern int sol2_DatabaseLuaAPI_open(sol::state*);
 #endif
 #ifdef URHO3D_IK
-extern int sol2_IKLuaAPI_open(lua_State*);
+extern int sol2_IKLuaAPI_open(sol::state*);
 #endif
 #ifdef URHO3D_PHYSICS
-extern int sol2_PhysicsLuaAPI_open(lua_State*);
+extern int sol2_PhysicsLuaAPI_open(sol::state*);
 #endif
-extern int sol2_ResourceLuaAPI_open(lua_State*);
-extern int sol2_SceneLuaAPI_open(lua_State*);
-extern int sol2_UILuaAPI_open(lua_State*);
+extern int sol2_ResourceLuaAPI_open(sol::state*);
+extern int sol2_SceneLuaAPI_open(sol::state*);
+extern int sol2_UILuaAPI_open(sol::state*);
 #ifdef URHO3D_URHO2D
-extern int sol2_Urho2DLuaAPI_open(lua_State*);
+extern int sol2_Urho2DLuaAPI_open(sol::state*);
 #endif
-extern int sol2_LuaScriptLuaAPI_open(lua_State*);
+extern int sol2_LuaScriptLuaAPI_open(sol::state*);
 
 /// Set context.
-void SetContext(lua_State* L, Urho3D::Context* context);
+void SetContext(sol::state* lua, Urho3D::Context* context)
+{
+    (*lua)[".context"] = context;
+}
 /// Return context.
-Urho3D::Context* GetContext(lua_State* L);
+Urho3D::Context* GetContext(sol::state* lua)
+{
+    return (*lua)[".context"];
+}
 namespace Urho3D
 {
 
 LuaScript::LuaScript(Context* context) :
     Object(context),
-    luaState_(nullptr),
     executeConsoleCommands_(false)
 {
     RegisterLuaScriptLibrary(context_);
 
-    luaState_ = luaL_newstate();
+    luaState_ = std::make_unique<sol::state>();// luaL_newstate();
     if (!luaState_)
     {
         URHO3D_LOGERROR("Could not create Lua state");
         return;
     }
 
-    lua_atpanic(luaState_, &LuaScript::AtPanic);
-
-    luaL_openlibs(luaState_);
+    lua_atpanic(luaState_->lua_state(), &LuaScript::AtPanic);
+    luaState_->open_libraries();
+    //luaL_openlibs(luaState_);
     RegisterLoader();
-    ReplacePrint();
-    /*
-    tolua_MathLuaAPI_open(luaState_);
-    tolua_CoreLuaAPI_open(luaState_);
-    tolua_IOLuaAPI_open(luaState_);
-    tolua_ResourceLuaAPI_open(luaState_);
-    tolua_SceneLuaAPI_open(luaState_);
-    tolua_AudioLuaAPI_open(luaState_);
-    tolua_EngineLuaAPI_open(luaState_);
-    tolua_GraphicsLuaAPI_open(luaState_);
-    tolua_InputLuaAPI_open(luaState_);
-#ifdef URHO3D_NAVIGATION
-    tolua_NavigationLuaAPI_open(luaState_);
-#endif
-#ifdef URHO3D_NETWORK
-    tolua_NetworkLuaAPI_open(luaState_);
-#endif
-#ifdef URHO3D_DATABASE
-    tolua_DatabaseLuaAPI_open(luaState_);
-#endif
-#ifdef URHO3D_IK
-    tolua_IKLuaAPI_open(luaState_);
-#endif
-#ifdef URHO3D_PHYSICS
-    tolua_PhysicsLuaAPI_open(luaState_);
-#endif
-    tolua_UILuaAPI_open(luaState_);
-#ifdef URHO3D_URHO2D
-    tolua_Urho2DLuaAPI_open(luaState_);
-#endif
-    tolua_LuaScriptLuaAPI_open(luaState_);
-    */
-    SetContext(luaState_, context_);
+    //ReplacePrint();
+    auto lua = luaState_.get();
+    SetContext(lua, context_);
+    sol2_MathLuaAPI_open(lua);
+//     sol2_CoreLuaAPI_open(lua);
+//     sol2_IOLuaAPI_open(lua);
+    sol2_ResourceLuaAPI_open(lua);
+    sol2_SceneLuaAPI_open(lua);
+//     sol2_AudioLuaAPI_open(lua);
+    sol2_EngineLuaAPI_open(lua);
+//     sol2_GraphicsLuaAPI_open(lua);
+//     sol2_InputLuaAPI_open(lua);
+// #ifdef URHO3D_NAVIGATION
+//     sol2_NavigationLuaAPI_open(lua);
+// #endif
+// #ifdef URHO3D_NETWORK
+//     sol2_NetworkLuaAPI_open(lua);
+// #endif
+// #ifdef URHO3D_DATABASE
+//     sol2_DatabaseLuaAPI_open(lua);
+// #endif
+// #ifdef URHO3D_IK
+//     sol2_IKLuaAPI_open(lua);
+// #endif
+// #ifdef URHO3D_PHYSICS
+//     sol2_PhysicsLuaAPI_open(lua);
+// #endif
+//     sol2_UILuaAPI_open(lua);
+// #ifdef URHO3D_URHO2D
+//     sol2_Urho2DLuaAPI_open(lua);
+// #endif
+//     sol2_LuaScriptLuaAPI_open(lua);
+    
+
+//    SetContext(luaState_.get(), context_);
 
     eventInvoker_ = new LuaScriptEventInvoker(context_);
     coroutineUpdate_ = GetFunction("coroutine.update");
@@ -153,12 +161,12 @@ LuaScript::~LuaScript()
     functionPointerToFunctionMap_.Clear();
     functionNameToFunctionMap_.Clear();
 
-    lua_State* luaState = luaState_;
-    luaState_ = nullptr;
+//     lua_State* luaState = luaState_;
+//     luaState_ = nullptr;
     coroutineUpdate_ = nullptr;
 
-    if (luaState)
-        lua_close(luaState);
+//     if (luaState)
+//         lua_close(luaState);
 }
 
 void LuaScript::AddEventHandler(const String& eventName, int index)
@@ -251,18 +259,18 @@ bool LuaScript::ExecuteFile(const String& fileName)
 
     auto* cache = GetSubsystem<ResourceCache>();
     auto* luaFile = cache->GetResource<LuaFile>(fileName);
-    return luaFile && luaFile->LoadAndExecute(luaState_);
+    return luaFile && luaFile->LoadAndExecute(luaState_->lua_state());
 }
 
 bool LuaScript::ExecuteString(const String& string)
 {
     URHO3D_PROFILE(ExecuteString);
-
-    if (luaL_dostring(luaState_, string.CString()))
+    auto L = luaState_->lua_state();
+    if (luaL_dostring(L, string.CString()))
     {
-        const char* message = lua_tostring(luaState_, -1);
+        const char* message = lua_tostring(L, -1);
         URHO3D_LOGERRORF("Execute Lua string failed: %s", message);
-        lua_pop(luaState_, 1);
+        lua_pop(L, 1);
         return false;
     }
 
@@ -287,12 +295,12 @@ bool LuaScript::LoadRawFile(const String& fileName)
     filePath = GetNativePath(filePath);
 
     URHO3D_LOGINFO("Loading Lua file from file system: " + filePath);
-
-    if (luaL_loadfile(luaState_, filePath.CString()))
+    auto L = luaState_->lua_state();
+    if (luaL_loadfile(L, filePath.CString()))
     {
-        const char* message = lua_tostring(luaState_, -1);
+        const char* message = lua_tostring(L, -1);
         URHO3D_LOGERRORF("Load Lua file failed: %s", message);
-        lua_pop(luaState_, 1);
+        lua_pop(L, 1);
         return false;
     }
 
@@ -307,12 +315,12 @@ bool LuaScript::ExecuteRawFile(const String& fileName)
 
     if (!LoadRawFile(fileName))
         return false;
-
-    if (lua_pcall(luaState_, 0, 0, 0))
+    auto L = luaState_->lua_state();
+    if (lua_pcall(L, 0, 0, 0))
     {
-        const char* message = lua_tostring(luaState_, -1);
+        const char* message = lua_tostring(L, -1);
         URHO3D_LOGERRORF("Execute Lua file failed: %s", message);
-        lua_pop(luaState_, 1);
+        lua_pop(L, 1);
         return false;
     }
 
@@ -339,15 +347,16 @@ void LuaScript::SetExecuteConsoleCommands(bool enable)
 
 void LuaScript::RegisterLoader()
 {
+    auto L = luaState_->lua_state();
     // Get package.loaders table
-    lua_getglobal(luaState_, "package");
-    lua_getfield(luaState_, -1, "loaders");
-
+    lua_getglobal(L, "package");
+    //lua_getfield(L, -1, "loaders");
+    lua_getfield(L, -1, "preload");
     // Add LuaScript::Loader to the end of the table
-    lua_pushinteger(luaState_, lua_rawlen(luaState_, -1) + 1);
-    lua_pushcfunction(luaState_, &LuaScript::Loader);
-    lua_settable(luaState_, -3);
-    lua_pop(luaState_, 2);
+    lua_pushinteger(L, lua_rawlen(L, -1) + 1);
+    lua_pushcfunction(L, &LuaScript::Loader);
+    lua_settable(L, -3);
+    lua_pop(L, 2);
 }
 
 int LuaScript::AtPanic(lua_State* L)
@@ -371,7 +380,7 @@ int LuaScript::Loader(lua_State* L)
         return 1;
 #endif
 
-    auto* cache = ::GetContext(L)->GetSubsystem<ResourceCache>();
+    auto* cache = ::GetContext(luaState_.get())->GetSubsystem<ResourceCache>();
 
     // Attempt to get .luc file first
     auto* lucFile = cache->GetResource<LuaFile>(fileName + ".luc", false);
@@ -389,16 +398,17 @@ int LuaScript::Loader(lua_State* L)
 
 void LuaScript::ReplacePrint()
 {
-//     static const struct luaL_reg reg[] =
-//     {
-//         {"print", &LuaScript::Print},
-//         {nullptr, nullptr}
-//     };
-
-    lua_getglobal(luaState_, "_G");
-    //luaL_register(luaState_, nullptr, reg);
-    luaL_requiref(luaState_, "print", &LuaScript::Print, 1);
-    lua_pop(luaState_, 1);
+    static const struct luaL_Reg reg[] =
+    {
+        {"print", &LuaScript::Print},
+        {nullptr, nullptr}
+    };
+    auto L = luaState_->lua_state();
+    lua_getglobal(L, "_G");
+    //luaL_register(L, nullptr, reg);
+    luaL_setfuncs(L, reg, 0);
+    //luaL_requiref(L, "print", &LuaScript::Print, 1);
+    lua_pop(L, 1);
 }
 
 #define LUA_QL(x) "'" x "'"
@@ -434,10 +444,11 @@ int LuaScript::Print(lua_State* L)
 
 LuaFunction* LuaScript::GetFunction(int index)
 {
-    if (!lua_isfunction(luaState_, index))
+    auto L = luaState_->lua_state();
+    if (!lua_isfunction(L, index))
         return nullptr;
 
-    const void* functionPointer = lua_topointer(luaState_, index);
+    const void* functionPointer = lua_topointer(L, index);
     if (!functionPointer)
         return nullptr;
 
@@ -445,7 +456,7 @@ LuaFunction* LuaScript::GetFunction(int index)
     if (i != functionPointerToFunctionMap_.End())
         return i->second_;
 
-    SharedPtr<LuaFunction> function(new LuaFunction(luaState_, index));
+    SharedPtr<LuaFunction> function(new LuaFunction(L, index));
     functionPointerToFunctionMap_[functionPointer] = function;
 
     return function;
@@ -453,7 +464,8 @@ LuaFunction* LuaScript::GetFunction(int index)
 
 LuaFunction* LuaScript::GetFunction(const String& functionName, bool silentIfNotFound)
 {
-    if (!luaState_)
+    auto L = luaState_->lua_state();
+    if (!L)
         return nullptr;
 
     HashMap<String, SharedPtr<LuaFunction> >::Iterator i = functionNameToFunctionMap_.Find(functionName);
@@ -461,14 +473,14 @@ LuaFunction* LuaScript::GetFunction(const String& functionName, bool silentIfNot
         return i->second_;
 
     SharedPtr<LuaFunction> function;
-    if (PushLuaFunction(luaState_, functionName))
+    if (PushLuaFunction(L, functionName))
     {
         function = GetFunction(-1);
         functionNameToFunctionMap_[functionName] = function;
     }
     else if (!silentIfNotFound)
-        URHO3D_LOGERRORF("%s", lua_tostring(luaState_, -1));
-    lua_pop(luaState_, 1);
+        URHO3D_LOGERRORF("%s", lua_tostring(L, -1));
+    lua_pop(L, 1);
 
     return function;
 }
@@ -486,7 +498,7 @@ void LuaScript::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
     // Collect garbage
     {
         URHO3D_PROFILE(LuaCollectGarbage);
-        lua_gc(luaState_, LUA_GCSTEP, 0);
+        lua_gc(luaState_->lua_state(), LUA_GCSTEP, 0);
     }
 }
 

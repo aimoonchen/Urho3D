@@ -41,6 +41,7 @@
 #include "../Scene/Scene.h"
 #include "../Scene/SceneEvents.h"
 
+#include <sol/sol.hpp>
 // #include <toluapp/tolua++.h>
 // #include "../LuaScript/ToluaUtils.h"
 
@@ -71,7 +72,7 @@ LuaScriptInstance::LuaScriptInstance(Context* context) :
     eventInvoker_(new LuaScriptEventInvoker(this)),
     scriptObjectRef_(LUA_REFNIL)
 {
-    luaState_ = luaScript_->GetState();
+    luaState_ = luaScript_->GetState()->lua_state();
     attributeInfos_ = *context_->GetAttributes(GetTypeStatic());
 }
 

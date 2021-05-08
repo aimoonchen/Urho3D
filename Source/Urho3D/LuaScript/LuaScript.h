@@ -27,7 +27,9 @@
 #include "../LuaScript/LuaScriptEventListener.h"
 
 struct lua_State;
-
+namespace sol {
+    class state;
+}
 namespace Urho3D
 {
 
@@ -85,7 +87,7 @@ public:
     void SetExecuteConsoleCommands(bool enable);
 
     /// Return Lua state.
-    lua_State* GetState() const { return luaState_; }
+    sol::state* GetState() const { return luaState_.get(); }
 
     /// Return Lua function at the given stack index.
     LuaFunction* GetFunction(int index);
@@ -116,7 +118,8 @@ private:
     static int Print(lua_State* L);
 
     /// Lua state.
-    lua_State* luaState_;
+    //lua_State* luaState_;
+    std::unique_ptr<sol::state> luaState_;
     /// Procedural event invoker.
     SharedPtr<LuaScriptEventInvoker> eventInvoker_;
     /// Coroutine update function.
