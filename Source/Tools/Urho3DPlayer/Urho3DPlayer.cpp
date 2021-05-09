@@ -144,6 +144,9 @@ void Urho3DPlayer::Setup()
     // The second and third entries are possible relative paths from the installed program/bin directory to the asset directory -- these entries are for binary when it is in the Urho3D SDK installation location
     if (!engineParameters_.Contains(EP_RESOURCE_PREFIX_PATHS))
         engineParameters_[EP_RESOURCE_PREFIX_PATHS] = ";../share/Resources;../share/Urho3D/Resources";
+    engineParameters_[EP_WINDOW_WIDTH] = 1280;
+    engineParameters_[EP_WINDOW_HEIGHT] = 720;
+    engineParameters_[EP_FULL_SCREEN] = false;
 }
 
 void Urho3DPlayer::Start()

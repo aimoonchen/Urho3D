@@ -80,16 +80,6 @@ extern int sol2_Urho2DLuaAPI_open(sol::state*);
 #endif
 extern int sol2_LuaScriptLuaAPI_open(sol::state*);
 
-/// Set context.
-void SetContext(sol::state* lua, Urho3D::Context* context)
-{
-    (*lua)[".context"] = context;
-}
-/// Return context.
-Urho3D::Context* GetContext(sol::state* lua)
-{
-    return (*lua)[".context"];
-}
 namespace Urho3D
 {
 
@@ -112,16 +102,17 @@ LuaScript::LuaScript(Context* context) :
     RegisterLoader();
     //ReplacePrint();
     auto lua = luaState_.get();
-    SetContext(lua, context_);
+    SetContext(lua->lua_state(), context_);
+
     sol2_MathLuaAPI_open(lua);
-//     sol2_CoreLuaAPI_open(lua);
-//     sol2_IOLuaAPI_open(lua);
+    sol2_CoreLuaAPI_open(lua);
+//    sol2_IOLuaAPI_open(lua);
     sol2_ResourceLuaAPI_open(lua);
     sol2_SceneLuaAPI_open(lua);
 //     sol2_AudioLuaAPI_open(lua);
     sol2_EngineLuaAPI_open(lua);
 //     sol2_GraphicsLuaAPI_open(lua);
-//     sol2_InputLuaAPI_open(lua);
+    sol2_InputLuaAPI_open(lua);
 // #ifdef URHO3D_NAVIGATION
 //     sol2_NavigationLuaAPI_open(lua);
 // #endif
@@ -347,16 +338,17 @@ void LuaScript::SetExecuteConsoleCommands(bool enable)
 
 void LuaScript::RegisterLoader()
 {
-    auto L = luaState_->lua_state();
-    // Get package.loaders table
-    lua_getglobal(L, "package");
-    //lua_getfield(L, -1, "loaders");
-    lua_getfield(L, -1, "preload");
-    // Add LuaScript::Loader to the end of the table
-    lua_pushinteger(L, lua_rawlen(L, -1) + 1);
-    lua_pushcfunction(L, &LuaScript::Loader);
-    lua_settable(L, -3);
-    lua_pop(L, 2);
+//     auto L = luaState_->lua_state();
+//     // Get package.loaders table
+//     lua_getglobal(L, "package");
+//     //lua_getfield(L, -1, "loaders");
+//     lua_getfield(L, -1, "preload");
+//     // Add LuaScript::Loader to the end of the table
+//     lua_pushinteger(L, lua_rawlen(L, -1) + 1);
+//     lua_pushcfunction(L, &LuaScript::Loader);
+//     lua_settable(L, -3);
+//     lua_pop(L, 2);
+    (*luaState_)["package"]["searchers"] = luaState_->create_table_with(1, &LuaScript::Loader);
 }
 
 int LuaScript::AtPanic(lua_State* L)
@@ -380,7 +372,7 @@ int LuaScript::Loader(lua_State* L)
         return 1;
 #endif
 
-    auto* cache = ::GetContext(luaState_.get())->GetSubsystem<ResourceCache>();
+    auto* cache = ::GetContext(L)->GetSubsystem<ResourceCache>();
 
     // Attempt to get .luc file first
     auto* lucFile = cache->GetResource<LuaFile>(fileName + ".luc", false);

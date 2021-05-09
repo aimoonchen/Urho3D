@@ -6,11 +6,11 @@
 
 using namespace Urho3D;
 
-Urho3D::Context* GetContext(sol::state* lua);
+Urho3D::Context* GetContext(lua_State* L);
 
 int sol2_SceneLuaAPI_open(sol::state* lua)
 {
-	auto context = GetContext(lua);
+	auto context = GetContext(lua->lua_state());
 //    lua->new_usertype<RefCounted>("RefCounted", sol::constructors<Node(Context*)>());
     lua->new_usertype<Context>("Context", sol::constructors<Context()>());
 	lua->new_usertype<Component>("Component", sol::constructors<Component(Context*)>());

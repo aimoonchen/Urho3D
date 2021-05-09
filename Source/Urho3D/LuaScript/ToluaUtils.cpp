@@ -18,20 +18,20 @@
 // LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
-// 
-// 
-// #include "../Precompiled.h"
-// 
-// #ifndef _WIN32
-// #include "../Graphics/IndexBuffer.h"
-// #include "../Graphics/VertexBuffer.h"
-// #endif
-// #include "../IO/VectorBuffer.h"
-// 
+
+
+#include "../Precompiled.h"
+
+#ifndef _WIN32
+#include "../Graphics/IndexBuffer.h"
+#include "../Graphics/VertexBuffer.h"
+#endif
+#include "../IO/VectorBuffer.h"
+
 // #include <toluapp/tolua++.h>
-// 
-// #include "../LuaScript/ToluaUtils.h"
-// 
+#include <sol/sol.hpp>
+#include "../LuaScript/ToluaUtils.h"
+
 // const char* tolua_tourho3dstring(lua_State* L, int narg, const char* str)
 // {
 //     return tolua_tostring(L, narg, str);
@@ -41,16 +41,18 @@
 // {
 //     return tolua_tourho3dstring(L, narg, str.CString());
 // }
-// 
-// void SetContext(lua_State* L, Context* context)
-// {
+
+void SetContext(lua_State* L, Context* context)
+{
 //     assert(L && context);
 //     tolua_pushusertype(L, static_cast<void*>(context), "Context");
 //     lua_setglobal(L, ".context");   // This property is internal, the exposed 'context' property is obtained via GetContext() call
-// }
-// 
-// Context* GetContext(lua_State* L)
-// {
+    sol::state_view lua(L);
+    lua[".context"] = context;
+}
+
+Context* GetContext(lua_State* L)
+{
 //     lua_getglobal(L, ".context");
 //     if (lua_isnil(L, -1))
 //     {
@@ -59,8 +61,10 @@
 //     }
 //     tolua_Error error;      // Ensure we are indeed getting a Context object before casting
 //     return tolua_isusertype(L, -1, "Context", 0, &error) ? static_cast<Context*>(tolua_tousertype(L, -1, nullptr)) : nullptr;
-// }
-// 
+    sol::state_view lua(L);
+    return lua[".context"];
+}
+
 // Explicit template specialization for StringVector
 // 
 // template <> int ToluaIsVector<String>(lua_State* L, int lo, const char* /*type*/, int def, tolua_Error* err)
