@@ -6,6 +6,7 @@
 
 Urho3D::Context* GetContext(lua_State* L);
 using namespace Urho3D;
+
 int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
@@ -18,10 +19,12 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 		"width",sol::property(&Texture2D::GetWidth),
 		"height", sol::property(&Texture2D::GetHeight),
 		sol::base_classes, sol::bases<Texture>()
-		);
+	);
 	lua.new_usertype<Graphics>("Graphics", sol::constructors<Graphics(Context*)>(),
 		"SetWindowIcon", &Graphics::SetWindowIcon,
-		"windowTitle", sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle));
+		"windowTitle", sol::property([](Graphics* obj) { return obj->GetWindowTitle().CString(); },
+                      [](Graphics* obj, std::string title) { obj->SetWindowTitle(title.c_str());}) // sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle)
+	);
 
 	auto context = GetContext(lua.lua_state());
 	lua["graphics"] = context->GetSubsystem<Graphics>();

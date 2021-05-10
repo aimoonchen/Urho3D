@@ -59,3 +59,13 @@ int sol2_LuaScriptLuaAPI_open(sol::state* solState)
 
     return 0;
 }
+
+String sol_lua_get(sol::types<String>, lua_State* L, int index, sol::stack::record& tracking)
+{
+    return sol::stack::get<std::string>(L, index, tracking).c_str();
+}
+
+StringHash sol_lua_get(sol::types<StringHash>, lua_State* L, int index, sol::stack::record& tracking)
+{
+    return sol::stack::get<std::string>(L, index, tracking).c_str();
+}
