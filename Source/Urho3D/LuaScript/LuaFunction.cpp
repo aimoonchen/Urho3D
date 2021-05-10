@@ -31,7 +31,8 @@
 #include "../LuaScript/LuaScriptInstance.h"
 
 // #include <toluapp/tolua++.h>
-// #include "../LuaScript/ToluaUtils.h"
+#include <sol/sol.hpp>
+#include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
@@ -131,9 +132,9 @@ void LuaFunction::PushDouble(double value)
 
 void LuaFunction::PushString(const String& string)
 {
-//     assert(numArguments_ >= 0);
-//     ++numArguments_;
-//     tolua_pushurho3dstring(luaState_, string);
+    assert(numArguments_ >= 0);
+    ++numArguments_;
+    tolua_pushurho3dstring(luaState_, string);
 }
 
 void LuaFunction::PushUserType(void* userType, const char* typeName)

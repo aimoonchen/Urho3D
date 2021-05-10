@@ -43,7 +43,7 @@
 
 #include <sol/sol.hpp>
 // #include <toluapp/tolua++.h>
-// #include "../LuaScript/ToluaUtils.h"
+#include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
@@ -137,9 +137,9 @@ void LuaScriptInstance::OnSetAttribute(const AttributeInfo& attr, const Variant&
         case VAR_DOUBLE:
             lua_pushnumber(luaState_, src.GetDouble());
             break;
-//         case VAR_STRING:
-//             tolua_pushurho3dstring(luaState_, src.GetString());
-//             break;
+        case VAR_STRING:
+            tolua_pushurho3dstring(luaState_, src.GetString());
+            break;
 //         case VAR_VECTOR2:
 //             {
 //                 auto* value = new Vector2(src.GetVector2());

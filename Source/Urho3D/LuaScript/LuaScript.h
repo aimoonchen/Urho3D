@@ -123,7 +123,7 @@ private:
     /// Procedural event invoker.
     SharedPtr<LuaScriptEventInvoker> eventInvoker_;
     /// Coroutine update function.
-    LuaFunction* coroutineUpdate_;
+    LuaFunction* coroutineUpdate_{ nullptr };
     /// Flag for executing engine console commands as script code. Default to true.
     bool executeConsoleCommands_;
     /// Function pointer to function map.

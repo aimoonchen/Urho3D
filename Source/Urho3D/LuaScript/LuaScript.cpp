@@ -46,7 +46,7 @@
 // }
 
 //#include <toluapp/tolua++.h>
-// #include "../LuaScript/ToluaUtils.h"
+#include "../LuaScript/ToluaUtils.h"
 
 #include "../DebugNew.h"
 
@@ -111,7 +111,7 @@ LuaScript::LuaScript(Context* context) :
     sol2_SceneLuaAPI_open(lua);
 //     sol2_AudioLuaAPI_open(lua);
     sol2_EngineLuaAPI_open(lua);
-//     sol2_GraphicsLuaAPI_open(lua);
+    sol2_GraphicsLuaAPI_open(lua);
     sol2_InputLuaAPI_open(lua);
 // #ifdef URHO3D_NAVIGATION
 //     sol2_NavigationLuaAPI_open(lua);
@@ -128,17 +128,17 @@ LuaScript::LuaScript(Context* context) :
 // #ifdef URHO3D_PHYSICS
 //     sol2_PhysicsLuaAPI_open(lua);
 // #endif
-//     sol2_UILuaAPI_open(lua);
+    sol2_UILuaAPI_open(lua);
 // #ifdef URHO3D_URHO2D
 //     sol2_Urho2DLuaAPI_open(lua);
 // #endif
-//     sol2_LuaScriptLuaAPI_open(lua);
+    sol2_LuaScriptLuaAPI_open(lua);
     
 
 //    SetContext(luaState_.get(), context_);
 
     eventInvoker_ = new LuaScriptEventInvoker(context_);
-    coroutineUpdate_ = GetFunction("coroutine.update");
+//    coroutineUpdate_ = GetFunction("coroutine.update");
 
     // Subscribe to post update
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(LuaScript, HandlePostUpdate));

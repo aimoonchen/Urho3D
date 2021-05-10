@@ -32,15 +32,15 @@
 #include <sol/sol.hpp>
 #include "../LuaScript/ToluaUtils.h"
 
-// const char* tolua_tourho3dstring(lua_State* L, int narg, const char* str)
-// {
-//     return tolua_tostring(L, narg, str);
-// }
-// 
-// const char* tolua_tourho3dstring(lua_State* L, int narg, const String& str)
-// {
-//     return tolua_tourho3dstring(L, narg, str.CString());
-// }
+const char* tolua_tourho3dstring(lua_State* L, int narg, const char* str)
+{
+    return sol::stack::get<std::string>(L, narg).c_str();// tolua_tostring(L, narg, str);
+}
+
+const char* tolua_tourho3dstring(lua_State* L, int narg, const String& str)
+{
+    return tolua_tourho3dstring(L, narg, str.CString());
+}
 
 void SetContext(lua_State* L, Context* context)
 {
