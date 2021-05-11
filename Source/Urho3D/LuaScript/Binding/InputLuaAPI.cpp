@@ -37,7 +37,7 @@ int sol2_InputLuaAPI_open(sol::state* luaState)
         "GetTouch", &Input::GetTouch,
         "touchEmulation", sol::property(&Input::GetTouchEmulation, &Input::SetTouchEmulation),
         "mouseVisible", sol::property(&Input::IsMouseVisible, &Input::SetMouseVisible),
-        "mouseMode", sol::property(&Input::GetMouseMode, &Input::SetMouseMode)
+        "mouseMode", sol::property(&Input::GetMouseMode, [](Input* obj, MouseMode mode) { obj->SetMouseMode(mode); })
         );
     //
     lua["MM_ABSOLUTE"] = MM_ABSOLUTE;

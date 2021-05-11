@@ -45,5 +45,8 @@ int sol2_CoreLuaAPI_open(sol::state* luaState)
         "GetBool", &Variant::GetBool,
         "GetFloat", &Variant::GetFloat
     );
+    lua.new_usertype<VariantMap>("VariantMap", sol::constructors<VariantMap()>(),
+        sol::meta_function::index, [](VariantMap* map, std::string key) { return (*map)[key.c_str()]; }
+        );
     return 0;
 }

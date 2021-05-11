@@ -114,15 +114,16 @@ void LuaScriptInstance::OnSetAttribute(const AttributeInfo& attr, const Variant&
     int top = lua_gettop(luaState_);
 
     String functionName = String("Set") + name.Substring(0, 1).ToUpper() + name.Substring(1, length - 1);
-    LuaFunction* function = GetScriptObjectFunction(functionName);
+    auto function = GetScriptObjectFunction(functionName);
     // If set function exist
     if (function)
     {
-        if (function->BeginCall(this))
-        {
-            function->PushVariant(src);
-            function->EndCall();
-        }
+//         if (function->BeginCall(this))
+//         {
+//             function->PushVariant(src);
+//             function->EndCall();
+//         }
+        (*function)(src);
     }
     else
     {
@@ -227,12 +228,13 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
     int top = lua_gettop(luaState_);
 
     String functionName = String("Get") + name.Substring(0, 1).ToUpper() + name.Substring(1, length - 1);
-    LuaFunction* function = GetScriptObjectFunction(functionName);
+    auto function = GetScriptObjectFunction(functionName);
     // If get function exist
     if (function)
     {
-        if (function->BeginCall(this))
-            function->EndCall(1);
+//         if (function->BeginCall(this))
+//             function->EndCall(1);
+        (*function)();
     }
     else
     {
@@ -286,9 +288,13 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
 
 void LuaScriptInstance::ApplyAttributes()
 {
-    LuaFunction* function = scriptObjectMethods_[LSOM_APPLYATTRIBUTES];
-    if (function && function->BeginCall(this))
-        function->EndCall();
+    auto function = scriptObjectMethods_[LSOM_APPLYATTRIBUTES];
+//     if (function && function->BeginCall(this))
+//         function->EndCall();
+    if (function)
+    {
+        (*function)();
+    }
 }
 
 void LuaScriptInstance::OnSetEnabled()
@@ -301,27 +307,29 @@ void LuaScriptInstance::OnSetEnabled()
 
 void LuaScriptInstance::AddEventHandler(const String& eventName, int functionIndex)
 {
-    LuaFunction* function = luaScript_->GetFunction(functionIndex);
-    if (function)
-        eventInvoker_->AddEventHandler(nullptr, eventName, function);
+    assert(false);
+//     LuaFunction* function = luaScript_->GetFunction(functionIndex);
+//     if (function)
+//        eventInvoker_->AddEventHandler(nullptr, eventName, function);
 }
 
 void LuaScriptInstance::AddEventHandler(const String& eventName, const String& functionName)
 {
     String realFunctionName = functionName.Replaced(":", ".");
-    LuaFunction* function = luaScript_->GetFunction(realFunctionName);
+    auto function = luaScript_->GetFunction(realFunctionName);
     if (function)
         eventInvoker_->AddEventHandler(nullptr, eventName, function);
 }
 
 void LuaScriptInstance::AddEventHandler(Object* sender, const String& eventName, int functionIndex)
 {
-    if (!sender)
-        return;
-
-    LuaFunction* function = luaScript_->GetFunction(functionIndex);
-    if (function)
-        eventInvoker_->AddEventHandler(sender, eventName, function);
+    assert(false);
+//     if (!sender)
+//         return;
+// 
+//     LuaFunction* function = luaScript_->GetFunction(functionIndex);
+//     if (function)
+//         eventInvoker_->AddEventHandler(sender, eventName, function);
 }
 
 void LuaScriptInstance::AddEventHandler(Object* sender, const String& eventName, const String& functionName)
@@ -330,7 +338,7 @@ void LuaScriptInstance::AddEventHandler(Object* sender, const String& eventName,
         return;
 
     String realFunctionName = functionName.Replaced(":", ".");
-    LuaFunction* function = luaScript_->GetFunction(realFunctionName);
+    auto function = luaScript_->GetFunction(realFunctionName);
     if (function)
         eventInvoker_->AddEventHandler(sender, eventName, function);
 }
@@ -415,16 +423,16 @@ void LuaScriptInstance::SetScriptObjectType(const String& scriptObjectType)
 
     ReleaseObject();
 
-    LuaFunction* function = luaScript_->GetFunction("CreateScriptObjectInstance");
-    if (!function || !function->BeginCall())
+    auto function = luaScript_->GetFunction("CreateScriptObjectInstance");
+    if (!function/* || !function->BeginCall()*/)
         return;
-
-    function->PushLuaTable(scriptObjectType);
-    function->PushUserType((void*)this, "LuaScriptInstance");
-
-    // Return script object and attribute names
-    if (!function->EndCall(2))
-        return;
+    (*function)(scriptObjectType.CString(), this);
+//     function->PushLuaTable(scriptObjectType);
+//     function->PushUserType((void*)this, "LuaScriptInstance");
+// 
+//     // Return script object and attribute names
+//     if (!function->EndCall(2))
+//         return;
 
     GetScriptAttributes();
     scriptObjectType_ = scriptObjectType;
@@ -439,12 +447,13 @@ void LuaScriptInstance::SetScriptDataAttr(const PODVector<unsigned char>& data)
     if (scriptObjectRef_ == LUA_REFNIL)
         return;
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_LOAD];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_LOAD];
+    if (function/* && function->BeginCall(this)*/)
     {
         MemoryBuffer buf(data);
-        function->PushUserType((Deserializer&)buf, "Deserializer");
-        function->EndCall();
+//         function->PushUserType((Deserializer&)buf, "Deserializer");
+//         function->EndCall();
+        (*function)((Deserializer&)buf);
     }
 }
 
@@ -453,12 +462,13 @@ void LuaScriptInstance::SetScriptNetworkDataAttr(const PODVector<unsigned char>&
     if (scriptObjectRef_ == LUA_REFNIL)
         return;
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_READNETWORKUPDATE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_READNETWORKUPDATE];
+    if (function/* && function->BeginCall(this)*/)
     {
         MemoryBuffer buf(data);
-        function->PushUserType((Deserializer&)buf, "Deserializer");
-        function->EndCall();
+//         function->PushUserType((Deserializer&)buf, "Deserializer");
+//         function->EndCall();
+        (*function)((Deserializer&)buf);
     }
 }
 
@@ -474,11 +484,12 @@ PODVector<unsigned char> LuaScriptInstance::GetScriptDataAttr() const
 
     VectorBuffer buf;
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_SAVE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_SAVE];
+    if (function/* && function->BeginCall(this)*/)
     {
-        function->PushUserType((Serializer&)buf, "Serializer");
-        function->EndCall();
+//         function->PushUserType((Serializer&)buf, "Serializer");
+//         function->EndCall();
+        (*function)((Serializer&)buf);
     }
 
     return buf.GetBuffer();
@@ -491,11 +502,12 @@ PODVector<unsigned char> LuaScriptInstance::GetScriptNetworkDataAttr() const
 
     VectorBuffer buf;
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_WRITENETWORKUPDATE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_WRITENETWORKUPDATE];
+    if (function/* && function->BeginCall(this)*/)
     {
-        function->PushUserType((Serializer&)buf, "Serializer");
-        function->EndCall();
+//         function->PushUserType((Serializer&)buf, "Serializer");
+//         function->EndCall();
+        (*function)((Serializer&)buf);
     }
 
     return buf.GetBuffer();
@@ -519,9 +531,10 @@ void LuaScriptInstance::OnMarkedDirty(Node* node)
         return;
     }
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_TRANSFORMCHANGED];
-    if (function && function->BeginCall(this))
-        function->EndCall();
+    auto function = scriptObjectMethods_[LSOM_TRANSFORMCHANGED];
+    if (function/* && function->BeginCall(this)*/)
+        //function->EndCall();
+        (*function)();
 }
 
 void LuaScriptInstance::GetScriptAttributes()
@@ -664,17 +677,21 @@ void LuaScriptInstance::HandleUpdate(StringHash eventType, VariantMap& eventData
     // Execute delayed start before first update
     if (scriptObjectMethods_[LSOM_DELAYEDSTART])
     {
-        if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
-            scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
+//         if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
+//             scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
+        (*scriptObjectMethods_[LSOM_DELAYEDSTART])();
         scriptObjectMethods_[LSOM_DELAYEDSTART] = nullptr;  // Only execute once
     }
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_UPDATE];
-    if (function && function->BeginCall(this))
-    {
-        function->PushFloat(timeStep);
-        function->EndCall();
+    auto function = scriptObjectMethods_[LSOM_UPDATE];
+    if (function) {
+        (*function)(timeStep);
     }
+//     if (function && function->BeginCall(this))
+//     {
+//         function->PushFloat(timeStep);
+//         function->EndCall();
+//     }
 }
 
 void LuaScriptInstance::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
@@ -682,11 +699,12 @@ void LuaScriptInstance::HandlePostUpdate(StringHash eventType, VariantMap& event
     using namespace PostUpdate;
     float timeStep = eventData[P_TIMESTEP].GetFloat();
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_POSTUPDATE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_POSTUPDATE];
+    if (function/* && function->BeginCall(this)*/)
     {
-        function->PushFloat(timeStep);
-        function->EndCall();
+        (*function)(timeStep);
+//         function->PushFloat(timeStep);
+//         function->EndCall();
     }
 }
 
@@ -697,19 +715,21 @@ void LuaScriptInstance::HandleFixedUpdate(StringHash eventType, VariantMap& even
     // Execute delayed start before first fixed update if not called yet
     if (scriptObjectMethods_[LSOM_DELAYEDSTART])
     {
-        if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
-            scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
+//         if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
+//             scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
+        (*scriptObjectMethods_[LSOM_DELAYEDSTART])();
         scriptObjectMethods_[LSOM_DELAYEDSTART] = nullptr;  // Only execute once
     }
 
     using namespace PhysicsPreStep;
     float timeStep = eventData[P_TIMESTEP].GetFloat();
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_FIXEDUPDATE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_FIXEDUPDATE];
+    if (function/* && function->BeginCall(this)*/)
     {
-        function->PushFloat(timeStep);
-        function->EndCall();
+        (*function)(timeStep);
+//         function->PushFloat(timeStep);
+//         function->EndCall();
     }
 }
 
@@ -718,11 +738,12 @@ void LuaScriptInstance::HandlePostFixedUpdate(StringHash eventType, VariantMap& 
     using namespace PhysicsPostStep;
     float timeStep = eventData[P_TIMESTEP].GetFloat();
 
-    LuaFunction* function = scriptObjectMethods_[LSOM_FIXEDPOSTUPDATE];
-    if (function && function->BeginCall(this))
+    auto function = scriptObjectMethods_[LSOM_FIXEDPOSTUPDATE];
+    if (function/* && function->BeginCall(this)*/)
     {
-        function->PushFloat(timeStep);
-        function->EndCall();
+        (*function)(timeStep);
+//         function->PushFloat(timeStep);
+//         function->EndCall();
     }
 }
 
@@ -742,18 +763,19 @@ void LuaScriptInstance::ReleaseObject()
     luaL_unref(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
     scriptObjectRef_ = LUA_REFNIL;
 
-    LuaFunction* function = luaScript_->GetFunction("DestroyScriptObjectInstance");
-    if (function && function->BeginCall())
+    auto function = luaScript_->GetFunction("DestroyScriptObjectInstance");
+    if (function/* && function->BeginCall()*/)
     {
-        function->PushUserType((void*)this, "LuaScriptInstance");
-        function->EndCall();
+        (*function)(this);
+//         function->PushUserType((void*)this, "LuaScriptInstance");
+//         function->EndCall();
     }
 
     for (auto& scriptObjectMethod : scriptObjectMethods_)
         scriptObjectMethod = nullptr;
 }
 
-LuaFunction* LuaScriptInstance::GetScriptObjectFunction(const String& functionName) const
+sol::function* LuaScriptInstance::GetScriptObjectFunction(const String& functionName) const
 {
     return luaScript_->GetFunction(scriptObjectType_ + "." + functionName, true);
 }

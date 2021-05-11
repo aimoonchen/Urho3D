@@ -145,7 +145,7 @@ bool ShaderProgram::Link()
             {
                 uniforms_[StringHash(&info.name[1])] = uniform.idx;
 
-                if (info.name[0] == 's')
+                if (info.type == bgfx::UniformType::Sampler && info.name[0] == 's')
                 {
                     unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
                     if (unit >= MAX_TEXTURE_UNITS)

@@ -24,6 +24,8 @@
 
 #include "../Container/RefCounted.h"
 
+#include <sol/sol.hpp>
+
 struct lua_State;
 using lua_CFunction = int (*) (lua_State *L);
 
@@ -85,7 +87,8 @@ public:
     /// Push user type to stack.
     template <typename T> void PushUserType(const T& userType, const char* typeName)
     {
-        PushUserType((void*)&userType, typeName);
+        sol::stack::push(luaState_, &userType);
+        //PushUserType((void*)&userType, typeName);
     }
 
     /// Push variant to stack.

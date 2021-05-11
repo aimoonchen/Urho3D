@@ -25,7 +25,7 @@
 #include "../Core/Context.h"
 #include "../Core/Object.h"
 #include "../LuaScript/LuaScriptEventListener.h"
-
+#include <sol/forward.hpp>
 struct lua_State;
 namespace sol {
     class state;
@@ -89,11 +89,11 @@ public:
     /// Return Lua state.
     sol::state* GetState() const { return luaState_.get(); }
 
-    /// Return Lua function at the given stack index.
-    LuaFunction* GetFunction(int index);
-    /// Return Lua function by function name.
-    LuaFunction* GetFunction(const String& functionName, bool silentIfNotFound = false);
-
+//     /// Return Lua function at the given stack index.
+//     LuaFunction* GetFunction(int index);
+//     /// Return Lua function by function name.
+//     LuaFunction* GetFunction(const String& functionName, bool silentIfNotFound = false);
+    sol::function* GetFunction(const String& functionName, bool silentIfNotFound = false);
     /// Return whether is executing engine console commands as script code.
     bool GetExecuteConsoleCommands() const { return executeConsoleCommands_; }
 
@@ -123,13 +123,13 @@ private:
     /// Procedural event invoker.
     SharedPtr<LuaScriptEventInvoker> eventInvoker_;
     /// Coroutine update function.
-    LuaFunction* coroutineUpdate_{ nullptr };
+    sol::function* coroutineUpdate_{ nullptr };
     /// Flag for executing engine console commands as script code. Default to true.
     bool executeConsoleCommands_;
     /// Function pointer to function map.
-    HashMap<const void*, SharedPtr<LuaFunction> > functionPointerToFunctionMap_;
+    //HashMap<const void*, SharedPtr<LuaFunction> > functionPointerToFunctionMap_;
     /// Function name to function map.
-    HashMap<String, SharedPtr<LuaFunction> > functionNameToFunctionMap_;
+    HashMap<String, std::shared_ptr<sol::function> > functionNameToFunctionMap_;
 };
 
 /// Register Lua script library objects.

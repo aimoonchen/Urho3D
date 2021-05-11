@@ -44,7 +44,7 @@ LuaScriptEventInvoker::LuaScriptEventInvoker(LuaScriptInstance* instance) :
 
 LuaScriptEventInvoker::~LuaScriptEventInvoker() = default;
 
-void LuaScriptEventInvoker::AddEventHandler(Object* sender, const StringHash& eventType, LuaFunction* function)
+void LuaScriptEventInvoker::AddEventHandler(Object* sender, const StringHash& eventType, sol::function* function)
 {
     if (!function)
         return;
@@ -57,18 +57,20 @@ void LuaScriptEventInvoker::AddEventHandler(Object* sender, const StringHash& ev
 
 void LuaScriptEventInvoker::HandleLuaScriptEvent(StringHash eventType, VariantMap& eventData)
 {
-    auto* function = static_cast<LuaFunction*>(GetEventHandler()->GetUserData());
+    auto function = static_cast<sol::function*>(GetEventHandler()->GetUserData());
     if (!function)
         return;
 
     // Keep instance alive during invoking
-    SharedPtr<LuaScriptInstance> instance(instance_);
-    if (function->BeginCall(instance))      // instance may be null when invoking a procedural event handler
-    {
-        function->PushUserType(eventType, "StringHash");
-        function->PushUserType(eventData, "VariantMap");
-        function->EndCall();
-    }
+//     SharedPtr<LuaScriptInstance> instance(instance_);
+//     if (function->BeginCall(instance))      // instance may be null when invoking a procedural event handler
+//     {
+//         function->PushUserType(eventType, "StringHash");
+//         function->PushUserType(eventData, "VariantMap");
+//         
+//         function->EndCall();
+//     }
+    (*function)(eventType, eventData);
 }
 
 }

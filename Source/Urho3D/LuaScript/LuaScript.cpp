@@ -139,7 +139,7 @@ LuaScript::LuaScript(Context* context) :
 
     eventInvoker_ = new LuaScriptEventInvoker(context_);
 //    coroutineUpdate_ = GetFunction("coroutine.update");
-
+    coroutineUpdate_ = (*lua)["coroutine"]["update"];
     // Subscribe to post update
     SubscribeToEvent(E_POSTUPDATE, URHO3D_HANDLER(LuaScript, HandlePostUpdate));
 
@@ -149,7 +149,7 @@ LuaScript::LuaScript(Context* context) :
 
 LuaScript::~LuaScript()
 {
-    functionPointerToFunctionMap_.Clear();
+//    functionPointerToFunctionMap_.Clear();
     functionNameToFunctionMap_.Clear();
 
 //     lua_State* luaState = luaState_;
@@ -162,26 +162,28 @@ LuaScript::~LuaScript()
 
 void LuaScript::AddEventHandler(const String& eventName, int index)
 {
-    LuaFunction* function = GetFunction(index);
-    if (function)
-        eventInvoker_->AddEventHandler(nullptr, eventName, function);
+    assert(false);
+//     LuaFunction* function = GetFunction(index);
+//     if (function)
+//         eventInvoker_->AddEventHandler(nullptr, eventName, function);
 }
 
 void LuaScript::AddEventHandler(const String& eventName, const String& functionName)
 {
-    LuaFunction* function = GetFunction(functionName);
+    auto* function = GetFunction(functionName);
     if (function)
         eventInvoker_->AddEventHandler(nullptr, eventName, function);
 }
 
 void LuaScript::AddEventHandler(Object* sender, const String& eventName, int index)
 {
-    if (!sender)
-        return;
-
-    LuaFunction* function = GetFunction(index);
-    if (function)
-        eventInvoker_->AddEventHandler(sender, eventName, function);
+    assert(false);
+//     if (!sender)
+//         return;
+// 
+//     LuaFunction* function = GetFunction(index);
+//     if (function)
+//         eventInvoker_->AddEventHandler(sender, eventName, function);
 }
 
 void LuaScript::AddEventHandler(Object* sender, const String& eventName, const String& functionName)
@@ -189,7 +191,7 @@ void LuaScript::AddEventHandler(Object* sender, const String& eventName, const S
     if (!sender)
         return;
 
-    LuaFunction* function = GetFunction(functionName);
+    auto function = GetFunction(functionName);
     if (function)
         eventInvoker_->AddEventHandler(sender, eventName, function);
 }
@@ -320,8 +322,9 @@ bool LuaScript::ExecuteRawFile(const String& fileName)
 
 bool LuaScript::ExecuteFunction(const String& functionName)
 {
-    LuaFunction* function = GetFunction(functionName);
-    return function && function->BeginCall() && function->EndCall();
+    auto function = GetFunction(functionName);
+    //return function && function->BeginCall() && function->EndCall();
+    return function && (*function)();
 }
 
 void LuaScript::SetExecuteConsoleCommands(bool enable)
@@ -434,59 +437,82 @@ int LuaScript::Print(lua_State* L)
     return 0;
 }
 
-LuaFunction* LuaScript::GetFunction(int index)
-{
-    auto L = luaState_->lua_state();
-    if (!lua_isfunction(L, index))
-        return nullptr;
+// LuaFunction* LuaScript::GetFunction(int index)
+// {
+//     auto L = luaState_->lua_state();
+//     if (!lua_isfunction(L, index))
+//         return nullptr;
+// 
+//     const void* functionPointer = lua_topointer(L, index);
+//     if (!functionPointer)
+//         return nullptr;
+// 
+//     HashMap<const void*, SharedPtr<LuaFunction> >::Iterator i = functionPointerToFunctionMap_.Find(functionPointer);
+//     if (i != functionPointerToFunctionMap_.End())
+//         return i->second_;
+// 
+//     SharedPtr<LuaFunction> function(new LuaFunction(L, index));
+//     functionPointerToFunctionMap_[functionPointer] = function;
+// 
+//     return function;
+// }
+// 
+// LuaFunction* LuaScript::GetFunction(const String& functionName, bool silentIfNotFound)
+// {
+//     auto L = luaState_->lua_state();
+//     if (!L)
+//         return nullptr;
+// 
+//     HashMap<String, SharedPtr<LuaFunction> >::Iterator i = functionNameToFunctionMap_.Find(functionName);
+//     if (i != functionNameToFunctionMap_.End())
+//         return i->second_;
+//     
+//     SharedPtr<LuaFunction> function;
+//     if (PushLuaFunction(L, functionName))
+//     {
+//         function = GetFunction(-1);
+//         functionNameToFunctionMap_[functionName] = function;
+//     }
+//     else if (!silentIfNotFound)
+//         URHO3D_LOGERRORF("%s", lua_tostring(L, -1));
+//     lua_pop(L, 1);
+// 
+//     return function;
+// }
 
-    const void* functionPointer = lua_topointer(L, index);
-    if (!functionPointer)
-        return nullptr;
-
-    HashMap<const void*, SharedPtr<LuaFunction> >::Iterator i = functionPointerToFunctionMap_.Find(functionPointer);
-    if (i != functionPointerToFunctionMap_.End())
-        return i->second_;
-
-    SharedPtr<LuaFunction> function(new LuaFunction(L, index));
-    functionPointerToFunctionMap_[functionPointer] = function;
-
-    return function;
-}
-
-LuaFunction* LuaScript::GetFunction(const String& functionName, bool silentIfNotFound)
+sol::function* LuaScript::GetFunction(const String& functionName, bool silentIfNotFound)
 {
     auto L = luaState_->lua_state();
     if (!L)
         return nullptr;
 
-    HashMap<String, SharedPtr<LuaFunction> >::Iterator i = functionNameToFunctionMap_.Find(functionName);
+    auto i = functionNameToFunctionMap_.Find(functionName);
     if (i != functionNameToFunctionMap_.End())
-        return i->second_;
+        return i->second_.get();
 
-    SharedPtr<LuaFunction> function;
-    if (PushLuaFunction(L, functionName))
-    {
-        function = GetFunction(-1);
+    auto function = std::make_shared<sol::function>((*luaState_)[functionName.CString()]);
+    if (function) {
         functionNameToFunctionMap_[functionName] = function;
+    } else if (!silentIfNotFound) {
+        URHO3D_LOGERRORF("Can not find lua function : %s", functionName.CString());
     }
-    else if (!silentIfNotFound)
-        URHO3D_LOGERRORF("%s", lua_tostring(L, -1));
-    lua_pop(L, 1);
-
-    return function;
+    return function.get();
 }
 
 void LuaScript::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
 {
-    if (coroutineUpdate_ && coroutineUpdate_->BeginCall())
+//     if (coroutineUpdate_ && coroutineUpdate_->BeginCall())
+//     {
+//         using namespace PostUpdate;
+//         float timeStep = eventData[P_TIMESTEP].GetFloat();
+//         coroutineUpdate_->PushFloat(timeStep);
+//         coroutineUpdate_->EndCall();
+//     }
+    if (coroutineUpdate_)
     {
         using namespace PostUpdate;
-        float timeStep = eventData[P_TIMESTEP].GetFloat();
-        coroutineUpdate_->PushFloat(timeStep);
-        coroutineUpdate_->EndCall();
+        (*coroutineUpdate_)(eventData[P_TIMESTEP].GetFloat());
     }
-
     // Collect garbage
     {
         URHO3D_PROFILE(LuaCollectGarbage);

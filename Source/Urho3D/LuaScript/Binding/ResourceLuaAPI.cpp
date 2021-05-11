@@ -3,7 +3,10 @@
 #include "../../Resource/ResourceCache.h"
 #include "../../Resource/Image.h"
 #include "../../Resource/XMLFile.h"
+#include "../../Graphics/Model.h"
+#include "../../Graphics/Material.h"
 #include "../../Graphics/Texture2D.h"
+#include "../../UI/Font.h"
 #include <sol/sol.hpp>
 
 Urho3D::Context* GetContext(lua_State* L);
@@ -21,6 +24,18 @@ int sol_lua_push(sol::types<Resource*>, lua_State* L, const Resource* obj)
     else if (obj->GetTypeName() == "XMLFile")
     {
         return sol::make_object(L, static_cast<const XMLFile*>(obj)).push(L);
+    }
+    else if (obj->GetTypeName() == "Model")
+    {
+        return sol::make_object(L, static_cast<const Model*>(obj)).push(L);
+    }
+    else if (obj->GetTypeName() == "Material")
+    {
+        return sol::make_object(L, static_cast<const Material*>(obj)).push(L);
+    }
+    else if (obj->GetTypeName() == "Font")
+    {
+        return sol::make_object(L, static_cast<const Font*>(obj)).push(L);
     }
     else
     {
