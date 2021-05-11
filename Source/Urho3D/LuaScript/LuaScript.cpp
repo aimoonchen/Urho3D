@@ -320,11 +320,14 @@ bool LuaScript::ExecuteRawFile(const String& fileName)
     return true;
 }
 
-bool LuaScript::ExecuteFunction(const String& functionName)
+sol::protected_function_result LuaScript::ExecuteFunction(const String& functionName)
 {
     auto function = GetFunction(functionName);
     //return function && function->BeginCall() && function->EndCall();
-    return function && (*function)();
+    if (!function) {
+        return {};
+    }
+    return (*function)();
 }
 
 void LuaScript::SetExecuteConsoleCommands(bool enable)

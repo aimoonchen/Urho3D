@@ -82,7 +82,7 @@ public:
     /// Load and execute script file on file system (i.e. not from resource cache). Return true if successful.
     bool ExecuteRawFile(const String& fileName);
     /// Execute script function.
-    bool ExecuteFunction(const String& functionName);
+    sol::protected_function_result ExecuteFunction(const String& functionName);
     /// Set whether to execute engine console commands as script code.
     void SetExecuteConsoleCommands(bool enable);
 

@@ -30,6 +30,7 @@
 #include <Urho3D/IO/FileSystem.h>
 #include <Urho3D/IO/Log.h>
 #ifdef URHO3D_LUA
+#include <sol/sol.hpp>
 #include <Urho3D/LuaScript/LuaScript.h>
 #endif
 #include <Urho3D/Resource/ResourceCache.h>
@@ -211,9 +212,46 @@ void Urho3DPlayer::Start()
         // If script loading is successful, proceed to main loop
         if (luaScript->ExecuteFile(scriptFileName_))
         {
-            luaScript->ExecuteFunction("Start");
+            //luaScript->ExecuteFunction("Start");
+            sol::protected_function_result result = luaScript->ExecuteFunction("Start");
+            if (!result.valid()) {
+                sol::error err = result;
+                sol::call_status status = result.status();
+                std::string status_str = sol::to_string(status);
+                URHO3D_LOGERRORF(" %s  Error\n\t%s", status_str.c_str(), err.what());
+            }
             return;
         }
+//         auto lua = luaScript->GetState();
+//         sol::load_result loaded_chunk = lua->load(scriptFileName_.CString());
+//         if (!loaded_chunk.valid())
+//         {
+//             sol::error err = loaded_chunk;
+//             sol::load_status status = loaded_chunk.status();
+// //             std::cout << "Something went horribly wrong loading the code: " << sol::to_string(status) << " error"
+// //                       << "\n\t" << err.what() << std::endl;
+//             std::string status_str = sol::to_string(status);
+//             URHO3D_LOGERRORF("load script file : %s  Error\n\t%s", status_str.c_str(), err.what());
+//         }
+//         else
+//         {
+//             // Because the syntax is bad, this will never be reached
+//             //c_assert(false);
+//             // If there is a runtime error (lua GC memory error, nil access, etc.)
+//             // it will be caught here
+//             sol::protected_function script_func = loaded_chunk;
+//             sol::protected_function_result result = script_func();
+//             if (!result.valid())
+//             {
+//                 sol::error err = result;
+//                 sol::call_status status = result.status();
+// //                 std::cout << "Something went horribly wrong running the code: " << sol::to_string(status) << " error"
+// //                           << "\n\t" << err.what() << std::endl;
+//                 std::string status_str = sol::to_string(status);
+//                 
+//                 URHO3D_LOGERRORF("run lua code : %s  Error\n\t%s", status_str.c_str(), err.what());
+//             }
+//         }
 #else
         ErrorExit("Lua is not enabled!");
         return;
