@@ -8,6 +8,17 @@ int sol2_CoreLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
     lua["GetPlatform"] = []() { return Urho3D::GetPlatform().CString(); };
+    lua.new_usertype<String>("String",
+        sol::call_constructor, sol::factories(
+            []() { return String(); },
+            [](const char* str) { return String(str); },
+            [](char* str) { return String(str); },
+            [](const wchar_t* str) { return String(str); },
+            [](wchar_t* str) { return String(str); })
+    );
+    lua.new_usertype<WString>("WString",
+        sol::call_constructor, sol::factories([]() { return WString(); }, [](const String& str) { return WString(str); })
+    );
     lua.new_usertype<Variant>("Variant",
         sol::call_constructor, sol::factories(
             []() { return Variant(); },

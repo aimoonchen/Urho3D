@@ -49,9 +49,9 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
         "SetScale", [](Node* obj, float scale) { obj->SetScale(scale); },
         "Translate", [](Node* obj, const Vector3& translate) { obj->Translate(translate); },
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),
-		"CreateChild", [](Node* obj, const char* name) { return obj->CreateChild(name); }, // &Node::CreateChild
-		"CreateComponent", [](Node* obj, const char* name) { return obj->CreateComponent(name); }, // &Node::CreateComponent,
-        "GetComponent", [](Node* obj, const char* name) { return obj->GetComponent(name); } // Node::GetComponent
+		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); }, // sol::overload(sol::resolve<Node*(const String&, CreateMode, unsigned, bool)>(&Node::CreateChild)),//
+		"CreateComponent", [](Node* obj, const StringHash& type) { return obj->CreateComponent(type); }, // &Node::CreateComponent,
+        "GetComponent", [](Node* obj, const StringHash& type) { return obj->GetComponent(type); } // Node::GetComponent
 		);
 	lua->new_usertype<Scene>("Scene",// sol::constructors<Scene(Context*)>(),
 		sol::call_constructor, sol::factories([context]() { return std::make_unique<Scene>(context); }),

@@ -29,6 +29,12 @@ static LuaScript* GetLuaScript(lua_State* L) { return GetContext(L)->GetSubsyste
 int sol2_LuaScriptLuaAPI_open(sol::state* solState)
 {
 	auto& sol_S = (*solState);
+    sol_S.new_usertype<LuaScriptInstance>("LuaScriptInstance",
+        "SubscribeToEvent",sol::overload(
+            sol::resolve<void(const String&, const String&)>(&LuaScriptInstance::AddEventHandler),
+            sol::resolve<void(Object*, const String&, const String&)>(&LuaScriptInstance::AddEventHandler))
+    );
+
     sol_S["SubscribeToEvent"] = [&sol_S](sol::variadic_args va) {
         if (va.size() == 2)
         {
@@ -56,7 +62,131 @@ int sol2_LuaScriptLuaAPI_open(sol::state* solState)
             }
         }
 	};
+    sol_S.script(R"(
+LuaScriptObject = {}
 
+function LuaScriptObject:Start()
+end
+
+function LuaScriptObject:Stop()
+end
+
+function LuaScriptObject:GetNode()
+    return self.node
+end
+
+function LuaScriptObject:SubscribeToEvent(param1, param2, param3)
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+
+    if param3 == nil then
+        instance:SubscribeToEvent(param1, param2)
+    else
+        instance:SubscribeToEvent(param1, param2, param3)
+    end
+end
+
+function LuaScriptObject:UnsubscribeFromEvent(param1, param2)
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+
+    if param2 == nil then
+        instance:UnsubscribeFromEvent(param1)
+    else
+        instance:UnsubscribeFromEvent(param1, param2)
+    end
+end
+
+function LuaScriptObject:UnsubscribeFromEvents(sender)
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+    instance:UnsubscribeFromEvents(sender)
+end
+
+function LuaScriptObject:UnsubscribeFromAllEvents()
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+    instance:UnsubscribeFromAllEvents()
+end
+
+function LuaScriptObject:UnsubscribeFromAllEventsExcept()
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+    instance:UnsubscribeFromAllEventsExcept()
+end
+
+function LuaScriptObject:HasSubscribedToEvent(param1, param2)
+    local instance = self.instance
+    if instance == nil then
+        return
+    end
+
+    if param2 == nil then
+        return instance:HasSubscribedToEvent(param1)
+    else
+        return instance:HasSubscribedToEvent(param1, param2)
+    end
+end
+
+function ScriptObject()
+    local o = {}
+    setmetatable(o, LuaScriptObject)
+    LuaScriptObject.__index = LuaScriptObject
+    return o
+end
+
+function CreateScriptObjectInstance(object, instance)
+    local o = {}
+    setmetatable(o, object)
+    object.__index = object
+
+    instance.object = o
+    o.instance = instance
+    o.node = instance:GetNode()
+
+    local keys = {}
+    for k, v in pairs(o) do
+        keys[k] = true
+    end
+
+    -- Call start function
+    o:Start()
+
+    local attrNames = {}
+    for k, v in pairs(o) do
+        if keys[k] == nil then
+            table.insert(attrNames, k)
+        end
+    end
+
+    return o, attrNames
+end
+
+function DestroyScriptObjectInstance(instance)
+    local object = instance.object
+    if object == nil then
+        return
+    end
+
+    -- Call stop function
+    object:Stop()
+
+    object.node = nil
+    object.instance = nil
+    instance.object = nil
+end
+        )"
+    );
     return 0;
 }
 

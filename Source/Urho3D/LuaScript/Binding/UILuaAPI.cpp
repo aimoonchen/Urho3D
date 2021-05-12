@@ -33,8 +33,7 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetSize", sol::overload([](UIElement* obj, int w, int h) {obj->SetSize(w, h); }, [](UIElement* obj, IntVector2 v2) {obj->SetSize(v2); }),
         "SetPosition", sol::overload([](UIElement* obj, int x, int y) { obj->SetPosition(x, y); }, [](UIElement* obj, IntVector2 v2) { obj->SetPosition(v2); }),
         "SetAlignment", &UIElement::SetAlignment,
-        "CreateChild", [&lua](UIElement* obj, std::string typeName) {
-            return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
+        "CreateChild", [&lua](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),
@@ -59,12 +58,9 @@ int sol2_UILuaAPI_open(sol::state* luaState)
     lua.new_usertype<UISelectable>("UISelectable",
         sol::base_classes, sol::bases<UIElement>());
     lua.new_usertype<Text>("Text", sol::constructors<Text(Context*)>(),
-//        "SetPosition", sol::overload([](Text* obj, int x, int y) { obj->SetPosition(x, y); }, [](Text* obj, IntVector2 v2) { obj->SetPosition(v2); }),
-        "SetText", [](Text* obj, std::string text) { obj->SetText(text.c_str()); },
-        "SetFont", [](Text* obj, Font* font, float fontsize) { obj->SetFont(font, fontsize); },
+        "SetText", &Text::SetText,
+        "SetFont", sol::overload(sol::resolve<bool(const String&, float)>(&Text::SetFont), sol::resolve<bool(Font*, float)>(&Text::SetFont)),//[](Text* obj, Font* font, float fontsize) { obj->SetFont(font, fontsize); },
         "textAlignment", sol::property(&Text::GetTextAlignment, &Text::SetTextAlignment),
-//         "horizontalAlignment", sol::property(&Text::GetHorizontalAlignment, &Text::SetHorizontalAlignment),
-//         "verticalAlignment", sol::property(&Text::GetVerticalAlignment, &Text::SetVerticalAlignment),
         sol::base_classes, sol::bases<UIElement>());
     lua.new_usertype<UI>("UI", sol::constructors<UI(Context*)>(),
         "root", sol::property(&UI::GetRoot),
