@@ -47,8 +47,7 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 		sol::base_classes, sol::bases<Component>());
 	lua.new_usertype<Graphics>("Graphics", sol::constructors<Graphics(Context*)>(),
 		"SetWindowIcon", &Graphics::SetWindowIcon,
-		"windowTitle", sol::property([](Graphics* obj) { return obj->GetWindowTitle().CString(); },
-                      [](Graphics* obj, std::string title) { obj->SetWindowTitle(title.c_str());}) // sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle)
+		"windowTitle", sol::property(&Graphics::GetWindowTitle, [](Graphics* obj, const std::string& title){ obj->SetWindowTitle(title.c_str()); }/*&Graphics::SetWindowTitle*/) // sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle)
 	);
 	lua.new_usertype<Renderer>("Renderer", sol::constructors<Renderer(Context*)>(),
 		"SetViewport", &Renderer::SetViewport

@@ -46,12 +46,12 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
         "scale", sol::property(&Node::GetScale, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); }/*sol::overload([](Node* obj, float scale) { obj->SetScale(scale); }, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); })*/),
         "rotation", sol::property(&Node::GetRotation, &Node::SetRotation),
         "position", sol::property(&Node::GetPosition, &Node::SetPosition),
-        "SetScale", [](Node* obj, float scale) { obj->SetScale(scale); },
+        "SetScale", sol::overload(sol::resolve<void(float)>(&Node::SetScale), sol::resolve<void(const Vector3&)>(&Node::SetScale)),
         "Translate", [](Node* obj, const Vector3& translate) { obj->Translate(translate); },
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),
 		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); }, // sol::overload(sol::resolve<Node*(const String&, CreateMode, unsigned, bool)>(&Node::CreateChild)),//
-		"CreateComponent", [](Node* obj, const StringHash& type) { return obj->CreateComponent(type); }, // &Node::CreateComponent,
-        "GetComponent", [](Node* obj, const StringHash& type) { return obj->GetComponent(type); } // Node::GetComponent
+		"CreateComponent", [](Node* obj, /*StringHash*/const std::string& type) { return obj->CreateComponent(type.c_str()); }, // &Node::CreateComponent,
+        "GetComponent", [](Node* obj, /*StringHash*/const std::string& type) { return obj->GetComponent(type.c_str()); } // Node::GetComponent
 		);
 	lua->new_usertype<Scene>("Scene",// sol::constructors<Scene(Context*)>(),
 		sol::call_constructor, sol::factories([context]() { return std::make_unique<Scene>(context); }),

@@ -30,10 +30,11 @@ int sol2_UILuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
     lua.new_usertype<UIElement>("UIElement", sol::constructors<UIElement(Context*)>(),
-        "SetSize", sol::overload([](UIElement* obj, int w, int h) {obj->SetSize(w, h); }, [](UIElement* obj, IntVector2 v2) {obj->SetSize(v2); }),
-        "SetPosition", sol::overload([](UIElement* obj, int x, int y) { obj->SetPosition(x, y); }, [](UIElement* obj, IntVector2 v2) { obj->SetPosition(v2); }),
+        "SetSize", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetSize), sol::resolve<void(const IntVector2&)>(&UIElement::SetSize)),
+        "SetPosition", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetPosition), sol::resolve<void(const IntVector2&)>(&UIElement::SetPosition)),
         "SetAlignment", &UIElement::SetAlignment,
-        "CreateChild", [&lua](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
+        //"CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
+        "CreateChild", [](UIElement* obj, const std::string& typeName) { return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),
@@ -44,11 +45,11 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         sol::base_classes, sol::bases<UIElement>()
         );
     lua.new_usertype<Sprite>("Sprite", sol::constructors<Sprite(Context*)>(),
-        "SetTexture", &Sprite::SetTexture, "SetScale",
-        sol::overload([](Sprite* obj, float s) { obj->SetScale(s, s); },
-                      [](Sprite* obj, float sx, float sy) { obj->SetScale(sx, sy); },
-                      [](Sprite* obj, Vector2 v2) { obj->SetScale(v2); }),
-        "hotSpot", sol::property(&Sprite::GetHotSpot, [](Sprite* obj, IntVector2 v2) {obj->SetHotSpot(v2); }),
+        "SetTexture", &Sprite::SetTexture,
+        "SetScale", sol::overload(sol::resolve<void(float)>(&Sprite::SetScale),
+                      sol::resolve<void(float, float)>(&Sprite::SetScale),
+                      sol::resolve<void(const Vector2&)>(&Sprite::SetScale)),
+        "hotSpot", sol::property(&Sprite::GetHotSpot, sol::resolve<void(const IntVector2&)>(&Sprite::SetHotSpot)),
         "opacity", sol::property(&Sprite::GetOpacity, &Sprite::SetOpacity),
         "priority", sol::property(&Sprite::GetPriority, &Sprite::SetPriority),
         sol::base_classes, sol::bases<UIElement>()
@@ -68,7 +69,6 @@ int sol2_UILuaAPI_open(sol::state* luaState)
     );
     auto context = GetContext(lua);
     lua["ui"] = context->GetSubsystem<UI>();
-    auto root = lua["ui"]["root"];
     //
     lua["HA_LEFT"]      = HA_LEFT;
     lua["HA_CENTER"]    = HA_CENTER;

@@ -8,8 +8,14 @@ using namespace Urho3D;
 
 int sol2_MathLuaAPI_open(sol::state* lua)
 {
-	//lua->script("print('sol2_MathLuaAPI_open')");
-	lua->new_usertype<StringHash>("StringHash", sol::constructors<StringHash(const char* str)>());
+	lua->new_usertype<StringHash>("StringHash", /*sol::constructors<StringHash(const char* str)>()*/
+        sol::call_constructor,
+        sol::factories(
+			[]() { return StringHash(); },
+			[](const char* str) { return StringHash(str); },
+			[](const String& str) { return StringHash(str); },
+			[](unsigned value) { return StringHash(value); })
+		);
     lua->new_usertype<IntVector2>("IntVector2",
         sol::call_constructor, sol::factories([]() { return IntVector2(); }, [](int x, int y) { return IntVector2(x, y); }),
 		"x", &IntVector2::x_,
