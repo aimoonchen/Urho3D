@@ -87,14 +87,14 @@ function CreateInstructions()
     -- Position the text relative to the screen center
     instructionText.horizontalAlignment = HA_CENTER
     instructionText.verticalAlignment = VA_CENTER
-    instructionText:SetPosition(0, ui.root.height / 4)
+    instructionText:SetPosition(0, math.floor(ui.root.height / 4))
 end
 
 function SetupViewport()
     -- Set up a viewport to the Renderer subsystem so that the 3D scene can be seen. We need to define the scene and the camera
     -- at minimum. Additionally we could configure the viewport screen size and the rendering path (eg. forward / deferred) to
     -- use, but now we just use full screen and default render path configured in the engine command line options
-    local viewport = Viewport:new(scene_, cameraNode:GetComponent("Camera"))
+    local viewport = Viewport(scene_, cameraNode:GetComponent("Camera"))
     renderer:SetViewport(0, viewport)
 end
 
@@ -140,6 +140,7 @@ function SubscribeToEvents()
 end
 
 function HandleUpdate(eventType, eventData)
+    --print("--------- HandleUpdate ", eventType, eventData)
     -- Take the frame time step, which is stored as a float
     local timeStep = eventData["TimeStep"]:GetFloat()
 

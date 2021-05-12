@@ -12,13 +12,13 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 	lua->new_usertype<StringHash>("StringHash", sol::constructors<StringHash(const char* str)>());
     lua->new_usertype<IntVector2>("IntVector2",
         sol::call_constructor, sol::factories([]() { return IntVector2(); }, [](int x, int y) { return IntVector2(x, y); }),
-		"x_", &IntVector2::x_,
-		"y_", &IntVector2::y_
+		"x", &IntVector2::x_,
+		"y", &IntVector2::y_
         );
     lua->new_usertype<Vector2>("Vector2",
         sol::call_constructor, sol::factories([]() { return Vector2(); }, [](float x, float y) { return Vector2(x, y); }),
-		"x_", &Vector2::x_,
-		"y_", &Vector2::y_
+		"x", &Vector2::x_,
+		"y", &Vector2::y_
         );
 	lua->new_usertype<Vector3>("Vector3",
 		sol::call_constructor, sol::factories([]() { return Vector3(); }, [](float x, float y) { return Vector3(x, y); }, [](float x, float y, float z) { return Vector3(x, y, z); }),
@@ -45,9 +45,13 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 		"ReNormalized",			&Vector3::ReNormalized,
 		//"ToString",				&Vector3::ToString,
 		"ToHash",				&Vector3::ToHash,
-		"x_",					&Vector3::x_,
-		"y_",					&Vector3::y_,
-		"z_",					&Vector3::z_);
+		//sol::meta_function::to_string, &Vector3::ToString,
+		sol::meta_function::addition, &Vector3::operator+,
+		sol::meta_function::subtraction, sol::resolve<Vector3(const Vector3&) const>(&Vector3::operator-),
+		sol::meta_function::multiplication, sol::overload(sol::resolve<Vector3(const Vector3&) const>(&Vector3::operator*), sol::resolve<Vector3(float) const>(&Vector3::operator*)),
+		"x",					&Vector3::x_,
+		"y",					&Vector3::y_,
+		"z",					&Vector3::z_);
     lua->new_usertype<Quaternion>("Quaternion",
 		sol::call_constructor, sol::factories(
 			[]() { return Quaternion(); },
@@ -59,16 +63,16 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 			[](const Vector3& start, const Vector3& end) { return Quaternion(start, end); },
 			[](const Vector3& xAxis, const Vector3& yAxis, const Vector3& zAxis) { return Quaternion(xAxis, yAxis, zAxis); }
 		),
-		"w_", &Quaternion::w_,
-		"x_", &Quaternion::x_,
-        "y_", &Quaternion::y_,
-		"z_", &Quaternion::z_);
+		"w", &Quaternion::w_,
+		"x", &Quaternion::x_,
+        "y", &Quaternion::y_,
+		"z", &Quaternion::z_);
 	lua->new_usertype<Color>("Color",
 		sol::call_constructor, sol::factories([]() { return Color(); }, [](float r, float g, float b) { return Color(r, g, b); }, [](float r, float g, float b, float a) { return Color(r, g, b, a); }),
-		"r_", &Color::r_,
-		"g_", &Color::g_,
-		"b_", &Color::b_,
-		"a_", &Color::a_
+		"r", &Color::r_,
+		"g", &Color::g_,
+		"b", &Color::b_,
+		"a", &Color::a_
 		);
 	(*lua)["Random"] = sol::overload(
 		[]() { return Random(); },
@@ -78,5 +82,6 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 		[](int min, int max) { return Random(min, max); }
 	);
 	(*lua)["RandomNormal"] = RandomNormal;
+	(*lua)["Clamp"] = Clamp<float>;
 	return 0;
 }

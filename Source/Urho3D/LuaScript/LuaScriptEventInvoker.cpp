@@ -21,7 +21,7 @@
 //
 
 #include "../Precompiled.h"
-
+#include "../IO/Log.h"
 #include "../LuaScript/LuaFunction.h"
 #include "../LuaScript/LuaScriptEventInvoker.h"
 #include "../LuaScript/LuaScriptInstance.h"
@@ -70,7 +70,12 @@ void LuaScriptEventInvoker::HandleLuaScriptEvent(StringHash eventType, VariantMa
 //         
 //         function->EndCall();
 //     }
-    (*function)(eventType, eventData);
+    auto result = (*function)(eventType, eventData);
+    if (!result.valid()) {
+        sol::error err = result;
+        sol::call_status status = result.status();
+        URHO3D_LOGERRORF("%s error\n\t%s", sol::to_string(status).c_str(), err.what());
+    }
 }
 
 }

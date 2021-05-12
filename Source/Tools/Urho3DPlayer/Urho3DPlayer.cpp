@@ -217,8 +217,7 @@ void Urho3DPlayer::Start()
             if (!result.valid()) {
                 sol::error err = result;
                 sol::call_status status = result.status();
-                std::string status_str = sol::to_string(status);
-                URHO3D_LOGERRORF(" %s  Error\n\t%s", status_str.c_str(), err.what());
+                URHO3D_LOGERRORF("%s error\n\t%s", sol::to_string(status).c_str(), err.what());
             }
             return;
         }

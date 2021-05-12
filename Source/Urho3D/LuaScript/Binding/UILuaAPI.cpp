@@ -12,18 +12,18 @@ using namespace Urho3D;
 
 int sol_lua_push(sol::types<UIElement*>, lua_State* L, const UIElement* obj)
 {
-    if (obj->GetTypeName() == "Sprite")
+    if (obj)
     {
-        return sol::make_object(L, static_cast<const Sprite*>(obj)).push(L);
+        if (obj->GetTypeName() == "Sprite")
+        {
+            return sol::make_object(L, static_cast<const Sprite*>(obj)).push(L);
+        }
+        else if (obj->GetTypeName() == "Text")
+        {
+            return sol::make_object(L, static_cast<const Text*>(obj)).push(L);
+        }
     }
-    if (obj->GetTypeName() == "Text")
-    {
-        return sol::make_object(L, static_cast<const Text*>(obj)).push(L);
-    }
-    else
-    {
-        return sol::make_object(L, obj).push(L);
-    }
+    return sol::make_object(L, obj).push(L);
 }
 
 int sol2_UILuaAPI_open(sol::state* luaState)
@@ -33,7 +33,8 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetSize", sol::overload([](UIElement* obj, int w, int h) {obj->SetSize(w, h); }, [](UIElement* obj, IntVector2 v2) {obj->SetSize(v2); }),
         "SetPosition", sol::overload([](UIElement* obj, int x, int y) { obj->SetPosition(x, y); }, [](UIElement* obj, IntVector2 v2) { obj->SetPosition(v2); }),
         "SetAlignment", &UIElement::SetAlignment,
-        "CreateChild", [&lua](UIElement* obj, std::string typeName) { return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
+        "CreateChild", [&lua](UIElement* obj, std::string typeName) {
+            return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),
@@ -71,6 +72,7 @@ int sol2_UILuaAPI_open(sol::state* luaState)
     );
     auto context = GetContext(lua);
     lua["ui"] = context->GetSubsystem<UI>();
+    auto root = lua["ui"]["root"];
     //
     lua["HA_LEFT"]      = HA_LEFT;
     lua["HA_CENTER"]    = HA_CENTER;
