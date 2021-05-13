@@ -1,3 +1,5 @@
+#include <sol/sol.hpp>
+#include "GetPush.h"
 #include "../../Core/Context.h"
 #include "../../Scene/Node.h"
 #include "../../Scene/Scene.h"
@@ -6,7 +8,6 @@
 #include "../../Graphics/StaticModel.h"
 #include "../../Graphics/Octree.h"
 #include "../../Graphics/Camera.h"
-#include <sol/sol.hpp>
 
 using namespace Urho3D;
 
@@ -49,9 +50,9 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
         "SetScale", sol::overload(sol::resolve<void(float)>(&Node::SetScale), sol::resolve<void(const Vector3&)>(&Node::SetScale)),
         "Translate", [](Node* obj, const Vector3& translate) { obj->Translate(translate); },
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),
-		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); }, // sol::overload(sol::resolve<Node*(const String&, CreateMode, unsigned, bool)>(&Node::CreateChild)),//
-		"CreateComponent", [](Node* obj, /*StringHash*/const std::string& type) { return obj->CreateComponent(type.c_str()); }, // &Node::CreateComponent,
-        "GetComponent", [](Node* obj, /*StringHash*/const std::string& type) { return obj->GetComponent(type.c_str()); } // Node::GetComponent
+		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); },
+		"CreateComponent", [](Node* obj, StringHash type) { return obj->CreateComponent(type); },
+        "GetComponent", [](Node* obj, StringHash type) { return obj->GetComponent(type); }
 		);
 	lua->new_usertype<Scene>("Scene",// sol::constructors<Scene(Context*)>(),
 		sol::call_constructor, sol::factories([context]() { return std::make_unique<Scene>(context); }),

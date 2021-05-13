@@ -4,41 +4,13 @@
 #include "../../Math/Quaternion.h"
 #include "../../Math/Color.h"
 #include "../../Math/StringHash.h"
+#include "../../Math/BoundingBox.h"
+
 using namespace Urho3D;
-template <typename Handler>
-bool sol_lua_check(sol::types<StringHash>, lua_State* L, int index, Handler&& handler, sol::stack::record& tracking)
-{
-    int absolute_index = lua_absindex(L, index);
-    bool success = sol::stack::check<const char*>(L, absolute_index, handler);
-    tracking.use(1);
 
-    return success;
-}
-
-StringHash sol_lua_get(sol::types<StringHash>, lua_State* L, int index, sol::stack::record& tracking)
-{
-    tracking.use(1);
-    size_t len;
-    const char* p = lua_tolstring(L, index, &len);
-    return StringHash(p);
-}
-
-// int sol_lua_push(lua_State* L, const StringHash& str)
-// {
-//     lua_pushlstring(L, str.CString(), str.Length());
-//     return 1;
-// }
 
 int sol2_MathLuaAPI_open(sol::state* lua)
 {
-// 	lua->new_usertype<StringHash>("StringHash", /*sol::constructors<StringHash(const char* str)>()*/
-//         sol::call_constructor,
-//         sol::factories(
-// 			[]() { return StringHash(); },
-// 			[](const char* str) { return StringHash(str); },
-// 			[](const String& str) { return StringHash(str); },
-// 			[](unsigned value) { return StringHash(value); })
-// 		);
     lua->new_usertype<IntVector2>("IntVector2",
         sol::call_constructor, sol::factories([]() { return IntVector2(); }, [](int x, int y) { return IntVector2(x, y); }),
 		"x", &IntVector2::x_,
@@ -102,6 +74,11 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 		"g", &Color::g_,
 		"b", &Color::b_,
 		"a", &Color::a_
+		);
+	lua->new_usertype<BoundingBox>("BoundingBox",
+		sol::call_constructor, sol::factories([]() { return BoundingBox(); }, [](float min, float max) { return BoundingBox(min, max); }, [](const Vector3& min, const Vector3& max) { return BoundingBox(min, max); }),
+		"min", &BoundingBox::min_,
+		"max", &BoundingBox::max_
 		);
 	(*lua)["Random"] = sol::overload(
 		[]() { return Random(); },

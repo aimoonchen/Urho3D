@@ -1,10 +1,12 @@
+#include <sol/sol.hpp>
+#include "GetPush.h"
 #include "../../Core/Context.h"
 #include "../../UI/UI.h"
 #include "../../UI/UIElement.h"
 #include "../../UI/Sprite.h"
 #include "../../UI/Font.h"
 #include "../../UI/Text.h"
-#include <sol/sol.hpp>
+
 
 Urho3D::Context* GetContext(lua_State* L);
 
@@ -33,8 +35,8 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetSize", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetSize), sol::resolve<void(const IntVector2&)>(&UIElement::SetSize)),
         "SetPosition", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetPosition), sol::resolve<void(const IntVector2&)>(&UIElement::SetPosition)),
         "SetAlignment", &UIElement::SetAlignment,
-        //"CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
-        "CreateChild", [](UIElement* obj, const std::string& typeName) { return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
+        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
+        //"CreateChild", [](UIElement* obj, const std::string& typeName) { return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),
