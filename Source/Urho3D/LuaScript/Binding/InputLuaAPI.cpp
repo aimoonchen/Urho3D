@@ -31,7 +31,7 @@ int sol2_InputLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
     
-    lua.new_usertype<Input>("Input", sol::constructors<Input(Context*)>(),
+    lua.new_usertype<Input>("Input",
         "GetNumJoysticks", &Input::GetNumJoysticks,
         "AddScreenJoystick", &Input::AddScreenJoystick,
         "SetScreenJoystickVisible", &Input::SetScreenJoystickVisible,

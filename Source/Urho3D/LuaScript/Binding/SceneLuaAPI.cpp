@@ -6,8 +6,12 @@
 #include "../../Scene/Component.h"
 #include "../../Graphics/Light.h"
 #include "../../Graphics/StaticModel.h"
+#include "../../Graphics/AnimatedModel.h"
 #include "../../Graphics/Octree.h"
 #include "../../Graphics/Camera.h"
+#include "../../Graphics/Zone.h"
+#include "../../Graphics/DebugRenderer.h"
+#include "../LuaScriptInstance.h"
 
 using namespace Urho3D;
 
@@ -21,6 +25,10 @@ int sol_lua_push(sol::types<Component*>, lua_State* L, const Component* obj)
         {
             return sol::make_object(L, static_cast<const StaticModel*>(obj)).push(L);
         }
+        else if (obj->GetTypeName() == "AnimatedModel")
+        {
+            return sol::make_object(L, static_cast<const AnimatedModel*>(obj)).push(L);
+        }
         else if (obj->GetTypeName() == "Light")
         {
             return sol::make_object(L, static_cast<const Light*>(obj)).push(L);
@@ -33,6 +41,14 @@ int sol_lua_push(sol::types<Component*>, lua_State* L, const Component* obj)
         {
             return sol::make_object(L, static_cast<const Camera*>(obj)).push(L);
         }
+        else if (obj->GetTypeName() == "DebugRenderer")
+        {
+            return sol::make_object(L, static_cast<const DebugRenderer*>(obj)).push(L);
+        }
+        else if (obj->GetTypeName() == "Zone")
+        {
+            return sol::make_object(L, static_cast<const Zone*>(obj)).push(L);
+        }
     }
     return sol::make_object(L, obj).push(L);
 }
@@ -40,11 +56,9 @@ int sol_lua_push(sol::types<Component*>, lua_State* L, const Component* obj)
 int sol2_SceneLuaAPI_open(sol::state* lua)
 {
 	auto context = GetContext(lua->lua_state());
-//    lua->new_usertype<RefCounted>("RefCounted", sol::constructors<Node(Context*)>());
-    lua->new_usertype<Context>("Context", sol::constructors<Context()>());
-	lua->new_usertype<Component>("Component", sol::constructors<Component(Context*)>());
-    lua->new_usertype<Node>("Node", sol::constructors<Node(Context*)>(),
-        "scale", sol::property(&Node::GetScale, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); }/*sol::overload([](Node* obj, float scale) { obj->SetScale(scale); }, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); })*/),
+	lua->new_usertype<Component>("Component");
+    lua->new_usertype<Node>("Node",
+        "scale",    sol::property(&Node::GetScale, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); }/*sol::overload([](Node* obj, float scale) { obj->SetScale(scale); }, [](Node* obj, const Vector3& scale) { obj->SetScale(scale); })*/),
         "rotation", sol::property(&Node::GetRotation, &Node::SetRotation),
         "position", sol::property(&Node::GetPosition, &Node::SetPosition),
         "SetScale", sol::overload(sol::resolve<void(float)>(&Node::SetScale), sol::resolve<void(const Vector3&)>(&Node::SetScale)),
@@ -52,9 +66,14 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),
 		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); },
 		"CreateComponent", [](Node* obj, StringHash type) { return obj->CreateComponent(type); },
-        "GetComponent", [](Node* obj, StringHash type) { return obj->GetComponent(type); }
-		);
-	lua->new_usertype<Scene>("Scene",// sol::constructors<Scene(Context*)>(),
+        "GetComponent", [](Node* obj, StringHash type) { return obj->GetComponent(type); },
+        "CreateScriptObject", [lua](Node* obj, const String& name){
+            auto instance = obj->CreateComponent<LuaScriptInstance>();
+            instance->CreateObject(name);
+            lua_rawgeti(lua->lua_state(), LUA_REGISTRYINDEX, instance->GetScriptObjectRef());
+            return 1;
+        });
+	lua->new_usertype<Scene>("Scene",
 		sol::call_constructor, sol::factories([context]() { return std::make_unique<Scene>(context); }),
 		sol::base_classes, sol::bases<Node>()
 	);

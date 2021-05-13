@@ -28,6 +28,11 @@ static void RegisterConst(sol::state& lua)
     lua["LIGHT_POINT"]			= LIGHT_POINT;
 }
 
+// int sol_lua_push(sol::types<AnimationState*>, lua_State* L, const AnimationState* obj)
+// {
+//     return sol::make_object(L, obj).push(L);
+// }
+
 int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
@@ -42,6 +47,7 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 	lua.new_usertype<ResourceWithMetadata>("ResourceWithMetadata", sol::constructors<ResourceWithMetadata(Context*)>(),
 		sol::base_classes, sol::bases<Resource>());
     lua.new_usertype<Animation>("Animation",
+		"length", sol::property(&Animation::GetLength),
 		sol::base_classes, sol::bases<ResourceWithMetadata>());
     lua.new_usertype<Model>("Model", sol::constructors<Model(Context*)>(),
 		sol::base_classes, sol::bases<ResourceWithMetadata>());
@@ -82,10 +88,14 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 		"model", sol::property(&StaticModel::GetModel, &StaticModel::SetModel),
 		"material", sol::property([](StaticModel* obj) { return obj->GetMaterial(0); }, [](StaticModel* obj, Material* mtl ) { obj->SetMaterial(mtl); }),
 		sol::base_classes, sol::bases<Drawable>());
-	lua.new_usertype<AnimationState>("AnimationState");
+	lua.new_usertype<AnimationState>("AnimationState",
+		"weight", sol::property(&AnimationState::GetWeight, &AnimationState::SetWeight),
+		"looped", sol::property(&AnimationState::IsLooped, &AnimationState::SetLooped),
+		"time", sol::property(&AnimationState::GetTime, &AnimationState::SetTime));
 	lua.new_usertype<AnimatedModel>("AnimatedModel",
 		"AddAnimationState", &AnimatedModel::AddAnimationState,
-		sol::base_classes, sol::bases<StaticModel>());
+		"model", sol::property(&AnimatedModel::GetModel, [](AnimatedModel* obj, Model* model) { obj->SetModel(model); }),
+		sol::base_classes, sol::bases<StaticModel, Drawable>());
 	lua["graphics"] = context->GetSubsystem<Graphics>();
 	lua["renderer"] = context->GetSubsystem<Renderer>();
 	RegisterConst(lua);

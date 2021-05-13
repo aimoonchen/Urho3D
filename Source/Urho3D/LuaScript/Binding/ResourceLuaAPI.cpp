@@ -6,10 +6,11 @@
 #include "../../Graphics/Model.h"
 #include "../../Graphics/Material.h"
 #include "../../Graphics/Texture2D.h"
+#include "../../Graphics/Animation.h"
 #include "../../UI/Font.h"
 #include <sol/sol.hpp>
+#include "GetPush.h"
 
-Urho3D::Context* GetContext(lua_State* L);
 using namespace Urho3D;
 int sol_lua_push(sol::types<Resource*>, lua_State* L, const Resource* obj)
 {
@@ -37,19 +38,24 @@ int sol_lua_push(sol::types<Resource*>, lua_State* L, const Resource* obj)
     {
         return sol::make_object(L, static_cast<const Font*>(obj)).push(L);
     }
+    else if (obj->GetTypeName() == "Animation")
+    {
+        return sol::make_object(L, static_cast<const Animation*>(obj)).push(L);
+    }
     else
     {
         return sol::make_object(L, obj).push(L);
     }
 }
+
+Urho3D::Context* GetContext(lua_State* L);
+
 int sol2_ResourceLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
     auto context = GetContext(lua.lua_state());
-    lua.new_usertype<ResourceCache>("ResourceCache", sol::constructors<ResourceCache(Context*)>(),
-        "GetResource", [&lua](ResourceCache* obj, std::string typeName, std::string filePath) {
-            return obj->GetResource(typeName.c_str(), filePath.c_str());
-        }//&ResourceCache::GetResource
+    lua.new_usertype<ResourceCache>("ResourceCache",
+        "GetResource", [](ResourceCache* obj, StringHash typeName, const String& filePath) { return obj->GetResource(typeName, filePath); }
     );
     lua.new_usertype<Image>("Image", sol::constructors<Image(Context*)>());
     lua.new_usertype<XMLFile>("XMLFile", sol::constructors<XMLFile(Context*)>());
