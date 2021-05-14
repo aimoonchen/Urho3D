@@ -116,12 +116,12 @@ function CreateInstructions()
     -- Position the text relative to the screen center
     instructionText.horizontalAlignment = HA_CENTER
     instructionText.verticalAlignment = VA_CENTER
-    instructionText:SetPosition(0, ui.root.height / 4)
+    instructionText:SetPosition(0, math.floor(ui.root.height / 4))
 end
 
 function SetupViewport()
     -- Set up a viewport to the Renderer subsystem so that the 3D scene can be seen
-    local viewport = Viewport:new(scene_, cameraNode:GetComponent("Camera"))
+    local viewport = Viewport(scene_, cameraNode:GetComponent("Camera"))
     renderer:SetViewport(0, viewport)
 end
 

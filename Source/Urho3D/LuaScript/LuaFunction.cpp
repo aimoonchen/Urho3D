@@ -73,14 +73,14 @@ bool LuaFunction::BeginCall(const LuaScriptInstance* instance)
     if (!IsValid())
         return false;
 
-    lua_rawgeti(luaState_, LUA_REGISTRYINDEX, functionRef_);
-    if (instance)
-    {
-        lua_rawgeti(luaState_, LUA_REGISTRYINDEX, instance->GetScriptObjectRef());      // Will get a nil when reference is invalid
-        numArguments_ = 1;
-    }
-    else
-        numArguments_ = 0;
+//     lua_rawgeti(luaState_, LUA_REGISTRYINDEX, functionRef_);
+//     if (instance)
+//     {
+//         lua_rawgeti(luaState_, LUA_REGISTRYINDEX, instance->GetScriptObjectRef());      // Will get a nil when reference is invalid
+//         numArguments_ = 1;
+//     }
+//     else
+//         numArguments_ = 0;
 
     return true;
 }

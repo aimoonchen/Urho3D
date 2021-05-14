@@ -1,8 +1,9 @@
 #include <sol/sol.hpp>
+#include "GetPush.h"
 #include "LuaScript/ToluaUtils.h"
 #include "LuaScript/LuaScript.h"
 #include "LuaScript/LuaScriptInstance.h"
-
+#include "../../Scene/Node.h"
 
 using namespace Urho3D;
 #pragma warning(disable : 4800)
@@ -30,38 +31,54 @@ int sol2_LuaScriptLuaAPI_open(sol::state* solState)
 {
 	auto& sol_S = (*solState);
     sol_S.new_usertype<LuaScriptInstance>("LuaScriptInstance",
-        "SubscribeToEvent",sol::overload(
+        "SubscribeToEvent", sol::overload(
             sol::resolve<void(const String&, const String&)>(&LuaScriptInstance::AddEventHandler),
-            sol::resolve<void(Object*, const String&, const String&)>(&LuaScriptInstance::AddEventHandler))
-    );
+            sol::resolve<void(Object*, const String&, const String&)>(&LuaScriptInstance::AddEventHandler)),
+        "GetNode", &LuaScriptInstance::GetNode,
+        "object", sol::property(&LuaScriptInstance::GetScriptObject, &LuaScriptInstance::SetScriptObject),
+        sol::base_classes, sol::bases<Component>());
 
-    sol_S["SubscribeToEvent"] = [&sol_S](sol::variadic_args va) {
-        if (va.size() == 2)
-        {
-            // SubscribeToEvent(const String eventName, void* functionOrFunctionName);
-            const String eventName = va.get<std::string>(0).c_str();// ((const String)tolua_tourho3dstring(sol_S, 1, 0));
-            if (sol::stack::check<sol::function>(sol_S, 2)/*lua_isfunction(tolua_S, 2)*/)
-                LuaScriptAddEventHandler(eventName, 2);
-            else
-            {
-                const String functionName = va.get<std::string>(1).c_str();// (const String)tolua_tourho3dstring(sol_S, 2, 0);
-                LuaScriptAddEventHandler(eventName, functionName);
-            }
-        }
-        else if (va.size() == 3)
-        {
-            // SubscribeToEvent(Object* sender, const String eventName, void* functionOrFunctionName);
-            Object* sender = (Object*)lua_touserdata(sol_S, 1);// (Object*)tolua_touserdata(tolua_S, 1, 0));
-            const String eventName = va.get<std::string>(1).c_str();// ((const String)tolua_tourho3dstring(sol_S, 2, 0));
-            if (sol::stack::check<sol::function>(sol_S, 3)/*lua_isfunction(sol_S, 3)*/)
-                LuaScriptAddEventHandler(sender, eventName, 3);
-            else
-            {
-                const String functionName = va.get<std::string>(2).c_str();// (const String)tolua_tourho3dstring(sol_S, 3, 0);
-                LuaScriptAddEventHandler(sender, eventName, functionName);
-            }
-        }
-	};
+    sol_S["SubscribeToEvent"] = sol::overload(
+        [&sol_S](const String& eventName, const String& functionName) {
+            LuaScriptAddEventHandler(eventName, functionName);
+        },
+        [&sol_S](const String& eventName, sol::function function) {
+
+        },
+        [&sol_S](Object* sender, const String& eventName, const String& functionName) {
+            LuaScriptAddEventHandler(sender, eventName, functionName);
+        },
+        [&sol_S](Object* obj, const String& eventName, sol::function function) {
+
+        });
+
+//     sol_S["SubscribeToEvent"] = [&sol_S](sol::variadic_args va) {
+//         if (va.size() == 2)
+//         {
+//             // SubscribeToEvent(const String eventName, void* functionOrFunctionName);
+//             const String eventName = va.get<std::string>(0).c_str();// ((const String)tolua_tourho3dstring(sol_S, 1, 0));
+//             if (sol::stack::check<sol::function>(sol_S, 2)/*lua_isfunction(tolua_S, 2)*/)
+//                 LuaScriptAddEventHandler(eventName, 2);
+//             else
+//             {
+//                 const String functionName = va.get<std::string>(1).c_str();// (const String)tolua_tourho3dstring(sol_S, 2, 0);
+//                 LuaScriptAddEventHandler(eventName, functionName);
+//             }
+//         }
+//         else if (va.size() == 3)
+//         {
+//             // SubscribeToEvent(Object* sender, const String eventName, void* functionOrFunctionName);
+//             Object* sender = (Object*)lua_touserdata(sol_S, 1);// (Object*)tolua_touserdata(tolua_S, 1, 0));
+//             const String eventName = va.get<std::string>(1).c_str();// ((const String)tolua_tourho3dstring(sol_S, 2, 0));
+//             if (sol::stack::check<sol::function>(sol_S, 3)/*lua_isfunction(sol_S, 3)*/)
+//                 LuaScriptAddEventHandler(sender, eventName, 3);
+//             else
+//             {
+//                 const String functionName = va.get<std::string>(2).c_str();// (const String)tolua_tourho3dstring(sol_S, 3, 0);
+//                 LuaScriptAddEventHandler(sender, eventName, functionName);
+//             }
+//         }
+// 	};
     sol_S.script(R"(
 LuaScriptObject = {}
 

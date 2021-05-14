@@ -65,12 +65,24 @@ static const char* scriptObjectMethodNames[] = {
     "ApplyAttributes",
     "TransformChanged"
 };
+template<typename F, typename ...Args>
+auto CallLuaFunction(F f, Args&& ...args)
+{
+    sol::protected_function_result result = (*f)(std::forward<Args>(args)...);
+    if (!result.valid()) {
+        sol::error err = result;
+        sol::call_status status = result.status();
+        URHO3D_LOGERRORF("%s error\n\t%s", sol::to_string(status).c_str(), err.what());
+    }
+    return result;
+}
+
 
 LuaScriptInstance::LuaScriptInstance(Context* context) :
     Component(context),
     luaScript_(GetSubsystem<LuaScript>()),
-    eventInvoker_(new LuaScriptEventInvoker(this)),
-    scriptObjectRef_(LUA_REFNIL)
+    eventInvoker_(new LuaScriptEventInvoker(this))
+    //scriptObjectRef_(LUA_REFNIL)
 {
     luaState_ = luaScript_->GetState()->lua_state();
     attributeInfos_ = *context_->GetAttributes(GetTypeStatic());
@@ -103,7 +115,7 @@ void LuaScriptInstance::OnSetAttribute(const AttributeInfo& attr, const Variant&
         return;
     }
 
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return;
 
     String name = attr.name_;
@@ -127,8 +139,8 @@ void LuaScriptInstance::OnSetAttribute(const AttributeInfo& attr, const Variant&
     }
     else
     {
-        lua_rawgeti(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
-        lua_pushstring(luaState_, name.CString());
+//         lua_rawgeti(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
+//         lua_pushstring(luaState_, name.CString());
 
         switch (attr.type_)
         {
@@ -217,7 +229,7 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
         return;
     }
 
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return;
 
     String name = attr.name_;
@@ -236,12 +248,12 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
 //             function->EndCall(1);
         (*function)();
     }
-    else
-    {
-        lua_rawgeti(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
-        lua_pushstring(luaState_, name.CString());
-        lua_gettable(luaState_, -2);
-    }
+//     else
+//     {
+//         lua_rawgeti(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
+//         lua_pushstring(luaState_, name.CString());
+//         lua_gettable(luaState_, -2);
+//     }
 
     switch (attr.type_)
     {
@@ -283,7 +295,7 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
         return;
     }
 
-    lua_settop(luaState_, top);
+//    lua_settop(luaState_, top);
 }
 
 void LuaScriptInstance::ApplyAttributes()
@@ -392,14 +404,14 @@ bool LuaScriptInstance::CreateObject(const String& scriptObjectType)
 {
     SetScriptFile(nullptr);
     SetScriptObjectType(scriptObjectType);
-    return scriptObjectRef_ != LUA_REFNIL;
+    return scriptObjectRef_ != sol::lua_nil;
 }
 
 bool LuaScriptInstance::CreateObject(LuaFile* scriptFile, const String& scriptObjectType)
 {
     SetScriptFile(scriptFile);
     SetScriptObjectType(scriptObjectType);
-    return scriptObjectRef_ != LUA_REFNIL;
+    return scriptObjectRef_ != sol::lua_nil;
 }
 
 void LuaScriptInstance::SetScriptFile(LuaFile* scriptFile)
@@ -426,17 +438,26 @@ void LuaScriptInstance::SetScriptObjectType(const String& scriptObjectType)
     auto function = luaScript_->GetFunction("CreateScriptObjectInstance");
     if (!function/* || !function->BeginCall()*/)
         return;
-    (*function)(scriptObjectType.CString(), this);
-//     function->PushLuaTable(scriptObjectType);
+    auto sol_lua = sol::state_view(luaState_);
+    sol::table scriptClass = sol_lua[scriptObjectType.CString()];
+    //sol::protected_function_result result = (*function)(scriptClass, this);
+    sol::protected_function_result result = CallLuaFunction(function, scriptClass, this);
+    if (!result.valid()) {
+        return;
+    }
+    //     function->PushLuaTable(scriptObjectType);
 //     function->PushUserType((void*)this, "LuaScriptInstance");
 // 
 //     // Return script object and attribute names
 //     if (!function->EndCall(2))
 //         return;
-
-    GetScriptAttributes();
+    sol::table scriptObject = result.get<sol::table>();
+    if (result.return_count() > 1) {
+        sol::table attrNames = result.get<sol::table>(1);
+    }
+    //GetScriptAttributes();
     scriptObjectType_ = scriptObjectType;
-    scriptObjectRef_ = luaL_ref(luaState_, LUA_REGISTRYINDEX);
+    //scriptObjectRef_ = luaL_ref(luaState_, LUA_REGISTRYINDEX);
 
     // Find script object method refs
     FindScriptObjectMethodRefs();
@@ -444,7 +465,7 @@ void LuaScriptInstance::SetScriptObjectType(const String& scriptObjectType)
 
 void LuaScriptInstance::SetScriptDataAttr(const PODVector<unsigned char>& data)
 {
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return;
 
     auto function = scriptObjectMethods_[LSOM_LOAD];
@@ -459,7 +480,7 @@ void LuaScriptInstance::SetScriptDataAttr(const PODVector<unsigned char>& data)
 
 void LuaScriptInstance::SetScriptNetworkDataAttr(const PODVector<unsigned char>& data)
 {
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return;
 
     auto function = scriptObjectMethods_[LSOM_READNETWORKUPDATE];
@@ -479,7 +500,7 @@ LuaFile* LuaScriptInstance::GetScriptFile() const
 
 PODVector<unsigned char> LuaScriptInstance::GetScriptDataAttr() const
 {
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return PODVector<unsigned char>();
 
     VectorBuffer buf;
@@ -497,7 +518,7 @@ PODVector<unsigned char> LuaScriptInstance::GetScriptDataAttr() const
 
 PODVector<unsigned char> LuaScriptInstance::GetScriptNetworkDataAttr() const
 {
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return PODVector<unsigned char>();
 
     VectorBuffer buf;
@@ -685,7 +706,15 @@ void LuaScriptInstance::HandleUpdate(StringHash eventType, VariantMap& eventData
 
     auto function = scriptObjectMethods_[LSOM_UPDATE];
     if (function) {
-        (*function)(timeStep);
+        //(*function)(timeStep);
+//        CallLuaFunction(function, timeStep);
+        sol::protected_function_result result = (*function)(scriptObjectRef_, timeStep);
+        if (!result.valid())
+        {
+            sol::error err = result;
+            sol::call_status status = result.status();
+            URHO3D_LOGERRORF("%s error\n\t%s", sol::to_string(status).c_str(), err.what());
+        }
     }
 //     if (function && function->BeginCall(this))
 //     {
@@ -751,7 +780,7 @@ void LuaScriptInstance::HandlePostFixedUpdate(StringHash eventType, VariantMap& 
 
 void LuaScriptInstance::ReleaseObject()
 {
-    if (scriptObjectRef_ == LUA_REFNIL)
+    if (scriptObjectRef_ == sol::lua_nil)
         return;
 
     attributeInfos_ = *context_->GetAttributes(GetTypeStatic());
@@ -760,8 +789,8 @@ void LuaScriptInstance::ReleaseObject()
         UnsubscribeFromScriptMethodEvents();
 
     // Unref script object
-    luaL_unref(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
-    scriptObjectRef_ = LUA_REFNIL;
+    //luaL_unref(luaState_, LUA_REGISTRYINDEX, scriptObjectRef_);
+    scriptObjectRef_ = sol::lua_nil;
 
     auto function = luaScript_->GetFunction("DestroyScriptObjectInstance");
     if (function/* && function->BeginCall()*/)
@@ -789,6 +818,16 @@ void LuaScriptInstance::SetScriptFileAttr(const ResourceRef& value)
 ResourceRef LuaScriptInstance::GetScriptFileAttr() const
 {
     return GetResourceRef(scriptFile_, LuaFile::GetTypeStatic());
+}
+
+sol::table LuaScriptInstance::GetScriptObject()
+{
+    return scriptObjectRef_;
+}
+
+void LuaScriptInstance::SetScriptObject(sol::table obj)
+{
+    scriptObjectRef_ = obj;
 }
 
 }

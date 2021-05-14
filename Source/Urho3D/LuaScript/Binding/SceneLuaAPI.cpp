@@ -63,15 +63,15 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
         "position", sol::property(&Node::GetPosition, &Node::SetPosition),
         "SetScale", sol::overload(sol::resolve<void(float)>(&Node::SetScale), sol::resolve<void(const Vector3&)>(&Node::SetScale)),
         "Translate", [](Node* obj, const Vector3& translate) { obj->Translate(translate); },
+        "Yaw", [](Node* obj, float angle) { obj->Yaw(angle); },
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),
 		"CreateChild", [](Node* obj, const String& name) { return obj->CreateChild(name); },
 		"CreateComponent", [](Node* obj, StringHash type) { return obj->CreateComponent(type); },
-        "GetComponent", [](Node* obj, StringHash type) { return obj->GetComponent(type); },
-        "CreateScriptObject", [lua](Node* obj, const String& name){
+        "GetComponent", sol::overload([](Node* obj, StringHash type) { return obj->GetComponent(type); }, [](Node* obj, StringHash type, bool recursive) { return obj->GetComponent(type, recursive); }),
+        "CreateScriptObject", [lua](Node* obj, const String& name) {
             auto instance = obj->CreateComponent<LuaScriptInstance>();
             instance->CreateObject(name);
-            lua_rawgeti(lua->lua_state(), LUA_REGISTRYINDEX, instance->GetScriptObjectRef());
-            return 1;
+            return instance->GetScriptObject();
         });
 	lua->new_usertype<Scene>("Scene",
 		sol::call_constructor, sol::factories([context]() { return std::make_unique<Scene>(context); }),

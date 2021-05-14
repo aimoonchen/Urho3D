@@ -12,6 +12,7 @@ static void RegisterKeyboard(sol::state& lua)
     lua["KEY_F2"] = KEY_F2;
     lua["KEY_SELECT"] = KEY_SELECT;
     lua["KEY_ESCAPE"] = KEY_ESCAPE;
+    lua["KEY_SPACE"] = KEY_SPACE;
     lua["KEY_1"] = KEY_1;
     lua["KEY_2"] = KEY_2;
     lua["KEY_3"] = KEY_3;
@@ -40,6 +41,7 @@ int sol2_InputLuaAPI_open(sol::state* luaState)
         "GetNumTouches", &Input::GetNumTouches,
         "GetTouch", &Input::GetTouch,
         "GetKeyDown", &Input::GetKeyDown,
+        "GetKeyPress", &Input::GetKeyPress,
         "touchEmulation", sol::property(&Input::GetTouchEmulation, &Input::SetTouchEmulation),
         "mouseVisible", sol::property(&Input::IsMouseVisible, &Input::SetMouseVisible),
         "mouseMode", sol::property(&Input::GetMouseMode, [](Input* obj, MouseMode mode) { obj->SetMouseMode(mode); }),

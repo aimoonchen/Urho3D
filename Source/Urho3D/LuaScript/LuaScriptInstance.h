@@ -126,7 +126,7 @@ public:
     const String& GetScriptObjectType() const { return scriptObjectType_; }
 
     /// Return Lua reference to script object.
-    int GetScriptObjectRef() const { return scriptObjectRef_; }
+    //int GetScriptObjectRef() const { return scriptObjectRef_; }
 
     /// Get script file serialization attribute by calling a script function.
     PODVector<unsigned char> GetScriptDataAttr() const;
@@ -140,6 +140,8 @@ public:
     /// Return script file attribute.
     ResourceRef GetScriptFileAttr() const;
 
+    sol::table GetScriptObject();
+    void SetScriptObject(sol::table obj);
 protected:
     /// Handle scene being assigned.
     void OnSceneSet(Scene* scene) override;
@@ -181,7 +183,8 @@ private:
     /// Attributes, including script object variables.
     Vector<AttributeInfo> attributeInfos_;
     /// Lua reference to script object.
-    int scriptObjectRef_{};
+    //int scriptObjectRef_{};
+    sol::table scriptObjectRef_{ sol::lua_nil };
     /// Script object method.
     sol::function *scriptObjectMethods_[MAX_LUA_SCRIPT_OBJECT_METHODS]{};
 };

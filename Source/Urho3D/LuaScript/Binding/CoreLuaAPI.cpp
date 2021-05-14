@@ -1,4 +1,5 @@
 #include "../../Core/ProcessUtils.h"
+#include "../../Core/Object.h"
 #include "../../Core/Variant.h"
 
 #include <sol/sol.hpp>
@@ -9,6 +10,7 @@ int sol2_CoreLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
     lua["GetPlatform"] = []() { return Urho3D::GetPlatform().CString(); };
+    lua.new_usertype<Object>("Object");
     lua.new_usertype<Variant>("Variant",
         sol::call_constructor, sol::factories(
             []() { return Variant(); },

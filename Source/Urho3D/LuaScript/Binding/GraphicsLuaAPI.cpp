@@ -28,11 +28,6 @@ static void RegisterConst(sol::state& lua)
     lua["LIGHT_POINT"]			= LIGHT_POINT;
 }
 
-// int sol_lua_push(sol::types<AnimationState*>, lua_State* L, const AnimationState* obj)
-// {
-//     return sol::make_object(L, obj).push(L);
-// }
-
 int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
@@ -62,6 +57,7 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 			[context]() { return std::make_unique<Viewport>(context); },
 			[context](Scene* scene, Camera* camera) { return new Viewport(context, scene, camera);/*return std::make_unique<Viewport>(context, scene, camera);*/ }));
 	lua.new_usertype<Camera>("Camera",
+		"farClip", sol::property(&Camera::GetFarClip, &Camera::SetFarClip),
 		sol::base_classes, sol::bases<Component>());
 	lua.new_usertype<Graphics>("Graphics",
 		"SetWindowIcon", &Graphics::SetWindowIcon,
@@ -89,11 +85,16 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 		"material", sol::property([](StaticModel* obj) { return obj->GetMaterial(0); }, [](StaticModel* obj, Material* mtl ) { obj->SetMaterial(mtl); }),
 		sol::base_classes, sol::bases<Drawable>());
 	lua.new_usertype<AnimationState>("AnimationState",
+		"AddTime", &AnimationState::AddTime,
 		"weight", sol::property(&AnimationState::GetWeight, &AnimationState::SetWeight),
 		"looped", sol::property(&AnimationState::IsLooped, &AnimationState::SetLooped),
 		"time", sol::property(&AnimationState::GetTime, &AnimationState::SetTime));
 	lua.new_usertype<AnimatedModel>("AnimatedModel",
 		"AddAnimationState", &AnimatedModel::AddAnimationState,
+		"GetAnimationState", sol::overload(sol::resolve<AnimationState*(Animation*) const>(&AnimatedModel::GetAnimationState),
+			sol::resolve<AnimationState*(const String&) const>(&AnimatedModel::GetAnimationState),
+			sol::resolve<AnimationState*(StringHash) const>(&AnimatedModel::GetAnimationState),
+			sol::resolve<AnimationState*(unsigned) const>(&AnimatedModel::GetAnimationState)),
 		"model", sol::property(&AnimatedModel::GetModel, [](AnimatedModel* obj, Model* model) { obj->SetModel(model); }),
 		sol::base_classes, sol::bases<StaticModel, Drawable>());
 	lua["graphics"] = context->GetSubsystem<Graphics>();

@@ -492,14 +492,27 @@ sol::function* LuaScript::GetFunction(const String& functionName, bool silentIfN
     auto i = functionNameToFunctionMap_.Find(functionName);
     if (i != functionNameToFunctionMap_.End())
         return i->second_.get();
-
-    auto function = std::make_shared<sol::function>((*luaState_)[functionName.CString()]);
-    if (function) {
-        functionNameToFunctionMap_[functionName] = function;
+    const auto& path = functionName.Split('.');
+    std::shared_ptr<sol::function> func;
+    if (path.Size() > 1)
+    {
+        auto& parent = (*luaState_)[path[0].CString()];
+        for (size_t idx = 1; idx < path.Size() - 1; ++idx)
+        {
+            parent = parent[path[idx].CString()];
+        }
+        func = std::make_shared<sol::function>(parent[path[path.Size() - 1].CString()]);
+    }
+    else
+    {
+        func = std::make_shared<sol::function>((*luaState_)[functionName.CString()]);
+    }
+    if (func) {
+        functionNameToFunctionMap_[functionName] = func;
     } else if (!silentIfNotFound) {
         URHO3D_LOGERRORF("Can not find lua function : %s", functionName.CString());
     }
-    return function.get();
+    return func.get();
 }
 
 void LuaScript::HandlePostUpdate(StringHash eventType, VariantMap& eventData)
