@@ -135,7 +135,7 @@ void LuaScriptInstance::OnSetAttribute(const AttributeInfo& attr, const Variant&
 //             function->PushVariant(src);
 //             function->EndCall();
 //         }
-        (*function)(src);
+        CallLuaFunction(function, scriptObjectRef_, src);
     }
     else
     {
@@ -246,7 +246,8 @@ void LuaScriptInstance::OnGetAttribute(const AttributeInfo& attr, Variant& dest)
     {
 //         if (function->BeginCall(this))
 //             function->EndCall(1);
-        (*function)();
+//        (*function)();
+        CallLuaFunction(function, scriptObjectRef_);
     }
 //     else
 //     {
@@ -305,7 +306,8 @@ void LuaScriptInstance::ApplyAttributes()
 //         function->EndCall();
     if (function)
     {
-        (*function)();
+        //(*function)();
+        CallLuaFunction(function, scriptObjectRef_);
     }
 }
 
@@ -440,7 +442,6 @@ void LuaScriptInstance::SetScriptObjectType(const String& scriptObjectType)
         return;
     auto sol_lua = sol::state_view(luaState_);
     sol::table scriptClass = sol_lua[scriptObjectType.CString()];
-    //sol::protected_function_result result = (*function)(scriptClass, this);
     sol::protected_function_result result = CallLuaFunction(function, scriptClass, this);
     if (!result.valid()) {
         return;
@@ -474,7 +475,8 @@ void LuaScriptInstance::SetScriptDataAttr(const PODVector<unsigned char>& data)
         MemoryBuffer buf(data);
 //         function->PushUserType((Deserializer&)buf, "Deserializer");
 //         function->EndCall();
-        (*function)((Deserializer&)buf);
+        //(*function)((Deserializer&)buf);
+        CallLuaFunction(function, scriptObjectRef_, (Deserializer&)buf);
     }
 }
 
@@ -489,7 +491,7 @@ void LuaScriptInstance::SetScriptNetworkDataAttr(const PODVector<unsigned char>&
         MemoryBuffer buf(data);
 //         function->PushUserType((Deserializer&)buf, "Deserializer");
 //         function->EndCall();
-        (*function)((Deserializer&)buf);
+        CallLuaFunction(function, scriptObjectRef_, (Deserializer&)buf);
     }
 }
 
@@ -510,7 +512,7 @@ PODVector<unsigned char> LuaScriptInstance::GetScriptDataAttr() const
     {
 //         function->PushUserType((Serializer&)buf, "Serializer");
 //         function->EndCall();
-        (*function)((Serializer&)buf);
+        CallLuaFunction(function, scriptObjectRef_, (Serializer&)buf);
     }
 
     return buf.GetBuffer();
@@ -528,7 +530,7 @@ PODVector<unsigned char> LuaScriptInstance::GetScriptNetworkDataAttr() const
     {
 //         function->PushUserType((Serializer&)buf, "Serializer");
 //         function->EndCall();
-        (*function)((Serializer&)buf);
+        CallLuaFunction(function, scriptObjectRef_, (Serializer&)buf);
     }
 
     return buf.GetBuffer();
@@ -555,7 +557,7 @@ void LuaScriptInstance::OnMarkedDirty(Node* node)
     auto function = scriptObjectMethods_[LSOM_TRANSFORMCHANGED];
     if (function/* && function->BeginCall(this)*/)
         //function->EndCall();
-        (*function)();
+        CallLuaFunction(function, scriptObjectRef_);
 }
 
 void LuaScriptInstance::GetScriptAttributes()
@@ -700,21 +702,14 @@ void LuaScriptInstance::HandleUpdate(StringHash eventType, VariantMap& eventData
     {
 //         if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
 //             scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
-        (*scriptObjectMethods_[LSOM_DELAYEDSTART])();
+        CallLuaFunction(scriptObjectMethods_[LSOM_DELAYEDSTART], scriptObjectRef_);
         scriptObjectMethods_[LSOM_DELAYEDSTART] = nullptr;  // Only execute once
     }
 
     auto function = scriptObjectMethods_[LSOM_UPDATE];
     if (function) {
         //(*function)(timeStep);
-//        CallLuaFunction(function, timeStep);
-        sol::protected_function_result result = (*function)(scriptObjectRef_, timeStep);
-        if (!result.valid())
-        {
-            sol::error err = result;
-            sol::call_status status = result.status();
-            URHO3D_LOGERRORF("%s error\n\t%s", sol::to_string(status).c_str(), err.what());
-        }
+        CallLuaFunction(function, scriptObjectRef_, timeStep);
     }
 //     if (function && function->BeginCall(this))
 //     {
@@ -731,8 +726,8 @@ void LuaScriptInstance::HandlePostUpdate(StringHash eventType, VariantMap& event
     auto function = scriptObjectMethods_[LSOM_POSTUPDATE];
     if (function/* && function->BeginCall(this)*/)
     {
-        (*function)(timeStep);
-//         function->PushFloat(timeStep);
+        CallLuaFunction(function, scriptObjectRef_, timeStep);
+        //         function->PushFloat(timeStep);
 //         function->EndCall();
     }
 }
@@ -746,7 +741,7 @@ void LuaScriptInstance::HandleFixedUpdate(StringHash eventType, VariantMap& even
     {
 //         if (scriptObjectMethods_[LSOM_DELAYEDSTART]->BeginCall(this))
 //             scriptObjectMethods_[LSOM_DELAYEDSTART]->EndCall();
-        (*scriptObjectMethods_[LSOM_DELAYEDSTART])();
+        CallLuaFunction(scriptObjectMethods_[LSOM_DELAYEDSTART], scriptObjectRef_);
         scriptObjectMethods_[LSOM_DELAYEDSTART] = nullptr;  // Only execute once
     }
 
@@ -756,8 +751,8 @@ void LuaScriptInstance::HandleFixedUpdate(StringHash eventType, VariantMap& even
     auto function = scriptObjectMethods_[LSOM_FIXEDUPDATE];
     if (function/* && function->BeginCall(this)*/)
     {
-        (*function)(timeStep);
-//         function->PushFloat(timeStep);
+        CallLuaFunction(function, scriptObjectRef_, timeStep);
+        //         function->PushFloat(timeStep);
 //         function->EndCall();
     }
 }
@@ -770,8 +765,8 @@ void LuaScriptInstance::HandlePostFixedUpdate(StringHash eventType, VariantMap& 
     auto function = scriptObjectMethods_[LSOM_FIXEDPOSTUPDATE];
     if (function/* && function->BeginCall(this)*/)
     {
-        (*function)(timeStep);
-//         function->PushFloat(timeStep);
+        CallLuaFunction(function, scriptObjectRef_, timeStep);
+        //         function->PushFloat(timeStep);
 //         function->EndCall();
     }
 }
@@ -795,8 +790,8 @@ void LuaScriptInstance::ReleaseObject()
     auto function = luaScript_->GetFunction("DestroyScriptObjectInstance");
     if (function/* && function->BeginCall()*/)
     {
-        (*function)(this);
-//         function->PushUserType((void*)this, "LuaScriptInstance");
+        CallLuaFunction(function, this);
+        //         function->PushUserType((void*)this, "LuaScriptInstance");
 //         function->EndCall();
     }
 

@@ -73,17 +73,17 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 		"fogColor",		sol::property(&Zone::GetFogColor, &Zone::SetFogColor),
 		"fogStart",		sol::property(&Zone::GetFogStart, &Zone::SetFogStart),
 		"fogEnd",		sol::property(&Zone::GetFogEnd, &Zone::SetFogEnd),
-		sol::base_classes, sol::bases<Drawable>());
+		sol::base_classes, sol::bases<Drawable, Component>());
 	lua.new_usertype<Light>("Light",
 		"lightType", sol::property(&Light::GetLightType, &Light::SetLightType),
 		"color", sol::property(&Light::GetColor, &Light::SetColor),
 		"shadowBias", sol::property(&Light::GetShadowBias, &Light::SetShadowBias),
 		"shadowCascade", sol::property(&Light::GetShadowCascade, &Light::SetShadowCascade),
-		sol::base_classes, sol::bases<Drawable>());
+		sol::base_classes, sol::bases<Drawable, Component>());
 	lua.new_usertype<StaticModel>("StaticModel",
 		"model", sol::property(&StaticModel::GetModel, &StaticModel::SetModel),
 		"material", sol::property([](StaticModel* obj) { return obj->GetMaterial(0); }, [](StaticModel* obj, Material* mtl ) { obj->SetMaterial(mtl); }),
-		sol::base_classes, sol::bases<Drawable>());
+		sol::base_classes, sol::bases<Drawable, Component>());
 	lua.new_usertype<AnimationState>("AnimationState",
 		"AddTime", &AnimationState::AddTime,
 		"weight", sol::property(&AnimationState::GetWeight, &AnimationState::SetWeight),
@@ -96,7 +96,7 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 			sol::resolve<AnimationState*(StringHash) const>(&AnimatedModel::GetAnimationState),
 			sol::resolve<AnimationState*(unsigned) const>(&AnimatedModel::GetAnimationState)),
 		"model", sol::property(&AnimatedModel::GetModel, [](AnimatedModel* obj, Model* model) { obj->SetModel(model); }),
-		sol::base_classes, sol::bases<StaticModel, Drawable>());
+		sol::base_classes, sol::bases<StaticModel, Drawable, Component>());
 	lua["graphics"] = context->GetSubsystem<Graphics>();
 	lua["renderer"] = context->GetSubsystem<Renderer>();
 	RegisterConst(lua);
