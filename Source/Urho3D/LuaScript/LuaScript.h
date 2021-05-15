@@ -120,6 +120,7 @@ private:
     /// Lua state.
     //lua_State* luaState_;
     std::unique_ptr<sol::state> luaState_;
+    bool destorying_ = {false};
     /// Procedural event invoker.
     SharedPtr<LuaScriptEventInvoker> eventInvoker_;
     /// Coroutine update function.

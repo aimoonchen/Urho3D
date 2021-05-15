@@ -152,6 +152,7 @@ LuaScript::~LuaScript()
 //    functionPointerToFunctionMap_.Clear();
     functionNameToFunctionMap_.Clear();
 
+    destorying_ = true;
 //     lua_State* luaState = luaState_;
 //     luaState_ = nullptr;
     coroutineUpdate_ = nullptr;
@@ -486,7 +487,7 @@ int LuaScript::Print(lua_State* L)
 sol::function* LuaScript::GetFunction(const String& functionName, bool silentIfNotFound)
 {
     auto L = luaState_->lua_state();
-    if (!L)
+    if (/*!L*/ destorying_)
         return nullptr;
 
     auto i = functionNameToFunctionMap_.Find(functionName);
