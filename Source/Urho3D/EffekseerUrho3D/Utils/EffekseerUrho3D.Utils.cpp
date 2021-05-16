@@ -1,4 +1,4 @@
-﻿// #include <GDScript.hpp>
+// #include <GDScript.hpp>
 // #include <NativeScript.hpp>
 // #include <VisualScript.hpp>
 #include "EffekseerUrho3D.Utils.h"
@@ -6,7 +6,7 @@
 namespace EffekseerUrho3D
 {
 
-size_t ToEfkString(char16_t* to, const Urho3D::String& from, size_t size) {
+size_t ToEfkString(char16_t* to, const Urho3D::WString& from, size_t size) {
 #ifdef _MSC_VER
 	// Simple copy
 // 	const wchar_t* ustr = from.unicode_str();
@@ -20,8 +20,8 @@ size_t ToEfkString(char16_t* to, const Urho3D::String& from, size_t size) {
 	return count;
 #else
 	// UTF32 -> UTF16
-	const wchar_t* ustr = from.unicode_str();
-	size_t len = (size_t)from.length();
+	const wchar_t* ustr = from.CString();
+	size_t len = (size_t)from.Length();
 	size_t count = 0;
 	for (size_t i = 0; i < len; i++) {
 		wchar_t c = ustr[i];
@@ -42,12 +42,12 @@ size_t ToEfkString(char16_t* to, const Urho3D::String& from, size_t size) {
 #endif
 }
 
-Urho3D::String ToGdString(const char16_t* from)
+Urho3D::WString ToGdString(const char16_t* from)
 {
 #ifdef _MSC_VER
-	return Urho3D::String((const wchar_t*)from);
+	return Urho3D::WString((const wchar_t*)from);
 #else
-	Urho3D::String result;
+	Urho3D::WString result;
 	while (true) {
 		// FIXME
 		wchar_t c[2] = {}; 

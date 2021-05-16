@@ -213,7 +213,7 @@ inline Urho3D::Color ToGdColor(Effekseer::Color c)
 	return { c.R / 255.0f, c.G / 255.0f, c.B / 255.0f, c.A / 255.0f };
 }
 
-size_t ToEfkString(char16_t* to, const Urho3D::String& from, size_t size);
+size_t ToEfkString(char16_t* to, const Urho3D::WString& from, size_t size);
 
 Urho3D::String ToGdString(const char16_t* from);
 

@@ -1325,7 +1325,7 @@ void FileUtils::listFilesRecursively(const std::string& dirPath, std::vector<std
 }
 
 #else
-#include "tinydir/tinydir.h"
+#include "external/tinydir/tinydir.h"
 // default implements for unix like os
 #include <sys/types.h>
 #include <errno.h>

@@ -46,7 +46,7 @@ bool EffekseerEffect::BeginLoad(Deserializer& source)
         assert(false);
         return false;
     }
-	m_data_path = source.GetName().CString();
+    m_data_path = WString(source.GetName());//.CString();
 //     loadMaterialName_.Clear();
 // 
 //     XMLFile file(context_);
@@ -81,7 +81,7 @@ void EffekseerEffect::_init()
 {
 }
 
-void EffekseerEffect::load(String path)
+void EffekseerEffect::load(WString path)
 {
 	m_data_path = path;
 

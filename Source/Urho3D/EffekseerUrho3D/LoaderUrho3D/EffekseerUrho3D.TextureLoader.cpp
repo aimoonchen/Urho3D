@@ -15,7 +15,7 @@ namespace EffekseerUrho3D
 Effekseer::TextureRef TextureLoader::Load(const char16_t* path, Effekseer::TextureType textureType)
 {
 	static auto* cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
-	Urho3D::String urho3dPath = ToGdString(path);
+	Urho3D::String urho3dPath = Urho3D::String(ToGdString(path));
 	auto texture = cache->GetResource<Urho3D::Texture2D>(urho3dPath);
 	// Load by Godot
 // 	auto loader = godot::ResourceLoader::get_singleton();

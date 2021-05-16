@@ -31,8 +31,8 @@
 namespace Urho3D
 {
 
-static const int CONVERSION_BUFFER_LENGTH = 128;
-static const int MATRIX_CONVERSION_BUFFER_LENGTH = 256;
+static constexpr int CONVERSION_BUFFER_LENGTH = 128;
+static constexpr int MATRIX_CONVERSION_BUFFER_LENGTH = 256;
 
 class WString;
 
@@ -613,7 +613,16 @@ public:
         assert(index < length_);
         return buffer_[index];
     }
+    
+    WString& operator +=(wchar_t rhs)
+    {
+        unsigned oldLength = length_;
+        Resize(length_ + 1);
+        buffer_[oldLength] = rhs;
 
+        return *this;
+    }
+    
     /// Resize the string.
     void Resize(unsigned newLength);
 

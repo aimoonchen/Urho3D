@@ -27,7 +27,7 @@ public:
 
 	void _init();
 
-	void load(String path);
+	void load(WString path);
 
 	void release();
 
@@ -35,9 +35,9 @@ public:
 	
 	void setup();
 
-	String get_data_path() const { return m_data_path; }
+	WString get_data_path() const { return m_data_path; }
 
-	void set_data_path(String path) { m_data_path = path; }
+	void set_data_path(WString path) { m_data_path = path; }
 
 // 	Dictionary get_subresources() const { return m_subresources; }
 // 
@@ -56,7 +56,7 @@ public:
 private:
 	void get_material_path(char16_t* path, size_t path_size);
 
-	String m_data_path;
+	WString m_data_path;
 	std::vector<char> m_data_bytes;
 // 	PoolByteArray m_data_bytes;
 // 	Dictionary m_subresources;

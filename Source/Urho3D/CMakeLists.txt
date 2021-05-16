@@ -151,6 +151,17 @@ else ()
         list (APPEND EXCLUDED_SOURCE_DIRS Graphics/Direct3D11)
     endif ()
 endif ()
+
+if (WIN32)
+    list (APPEND EXCLUDED_SOURCE_DIRS Cocos2D/platform/android Cocos2D/platform/apple Cocos2D/platform/desktop Cocos2D/platform/ios Cocos2D/platform/linux Cocos2D/platform/mac)
+elseif(IOS)
+    list (APPEND EXCLUDED_SOURCE_DIRS Cocos2D/platform/android Cocos2D/platform/apple Cocos2D/platform/desktop Cocos2D/platform/win32 Cocos2D/platform/linux Cocos2D/platform/mac)
+elseif(ANDROID)
+    list (APPEND EXCLUDED_SOURCE_DIRS Cocos2D/platform/win32 Cocos2D/platform/apple Cocos2D/platform/desktop Cocos2D/platform/ios Cocos2D/platform/linux Cocos2D/platform/mac)
+elseif(WEB)
+    list (APPEND EXCLUDED_SOURCE_DIRS Cocos2D/platform/android Cocos2D/platform/win32 Cocos2D/platform/apple Cocos2D/platform/desktop Cocos2D/platform/ios Cocos2D/platform/linux Cocos2D/platform/mac)
+endif ()
+
 if (APPLE AND NOT ARM)
     set (GLOB_OBJC_PATTERN *.m)     # Should only pick up MacFileWatcher.m for macOS platform at the moment
 endif ()
