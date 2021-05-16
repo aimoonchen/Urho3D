@@ -27,29 +27,15 @@ THE SOFTWARE.
 #define __CCPLATFORMDEFINE_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#ifdef __MINGW32__
-#include <string.h>
-#endif
-
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+#if CC_TARGET_PLATFORM == CC_PLATFORM_IOS
 
 #include <assert.h>
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
+#define CC_DLL 
+
+#define CC_ASSERT(cond) assert(cond)
+
+
 #define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
 
 /* Define NULL pointer value */
@@ -61,6 +47,7 @@ THE SOFTWARE.
 #endif
 #endif
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+
+#endif // CC_PLATFORM_IOS
 
 #endif /* __CCPLATFORMDEFINE_H__*/

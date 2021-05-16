@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright (c) 2010-2012 cocos2d-x.org
+Copyright (c) 2012 cocos2d-x.org
 Copyright (c) 2013-2016 Chukong Technologies Inc.
 Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
@@ -23,44 +23,23 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
 
-#include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#ifdef __MINGW32__
+#include "platform/android/jni/JniHelper.h"
 #include <string.h>
-#endif
+#include "base/CCDirector.h"
+#include "platform/CCApplication.h"
+#include "platform/CCFileUtils.h"
+#include "base/ccUTF8.h"
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+static const std::string className = "org.cocos2dx.lib.Cocos2dxBitmap";
 
-#include <assert.h>
+using namespace cocos2d;
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+int getFontSizeAccordingHeightJni(int height) {
+    return JniHelper::callStaticIntMethod(className, "getFontSizeAccordingHeight", height);
+}
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
+std::string getStringWithEllipsisJni(const char* text, float width, float fontSize) {
+    return JniHelper::callStaticStringMethod(className, "getStringWithEllipsis", text, width, fontSize);
+}
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/

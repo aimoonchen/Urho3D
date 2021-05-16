@@ -23,44 +23,45 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+
+#ifndef __CC_EGLVIEWIMPL_ANDROID_H__
+#define __CC_EGLVIEWIMPL_ANDROID_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#include "base/CCRef.h"
+#include "math/CCGeometry.h"
+#include "platform/CCGLView.h"
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+NS_CC_BEGIN
 
-#include <assert.h>
+class CC_DLL GLViewImpl : public GLView
+{
+public:
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+    // static function
+    static GLViewImpl* create(const std::string &viewname);
+    static GLViewImpl* createWithRect(const std::string& viewName, Rect rect, float frameZoomFactor = 1.0f);
+    static GLViewImpl* createWithFullScreen(const std::string& viewName);
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
+    bool isOpenGLReady() override;
+    void end() override;
+    void swapBuffers() override;
+    void setIMEKeyboardState(bool bOpen) override;
+    virtual Rect getSafeAreaRect() const override;
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+protected:
+    GLViewImpl();
+    virtual ~GLViewImpl();
 
-#endif /* __CCPLATFORMDEFINE_H__*/
+    bool initWithRect(const std::string& viewName, Rect rect, float frameZoomFactor);
+    bool initWithFullScreen(const std::string& viewName);
+};
+
+NS_CC_END
+
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+
+#endif    // end of __CC_EGLVIEWIMPL_ANDROID_H__
+

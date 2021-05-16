@@ -23,44 +23,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
 
-#include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#ifndef __PLATFORM_IPHONE_PLATFORM_CCLOCK_H__
+#define __PLATFORM_IPHONE_PLATFORM_CCLOCK_H__
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#include "platform/CCPlatformMacros.h"
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+NS_CC_BEGIN
 
-#include <assert.h>
+class Lock
+{
+public:
+    /**
+     * @js ctor
+     */
+    Lock(void);
+    /**
+     * @js NA
+     * @lua NA
+     */
+    ~Lock(void);
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+    void lock(void);
+    void unlock(void);
+};
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
+NS_CC_END
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif // __PLATFORM_IPHONE_PLATFORM_CCLOCK_H__

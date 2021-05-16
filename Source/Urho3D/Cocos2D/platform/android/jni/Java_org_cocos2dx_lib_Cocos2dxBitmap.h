@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright (c) 2010-2012 cocos2d-x.org
+Copyright (c) 2012 cocos2d-x.org
 Copyright (c) 2013-2016 Chukong Technologies Inc.
 Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
@@ -23,44 +23,12 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+#ifndef __EDITBOX_JNI_H__
+#define __EDITBOX_JNI_H__
 
-#include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include <string>
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+int getFontSizeAccordingHeightJni(int height);
+std::string getStringWithEllipsisJni(const char* text, float width, float fontSize);
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
-
-#include <assert.h>
-
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
-
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
-
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif // __EDITBOX_JNI_H__

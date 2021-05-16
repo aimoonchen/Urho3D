@@ -2,6 +2,7 @@
 Copyright (c) 2010-2012 cocos2d-x.org
 Copyright (c) 2013-2016 Chukong Technologies Inc.
 Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
+Copyright (c) 2019 Xiamen Yaji Software Co., Ltd.
 
 http://www.cocos2d-x.org
 
@@ -22,45 +23,35 @@ AUTHORS OR COPYRIGHT HOLDERS BE LIABLE FOR ANY CLAIM, DAMAGES OR OTHER
 LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
-****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+ ****************************************************************************/
 
-#include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+package org.cocos2dx.lib;
+import android.util.Log;
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+import com.oppo.oiface.engine.OifaceGameEngineManager;
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+public class Cocos2dxDataManager {
+    public static void setOptimise(String thing, float value){
+        String jsonStr = "{\"" + thing + "\":" + String.valueOf(value) + "}";
+        OifaceGameEngineManager.getInstance().updateGameEngineInfo(jsonStr);
+    }
 
-#include <assert.h>
-
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
-
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
-
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/
+    public static void setProcessID(int pid){
+        setOptimise("render_pid", pid);
+    }
+    public static void setFrameSize(int width, int height){
+        setOptimise("buffer_size", width * height);
+    }
+    public static void onSceneLoaderBegin(){
+        setOptimise("load_scene", 1);
+    }
+    public static void onSceneLoaderEnd(){
+        setOptimise("load_scene", 0);
+    }
+    public static void onShaderLoaderBegin(){
+        setOptimise("shader_compile", 1);
+    }
+    public static void onShaderLoaderEnd(){
+        setOptimise("shader_compile", 0);
+    }
+}

@@ -1,5 +1,5 @@
 /****************************************************************************
-Copyright (c) 2010-2012 cocos2d-x.org
+Copyright (c) 2011      Laschweinski
 Copyright (c) 2013-2016 Chukong Technologies Inc.
 Copyright (c) 2017-2018 Xiamen Yaji Software Co., Ltd.
 
@@ -23,44 +23,46 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+#ifndef __CC_FILEUTILS_LINUX_H__
+#define __CC_FILEUTILS_LINUX_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#include "platform/CCFileUtils.h"
+#include "platform/CCPlatformMacros.h"
+#include "base/ccTypes.h"
+#include <string>
+#include <vector>
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+NS_CC_BEGIN
 
-#include <assert.h>
+/**
+ * @addtogroup platform
+ * @{
+ */
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+//! @brief  Helper class to handle file operations
+class CC_DLL FileUtilsLinux : public FileUtils
+{
+    friend class FileUtils;
+protected:
+    FileUtilsLinux();
+private:
+    std::string _writablePath;
+public:
+    /* override functions */
+    bool init() override;
+    virtual std::string getWritablePath() const override;
+private:
+    virtual bool isFileExistInternal(const std::string& strFilePath) const override;
+};
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
+// end of platform group
+/// @}
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+NS_CC_END
 
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+
+#endif    // __CC_FILEUTILS_LINUX_H__

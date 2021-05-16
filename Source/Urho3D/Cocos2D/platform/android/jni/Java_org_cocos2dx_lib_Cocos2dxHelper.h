@@ -23,44 +23,19 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+#ifndef __Java_org_cocos2dx_lib_Cocos2dxHelper_H__
+#define __Java_org_cocos2dx_lib_Cocos2dxHelper_H__
 
-#include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#include <string>
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+typedef void (*EditTextCallback)(const char* text, void* ctx);
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+extern const char * getApkPath();
+extern std::string getPackageNameJNI();
+extern int getObbAssetFileDescriptorJNI(const char* path, long* startOffset, long* size);
+extern void conversionEncodingJNI(const char* src, int byteSize, const char* fromCharset, char* dst, const char* newCharset);
 
-#include <assert.h>
+extern int getDeviceSampleRate();
+extern int getDeviceAudioBufferSizeInFrames();
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
-
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
-
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif /* __Java_org_cocos2dx_lib_Cocos2dxHelper_H__ */

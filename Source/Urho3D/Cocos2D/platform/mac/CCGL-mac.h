@@ -23,44 +23,28 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
+
+#ifndef __PLATFORM_MAC_CCGL_H__
+#define __PLATFORM_MAC_CCGL_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#import <OpenGL/gl.h>
+#import <OpenGL/glu.h>
+#import <OpenGL/glext.h>
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+#define CC_GL_DEPTH24_STENCIL8      -1
 
-#include <assert.h>
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+#define glDeleteVertexArrays            glDeleteVertexArraysAPPLE
+#define glGenVertexArrays               glGenVertexArraysAPPLE
+#define glBindVertexArray               glBindVertexArrayAPPLE
+#define glClearDepthf                   glClearDepth
+#define glDepthRangef                   glDepthRange
+#define glReleaseShaderCompiler(xxx)
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#endif // __PLATFORM_MAC_CCGL_H__
 
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_MAC

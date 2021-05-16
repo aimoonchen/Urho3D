@@ -23,33 +23,35 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
+
 #ifndef __CCPLATFORMDEFINE_H__
 #define __CCPLATFORMDEFINE_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#include <android/log.h>
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+#define CC_DLL
 
-#include <assert.h>
+#define CC_NO_MESSAGE_PSEUDOASSERT(cond)                        \
+    if (!(cond)) {                                              \
+        __android_log_print(ANDROID_LOG_ERROR,                  \
+                            "cocos2d-x assert",                 \
+                            "%s function:%s line:%d",           \
+                            __FILE__, __FUNCTION__, __LINE__);  \
+    }
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
+#define CC_MESSAGE_PSEUDOASSERT(cond, msg)                          \
+    if (!(cond)) {                                                  \
+        __android_log_print(ANDROID_LOG_ERROR,                      \
+                            "cocos2d-x assert",                     \
+                            "file:%s function:%s line:%d, %s",      \
+                            __FILE__, __FUNCTION__, __LINE__, msg); \
+    }
+
+#define CC_ASSERT(cond) CC_NO_MESSAGE_PSEUDOASSERT(cond)
+
 #define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
 
 /* Define NULL pointer value */
@@ -61,6 +63,6 @@ THE SOFTWARE.
 #endif
 #endif
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
 #endif /* __CCPLATFORMDEFINE_H__*/

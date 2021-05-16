@@ -23,44 +23,31 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
-#ifndef __CCPLATFORMDEFINE_H__
-#define __CCPLATFORMDEFINE_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
-#ifdef __MINGW32__
-#include <string.h>
-#endif
+#include "platform/CCCommon.h"
+#include "platform/android/jni/JniHelper.h"
+#include <android/log.h>
+#include <stdio.h>
+#include <jni.h>
 
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+NS_CC_BEGIN
 
-#include <assert.h>
+#define MAX_LEN         (cocos2d::kMaxLogLen + 1)
 
-#if CC_DISABLE_ASSERT > 0
-#define CC_ASSERT(cond)
-#else
-#define CC_ASSERT(cond)    assert(cond)
-#endif
-#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+void MessageBox(const char * pszMsg, const char * pszTitle)
+{
+    JniHelper::callStaticVoidMethod("org.cocos2dx.lib.Cocos2dxHelper", "showDialog", pszTitle, pszMsg);
+}
 
-/* Define NULL pointer value */
-#ifndef NULL
-#ifdef __cplusplus
-#define NULL    0
-#else
-#define NULL    ((void *)0)
-#endif
-#endif
+void LuaLog(const char * pszFormat)
+{
+    __android_log_write(ANDROID_LOG_DEBUG, "cocos2d-x debug info", pszFormat);
+}
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+NS_CC_END
 
-#endif /* __CCPLATFORMDEFINE_H__*/
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+

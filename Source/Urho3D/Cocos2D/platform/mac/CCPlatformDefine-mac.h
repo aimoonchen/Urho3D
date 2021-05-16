@@ -23,33 +23,27 @@ LIABILITY, WHETHER IN AN ACTION OF CONTRACT, TORT OR OTHERWISE, ARISING FROM,
 OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
+
 #ifndef __CCPLATFORMDEFINE_H__
 #define __CCPLATFORMDEFINE_H__
 
 #include "platform/CCPlatformConfig.h"
-#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-
-#ifdef __MINGW32__
-#include <string.h>
-#endif
-
-//#if defined(CC_STATIC)
-    #define CC_DLL
-// #else
-// #if defined(_USRDLL)
-//     #define CC_DLL     __declspec(dllexport)
-// #else         /* use a DLL library */
-//     #define CC_DLL     __declspec(dllimport)
-// #endif
-// #endif
+#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 
 #include <assert.h>
+
+#ifdef _USRDLL
+#define CC_DLL __attribute__ ((visibility("default"))) 
+#else
+#define CC_DLL
+#endif
 
 #if CC_DISABLE_ASSERT > 0
 #define CC_ASSERT(cond)
 #else
-#define CC_ASSERT(cond)    assert(cond)
+#define CC_ASSERT(cond) assert(cond)
 #endif
+
 #define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
 
 /* Define NULL pointer value */
@@ -61,6 +55,6 @@ THE SOFTWARE.
 #endif
 #endif
 
-#endif //s CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+#endif // CC_TARGET_PLATFORM == CC_PLATFORM_MAC
 
 #endif /* __CCPLATFORMDEFINE_H__*/
