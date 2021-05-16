@@ -30,15 +30,15 @@
         #include <string.h>
     #endif
 
-    #if defined(CC_STATIC)
+//    #if defined(CC_STATIC)
         #define CC_GUI_DLL
-    #else
-        #if defined(_USEGUIDLL)
-            #define CC_GUI_DLL     __declspec(dllexport)
-        #else
-            #define CC_GUI_DLL     __declspec(dllimport)
-        #endif
-    #endif
+//     #else
+//         #if defined(_USEGUIDLL)
+//             #define CC_GUI_DLL     __declspec(dllexport)
+//         #else
+//             #define CC_GUI_DLL     __declspec(dllimport)
+//         #endif
+//     #endif
 
     /* Define NULL pointer value */
     #ifndef NULL
