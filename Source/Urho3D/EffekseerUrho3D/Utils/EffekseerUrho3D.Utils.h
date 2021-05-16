@@ -215,7 +215,7 @@ inline Urho3D::Color ToGdColor(Effekseer::Color c)
 
 size_t ToEfkString(char16_t* to, const Urho3D::WString& from, size_t size);
 
-Urho3D::String ToGdString(const char16_t* from);
+Urho3D::WString ToGdString(const char16_t* from);
 
 //godot::Variant ScriptNew(godot::Ref<godot::Script> script);
 
