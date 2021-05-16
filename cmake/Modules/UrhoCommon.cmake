@@ -177,10 +177,10 @@ if (CMAKE_PROJECT_NAME STREQUAL Urho3D)
         set (DEFAULT_OPENGL TRUE)
     endif ()
     cmake_dependent_option (URHO3D_BGFX "Use BGFX graphic backend" TRUE WIN32 TRUE)
-    cmake_dependent_option (URHO3D_OPENGL "Use OpenGL instead of Direct3D (Windows platform only)" "${DEFAULT_OPENGL}" WIN32 TRUE)
+    # cmake_dependent_option (URHO3D_OPENGL "Use OpenGL instead of Direct3D (Windows platform only)" "${DEFAULT_OPENGL}" WIN32 TRUE)
     # On Windows platform Direct3D11 can be optionally chosen
     # Using Direct3D11 on non-MSVC compiler may require copying and renaming Microsoft official libraries (.lib to .a), else link failures or non-functioning graphics may result
-    cmake_dependent_option (URHO3D_D3D11 "Use Direct3D11 instead of Direct3D9 (Windows platform only); overrides URHO3D_OPENGL option" FALSE "WIN32" FALSE)
+    # cmake_dependent_option (URHO3D_D3D11 "Use Direct3D11 instead of Direct3D9 (Windows platform only); overrides URHO3D_OPENGL option" FALSE "WIN32" FALSE)
     if (X86 OR E2K OR WEB)
         # TODO: Rename URHO3D_SSE to URHO3D_SIMD
         if (MINGW AND CMAKE_CXX_COMPILER_VERSION VERSION_LESS 4.9.1)
