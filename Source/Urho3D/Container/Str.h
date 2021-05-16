@@ -614,15 +614,6 @@ public:
         return buffer_[index];
     }
     
-    WString& operator +=(wchar_t rhs)
-    {
-        unsigned oldLength = length_;
-        Resize(length_ + 1);
-        buffer_[oldLength] = rhs;
-
-        return *this;
-    }
-    
     /// Resize the string.
     void Resize(unsigned newLength);
 
