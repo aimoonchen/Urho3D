@@ -61,7 +61,7 @@ public:
     unsigned GetTimeStamp() const { return timeStamp_; }
     // TODO:
     const String& GetShaderPath() const { return shaderPath_; }
-
+    const std::vector<char>& GetCompiledData() { return compiled_data_; }
 private:
     /// Process source code and include files. Return true if successful.
     bool ProcessSource(String& code, Deserializer& source);
@@ -83,6 +83,7 @@ private:
     unsigned numVariations_;
     // TODO:
     String shaderPath_;
+    std::vector<char> compiled_data_;
 };
 
 }

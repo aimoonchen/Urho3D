@@ -2444,6 +2444,15 @@ ShaderVariation* Graphics::GetShader(ShaderType type, const char* name, const ch
         String realName;// = (type == VS) ? "vs_" : "fs_";
         realName += name;
         String fullShaderName = shaderPath_ + realName + shaderExtension_;
+
+        bool compiled = false;
+        Vector<String> definesVec = String(defines).ToUpper().Split(' ');
+        Sort(definesVec.Begin(), definesVec.End());
+        StringHash definesHash(String::Joined(definesVec, " "));
+        String fullBinName = shaderPath_ + GetCompiledShaderPath() + name + ((type == VS) ? "vs" : "fs") + String(definesHash.Value()) + ".bin";
+        if (cache->Exists(fullBinName)) {
+            fullShaderName = fullBinName;
+        }
         // Try to reduce repeated error log prints because of missing shaders
         if (lastShaderName_ == realName && !cache->Exists(fullShaderName))
             return nullptr;
@@ -3457,7 +3466,45 @@ void Graphics::WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t 
     memcpy(((bgfx::InstanceDataBuffer*)idb)->data + pos, data, len);
     pos += len;
 }
+String Graphics::GetCompiledShaderPath() const
+{
+    switch (bgfx::getRendererType())
+    {
+    case bgfx::RendererType::Noop:
+    case bgfx::RendererType::Direct3D9:
+        return "compiled/dx9/";
+        break;
+    case bgfx::RendererType::Direct3D11:
+    case bgfx::RendererType::Direct3D12:
+        return "compiled/dx11/";
+        break;
+    case bgfx::RendererType::Gnm:
+        return "compiled/pssl/";
+        break;
+    case bgfx::RendererType::Metal:
+        return "compiled/metal/";
+        break;
+    case bgfx::RendererType::Nvn:
+        return "compiled/nvn/";
+        break;
+    case bgfx::RendererType::OpenGL:
+        return "compiled/glsl/";
+        break;
+    case bgfx::RendererType::OpenGLES:
+        return "compiled/essl/";
+        break;
+    case bgfx::RendererType::Vulkan:
+        return "compiled/spirv/";
+        break;
+    case bgfx::RendererType::WebGPU:
+        return "compiled/spirv/";
+        break;
 
+    case bgfx::RendererType::Count:
+        BX_ASSERT(false, "You should not be here!");
+        break;
+    }
+}
 uint64_t bgfxRSBend(Urho3D::BlendMode mode, bool alphaToCoverage)
 {
     uint64_t flag = 0;

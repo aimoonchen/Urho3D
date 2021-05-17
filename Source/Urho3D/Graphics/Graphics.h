@@ -952,6 +952,7 @@ public:
     void SetUIMode(bool b) { ui_view_ = b; view_context_dirty_ = true; }
     ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }
     void SetGlobalTexture(unsigned index, Texture* texture);
+    String GetCompiledShaderPath() const;
 };
 
 /// Register Graphics library objects.
