@@ -2444,15 +2444,6 @@ ShaderVariation* Graphics::GetShader(ShaderType type, const char* name, const ch
         String realName;// = (type == VS) ? "vs_" : "fs_";
         realName += name;
         String fullShaderName = shaderPath_ + realName + shaderExtension_;
-
-        bool compiled = false;
-        Vector<String> definesVec = String(defines).ToUpper().Split(' ');
-        Sort(definesVec.Begin(), definesVec.End());
-        StringHash definesHash(String::Joined(definesVec, " "));
-        String fullBinName = shaderPath_ + GetCompiledShaderPath() + name + ((type == VS) ? "vs" : "fs") + String(definesHash.Value()) + ".bin";
-        if (cache->Exists(fullBinName)) {
-            fullShaderName = fullBinName;
-        }
         // Try to reduce repeated error log prints because of missing shaders
         if (lastShaderName_ == realName && !cache->Exists(fullShaderName))
             return nullptr;

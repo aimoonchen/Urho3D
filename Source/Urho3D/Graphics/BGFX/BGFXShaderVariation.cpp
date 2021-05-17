@@ -21,7 +21,9 @@
 //
 
 #include "../../Precompiled.h"
-
+#include "../../Core/Context.h"
+#include "../../IO/File.h"
+#include "../../Resource/ResourceCache.h"
 #include "../../Graphics/Graphics.h"
 #include "../../Graphics/GraphicsImpl.h"
 #include "../../Graphics/Shader.h"
@@ -102,37 +104,8 @@ bool ShaderVariation::Create()
 
     const String& originalShaderCode = owner_->GetSourceCode(type_);
     String shaderCode;
-    /*
-    // Check if the shader code contains a version define
-    unsigned verStart = originalShaderCode.Find('#');
-    unsigned verEnd = 0;
-    if (verStart != String::NPOS)
-    {
-        if (originalShaderCode.Substring(verStart + 1, 7) == "version")
-        {
-            verEnd = verStart + 9;
-            while (verEnd < originalShaderCode.Length())
-            {
-                if (IsDigit((unsigned)originalShaderCode[verEnd]))
-                    ++verEnd;
-                else
-                    break;
-            }
-            // If version define found, insert it first
-            String versionDefine = originalShaderCode.Substring(verStart, verEnd - verStart);
-            shaderCode += versionDefine + "\n";
-        }
-    }
-    // Force GLSL version 150 if no version define and GL3 is being used
-//     if (!verEnd && Graphics::GetGL3Support())
-//         shaderCode += "#version 150\n";
+    
 
-    // Distinguish between VS and PS compile in case the shader code wants to include/omit different things
-    shaderCode += type_ == VS ? "#define COMPILEVS\n" : "#define COMPILEPS\n";
-
-    // Add define for the maximum number of supported bones
-    shaderCode += "#define MAXBONES " + String(Graphics::GetMaxBones()) + "\n";
-    */
     // Prepend the defines to the shader code
     Vector<String> defineVec = defines_.Split(' ');
     for (unsigned i = 0; i < defineVec.Size(); ++i)
@@ -156,27 +129,30 @@ bool ShaderVariation::Create()
 #ifdef __EMSCRIPTEN__
     shaderCode += "#define WEBGL\n";
 #endif
-//     if (Graphics::GetGL3Support())
-//         shaderCode += "#define GL3\n";
 
-    // When version define found, do not insert it a second time
-//     if (verEnd > 0)
-//         shaderCode += (originalShaderCode.CString() + verEnd);
-//     else
-//        shaderCode += originalShaderCode;
-// 
-// 
-//     shaderCode = originalShaderCode;
-//     const char* shaderCStr = shaderCode.CString();
-    auto& compiled_data = owner_->GetCompiledData();
     const bgfx::Memory* bgfxmem = nullptr;
-    if (!compiled_data.empty())
-    {
-        bgfxmem = bgfx::copy(compiled_data.data(), compiled_data.size());
-    }
-    else
-    {
-        String filePath = /*"C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX\\" +*/ GetName() + ".sc";
+    
+    StringHash definesHash(String::Joined(defineVec, " "));
+    const auto& shaderPath = owner_->GetShaderPath();
+    String binFilename = shaderPath.Substring(13, shaderPath.FindLast('/') - 12) + GetName() +
+                         ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value()) + ".bin";
+
+    auto graphics = owner_->GetContext()->GetSubsystem<Graphics>();
+    String fullBinName = "Shaders/BGFX/" + graphics->GetCompiledShaderPath() + binFilename;
+    auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
+    if (cache->Exists(fullBinName)) {
+        auto binfile = cache->GetFile(fullBinName);
+        auto dataSize = binfile->GetSize();
+        bgfxmem = bgfx::alloc(dataSize);
+        if (binfile->Read(bgfxmem->data, dataSize) != dataSize) {
+            URHO3D_LOGERRORF("Read file error : %s", fullBinName.CString());
+            return false;
+        }
+    } else {
+#if _WIN32
+        String localPath("C:/GitProjects/");
+        //String localPath("D:/Github/");
+        String filePath = GetName() + ".sc";
         //
         bgfx::Options options;
         options.inputFilePath = filePath.CString();   // filePath;
@@ -206,35 +182,26 @@ bool ShaderVariation::Create()
         options.depends = false; // cmdLine.hasArg("depends");
         options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
 
-        //options.includeDirs.push_back("C:\\GitProjects\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
-        options.includeDirs.push_back("D:\\Github\\Urho3D\\bin\\CoreData\\Shaders\\BGFX");
+        options.includeDirs.push_back((localPath + "Urho3D/bin/CoreData/Shaders/BGFX").CString());
         options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
         auto maxbone = "MAXBONES=" + String(Graphics::GetMaxBones());
         options.defines.push_back(maxbone.CString());
+        
         for (const auto& def : defineVec)
         {
             options.defines.push_back(def.CString());
         }
         const char* varying = NULL;
         bgfx::File attribdef;
-        auto shaderPath = owner_->GetShaderPath();
-        if ('c' != options.shaderType)
-        {
-//              std::string defaultVarying = ("C:/GitProjects/Urho3D/bin/CoreData/" +
-//                                           shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc").CString();
-            std::string defaultVarying = ("D:/Github/Urho3D/bin/CoreData/" +
-                                          shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc")
-                                             .CString();
-            const char* varyingdef =
-                defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
+        if ('c' != options.shaderType) {
+            std::string defaultVarying = (localPath + "Urho3D/bin/CoreData/" +
+                                          shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc").CString();
+            const char* varyingdef = defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
             attribdef.load(varyingdef);
             varying = attribdef.getData();
-            if (NULL != varying && *varying != '\0')
-            {
+            if (NULL != varying && *varying != '\0') {
                 options.dependencies.push_back(varyingdef);
-            }
-            else
-            {
+            } else {
                 bx::printf(
                     "ERROR: Failed to parse varying def file: \"%s\" No input/output semantics will be generated in "
                     "the code!\n",
@@ -244,6 +211,7 @@ bool ShaderVariation::Create()
         const size_t padding = 16384;
         uint32_t size = originalShaderCode.Length();// (uint32_t)bx::getSize(&reader);
         char* data = new char[size + padding + 1];
+        char* dataMetal = new char[size + padding + 1];
         //size = (uint32_t)bx::read(&reader, data, size);
         memcpy(data, originalShaderCode.CString(), size);
 
@@ -257,38 +225,33 @@ bool ShaderVariation::Create()
         // if input doesn't have empty line at EOF.
         data[size] = '\n';
         bx::memSet(&data[size + 1], 0, padding);
-        //bx::close(&reader);
+        memcpy(dataMetal, data, size + padding + 1);
 
         bgfx::memory_writer mwriter;
         auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &mwriter);
-        if (!compiled)
-        {
-            URHO3D_LOGERRORF("CompileShader %s Failed.", filePath.CString());
+        if (!compiled) {
+            URHO3D_LOGERRORF("CompileShader(glsl) %s Failed.", filePath.CString());
         }
-
-        StringHash definesHash(defines_);
-        String outputFilename = GetName() + ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value()) + ".bin";
-
-        bx::FileWriter* fwriter = NULL;
-
-        if (false/*!bin2c.isEmpty()*/)
-        {
-            ; // writer = new Bin2cWriter(bin2c);
-        }
-        else
-        {
-            fwriter = new bx::FileWriter;
-        }
-        auto outFilePath = "D:/Github/Urho3D/bin/CoreData/Shaders/BGFX/compiled/glsl/" + shaderPath.Substring(13, shaderPath.FindLast('/') - 12) + outputFilename;
-        if (!bx::open(fwriter, /*outFilePath*/outFilePath.CString()))
-        {
-            //bx::printf("Unable to open output file '%s'.\n", outFilePath);
-            return bx::kExitFailure;
-        }
-        bx::write(fwriter, &mwriter.memory_[0], mwriter.current_size_);
-        bx::close(fwriter);
-        delete fwriter;
         bgfxmem = bgfx::copy(&mwriter.memory_[0], mwriter.current_size_);
+        
+        auto outFilePath0 = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/glsl/" + binFilename;
+        File file0(owner_->GetContext(), outFilePath0, FileMode::FILE_WRITE);
+        file0.Write(&mwriter.memory_[0], mwriter.current_size_);
+        //
+        mwriter.current_size_ = 0;
+        options.platform = "osx";
+        options.profile = "metal";
+        compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, dataMetal, size, options, &mwriter);
+        if (!compiled) {
+            URHO3D_LOGERRORF("CompileShader(metal) %s Failed", filePath.CString());
+        }
+        auto outFilePath1 = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
+        File file1(owner_->GetContext(), outFilePath1, FileMode::FILE_WRITE);
+        file1.Write(&mwriter.memory_[0], mwriter.current_size_);
+#else
+        URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
+        return false;
+#endif
     }
     auto shaderHandle = bgfx::createShader(bgfxmem);
     object_.handle_ = shaderHandle.idx;
