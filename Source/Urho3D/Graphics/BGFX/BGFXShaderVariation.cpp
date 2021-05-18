@@ -96,17 +96,9 @@ bool ShaderVariation::Create()
         return false;
     }
 
-//     object_.name_ = glCreateShader(type_ == VS ? GL_VERTEX_SHADER : GL_FRAGMENT_SHADER);
-//     if (!object_.name_)
-//     {
-//         compilerOutput_ = "Could not create shader object";
-//         return false;
-//     }
-
     const String& originalShaderCode = owner_->GetSourceCode(type_);
     String shaderCode;
     
-
     // Prepend the defines to the shader code
     Vector<String> defineVec = defines_.Split(' ');
     for (unsigned i = 0; i < defineVec.Size(); ++i)
@@ -159,12 +151,7 @@ bool ShaderVariation::Create()
             shader_command += " --type " + typestr;
             shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" +
                               shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
-            if (platform == "ios")
-            {
-                shader_command += " --platform ios -p metal";
-                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
-            }
-            else if (platform == "osx")
+            if (platform == "osx")
             {
                 shader_command += " --platform osx -p metal";
                 shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
@@ -186,11 +173,11 @@ bool ShaderVariation::Create()
         {
             ;
         }
-        ret = compile_shader("ios");
-        if (ret != 0)
-        {
-            ;
-        }
+//         ret = compile_shader("ios");
+//         if (ret != 0)
+//         {
+//             ;
+//         }
 #else
         URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
         return false;
