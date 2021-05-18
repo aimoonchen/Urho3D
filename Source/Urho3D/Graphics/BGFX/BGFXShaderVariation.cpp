@@ -133,8 +133,8 @@ bool ShaderVariation::Create()
     auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
     if (!cache->Exists(fullBinName)) {
 #if _WIN32
-        // String localPath("C:/GitProjects/");
-        String localPath("D:/Github/");
+        String localPath("C:/GitProjects/");
+        //String localPath("D:/Github/");
         auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](const String& platform) {
             Vector<String> defines;
             defines.Push((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
@@ -156,6 +156,11 @@ bool ShaderVariation::Create()
                 shader_command += " --platform osx -p metal";
                 shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
             }
+            else if (platform == "android")
+            {
+                shader_command += " --platform android";
+                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/essl/" + binFilename;
+            }
             else if (platform == "windows")
             {
                 shader_command += " --platform windows -p 150";
@@ -173,7 +178,7 @@ bool ShaderVariation::Create()
         {
             ;
         }
-//         ret = compile_shader("ios");
+//         ret = compile_shader("android");
 //         if (ret != 0)
 //         {
 //             ;

@@ -10,7 +10,7 @@ SAMPLER2D(sLightRampMap, 8);
 SAMPLER2D(sLightSpotMap, 9);
 SAMPLERCUBE(sLightCubeMap, 9);
 #ifndef GL_ES
-    SAMPLER3D(sVolumeMap, 5);
+    //SAMPLER3D(sVolumeMap, 5);
     SAMPLER2D(sAlbedoBuffer, 0);
     SAMPLER2D(sNormalBuffer, 1);
     SAMPLER2D(sDepthBuffer, 13);
@@ -23,7 +23,7 @@ SAMPLERCUBE(sLightCubeMap, 9);
     SAMPLERCUBE(sFaceSelectCubeMap, 11);
     SAMPLERCUBE(sIndirectionCubeMap, 12);
     SAMPLERCUBE(sZoneCubeMap, 15);
-    SAMPLER3D(sZoneVolumeMap, 15);
+    //SAMPLER3D(sZoneVolumeMap, 15);
 #else
     SAMPLER2D(sShadowMap, 10);
 #endif

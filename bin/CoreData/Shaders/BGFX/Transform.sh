@@ -5,11 +5,12 @@
 #endif
 
 // Silence GLSL 150 deprecation warnings
+/*
 #ifdef GL3
 #define attribute in
 #define varying out
 #endif
-
+*/
 // attribute vec4 iPos;
 // attribute vec3 iNormal;
 // attribute vec4 iColor;
@@ -201,7 +202,7 @@ vec4 GetWorldTangent(mat4 modelMatrix)
 }
 
 #else
-
+/*
 // Silence GLSL 150 deprecation warnings
 #ifdef GL3
 #define varying in
@@ -224,5 +225,5 @@ out vec4 fragData[MRT_COUNT];
 #define gl_FragColor fragData[0]
 #define gl_FragData fragData
 #endif
-
+*/
 #endif
