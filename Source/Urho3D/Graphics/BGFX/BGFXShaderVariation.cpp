@@ -23,6 +23,7 @@
 #include "../../Precompiled.h"
 #include "../../Core/Context.h"
 #include "../../IO/File.h"
+#include "../../IO/FileSystem.h"
 #include "../../Resource/ResourceCache.h"
 #include "../../Graphics/Graphics.h"
 #include "../../Graphics/GraphicsImpl.h"
@@ -130,132 +131,87 @@ bool ShaderVariation::Create()
     shaderCode += "#define WEBGL\n";
 #endif
 
-    const bgfx::Memory* bgfxmem = nullptr;
-    
-    StringHash definesHash(String::Joined(defineVec, " "));
     const auto& shaderPath = owner_->GetShaderPath();
-    String binFilename = shaderPath.Substring(13, shaderPath.FindLast('/') - 12) + GetName() +
-                         ((type_ == VS) ? "vs" : "fs") + String(definesHash.Value()) + ".bin";
+    StringHash filenameHash(shaderPath.Substring(13, shaderPath.FindLast('/') - 12) + GetName() +
+                           ((type_ == VS) ? "vs" : "fs") + String::Joined(defineVec, " "));
+    String binFilename = String(StringHash(filenameHash).Value()) + ".bin";
 
     auto graphics = owner_->GetContext()->GetSubsystem<Graphics>();
     String fullBinName = "Shaders/BGFX/" + graphics->GetCompiledShaderPath() + binFilename;
     auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
-    if (cache->Exists(fullBinName)) {
-        auto binfile = cache->GetFile(fullBinName);
-        auto dataSize = binfile->GetSize();
-        bgfxmem = bgfx::alloc(dataSize);
-        if (binfile->Read(bgfxmem->data, dataSize) != dataSize) {
-            URHO3D_LOGERRORF("Read file error : %s", fullBinName.CString());
-            return false;
-        }
-    } else {
+    if (!cache->Exists(fullBinName)) {
 #if _WIN32
-        String localPath("C:/GitProjects/");
-        //String localPath("D:/Github/");
-        String filePath = GetName() + ".sc";
-        //
-        bgfx::Options options;
-        options.inputFilePath = filePath.CString();   // filePath;
-        options.outputFilePath = ""; // outFilePath;
-        options.shaderType = (type_ == VS) ? 'v':'f'; // bx::toLower(type[0]);
-
-        options.disasm = false; // cmdLine.hasArg('\0', "disasm");
-        options.platform = "windows"; // platform;
-
-        options.raw = false; // cmdLine.hasArg('\0', "raw");
-
-        options.profile = "150";//
-        options.debugInformation = false; // cmdLine.hasArg('\0', "debug");
-        options.avoidFlowControl = false; // cmdLine.hasArg('\0', "avoid-flow-control");
-        options.noPreshader = false;      // cmdLine.hasArg('\0', "no-preshader");
-        options.partialPrecision = false; // cmdLine.hasArg('\0', "partial-precision");
-        options.preferFlowControl = false; // cmdLine.hasArg('\0', "prefer-flow-control");
-        options.backwardsCompatibility = false; // cmdLine.hasArg('\0', "backwards-compatibility");
-        options.warningsAreErrors = false;      // cmdLine.hasArg('\0', "Werror");
-        options.keepIntermediate = false;       // cmdLine.hasArg('\0', "keep-intermediate");
-        uint32_t optimization = 3;
-        if (true/*cmdLine.hasArg(optimization, 'O')*/)
-        {
-            options.optimize = true;
-            options.optimizationLevel = optimization;
-        }
-        options.depends = false; // cmdLine.hasArg("depends");
-        options.preprocessOnly = false; // cmdLine.hasArg("preprocess");
-
-        options.includeDirs.push_back((localPath + "Urho3D/bin/CoreData/Shaders/BGFX").CString());
-        options.defines.push_back((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
-        auto maxbone = "MAXBONES=" + String(Graphics::GetMaxBones());
-        options.defines.push_back(maxbone.CString());
-        
-        for (const auto& def : defineVec)
-        {
-            options.defines.push_back(def.CString());
-        }
-        const char* varying = NULL;
-        bgfx::File attribdef;
-        if ('c' != options.shaderType) {
-            std::string defaultVarying = (localPath + "Urho3D/bin/CoreData/" +
-                                          shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc").CString();
-            const char* varyingdef = defaultVarying.c_str(); // cmdLine.findOption("varyingdef", defaultVarying.c_str());
-            attribdef.load(varyingdef);
-            varying = attribdef.getData();
-            if (NULL != varying && *varying != '\0') {
-                options.dependencies.push_back(varyingdef);
-            } else {
-                bx::printf(
-                    "ERROR: Failed to parse varying def file: \"%s\" No input/output semantics will be generated in "
-                    "the code!\n",
-                    varyingdef);
+        // String localPath("C:/GitProjects/");
+        String localPath("D:/Github/");
+        auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](const String& platform) {
+            Vector<String> defines;
+            defines.Push((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
+            defines.Push("MAXBONES=" + String(Graphics::GetMaxBones()));
+            for (const auto& def : defineVec)
+            {
+                defines.Push(def);
             }
-        }
-        const size_t padding = 16384;
-        uint32_t size = originalShaderCode.Length();// (uint32_t)bx::getSize(&reader);
-        char* data = new char[size + padding + 1];
-        char* dataMetal = new char[size + padding + 1];
-        //size = (uint32_t)bx::read(&reader, data, size);
-        memcpy(data, originalShaderCode.CString(), size);
-
-        if (data[0] == '\xef' && data[1] == '\xbb' && data[2] == '\xbf')
+            String shader_command = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/shaderc.exe";
+            shader_command += " -i " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX";
+            shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
+            shader_command += " --define " + String::Joined(defines, ";");
+            String typestr = (type_ == VS) ? "v" : "f";
+            shader_command += " --type " + typestr;
+            shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" +
+                              shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
+            if (platform == "ios")
+            {
+                shader_command += " --platform ios -p metal";
+                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
+            }
+            else if (platform == "osx")
+            {
+                shader_command += " --platform osx -p metal";
+                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
+            }
+            else if (platform == "windows")
+            {
+                shader_command += " --platform windows -p 150";
+                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/glsl/" + binFilename;
+            }
+            return system(shader_command.CString());
+        };
+        auto ret = compile_shader("windows");
+        if (ret != 0)
         {
-            bx::memMove(data, &data[3], size - 3);
-            size -= 3;
+            ;
         }
-
-        // Compiler generates "error X3000: syntax error: unexpected end of file"
-        // if input doesn't have empty line at EOF.
-        data[size] = '\n';
-        bx::memSet(&data[size + 1], 0, padding);
-        memcpy(dataMetal, data, size + padding + 1);
-
-        bgfx::memory_writer mwriter;
-        auto compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, data, size, options, &mwriter);
-        if (!compiled) {
-            URHO3D_LOGERRORF("CompileShader(glsl) %s Failed.", filePath.CString());
+        ret = compile_shader("osx");
+        if (ret != 0)
+        {
+            ;
         }
-        bgfxmem = bgfx::copy(&mwriter.memory_[0], mwriter.current_size_);
-        
-        auto outFilePath0 = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/glsl/" + binFilename;
-        File file0(owner_->GetContext(), outFilePath0, FileMode::FILE_WRITE);
-        file0.Write(&mwriter.memory_[0], mwriter.current_size_);
-        //
-        mwriter.current_size_ = 0;
-        options.platform = "osx";
-        options.profile = "metal";
-        compiled = compileShader(varying, "" /*commandLineComment.c_str()*/, dataMetal, size, options, &mwriter);
-        if (!compiled) {
-            URHO3D_LOGERRORF("CompileShader(metal) %s Failed", filePath.CString());
+        ret = compile_shader("ios");
+        if (ret != 0)
+        {
+            ;
         }
-        auto outFilePath1 = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
-        File file1(owner_->GetContext(), outFilePath1, FileMode::FILE_WRITE);
-        file1.Write(&mwriter.memory_[0], mwriter.current_size_);
 #else
         URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
         return false;
 #endif
     }
-    auto shaderHandle = bgfx::createShader(bgfxmem);
-    object_.handle_ = shaderHandle.idx;
-    return bgfx::isValid(shaderHandle);
+    if (cache->Exists(fullBinName)) {
+        auto binfile = cache->GetFile(fullBinName);
+        auto dataSize = binfile->GetSize();
+        const bgfx::Memory* bgfxmem = bgfx::alloc(dataSize);
+        if (binfile->Read(bgfxmem->data, dataSize) != dataSize)
+        {
+            URHO3D_LOGERRORF("Read file error : %s", fullBinName.CString());
+            return false;
+        }
+        auto shaderHandle = bgfx::createShader(bgfxmem);
+        object_.handle_ = shaderHandle.idx;
+        return bgfx::isValid(shaderHandle);
+    } else {
+        URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
+        return false;
+    }
 }
 
 void ShaderVariation::SetDefines(const String& defines)
