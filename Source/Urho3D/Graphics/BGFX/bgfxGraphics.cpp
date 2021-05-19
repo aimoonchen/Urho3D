@@ -515,7 +515,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
 
     // Store the system FBO on iOS/tvOS now
 #if defined(IOS) || defined(TVOS)
-    glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&impl_->systemFBO_);
+    //glGetIntegerv(GL_FRAMEBUFFER_BINDING, (GLint*)&impl_->systemFBO_);
 #endif
 
     screenParams_ = newParams;

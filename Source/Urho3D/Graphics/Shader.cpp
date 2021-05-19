@@ -91,20 +91,20 @@ bool Shader::BeginLoad(Deserializer& source)
     timeStamp_ = 0;
     
     auto dataSize = source.GetSize();
-    if (source.GetName().EndsWith(".bin"))
-    {
-        compiled_data_.resize(dataSize);
-        if (source.Read(compiled_data_.data(), dataSize) != dataSize)
-            return false;
-    }
-    else
-    {
+//    if (source.GetName().EndsWith(".bin"))
+//    {
+//        compiled_data_.resize(dataSize);
+//        if (source.Read(compiled_data_.data(), dataSize) != dataSize)
+//            return false;
+//    }
+//    else
+//    {
         SharedArrayPtr<char> data(new char[dataSize + 1]);
         if (source.Read(data.Get(), dataSize) != dataSize)
             return false;
         data[dataSize] = '\0';
 
-        String shaderCode = data;
+        String shaderCode = data.Get();
 
         //     if (!ProcessSource(shaderCode, source))
         //         return false;
@@ -114,7 +114,7 @@ bool Shader::BeginLoad(Deserializer& source)
         psSourceCode_ = shaderCode;
         // TODO: 
         shaderPath_ = source.GetName();
-    }
+//    }
 //     CommentOutFunction(vsSourceCode_, "void PS(");
 //     CommentOutFunction(psSourceCode_, "void VS(");
 // 

@@ -531,7 +531,7 @@ void Input::Update()
         // When using the "click to focus" mechanism, only focus automatically in fullscreen or non-hidden mouse mode
         if (!inputFocus_ && ((mouseVisible_ || mouseMode_ == MM_FREE) || graphics_->GetFullscreen())/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/)
 #else
-        if (!inputFocus_ && (flags & SDL_WINDOW_INPUT_FOCUS))
+        if (!inputFocus_/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/)
 #endif
             focusedThisFrame_ = true;
 
