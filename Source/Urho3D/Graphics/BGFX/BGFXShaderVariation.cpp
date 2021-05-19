@@ -178,11 +178,11 @@ bool ShaderVariation::Create()
         {
             ;
         }
-//         ret = compile_shader("android");
-//         if (ret != 0)
-//         {
-//             ;
-//         }
+        ret = compile_shader("android");
+        if (ret != 0)
+        {
+            ;
+        }
 #else
         URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
         return false;

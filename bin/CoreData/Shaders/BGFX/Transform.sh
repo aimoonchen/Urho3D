@@ -1,16 +1,4 @@
 #ifdef COMPILEVS
-
-// Silence WARNING: Shader ... does not use the define NOUV
-#ifdef NOUV
-#endif
-
-// Silence GLSL 150 deprecation warnings
-/*
-#ifdef GL3
-#define attribute in
-#define varying out
-#endif
-*/
 // attribute vec4 iPos;
 // attribute vec3 iNormal;
 // attribute vec4 iColor;
@@ -41,12 +29,15 @@ mat4 GetSkinMatrix(vec4 blendWeights, vec4 blendIndices)
 #endif
 
 #ifdef INSTANCED
+#define GetInstanceMatrix() mat4(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0))
+/*
 mat4 GetInstanceMatrix()
 {
     const vec4 lastColumn = vec4(0.0, 0.0, 0.0, 1.0);
     //return mat4(a_texcoord4, a_texcoord5, a_texcoord6, lastColumn);
     return mat4(i_data0, i_data1, i_data2, lastColumn);
 }
+*/
 #endif
 
 mat3 GetNormalMatrix(mat4 modelMatrix)
@@ -61,16 +52,7 @@ vec2 GetTexCoord(vec2 texCoord)
 
 vec4 GetClipPos(vec3 worldPos)
 {
-    vec4 ret = mul(vec4(worldPos, 1.0), cViewProj);
-    /*
-    // While getting the clip coordinate, also automatically set gl_ClipVertex for user clip planes
-    #if !defined(GL_ES) && !defined(GL3)
-        gl_ClipVertex = ret;
-    #elif defined(GL3)
-        gl_ClipDistance[0] = dot(cClipPlane, ret);
-    #endif
-    */
-    return ret;
+    return mul(vec4(worldPos, 1.0), cViewProj);
 }
 
 float GetZonePos(vec3 worldPos)
@@ -160,6 +142,39 @@ vec3 GetTrailNormal(vec4 iPos, vec3 iParentPos, vec3 iForward)
     #define iModelMatrix cModel
 #endif
 
+#if defined(BILLBOARD)
+    #define GetWorldPos(modelMatrix) GetBillboardPos(vec4(a_position, 1), a_texcoord1, modelMatrix)
+#elif defined(DIRBILLBOARD)
+    #define GetWorldPos(modelMatrix) GetBillboardPos(vec4(a_position, 1), a_normal, modelMatrix)
+#elif defined(TRAILFACECAM)
+    #define GetWorldPos(modelMatrix) GetTrailPos(a_position, a_tangent.xyz, a_tangent.w, modelMatrix)
+#elif defined(TRAILBONE)
+    #define GetWorldPos(modelMatrix) GetTrailPos(a_position, a_tangent.xyz, a_tangent.w, modelMatrix)
+#else
+    #define GetWorldPos(modelMatrix) mul(vec4(a_position, 1.0), modelMatrix).xyz
+#endif
+
+#if defined(BILLBOARD)
+    #define GetWorldNormal(modelMatrix) GetBillboardNormal()
+#elif defined(DIRBILLBOARD)
+    #define GetWorldNormal(modelMatrix) GetBillboardNormal(a_position, a_normal, modelMatrix)
+#elif defined(TRAILFACECAM)
+    #define GetWorldNormal(modelMatrix) GetTrailNormal(a_position)
+#elif defined(TRAILBONE)
+    #define GetWorldNormal(modelMatrix) GetTrailNormal(a_position, a_tangent.xyz, a_normal)
+#else
+    #define GetWorldNormal(modelMatrix) normalize(mul(a_normal, GetNormalMatrix(modelMatrix)))
+#endif
+
+#if defined(BILLBOARD)
+    #define GetWorldTangent(modelMatrix) vec4(normalize(mul(vec3(1.0, 0.0, 0.0), cBillboardRot)), 1.0)
+#elif defined(DIRBILLBOARD)
+    #define GetWorldTangent(modelMatrix) vec4(normalize(mul(vec3(1.0, 0.0, 0.0), GetNormalMatrix(modelMatrix))), 1.0)
+#else
+    #define GetWorldTangent(modelMatrix) vec4(normalize(a_tangent.xyz * GetNormalMatrix(modelMatrix)), a_tangent.w)
+#endif
+
+/*
 vec3 GetWorldPos(mat4 modelMatrix)
 {
     #if defined(BILLBOARD)
@@ -200,30 +215,6 @@ vec4 GetWorldTangent(mat4 modelMatrix)
         return vec4(normalize(a_tangent.xyz * GetNormalMatrix(modelMatrix)), a_tangent.w);
     #endif
 }
-
-#else
-/*
-// Silence GLSL 150 deprecation warnings
-#ifdef GL3
-#define varying in
-
-#ifndef MRT_COUNT
-
-#if defined(DEFERRED)
-#define MRT_COUNT 4
-#elif defined(PREPASS)
-#define MRT_COUNT 2
-#else
-#define MRT_COUNT 1
-#endif
-
-#endif
-
-out vec4 fragData[MRT_COUNT];
-
-
-#define gl_FragColor fragData[0]
-#define gl_FragData fragData
-#endif
 */
+
 #endif
