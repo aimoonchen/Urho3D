@@ -151,9 +151,9 @@ bool ShaderVariation::Create()
             shader_command += " --type " + typestr;
             shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" +
                               shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
-            if (platform == "osx")
+            if (platform == "ios")
             {
-                shader_command += " --platform osx -p metal";
+                shader_command += " --platform ios -p metal";
                 shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
             }
             else if (platform == "android")
@@ -173,7 +173,7 @@ bool ShaderVariation::Create()
         {
             ;
         }
-        ret = compile_shader("osx");
+        ret = compile_shader("ios");
         if (ret != 0)
         {
             ;
