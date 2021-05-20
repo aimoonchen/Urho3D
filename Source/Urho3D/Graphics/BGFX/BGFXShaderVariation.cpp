@@ -34,10 +34,6 @@
 
 #include "bgfx/bgfx.h"
 
-#if _WIN32
-#include "shaderc/shaderc.h"
-#endif
-
 #include "../../DebugNew.h"
 
 namespace Urho3D
@@ -143,7 +139,7 @@ bool ShaderVariation::Create()
             {
                 defines.Push(def);
             }
-            String shader_command = localPath + "Urho3D/bin/CoreData/Shaders/BGFX/shaderc.exe";
+            String shader_command = localPath + "Urho3D/3rd/bgfx/.build/win64_vs2019/bin/shadercRelease.exe";
             shader_command += " -i " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX";
             shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
             shader_command += " --define " + String::Joined(defines, ";");
