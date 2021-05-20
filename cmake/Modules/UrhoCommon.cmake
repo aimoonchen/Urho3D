@@ -558,7 +558,7 @@ if (APPLE)
 endif ()
 if (MSVC)
     # VS-specific setup
-    add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS)
+    add_definitions (-D_CRT_SECURE_NO_WARNINGS -D_SCL_SECURE_NO_WARNINGS -DNOMINMAX)
     if (URHO3D_STATIC_RUNTIME)
         set (RELEASE_RUNTIME /MT)
         set (DEBUG_RUNTIME /MTd)
