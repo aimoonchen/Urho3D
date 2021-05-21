@@ -1189,7 +1189,7 @@ namespace entry
     void* getNativeWindow() { return s_ctx.m_hwnd[0]; }
     } // namespace entry
 
-URHO3D_API int main(int _argc, const char* const* _argv)
+/*URHO3D_API*/ int main(int _argc, const char* const* _argv)
 {
 	using namespace entry;
 	return s_ctx.run(_argc, _argv);
