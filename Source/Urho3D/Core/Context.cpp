@@ -27,7 +27,6 @@
 #include "../IO/Log.h"
 
 #ifndef MINI_URHO
-#include <SDL/SDL.h>
 #ifdef URHO3D_IK
 #include <ik/log.h>
 #include <ik/memory.h>
@@ -257,25 +256,25 @@ bool Context::RequireSDL(unsigned int sdlFlags)
     ++sdlInitCounter;
 
     // Need to call SDL_Init() at least once before SDL_InitSubsystem()
-    if (sdlInitCounter == 1)
-    {
-        URHO3D_LOGDEBUG("Initialising SDL");
-        if (SDL_Init(0) != 0)
-        {
-            URHO3D_LOGERRORF("Failed to initialise SDL: %s", SDL_GetError());
-            return false;
-        }
-    }
-
-    Uint32 remainingFlags = sdlFlags & ~SDL_WasInit(0);
-    if (remainingFlags != 0)
-    {
-        if (SDL_InitSubSystem(remainingFlags) != 0)
-        {
-            URHO3D_LOGERRORF("Failed to initialise SDL subsystem: %s", SDL_GetError());
-            return false;
-        }
-    }
+//     if (sdlInitCounter == 1)
+//     {
+//         URHO3D_LOGDEBUG("Initialising SDL");
+//         if (SDL_Init(0) != 0)
+//         {
+//             URHO3D_LOGERRORF("Failed to initialise SDL: %s", SDL_GetError());
+//             return false;
+//         }
+//     }
+// 
+//     Uint32 remainingFlags = sdlFlags & ~SDL_WasInit(0);
+//     if (remainingFlags != 0)
+//     {
+//         if (SDL_InitSubSystem(remainingFlags) != 0)
+//         {
+//             URHO3D_LOGERRORF("Failed to initialise SDL subsystem: %s", SDL_GetError());
+//             return false;
+//         }
+//     }
 
     return true;
 }
@@ -284,15 +283,15 @@ void Context::ReleaseSDL()
 {
     --sdlInitCounter;
 
-    if (sdlInitCounter == 0)
-    {
-        URHO3D_LOGDEBUG("Quitting SDL");
-        SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
-        SDL_Quit();
-    }
-
-    if (sdlInitCounter < 0)
-        URHO3D_LOGERROR("Too many calls to Context::ReleaseSDL()!");
+//     if (sdlInitCounter == 0)
+//     {
+//         URHO3D_LOGDEBUG("Quitting SDL");
+//         SDL_QuitSubSystem(SDL_INIT_EVERYTHING);
+//         SDL_Quit();
+//     }
+// 
+//     if (sdlInitCounter < 0)
+//         URHO3D_LOGERROR("Too many calls to Context::ReleaseSDL()!");
 }
 
 #ifdef URHO3D_IK

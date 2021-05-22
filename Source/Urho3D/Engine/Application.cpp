@@ -28,7 +28,6 @@
 
 #if defined(IOS) || defined(TVOS)
 #include "../Graphics/Graphics.h"
-#include <SDL/SDL.h>
 #endif
 
 #include "bgfx/bgfx.h"

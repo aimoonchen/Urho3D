@@ -31,8 +31,6 @@
 
 #include "../DebugNew.h"
 
-#include <SDL/SDL.h>
-
 namespace Urho3D
 {
 
@@ -608,8 +606,8 @@ void LineEdit::UpdateCursor()
     cursor_->SetSize(cursor_->GetWidth(), text_->GetRowHeight());
 
     IntVector2 screenPosition = ElementToScreen(cursor_->GetPosition());
-    SDL_Rect rect = {screenPosition.x_, screenPosition.y_, cursor_->GetSize().x_, cursor_->GetSize().y_};
-    SDL_SetTextInputRect(&rect);
+//     SDL_Rect rect = {screenPosition.x_, screenPosition.y_, cursor_->GetSize().x_, cursor_->GetSize().y_};
+//     SDL_SetTextInputRect(&rect);
 
     // Scroll if necessary
     int sx = -GetChildOffset().x_;

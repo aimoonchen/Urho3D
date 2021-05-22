@@ -42,6 +42,10 @@ namespace entry
 
 	static String s_currentDir;
 
+	GamepadState::GamepadState()
+    {
+		bx::memSet(m_axis, 0, sizeof(m_axis));
+    }
 	class FileReader : public bx::FileReader
 	{
 		typedef bx::FileReader super;
@@ -932,8 +936,8 @@ restart:
 
 				case Event::DropFile:
 					{
-						const DropFileEvent* drop = static_cast<const DropFileEvent*>(ev);
-						win.m_dropFile = drop->m_filePath;
+// 						const DropFileEvent* drop = static_cast<const DropFileEvent*>(ev);
+// 						win.m_dropFile = drop->m_filePath;
 						clearDropFile = false;
 					}
 					break;
@@ -952,7 +956,7 @@ restart:
 			WindowState& win = s_window[handle.idx];
 			if (clearDropFile)
 			{
-				win.m_dropFile.clear();
+				//win.m_dropFile.clear();
 			}
 
 			_state = win;
@@ -1031,6 +1035,9 @@ restart:
         // Set view 0 clear state.
         bgfx::setViewClear(0, BGFX_CLEAR_COLOR | BGFX_CLEAR_DEPTH | BGFX_CLEAR_STENCIL, 0x303030ff, 1.0f, 0);
 	}
+    
+	bool AppI::update() { return true; }
+
     int AppI::shutdown()
 	{
 		bgfx::shutdown();

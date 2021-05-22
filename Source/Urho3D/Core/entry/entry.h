@@ -7,9 +7,9 @@
 #define ENTRY_H_HEADER_GUARD
 
 #include "dbg.h"
-#include <bx/bx.h>
-#include <bx/filepath.h>
-#include <bx/string.h>
+// #include <bx/bx.h>
+// #include <bx/filepath.h>
+// #include <bx/string.h>
 
 namespace bx { struct FileReaderI; struct FileWriterI; struct AllocatorI; }
 
@@ -234,10 +234,7 @@ namespace entry
 
 	struct GamepadState
 	{
-		GamepadState()
-		{
-			bx::memSet(m_axis, 0, sizeof(m_axis) );
-		}
+        GamepadState();
 
 		int32_t m_axis[entry::GamepadAxis::Count];
 	};
@@ -274,12 +271,12 @@ namespace entry
 		uint32_t     m_height;
 		MouseState   m_mouse;
 		void*        m_nwh;
-		bx::FilePath m_dropFile;
+//		bx::FilePath m_dropFile;
 	};
 
 	bool processWindowEvents(WindowState& _state, uint32_t& _debug, uint32_t& _reset);
 
-	class BX_NO_VTABLE AppI
+	class /*BX_NO_VTABLE*/ AppI
 	{
 	public:
 		///

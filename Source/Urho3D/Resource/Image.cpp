@@ -29,7 +29,7 @@
 #include "../IO/Log.h"
 #include "../Resource/Decompress.h"
 
-#include <SDL/SDL_surface.h>
+//#include <SDL/SDL_surface.h>
 #define STB_IMAGE_IMPLEMENTATION
 #include <STB/stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
@@ -2222,68 +2222,69 @@ Image* Image::GetSubimage(const IntRect& rect) const
 
 SDL_Surface* Image::GetSDLSurface(const IntRect& rect) const
 {
-    if (!data_)
-        return nullptr;
-
-    if (depth_ > 1)
-    {
-        URHO3D_LOGERROR("Can not get SDL surface from 3D image");
-        return nullptr;
-    }
-
-    if (IsCompressed())
-    {
-        URHO3D_LOGERROR("Can not get SDL surface from compressed image " + GetName());
-        return nullptr;
-    }
-
-    if (components_ < 3)
-    {
-        URHO3D_LOGERROR("Can not get SDL surface from image " + GetName() + " with less than 3 components");
-        return nullptr;
-    }
-
-    IntRect imageRect = rect;
-    // Use full image if illegal rect
-    if (imageRect.left_ < 0 || imageRect.top_ < 0 || imageRect.right_ > width_ || imageRect.bottom_ > height_ ||
-        imageRect.left_ >= imageRect.right_ || imageRect.top_ >= imageRect.bottom_)
-    {
-        imageRect.left_ = 0;
-        imageRect.top_ = 0;
-        imageRect.right_ = width_;
-        imageRect.bottom_ = height_;
-    }
-
-    int imageWidth = width_;
-    int width = imageRect.Width();
-    int height = imageRect.Height();
-
-    // Assume little-endian for all the supported platforms
-    unsigned rMask = 0x000000ff;
-    unsigned gMask = 0x0000ff00;
-    unsigned bMask = 0x00ff0000;
-    unsigned aMask = 0xff000000;
-
-    SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, components_ * 8, rMask, gMask, bMask, aMask);
-    if (surface)
-    {
-        SDL_LockSurface(surface);
-
-        auto* destination = reinterpret_cast<unsigned char*>(surface->pixels);
-        unsigned char* source = data_ + components_ * (imageWidth * imageRect.top_ + imageRect.left_);
-        for (int i = 0; i < height; ++i)
-        {
-            memcpy(destination, source, (size_t)components_ * width);
-            destination += surface->pitch;
-            source += components_ * imageWidth;
-        }
-
-        SDL_UnlockSurface(surface);
-    }
-    else
-        URHO3D_LOGERROR("Failed to create SDL surface from image " + GetName());
-
-    return surface;
+//     if (!data_)
+//         return nullptr;
+// 
+//     if (depth_ > 1)
+//     {
+//         URHO3D_LOGERROR("Can not get SDL surface from 3D image");
+//         return nullptr;
+//     }
+// 
+//     if (IsCompressed())
+//     {
+//         URHO3D_LOGERROR("Can not get SDL surface from compressed image " + GetName());
+//         return nullptr;
+//     }
+// 
+//     if (components_ < 3)
+//     {
+//         URHO3D_LOGERROR("Can not get SDL surface from image " + GetName() + " with less than 3 components");
+//         return nullptr;
+//     }
+// 
+//     IntRect imageRect = rect;
+//     // Use full image if illegal rect
+//     if (imageRect.left_ < 0 || imageRect.top_ < 0 || imageRect.right_ > width_ || imageRect.bottom_ > height_ ||
+//         imageRect.left_ >= imageRect.right_ || imageRect.top_ >= imageRect.bottom_)
+//     {
+//         imageRect.left_ = 0;
+//         imageRect.top_ = 0;
+//         imageRect.right_ = width_;
+//         imageRect.bottom_ = height_;
+//     }
+// 
+//     int imageWidth = width_;
+//     int width = imageRect.Width();
+//     int height = imageRect.Height();
+// 
+//     // Assume little-endian for all the supported platforms
+//     unsigned rMask = 0x000000ff;
+//     unsigned gMask = 0x0000ff00;
+//     unsigned bMask = 0x00ff0000;
+//     unsigned aMask = 0xff000000;
+// 
+//     SDL_Surface* surface = SDL_CreateRGBSurface(0, width, height, components_ * 8, rMask, gMask, bMask, aMask);
+//     if (surface)
+//     {
+//         SDL_LockSurface(surface);
+// 
+//         auto* destination = reinterpret_cast<unsigned char*>(surface->pixels);
+//         unsigned char* source = data_ + components_ * (imageWidth * imageRect.top_ + imageRect.left_);
+//         for (int i = 0; i < height; ++i)
+//         {
+//             memcpy(destination, source, (size_t)components_ * width);
+//             destination += surface->pitch;
+//             source += components_ * imageWidth;
+//         }
+// 
+//         SDL_UnlockSurface(surface);
+//     }
+//     else
+//         URHO3D_LOGERROR("Failed to create SDL surface from image " + GetName());
+// 
+//     return surface;
+    return {};
 }
 
 void Image::PrecalculateLevels()

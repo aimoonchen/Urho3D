@@ -32,6 +32,10 @@
 #include "../Input/InputEvents.h"
 #include "../UI/Cursor.h"
 
+struct SDL_Joystick;
+struct SDL_GameController;
+using SDL_JoystickID = int;
+using SDL_bool = bool;
 namespace Urho3D
 {
 /// %Input Mouse Modes.

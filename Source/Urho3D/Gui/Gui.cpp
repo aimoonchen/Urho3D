@@ -57,7 +57,6 @@
 // #include "../Gui/UIComponent.h"
 
 #include <cassert>
-#include <SDL/SDL.h>
 
 #include "../DebugNew.h"
 
@@ -698,8 +697,8 @@ namespace Urho3D
 	void GUI::SetClipboardText(const String& text)
 	{
 		clipBoard_ = text;
-		if (useSystemClipboard_)
-			SDL_SetClipboardText(text.CString());
+// 		if (useSystemClipboard_)
+// 			SDL_SetClipboardText(text.CString());
 	}
 
 	void GUI::SetDoubleClickInterval(float interval)
@@ -972,13 +971,13 @@ namespace Urho3D
 
 	const String& GUI::GetClipboardText() const
 	{
-		if (useSystemClipboard_)
-		{
-			char* text = SDL_GetClipboardText();
-			clipBoard_ = String(text);
-			if (text)
-				SDL_free(text);
-		}
+// 		if (useSystemClipboard_)
+// 		{
+// 			char* text = SDL_GetClipboardText();
+// 			clipBoard_ = String(text);
+// 			if (text)
+// 				SDL_free(text);
+// 		}
 
 		return clipBoard_;
 	}

@@ -53,11 +53,10 @@
 #endif
 
 #include <bx/os.h>
-#include <SDL/SDL.h>
 
 BX_PRAGMA_DIAGNOSTIC_PUSH()
 BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG("-Wextern-c-compat")
-#include <SDL/SDL_syswm.h>
+//#include <SDL/SDL_syswm.h>
 BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include <bgfx/platform.h>
@@ -314,7 +313,7 @@ bool Graphics::gl3Support = false;
 Graphics::Graphics(Context* context) :
     Object(context),
     impl_(new GraphicsImpl()),
-    position_(SDL_WINDOWPOS_UNDEFINED, SDL_WINDOWPOS_UNDEFINED),
+    position_(0/*SDL_WINDOWPOS_UNDEFINED*/, 0/*SDL_WINDOWPOS_UNDEFINED*/),
     shadowMapFormat_(bgfx::TextureFormat::D16/*GL_DEPTH_COMPONENT16*/),
     hiresShadowMapFormat_(bgfx::TextureFormat::D24/*GL_DEPTH_COMPONENT24*/),
 //     shaderPath_("Shaders/GLSL/"),
@@ -332,7 +331,7 @@ Graphics::Graphics(Context* context) :
     SetTextureUnitMappings();
     ResetCachedState();
 
-    context_->RequireSDL(SDL_INIT_VIDEO);
+//    context_->RequireSDL(SDL_INIT_VIDEO);
 
     // Register Graphics library object factories
     RegisterGraphicsLibrary(context_);
@@ -370,7 +369,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     OnScreenModeChanged();
     CheckFeatureSupport();
     return true;
-
+    /*
     // If only vsync changes, do not destroy/recreate the context
     if (IsInitialized() && width == width_ && height == height_
         && screenParams_.EqualsExceptVSync(newParams) && screenParams_.vsync_ != newParams.vsync_)
@@ -544,6 +543,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     OnScreenModeChanged();
 
     return true;
+    */
 }
 
 void Graphics::SetSRGB(bool enable)
@@ -629,11 +629,11 @@ bool Graphics::BeginFrame()
     // If using an external window, check it for size changes, and reset screen mode if necessary
     if (externalWindow_)
     {
-        int width, height;
-
-        SDL_GL_GetDrawableSize(window_, &width, &height);
-        if (width != width_ || height != height_)
-            SetMode(width, height);
+//         int width, height;
+// 
+//         SDL_GL_GetDrawableSize(window_, &width, &height);
+//         if (width != width_ || height != height_)
+//             SetMode(width, height);
     }
 
     // Re-enable depth test and depth func in case a third party program has modified it
@@ -2564,14 +2564,14 @@ void Graphics::OnWindowMoved()
     if (!window_ || screenParams_.fullscreen_)
         return;
 
-    int newX, newY;
-
-    SDL_GetWindowPosition(window_, &newX, &newY);
-    if (newX == position_.x_ && newY == position_.y_)
-        return;
-
-    position_.x_ = newX;
-    position_.y_ = newY;
+//     int newX, newY;
+// 
+//     SDL_GetWindowPosition(window_, &newX, &newY);
+//     if (newX == position_.x_ && newY == position_.y_)
+//         return;
+// 
+//     position_.x_ = newX;
+//     position_.y_ = newY;
 
     URHO3D_LOGTRACEF("Window was moved to %d,%d", position_.x_, position_.y_);
 

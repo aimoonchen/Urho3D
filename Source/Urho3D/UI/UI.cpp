@@ -66,7 +66,6 @@
 #include "../Graphics/BGFX/BGFXGraphics.h"
 
 #include <cassert>
-#include <SDL/SDL.h>
 
 #include "../DebugNew.h"
 
@@ -633,8 +632,8 @@ bool UI::SaveLayout(Serializer& dest, UIElement* element)
 void UI::SetClipboardText(const String& text)
 {
     clipBoard_ = text;
-    if (useSystemClipboard_)
-        SDL_SetClipboardText(text.CString());
+//     if (useSystemClipboard_)
+//         SDL_SetClipboardText(text.CString());
 }
 
 void UI::SetDoubleClickInterval(float interval)
@@ -920,13 +919,13 @@ UIElement* UI::GetDragElement(unsigned index)
 
 const String& UI::GetClipboardText() const
 {
-    if (useSystemClipboard_)
-    {
-        char* text = SDL_GetClipboardText();
-        clipBoard_ = String(text);
-        if (text)
-            SDL_free(text);
-    }
+//     if (useSystemClipboard_)
+//     {
+//         char* text = SDL_GetClipboardText();
+//         clipBoard_ = String(text);
+//         if (text)
+//             SDL_free(text);
+//     }
 
     return clipBoard_;
 }

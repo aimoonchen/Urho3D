@@ -32,8 +32,6 @@
 #include "../Core/Profiler.h"
 #include "../IO/Log.h"
 
-#include <SDL/SDL.h>
-
 #include "../DebugNew.h"
 
 #ifdef _MSC_VER
@@ -50,12 +48,12 @@ static const int MIN_MIXRATE = 11025;
 static const int MAX_MIXRATE = 48000;
 static const StringHash SOUND_MASTER_HASH("Master");
 
-static void SDLAudioCallback(void* userdata, Uint8* stream, int len);
+static void SDLAudioCallback(void* userdata, uint8_t* stream, int len);
 
 Audio::Audio(Context* context) :
     Object(context)
 {
-    context_->RequireSDL(SDL_INIT_AUDIO);
+//    context_->RequireSDL(SDL_INIT_AUDIO);
 
     // Set the master to the default value
     masterGain_[SOUND_MASTER_HASH] = 1.0f;
@@ -75,7 +73,7 @@ Audio::~Audio()
 bool Audio::SetMode(int bufferLengthMSec, int mixRate, bool stereo, bool interpolation)
 {
     Release();
-
+    /*
     bufferLengthMSec = Max(bufferLengthMSec, MIN_BUFFERLENGTH);
     mixRate = Clamp(mixRate, MIN_MIXRATE, MAX_MIXRATE);
 
@@ -137,6 +135,8 @@ bool Audio::SetMode(int bufferLengthMSec, int mixRate, bool stereo, bool interpo
     URHO3D_LOGINFO("Set audio mode " + String(mixRate_) + " Hz " + (stereo_ ? "stereo" : "mono") + (interpolation_ ? " interpolated" : ""));
 
     return Play();
+    */
+    return false;
 }
 
 void Audio::Update(float timeStep)
@@ -158,7 +158,7 @@ bool Audio::Play()
         return false;
     }
 
-    SDL_PauseAudioDevice(deviceID_, 0);
+//    SDL_PauseAudioDevice(deviceID_, 0);
 
     // Update sound sources before resuming playback to make sure 3D positions are up to date
     UpdateInternal(0.0f);
@@ -267,7 +267,7 @@ float Audio::GetSoundSourceMasterGain(StringHash typeHash) const
     return masterIt->second_.GetFloat() * typeIt->second_.GetFloat();
 }
 
-void SDLAudioCallback(void* userdata, Uint8* stream, int len)
+void SDLAudioCallback(void* userdata, uint8_t* stream, int len)
 {
     auto* audio = static_cast<Audio*>(userdata);
     {
@@ -332,7 +332,7 @@ void Audio::Release()
 
     if (deviceID_)
     {
-        SDL_CloseAudioDevice(deviceID_);
+//        SDL_CloseAudioDevice(deviceID_);
         deviceID_ = 0;
         clipBuffer_.Reset();
     }

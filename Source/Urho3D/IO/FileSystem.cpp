@@ -37,9 +37,9 @@
 #include <SDL/SDL_rwops.h>
 #endif
 
-#ifndef MINI_URHO
-#include <SDL/SDL_filesystem.h>
-#endif
+// #ifndef MINI_URHO
+// #include <SDL/SDL_filesystem.h>
+// #endif
 
 #include <sys/stat.h>
 #include <cstdio>
@@ -98,13 +98,13 @@ int DoSystemCommand(const String& commandLine, bool redirectToLog, Context* cont
     // Get a platform-agnostic temporary file name for stderr redirection
     String stderrFilename;
     String adjustedCommandLine(commandLine);
-    char* prefPath = SDL_GetPrefPath("urho3d", "temp");
-    if (prefPath)
-    {
-        stderrFilename = String(prefPath) + "command-stderr";
-        adjustedCommandLine += " 2>" + stderrFilename;
-        SDL_free(prefPath);
-    }
+//     char* prefPath = SDL_GetPrefPath("urho3d", "temp");
+//     if (prefPath)
+//     {
+//         stderrFilename = String(prefPath) + "command-stderr";
+//         adjustedCommandLine += " 2>" + stderrFilename;
+//         SDL_free(prefPath);
+//     }
 
 #ifdef _MSC_VER
     #define popen _popen
@@ -748,13 +748,13 @@ String FileSystem::GetAppPreferencesDir(const String& org, const String& app) co
 {
     String dir;
 #ifndef MINI_URHO
-    char* prefPath = SDL_GetPrefPath(org.CString(), app.CString());
-    if (prefPath)
-    {
-        dir = GetInternalPath(String(prefPath));
-        SDL_free(prefPath);
-    }
-    else
+//     char* prefPath = SDL_GetPrefPath(org.CString(), app.CString());
+//     if (prefPath)
+//     {
+//         dir = GetInternalPath(String(prefPath));
+//         SDL_free(prefPath);
+//     }
+//     else
 #endif
         URHO3D_LOGWARNING("Could not get application preferences directory");
 
@@ -1075,9 +1075,9 @@ String FileSystem::GetTemporaryDir() const
 #if defined(MINI_URHO)
     return getenv("TMP");
 #else
-    wchar_t pathName[MAX_PATH];
-    pathName[0] = 0;
-    GetTempPathW(SDL_arraysize(pathName), pathName);
+     wchar_t pathName[MAX_PATH];
+//     pathName[0] = 0;
+//     GetTempPathW(SDL_arraysize(pathName), pathName);
     return AddTrailingSlash(String(pathName));
 #endif
 #else

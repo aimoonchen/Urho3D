@@ -284,7 +284,7 @@ endif ()
 # Structured exception handling and minidumps on MSVC only
 cmake_dependent_option (URHO3D_MINIDUMPS "Enable minidumps on crash (VS only)" TRUE "MSVC" FALSE)
 # By default Windows platform setups main executable as Windows application with WinMain() as entry point
-cmake_dependent_option (URHO3D_WIN32_CONSOLE "Use console main() instead of WinMain() as entry point when setting up Windows executable targets (Windows platform only)" FALSE "WIN32" FALSE)
+cmake_dependent_option (URHO3D_WIN32_CONSOLE "Use console main() instead of WinMain() as entry point when setting up Windows executable targets (Windows platform only)" TRUE "WIN32" TRUE)
 cmake_dependent_option (URHO3D_MACOSX_BUNDLE "Use MACOSX_BUNDLE when setting up macOS executable targets (Xcode/macOS platform only)" FALSE "XCODE AND NOT ARM" FALSE)
 if (CMAKE_CROSSCOMPILING AND NOT ANDROID AND NOT APPLE)
     set (URHO3D_SCP_TO_TARGET "" CACHE STRING "Use scp to transfer executables to target system (RPI and generic ARM cross-compiling build only), SSH digital key must be setup first for this to work, typical value has a pattern of usr@tgt:remote-loc")
@@ -885,7 +885,7 @@ endmacro ()
 # *** THIS IS A DEPRECATED MACRO ***
 macro (define_dependency_libs TARGET)
     # ThirdParty/SDL external dependency
-    if (${TARGET} MATCHES SDL|Urho3D)
+    if (${TARGET} MATCHES Urho3D)
         if (WIN32)
             list (APPEND LIBS user32 gdi32 winmm imm32 ole32 oleaut32 setupapi version uuid)
         elseif (APPLE)

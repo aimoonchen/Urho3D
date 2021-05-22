@@ -29,7 +29,7 @@
 #include "../Resource/ResourceCache.h"
 #include "../UI/UI.h"
 
-#include <SDL/SDL_mouse.h>
+//#include <SDL/SDL_mouse.h>
 
 #include "../DebugNew.h"
 
@@ -54,21 +54,21 @@ static const char* shapeNames[] =
 
 #if !defined(__ANDROID__) && !defined(IOS) && !defined(TVOS)
 // OS cursor shape lookup table matching cursor shape enumeration
-static const int osCursorLookup[CS_MAX_SHAPES] =
-{
-    SDL_SYSTEM_CURSOR_ARROW,    // CS_NORMAL
-    SDL_SYSTEM_CURSOR_IBEAM,     // CS_IBEAM
-    SDL_SYSTEM_CURSOR_CROSSHAIR, // CS_CROSS
-    SDL_SYSTEM_CURSOR_SIZENS,   // CS_RESIZEVERTICAL
-    SDL_SYSTEM_CURSOR_SIZENESW, // CS_RESIZEDIAGONAL_TOPRIGHT
-    SDL_SYSTEM_CURSOR_SIZEWE,   // CS_RESIZEHORIZONTAL
-    SDL_SYSTEM_CURSOR_SIZENWSE, // CS_RESIZEDIAGONAL_TOPLEFT
-    SDL_SYSTEM_CURSOR_SIZEALL,   // CS_RESIZE_ALL
-    SDL_SYSTEM_CURSOR_HAND,     // CS_ACCEPTDROP
-    SDL_SYSTEM_CURSOR_NO,       // CS_REJECTDROP
-    SDL_SYSTEM_CURSOR_WAIT,   // CS_BUSY
-    SDL_SYSTEM_CURSOR_WAITARROW // CS_BUSY_ARROW
-};
+// static const int osCursorLookup[CS_MAX_SHAPES] =
+// {
+//     SDL_SYSTEM_CURSOR_ARROW,    // CS_NORMAL
+//     SDL_SYSTEM_CURSOR_IBEAM,     // CS_IBEAM
+//     SDL_SYSTEM_CURSOR_CROSSHAIR, // CS_CROSS
+//     SDL_SYSTEM_CURSOR_SIZENS,   // CS_RESIZEVERTICAL
+//     SDL_SYSTEM_CURSOR_SIZENESW, // CS_RESIZEDIAGONAL_TOPRIGHT
+//     SDL_SYSTEM_CURSOR_SIZEWE,   // CS_RESIZEHORIZONTAL
+//     SDL_SYSTEM_CURSOR_SIZENWSE, // CS_RESIZEDIAGONAL_TOPLEFT
+//     SDL_SYSTEM_CURSOR_SIZEALL,   // CS_RESIZE_ALL
+//     SDL_SYSTEM_CURSOR_HAND,     // CS_ACCEPTDROP
+//     SDL_SYSTEM_CURSOR_NO,       // CS_REJECTDROP
+//     SDL_SYSTEM_CURSOR_WAIT,   // CS_BUSY
+//     SDL_SYSTEM_CURSOR_WAITARROW // CS_BUSY_ARROW
+// };
 #endif
 
 extern const char* UI_CATEGORY;
@@ -93,7 +93,7 @@ Cursor::~Cursor()
     {
         if (i->second_.osCursor_)
         {
-            SDL_FreeCursor(i->second_.osCursor_);
+            //SDL_FreeCursor(i->second_.osCursor_);
             i->second_.osCursor_ = nullptr;
         }
     }
@@ -162,7 +162,7 @@ void Cursor::DefineShape(const String& shape, Image* image, const IntRect& image
     // Remove existing SDL cursor
     if (info.osCursor_)
     {
-        SDL_FreeCursor(info.osCursor_);
+        //SDL_FreeCursor(info.osCursor_);
         info.osCursor_ = nullptr;
     }
 
@@ -265,7 +265,7 @@ void Cursor::ApplyOSCursorShape()
     // Remove existing SDL cursor if is not a system shape while we should be using those, or vice versa
     if (info.osCursor_ && info.systemDefined_ != useSystemShapes_)
     {
-        SDL_FreeCursor(info.osCursor_);
+        //SDL_FreeCursor(info.osCursor_);
         info.osCursor_ = nullptr;
     }
 
@@ -275,7 +275,7 @@ void Cursor::ApplyOSCursorShape()
         // Create a system default shape
         if (useSystemShapes_ && info.systemCursor_ >= 0 && info.systemCursor_ < CS_MAX_SHAPES)
         {
-            info.osCursor_ = SDL_CreateSystemCursor((SDL_SystemCursor)osCursorLookup[info.systemCursor_]);
+            //info.osCursor_ = SDL_CreateSystemCursor((SDL_SystemCursor)osCursorLookup[info.systemCursor_]);
             info.systemDefined_ = true;
             if (!info.osCursor_)
                 URHO3D_LOGERROR("Could not create system cursor");
@@ -287,17 +287,17 @@ void Cursor::ApplyOSCursorShape()
 
             if (surface)
             {
-                info.osCursor_ = SDL_CreateColorCursor(surface, info.hotSpot_.x_, info.hotSpot_.y_);
+                //info.osCursor_ = SDL_CreateColorCursor(surface, info.hotSpot_.x_, info.hotSpot_.y_);
                 info.systemDefined_ = false;
                 if (!info.osCursor_)
                     URHO3D_LOGERROR("Could not create cursor from image " + info.image_->GetName());
-                SDL_FreeSurface(surface);
+                //SDL_FreeSurface(surface);
             }
         }
     }
 
-    if (info.osCursor_)
-        SDL_SetCursor(info.osCursor_);
+//     if (info.osCursor_)
+//         SDL_SetCursor(info.osCursor_);
 
     osShapeDirty_ = false;
 #endif
