@@ -57,7 +57,7 @@ public:
 #if defined(_WIN32) && !defined(URHO3D_WIN32_CONSOLE)
         Urho3D::ParseArguments(GetCommandLineW());
 #elif defined(__ANDROID__) || defined(IOS) || defined(TVOS)
-        Urho3D::ParseArguments(argc_, argv_);
+        Urho3D::ParseArguments(argc_, (char**)argv_);
 #endif
         std::shared_ptr<Urho3D::Context> context_ = std::make_shared<Urho3D::Context>();
         std::shared_ptr<Impl> urho3d_app_ = std::make_shared<Impl>(context_.get());
