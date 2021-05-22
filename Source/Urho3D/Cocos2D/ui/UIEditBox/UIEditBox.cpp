@@ -136,28 +136,28 @@ bool EditBox::initWithSizeAndBackgroundSprite(const Size& size, Scale9Sprite* no
 
 bool EditBox::initWithSizeAndBackgroundSprite(const Size& size, Scale9Sprite* normalSprite, Scale9Sprite* pressedSprite, Scale9Sprite* disabledSprite)
 {
-    if (Widget::init())
-    {
-        _editBoxImpl = __createSystemEditBox(this);
-        _editBoxImpl->initWithSize(size);
-        _editBoxImpl->setInputMode(EditBox::InputMode::ANY);
+    // if (Widget::init())
+    // {
+    //     _editBoxImpl = __createSystemEditBox(this);
+    //     _editBoxImpl->initWithSize(size);
+    //     _editBoxImpl->setInputMode(EditBox::InputMode::ANY);
 
-        loadTextureNormal(normalSprite->getResourceName(), normalSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
-        if (pressedSprite != nullptr)
-        {
-            loadTexturePressed(pressedSprite->getResourceName(), pressedSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
-        }
-        if (disabledSprite != nullptr)
-        {
-            loadTexturePressed(disabledSprite->getResourceName(), disabledSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
-        }
+    //     loadTextureNormal(normalSprite->getResourceName(), normalSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
+    //     if (pressedSprite != nullptr)
+    //     {
+    //         loadTexturePressed(pressedSprite->getResourceName(), pressedSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
+    //     }
+    //     if (disabledSprite != nullptr)
+    //     {
+    //         loadTexturePressed(disabledSprite->getResourceName(), disabledSprite->getResourceType() == 0 ? TextureResType::LOCAL : TextureResType::PLIST);
+    //     }
 
-        this->setContentSize(size);
+    //     this->setContentSize(size);
 
-        this->setTouchEnabled(true);
+    //     this->setTouchEnabled(true);
 
-        return true;
-    }
+    //     return true;
+    // }
     return false;
 }
 
@@ -174,19 +174,19 @@ bool EditBox::initWithSizeAndTexture(const Size& size,
                                      const std::string& disabledImage /* = "" */,
                                      TextureResType texType /* = TextureResType::LOCAL */)
 {
-    if (Widget::init())
-    {
-        _editBoxImpl = __createSystemEditBox(this);
-        _editBoxImpl->initWithSize(size);
-        _editBoxImpl->setInputMode(EditBox::InputMode::ANY);
+    // if (Widget::init())
+    // {
+    //     _editBoxImpl = __createSystemEditBox(this);
+    //     _editBoxImpl->initWithSize(size);
+    //     _editBoxImpl->setInputMode(EditBox::InputMode::ANY);
 
-        loadTextures(normalImage, pressedImage, disabledImage, texType);
+    //     loadTextures(normalImage, pressedImage, disabledImage, texType);
 
-        this->setContentSize(size);
-        this->setTouchEnabled(true);
+    //     this->setContentSize(size);
+    //     this->setTouchEnabled(true);
 
-        return true;
-    }
+    //     return true;
+    // }
     return false;
 }
 

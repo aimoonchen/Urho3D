@@ -978,44 +978,44 @@ bool Widget::hitTest(const Vec2 &pt, const Camera* camera, Vec3 *p) const
 bool Widget::isClippingParentContainsPoint(const Vec2 &pt)
 {
     _affectByClipping = false;
-    Node* parent = getParent();
-    Widget* clippingParent = nullptr;
-    while (parent)
-    {
-        Layout* layoutParent = dynamic_cast<Layout*>(parent);
-        if (layoutParent)
-        {
-            if (layoutParent->isClippingEnabled())
-            {
-                _affectByClipping = true;
-                clippingParent = layoutParent;
-                break;
-            }
-        }
-        parent = parent->getParent();
-    }
+    // Node* parent = getParent();
+    // Widget* clippingParent = nullptr;
+    // while (parent)
+    // {
+    //     Layout* layoutParent = dynamic_cast<Layout*>(parent);
+    //     if (layoutParent)
+    //     {
+    //         if (layoutParent->isClippingEnabled())
+    //         {
+    //             _affectByClipping = true;
+    //             clippingParent = layoutParent;
+    //             break;
+    //         }
+    //     }
+    //     parent = parent->getParent();
+    // }
 
-    if (!_affectByClipping)
-    {
-        return true;
-    }
+    // if (!_affectByClipping)
+    // {
+    //     return true;
+    // }
 
 
-    if (clippingParent)
-    {
-        bool bRet = false;
-        auto camera = Camera::getVisitingCamera();
-        // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
-        if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
-        {
-            bRet = true;
-        }
-        if (bRet)
-        {
-            return clippingParent->isClippingParentContainsPoint(pt);
-        }
-        return false;
-    }
+    // if (clippingParent)
+    // {
+    //     bool bRet = false;
+    //     auto camera = Camera::getVisitingCamera();
+    //     // Camera isn't null means in touch begin process, otherwise use _hittedByCamera instead.
+    //     if (clippingParent->hitTest(pt, (camera ? camera : _hittedByCamera), nullptr))
+    //     {
+    //         bRet = true;
+    //     }
+    //     if (bRet)
+    //     {
+    //         return clippingParent->isClippingParentContainsPoint(pt);
+    //     }
+    //     return false;
+    // }
     return true;
 }
 
@@ -1389,38 +1389,38 @@ bool Widget::isFocusEnabled()const
 
 Widget* Widget::findNextFocusedWidget(FocusDirection direction,  Widget* current)
 {
-    if (nullptr == onNextFocusedWidget || nullptr == onNextFocusedWidget(direction) ) {
-        if (this->isFocused() || dynamic_cast<Layout*>(current))
-        {
-            Node* parent = this->getParent();
+    // if (nullptr == onNextFocusedWidget || nullptr == onNextFocusedWidget(direction) ) {
+    //     if (this->isFocused() || dynamic_cast<Layout*>(current))
+    //     {
+    //         Node* parent = this->getParent();
 
-            Layout* layout = dynamic_cast<Layout*>(parent);
-            if (nullptr == layout)
-            {
-                //the outer layout's default behaviour is : loop focus
-                if (dynamic_cast<Layout*>(current))
-                {
-                    return current->findNextFocusedWidget(direction, current);
-                }
-                return current;
-            }
-            else
-            {
-                Widget *nextWidget = layout->findNextFocusedWidget(direction, current);
-                return nextWidget;
-            }
-        }
-        else
-        {
-            return current;
-        }
-    }
-    else
-    {
-        Widget *getFocusWidget = onNextFocusedWidget(direction);
-        this->dispatchFocusEvent(this, getFocusWidget);
-        return getFocusWidget;
-    }
+    //         Layout* layout = dynamic_cast<Layout*>(parent);
+    //         if (nullptr == layout)
+    //         {
+    //             //the outer layout's default behaviour is : loop focus
+    //             if (dynamic_cast<Layout*>(current))
+    //             {
+    //                 return current->findNextFocusedWidget(direction, current);
+    //             }
+    //             return current;
+    //         }
+    //         else
+    //         {
+    //             Widget *nextWidget = layout->findNextFocusedWidget(direction, current);
+    //             return nextWidget;
+    //         }
+    //     }
+    //     else
+    //     {
+    //         return current;
+    //     }
+    // }
+    // else
+    // {
+    //     Widget *getFocusWidget = onNextFocusedWidget(direction);
+    //     this->dispatchFocusEvent(this, getFocusWidget);
+    //     return getFocusWidget;
+    // }
 }
 
 void Widget::dispatchFocusEvent(cocos2d::ui::Widget *widgetLoseFocus, cocos2d::ui::Widget *widgetGetFocus)

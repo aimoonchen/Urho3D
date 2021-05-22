@@ -345,7 +345,7 @@ public:
     void* GetExternalWindow() const { return externalWindow_; }
 
     /// Return SDL window.
-    SDL_Window* GetWindow() const { return window_; }
+    SDL_Window* GetWindow() const { return nullptr;/*window_;*/ }
 
     /// Return window title.
     /// @property
@@ -766,7 +766,8 @@ private:
     /// Implementation.
     GraphicsImpl* impl_;
     /// SDL window.
-    SDL_Window* window_{};
+    //SDL_Window* window_{};
+    bool window_{ false };
     /// Window title.
     String windowTitle_;
     /// Window icon image.

@@ -7,7 +7,7 @@
 #include <bx/file.h>
 #include <bx/sort.h>
 #include <bgfx/bgfx.h>
-
+#include <cstdio>
 #include <time.h>
 
 #if BX_PLATFORM_EMSCRIPTEN
@@ -46,31 +46,31 @@ namespace entry
     {
 		bx::memSet(m_axis, 0, sizeof(m_axis));
     }
-	class FileReader : public bx::FileReader
-	{
-		typedef bx::FileReader super;
+	// class FileReader : public bx::FileReader
+	// {
+	// 	typedef bx::FileReader super;
 
-	public:
-		virtual bool open(const bx::FilePath& _filePath, bx::Error* _err) override
-		{
-			String filePath(s_currentDir);
-			filePath.append(_filePath);
-			return super::open(filePath.getPtr(), _err);
-		}
-	};
+	// public:
+	// 	virtual bool open(const bx::FilePath& _filePath, bx::Error* _err) override
+	// 	{
+	// 		String filePath(s_currentDir);
+	// 		filePath.append(_filePath);
+	// 		return super::open(filePath.getPtr(), _err);
+	// 	}
+	// };
 
-	class FileWriter : public bx::FileWriter
-	{
-		typedef bx::FileWriter super;
+	// class FileWriter : public bx::FileWriter
+	// {
+	// 	typedef bx::FileWriter super;
 
-	public:
-		virtual bool open(const bx::FilePath& _filePath, bool _append, bx::Error* _err) override
-		{
-			String filePath(s_currentDir);
-			filePath.append(_filePath);
-			return super::open(filePath.getPtr(), _append, _err);
-		}
-	};
+	// public:
+	// 	virtual bool open(const bx::FilePath& _filePath, bool _append, bx::Error* _err) override
+	// 	{
+	// 		String filePath(s_currentDir);
+	// 		filePath.append(_filePath);
+	// 		return super::open(filePath.getPtr(), _append, _err);
+	// 	}
+	// };
 
 	void setCurrentDir(const char* _dir)
 	{
@@ -579,8 +579,8 @@ BX_PRAGMA_DIAGNOSTIC_POP();
 	{
 		//DBG(BX_COMPILER_NAME " / " BX_CPU_NAME " / " BX_ARCH_NAME " / " BX_PLATFORM_NAME);
 
-		s_fileReader = BX_NEW(g_allocator, FileReader);
-		s_fileWriter = BX_NEW(g_allocator, FileWriter);
+		// s_fileReader = BX_NEW(g_allocator, FileReader);
+		// s_fileWriter = BX_NEW(g_allocator, FileWriter);
 
 		cmdInit();
 		cmdAdd("mouselock", cmdMouseLock);
@@ -651,11 +651,11 @@ restart:
 
 		cmdShutdown();
 
-		BX_DELETE(g_allocator, s_fileReader);
-		s_fileReader = NULL;
+		// BX_DELETE(g_allocator, s_fileReader);
+		// s_fileReader = NULL;
 
-		BX_DELETE(g_allocator, s_fileWriter);
-		s_fileWriter = NULL;
+		// BX_DELETE(g_allocator, s_fileWriter);
+		// s_fileWriter = NULL;
 
 		return result;
 	}

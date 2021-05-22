@@ -365,7 +365,7 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
     entry::setWindowSize(default_window_, width, height);
     width_ = width;
     height_ = height;
-    window_ = (SDL_Window*)entry::getNativeWindow(); // (SDL_Window*) 1;
+    window_ = true;//(SDL_Window*)entry::getNativeWindow(); // (SDL_Window*) 1;
     OnScreenModeChanged();
     CheckFeatureSupport();
     return true;
@@ -2335,7 +2335,7 @@ void Graphics::SetStencilTest(bool enable, CompareMode mode, StencilOp pass, Ste
 
 bool Graphics::IsInitialized() const
 {
-    return window_ != nullptr;
+    return window_;
 }
 
 bool Graphics::GetDither() const
@@ -2346,13 +2346,13 @@ bool Graphics::GetDither() const
 bool Graphics::IsDeviceLost() const
 {
     return false;
-    // On iOS and tvOS treat window minimization as device loss, as it is forbidden to access OpenGL when minimized
-#if defined(IOS) || defined(TVOS)
-    if (window_ && (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED) != 0)
-        return true;
-#endif
-
-    return impl_->context_ == nullptr;
+//    // On iOS and tvOS treat window minimization as device loss, as it is forbidden to access OpenGL when minimized
+//#if defined(IOS) || defined(TVOS)
+//    if (window_ && (SDL_GetWindowFlags(window_) & SDL_WINDOW_MINIMIZED) != 0)
+//        return true;
+//#endif
+//
+//    return impl_->context_ == nullptr;
 }
 
 PODVector<int> Graphics::GetMultiSampleLevels() const
@@ -2718,7 +2718,7 @@ void Graphics::Release(bool clearGPUObjects, bool closeWindow)
         if (!externalWindow_ || clearGPUObjects)
         {
             //SDL_DestroyWindow(window_);
-            window_ = nullptr;
+            window_ = false;
         }
     }
 }

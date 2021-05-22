@@ -98,38 +98,38 @@ static CGSize _calculateShrinkedSizeForString(NSAttributedString **str,
     fontSize = fontSize + 1;
 
     if (!enableWrap) {
-        while (actualSize.size.width > constrainSize.width ||
-               actualSize.size.height > constrainSize.height) {
-            fontSize = fontSize - 1;
+        // while (actualSize.size.width > constrainSize.width ||
+        //        actualSize.size.height > constrainSize.height) {
+        //     fontSize = fontSize - 1;
 
-            if(fontSize < 0) {
-                actualSize = CGRectMake(0, 0, 0, 0);
-                break;
-            }
+        //     if(fontSize < 0) {
+        //         actualSize = CGRectMake(0, 0, 0, 0);
+        //         break;
+        //     }
 
-            NSMutableAttributedString *mutableString = [[*str mutableCopy] autorelease];
-            *str = __attributedStringWithFontSize(mutableString, fontSize);
+        //     NSMutableAttributedString *mutableString = [[*str mutableCopy] autorelease];
+        //     *str = __attributedStringWithFontSize(mutableString, fontSize);
 
-            CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)*str);
-            CGSize targetSize = CGSizeMake(MAX_MEASURE_HEIGHT, MAX_MEASURE_HEIGHT);
-            CGSize fitSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, [(*str) length]), NULL, targetSize, NULL);
-            CFRelease(framesetter);
-            if (fitSize.width == 0 || fitSize.height == 0) {
-                continue;
-            }
+        //     CTFramesetterRef framesetter = CTFramesetterCreateWithAttributedString((__bridge CFAttributedStringRef)*str);
+        //     CGSize targetSize = CGSizeMake(MAX_MEASURE_HEIGHT, MAX_MEASURE_HEIGHT);
+        //     CGSize fitSize = CTFramesetterSuggestFrameSizeWithConstraints(framesetter, CFRangeMake(0, [(*str) length]), NULL, targetSize, NULL);
+        //     CFRelease(framesetter);
+        //     if (fitSize.width == 0 || fitSize.height == 0) {
+        //         continue;
+        //     }
            
-            actualSize.size = fitSize;
+        //     actualSize.size = fitSize;
             
-            if (constrainSize.width <= 0) {
-                constrainSize.width = fitSize.width;
-            }
-            if (constrainSize.height <= 0) {
-                constrainSize.height = fitSize.height;
-            }
-            if (fontSize <= 0) {
-                break;
-            }
-        }
+        //     if (constrainSize.width <= 0) {
+        //         constrainSize.width = fitSize.width;
+        //     }
+        //     if (constrainSize.height <= 0) {
+        //         constrainSize.height = fitSize.height;
+        //     }
+        //     if (fontSize <= 0) {
+        //         break;
+        //     }
+        // }
 
     }
     else {
@@ -623,4 +623,52 @@ void Device::vibrate(float duration)
 
 NS_CC_END
 
+// Urho3D: added variables
+char* resource_dir = 0;
+char* documents_dir = 0;
+
+// Urho3D: added function
+void SDL_IOS_LogMessage(const char *message)
+{
+    #ifdef _DEBUG
+    NSLog(@"%@", [NSString stringWithUTF8String: message]);
+    #endif
+}
+
+// Urho3D: added function
+const char* SDL_IOS_GetResourceDir()
+{
+    if (!resource_dir)
+    {
+        const char *temp = [[[NSBundle mainBundle] resourcePath] UTF8String];
+        resource_dir = (char*)malloc(strlen(temp) + 1);
+        strcpy(resource_dir, temp);
+    }
+
+    return resource_dir;
+}
+
+// Urho3D: added function
+const char* SDL_IOS_GetDocumentsDir()
+{
+    if (!documents_dir)
+    {
+        NSArray *paths = NSSearchPathForDirectoriesInDomains(NSDocumentDirectory, NSUserDomainMask, YES);
+        NSString *basePath = ([paths count] > 0) ? [paths objectAtIndex:0] : nil;
+
+        const char *temp = [basePath UTF8String];
+        documents_dir = (char*)malloc(strlen(temp) + 1);
+        strcpy(documents_dir, temp);
+    }
+
+    return documents_dir;
+}
+
+// Urho3D: added function
+#if TARGET_OS_TV
+unsigned SDL_TVOS_GetActiveProcessorCount()
+{
+    return [NSProcessInfo class] ? (unsigned)[[NSProcessInfo processInfo] activeProcessorCount] : 1;
+}
+#endif
 #endif // CC_PLATFORM_IOS

@@ -38,7 +38,7 @@
 #include <android/log.h>
 #endif
 #if defined(IOS) || defined(TVOS)
-extern "C" void SDL_IOS_LogMessage(const char* message);
+void SDL_IOS_LogMessage(const char* message);
 #endif
 
 #include "../DebugNew.h"

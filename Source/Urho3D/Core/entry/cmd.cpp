@@ -7,6 +7,7 @@
 #include <bx/commandline.h>
 #include <bx/hash.h>
 #include <bx/string.h>
+#include <cstdio>
 
 #include "dbg.h"
 #include "cmd.h"
