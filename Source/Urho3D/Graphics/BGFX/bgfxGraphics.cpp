@@ -2696,8 +2696,8 @@ void Graphics::Release(bool clearGPUObjects, bool closeWindow)
 
     // End fullscreen mode first to counteract transition and getting stuck problems on OS X
 #if defined(__APPLE__) && !defined(IOS) && !defined(TVOS)
-    if (closeWindow && screenParams_.fullscreen_ && !externalWindow_)
-        SDL_SetWindowFullscreen(window_, 0);
+//    if (closeWindow && screenParams_.fullscreen_ && !externalWindow_)
+//        SDL_SetWindowFullscreen(window_, 0);
 #endif
 
     if (impl_->context_)
@@ -3020,9 +3020,9 @@ void Graphics::CheckFeatureSupport()
     // On macOS check for an Intel driver and use shadow map RGBA dummy color textures, because mixing
     // depth-only FBO rendering and backbuffer rendering will bug, resulting in a black screen in full
     // screen mode, and incomplete shadow maps in windowed mode
-    String renderer((const char*)glGetString(GL_RENDERER));
-    if (renderer.Contains("Intel", false))
-        dummyColorFormat_ = GetRGBAFormat();
+//    String renderer((const char*)glGetString(GL_RENDERER));
+//    if (renderer.Contains("Intel", false))
+//        dummyColorFormat_ = GetRGBAFormat();
 #endif
 #else
     // Check for supported compressed texture formats

@@ -128,9 +128,13 @@ bool ShaderVariation::Create()
     String fullBinName = "Shaders/BGFX/" + graphics->GetCompiledShaderPath() + binFilename;
     auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
     if (!cache->Exists(fullBinName)) {
-#if _WIN32
+#if defined(_WIN32)// || defined(__APPLE__)
+#ifdef __APPLE__
+        String localPath("/Users/simonchen/Development/");
+#else
         String localPath("C:/GitProjects/");
         //String localPath("D:/Github/");
+#endif
         auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](const String& platform) {
             Vector<String> defines;
             defines.Push((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
@@ -139,7 +143,11 @@ bool ShaderVariation::Create()
             {
                 defines.Push(def);
             }
+#ifdef __APPLE__
+            String shader_command = localPath + "Urho3D/3rd/bgfx/.build/osx-x64/bin/shadercRelease";
+#else
             String shader_command = localPath + "Urho3D/3rd/bgfx/.build/win64_vs2019/bin/shadercRelease.exe";
+#endif
             shader_command += " -i " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX";
             shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
             shader_command += " --define " + String::Joined(defines, ";");
@@ -180,7 +188,7 @@ bool ShaderVariation::Create()
             ;
         }
 #else
-        URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
+        URHO3D_LOGERRORF("Can't found shader file : %s, source file : %s, defines : %s", fullBinName.CString(), shaderPath.CString(), defines_.CString());
         return false;
 #endif
     }
@@ -190,14 +198,14 @@ bool ShaderVariation::Create()
         const bgfx::Memory* bgfxmem = bgfx::alloc(dataSize);
         if (binfile->Read(bgfxmem->data, dataSize) != dataSize)
         {
-            URHO3D_LOGERRORF("Read file error : %s", fullBinName.CString());
+            URHO3D_LOGERRORF("Read shader file error : %s", fullBinName.CString());
             return false;
         }
         auto shaderHandle = bgfx::createShader(bgfxmem);
         object_.handle_ = shaderHandle.idx;
         return bgfx::isValid(shaderHandle);
     } else {
-        URHO3D_LOGERRORF("Can't found file : %s", fullBinName.CString());
+        URHO3D_LOGERRORF("Can't found shader file : %s, source file : %s, defines : %s", fullBinName.CString(), shaderPath.CString(), defines_.CString());
         return false;
     }
 }

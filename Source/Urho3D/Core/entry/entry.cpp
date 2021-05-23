@@ -1022,7 +1022,9 @@ restart:
         uint32_t m_reset = BGFX_RESET_VSYNC;
 
         bgfx::Init init;
+#ifdef _WIN32
         init.type = bgfx::RendererType::OpenGL; // args.m_type;
+#endif
         init.vendorId = 0;                      // args.m_pciId;
         init.resolution.width = m_width;
         init.resolution.height = m_height;

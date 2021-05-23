@@ -404,7 +404,7 @@ bool Texture2D::Create()
 //     glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
 // #endif
 
-    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
+    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V));
     if (usage_ >= TEXTURE_RENDERTARGET)
     {
         textureFlags |= BGFX_TEXTURE_RT;

@@ -31,12 +31,14 @@
 
 #ifdef __APPLE__
 #include "TargetConditionals.h"
+char * SDL_GetPrefPath(const char *org, const char *app);
 #endif
 
 #if defined(IOS)
+char * SDL_GetPrefPath(const char *org, const char *app);
 #include <mach/mach_host.h>
 #elif defined(TVOS)
-extern "C" unsigned SDL_TVOS_GetActiveProcessorCount();
+unsigned SDL_TVOS_GetActiveProcessorCount();
 #elif !defined(__linux__) && !defined(__EMSCRIPTEN__)
 #include <LibCpuId/libcpuid.h>
 #endif
@@ -502,16 +504,16 @@ void SetMiniDumpDir(const String& pathName)
 String GetMiniDumpDir()
 {
 #ifndef MINI_URHO
-//     if (miniDumpDir.Empty())
-//     {
-//         char* pathName = SDL_GetPrefPath("urho3d", "crashdumps");
-//         if (pathName)
-//         {
-//             String ret(pathName);
-//             SDL_free(pathName);
-//             return ret;
-//         }
-//     }
+    if (miniDumpDir.Empty())
+    {
+        char* pathName = SDL_GetPrefPath("urho3d", "crashdumps");
+        if (pathName)
+        {
+            String ret(pathName);
+            free(pathName);
+            return ret;
+        }
+    }
 #endif
 
     return miniDumpDir;
