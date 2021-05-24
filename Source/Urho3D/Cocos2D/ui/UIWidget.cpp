@@ -1421,6 +1421,7 @@ Widget* Widget::findNextFocusedWidget(FocusDirection direction,  Widget* current
     //     this->dispatchFocusEvent(this, getFocusWidget);
     //     return getFocusWidget;
     // }
+    return nullptr;
 }
 
 void Widget::dispatchFocusEvent(cocos2d::ui::Widget *widgetLoseFocus, cocos2d::ui::Widget *widgetGetFocus)

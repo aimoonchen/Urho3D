@@ -29,13 +29,13 @@
 #include <cstdio>
 #include <fcntl.h>
 
+char* SDL_GetPrefPath(const char* org, const char* app);
+
 #ifdef __APPLE__
 #include "TargetConditionals.h"
-char * SDL_GetPrefPath(const char *org, const char *app);
 #endif
 
 #if defined(IOS)
-char * SDL_GetPrefPath(const char *org, const char *app);
 #include <mach/mach_host.h>
 #elif defined(TVOS)
 unsigned SDL_TVOS_GetActiveProcessorCount();
