@@ -493,9 +493,9 @@ void Graphics::CreateWindowIcon()
 void Graphics::AdjustScreenMode(int& newWidth, int& newHeight, ScreenModeParams& params, bool& maximize) const
 {
     // High DPI is supported only for OpenGL backend
-#ifndef URHO3D_OPENGL
-    params.highDPI_ = false;
-#endif
+// #ifndef URHO3D_OPENGL
+//     params.highDPI_ = false;
+// #endif
 
 #if defined(IOS) || defined(TVOS)
     // iOS and tvOS app always take the fullscreen (and with status bar hidden)

@@ -70,7 +70,7 @@ void main()
         v_texcoord0 = vec4(GetTexCoord(a_texcoord0), bitangent.xy);
         v_tangent = vec4(tangent.xyz, bitangent.z);
     #else
-        v_texcoord0 = vec4(GetTexCoord(a_texcoord0), vec2_splat(0));
+        v_texcoord0 = vec4(GetTexCoord(a_texcoord0), vec2_splat(0.0));
     #endif
 
     #ifdef PERPIXEL

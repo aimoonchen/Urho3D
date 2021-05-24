@@ -4,7 +4,7 @@ static wchar_t* WIN_UTF8ToString(const char* path)
 {
     auto sourcePath = Urho3D::WString(Urho3D::String(path));
     auto length = sourcePath.Length();
-    auto retval = (wchar_t*)malloc(length + 1);
+    auto retval = (wchar_t*)malloc((length + 1) * sizeof(wchar_t));
     memcpy(retval, sourcePath.CString(), length * sizeof(wchar_t));
     retval[length] = '\0';
     return retval;

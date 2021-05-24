@@ -260,7 +260,7 @@ protected:
     /// Filtering mode.
     TextureFilterMode filterMode_{FILTER_DEFAULT};
     /// Addressing mode.
-    TextureAddressMode addressModes_[MAX_COORDS]{ADDRESS_CLAMP, ADDRESS_CLAMP, ADDRESS_CLAMP};
+    TextureAddressMode addressModes_[MAX_COORDS]{ADDRESS_WRAP, ADDRESS_WRAP, ADDRESS_WRAP};
     /// Texture anisotropy level.
     unsigned anisotropy_{};
     /// Mip levels to skip when loading per texture quality setting.

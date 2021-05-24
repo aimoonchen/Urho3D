@@ -123,12 +123,12 @@ void EffekseerSystem::SetCamera(Camera* camera)
 {
 	main_camera_ = camera;
     Matrix4 projection = camera->GetGPUProjection();
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
     // Add constant depth bias manually to the projection matrix due to glPolygonOffset() inconsistency
     float constantBias = 2.0f * 0.0f/*graphics_->GetDepthConstantBias()*/;
     projection.m22_ += projection.m32_ * constantBias;
     projection.m23_ += projection.m33_ * constantBias;
-#endif
+//#endif
     m_renderer->SetProjectionMatrix(EffekseerUrho3D::ToEfkMatrix44(projection));
 }
 

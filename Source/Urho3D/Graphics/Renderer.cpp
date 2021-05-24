@@ -948,11 +948,11 @@ Texture2D* Renderer::GetShadowMap(Light* light, Camera* camera, unsigned viewWid
     newShadowMap->SetFilterMode(FILTER_BILINEAR);
     newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
 #endif
-#ifndef URHO3D_OPENGL
-    // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
-    // and other shadowed lights matches
-    newShadowMap->SetFilterMode(graphics_->GetHardwareShadowSupport() ? FILTER_BILINEAR : FILTER_NEAREST);
-#endif
+// #ifndef URHO3D_OPENGL
+//     // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
+//     // and other shadowed lights matches
+//     newShadowMap->SetFilterMode(graphics_->GetHardwareShadowSupport() ? FILTER_BILINEAR : FILTER_NEAREST);
+// #endif
     while (retries)
     {
         if (!newShadowMap->SetSize(width, height, shadowMapFormat, shadowMapUsage, multiSample))
@@ -964,9 +964,9 @@ Texture2D* Renderer::GetShadowMap(Light* light, Camera* camera, unsigned viewWid
         else
         {
 // #ifndef GL_ES_VERSION_2_0
-//             // OpenGL (desktop) and D3D11: shadow compare mode needs to be specifically enabled for the shadow map
-//             newShadowMap->SetFilterMode(FILTER_BILINEAR);
-//             newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
+             // OpenGL (desktop) and D3D11: shadow compare mode needs to be specifically enabled for the shadow map
+             newShadowMap->SetFilterMode(FILTER_BILINEAR);
+             newShadowMap->SetShadowCompare(shadowMapUsage == TEXTURE_DEPTHSTENCIL);
 // #endif
 // #ifndef URHO3D_OPENGL
 //             // Direct3D9: when shadow compare must be done manually, use nearest filtering so that the filtering of point lights
@@ -1820,7 +1820,7 @@ void Renderer::CreateGeometries()
     pointLightGeometry_->SetIndexBuffer(plib);
     pointLightGeometry_->SetDrawRange(TRIANGLE_LIST, 0, plib->GetIndexCount());
 
-#if !defined(URHO3D_OPENGL) || !defined(GL_ES_VERSION_2_0)
+// #if !defined(URHO3D_OPENGL) || !defined(GL_ES_VERSION_2_0)
     if (graphics_->GetShadowMapFormat())
     {
         faceSelectCubeMap_ = new TextureCube(context_);
@@ -1838,7 +1838,7 @@ void Renderer::CreateGeometries()
 
         SetIndirectionTextureData();
     }
-#endif
+// #endif
 }
 
 void Renderer::SetIndirectionTextureData()
@@ -1864,17 +1864,17 @@ void Renderer::SetIndirectionTextureData()
         {
             for (unsigned x = 0; x < 256; ++x)
             {
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
                 dest[0] = (unsigned char)x;
                 dest[1] = (unsigned char)(255 - y);
                 dest[2] = faceX;
                 dest[3] = (unsigned char)(255 * 2 / 3 - faceY);
-#else
-                dest[0] = (unsigned char)x;
-                dest[1] = (unsigned char)y;
-                dest[2] = faceX;
-                dest[3] = faceY;
-#endif
+// #else
+//                 dest[0] = (unsigned char)x;
+//                 dest[1] = (unsigned char)y;
+//                 dest[2] = faceX;
+//                 dest[3] = faceY;
+// #endif
                 dest += 4;
             }
         }
@@ -1924,25 +1924,25 @@ String Renderer::GetShadowVariations() const
     switch (shadowQuality_)
     {
         case SHADOWQUALITY_SIMPLE_16BIT:
-        #ifdef URHO3D_OPENGL
+        //#ifdef URHO3D_OPENGL
             return "SIMPLE_SHADOW ";
-        #else
-            if (graphics_->GetHardwareShadowSupport())
-                return "SIMPLE_SHADOW ";
-            else
-                return "SIMPLE_SHADOW SHADOWCMP ";
-        #endif
+//         #else
+//             if (graphics_->GetHardwareShadowSupport())
+//                 return "SIMPLE_SHADOW ";
+//             else
+//                 return "SIMPLE_SHADOW SHADOWCMP ";
+//         #endif
         case SHADOWQUALITY_SIMPLE_24BIT:
             return "SIMPLE_SHADOW ";
         case SHADOWQUALITY_PCF_16BIT:
-        #ifdef URHO3D_OPENGL
+        //#ifdef URHO3D_OPENGL
             return "PCF_SHADOW ";
-        #else
-            if (graphics_->GetHardwareShadowSupport())
-                return "PCF_SHADOW ";
-            else
-                return "PCF_SHADOW SHADOWCMP ";
-        #endif
+//         #else
+//             if (graphics_->GetHardwareShadowSupport())
+//                 return "PCF_SHADOW ";
+//             else
+//                 return "PCF_SHADOW SHADOWCMP ";
+//         #endif
         case SHADOWQUALITY_PCF_24BIT:
             return "PCF_SHADOW ";
         case SHADOWQUALITY_VSM:

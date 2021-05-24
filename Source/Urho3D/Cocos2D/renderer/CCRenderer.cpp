@@ -874,12 +874,12 @@ void Renderer::drawBatchedTriangles()
     Urho3D::Vector2 offset(-1.0f, -1.0f);
     if (surface)
     {
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
         // On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the
         // same way as a render texture produced on Direct3D.
         offset.y_ = -offset.y_;
         scale.y_ = -scale.y_;
-#endif
+//#endif
     }
 
     //  Urho3D::Matrix4 projection(Urho3D::Matrix4::IDENTITY);

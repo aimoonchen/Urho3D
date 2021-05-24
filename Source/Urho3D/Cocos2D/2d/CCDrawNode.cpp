@@ -363,12 +363,12 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
     Urho3D::Vector2 offset(-1.0f, -1.0f);
     if (surface)
     {
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
         // On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the
         // same way as a render texture produced on Direct3D.
         offset.y_ = -offset.y_;
         scale.y_ = -scale.y_;
-#endif
+//#endif
     }
     const auto& matrixP = _director->getMatrix(MATRIX_STACK_TYPE::MATRIX_STACK_PROJECTION);
     Mat4 matrixMVP = matrixP * transform;
@@ -385,12 +385,12 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
 
     graphics_->ClearParameterSources();
     graphics_->SetColorWrite(true);
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
     // Reverse winding if rendering to texture on OpenGL
     if (surface)
         graphics_->SetCullMode(Urho3D::CULL_CW);
     else
-#endif
+//#endif
         // graphics_->SetCullMode(Urho3D::CULL_CCW);
         // graphics_->SetCullMode(Urho3D::CULL_CW);
         graphics_->SetCullMode(Urho3D::CULL_NONE);
@@ -460,7 +460,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
         // 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
 
         // Flip scissor vertically if using OpenGL texture rendering
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
         if (surface)
         {
             // 			int top = scissor.top_;
@@ -468,7 +468,7 @@ void DrawNode::onDraw(const Mat4 &transform, uint32_t /*flags*/)
             // 			scissor.top_ = viewSize.y_ - bottom;
             // 			scissor.bottom_ = viewSize.y_ - top;
         }
-#endif
+//#endif
 
         graphics_->SetBlendMode(BlendCocosToUrho3D(_blendFunc));
         //		graphics_->SetScissorTest(true, scissor);
@@ -536,12 +536,12 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
     auto graphics_ = GetUrho3DContext()->GetSubsystem<Urho3D::Graphics>();
     graphics_->ClearParameterSources();
     graphics_->SetColorWrite(true);
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
     // Reverse winding if rendering to texture on OpenGL
     if (false /*surface*/)
         graphics_->SetCullMode(Urho3D::CULL_CW);
     else
-#endif
+//#endif
         // graphics_->SetCullMode(Urho3D::CULL_CCW);
         // graphics_->SetCullMode(Urho3D::CULL_CW);
         graphics_->SetCullMode(Urho3D::CULL_NONE);
@@ -594,7 +594,7 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
     // 		scissor.bottom_ = (int)(scissor.bottom_ * uiScale_);
 
     // Flip scissor vertically if using OpenGL texture rendering
-#ifdef URHO3D_OPENGL
+//#ifdef URHO3D_OPENGL
 // 		if (surface)
 // 		{
 // 			int top = scissor.top_;
@@ -602,7 +602,7 @@ void DrawNode::onDrawGLLine(const Mat4 &transform, uint32_t /*flags*/)
 // 			scissor.top_ = viewSize.y_ - bottom;
 // 			scissor.bottom_ = viewSize.y_ - top;
 // 		}
-#endif
+//#endif
 
     graphics_->SetBlendMode(blendMode);
     //		graphics_->SetScissorTest(true, scissor);
