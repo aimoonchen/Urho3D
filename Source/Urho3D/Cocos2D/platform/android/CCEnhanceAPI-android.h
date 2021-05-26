@@ -20,7 +20,7 @@
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
 
 #include "platform/CCCommon.h"
-#include "platform/CCApplicationProtocol.h"
+//#include "platform/CCApplicationProtocol.h"
 
 NS_CC_BEGIN
 

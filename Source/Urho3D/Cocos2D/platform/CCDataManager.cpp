@@ -28,7 +28,7 @@ THE SOFTWARE.
 #include "platform/CCDataManager.h"
 
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-#   include "platform/android/jni/JniHelper.h"
+//#   include "platform/android/jni/JniHelper.h"
 #   define DataManagerClassName "org/cocos2dx/lib/Cocos2dxDataManager"
 #endif
 
@@ -36,32 +36,32 @@ NS_CC_BEGIN
 
 void DataManager::setProcessID(int pid){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "setProcessID", pid);
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "setProcessID", pid);
 #endif
 }
 void DataManager::setFrameSize(int width, int height){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "setFrameSize", width, height);
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "setFrameSize", width, height);
 #endif
 }
 void DataManager::onSceneLoaderBegin(){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "onSceneLoaderBegin");
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "onSceneLoaderBegin");
 #endif
 }
 void DataManager::onSceneLoaderEnd(){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "onSceneLoaderEnd");
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "onSceneLoaderEnd");
 #endif
 }
 void DataManager::onShaderLoaderBegin(){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "onShaderLoaderBegin");
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "onShaderLoaderBegin");
 #endif
 }
 void DataManager::onShaderLoaderEnd(){
 #if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-    JniHelper::callStaticVoidMethod(DataManagerClassName, "onShaderLoaderEnd");
+    //JniHelper::callStaticVoidMethod(DataManagerClassName, "onShaderLoaderEnd");
 #endif
 }
 

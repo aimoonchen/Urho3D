@@ -34,7 +34,7 @@
 #include "../IO/Log.h"
 
 #ifdef __ANDROID__
-#include <SDL/SDL_rwops.h>
+//#include <SDL/SDL_rwops.h>
 #endif
 
 // #ifndef MINI_URHO
@@ -70,9 +70,9 @@
 // extern "C"
 // {
 #ifdef __ANDROID__
-const char* SDL_Android_GetFilesDir();
-char** SDL_Android_GetFileList(const char* path, int* count);
-void SDL_Android_FreeFileList(char*** array, int* count);
+//const char* SDL_Android_GetFilesDir();
+//char** SDL_Android_GetFileList(const char* path, int* count);
+//void SDL_Android_FreeFileList(char*** array, int* count);
 #elif defined(IOS) || defined(TVOS)
 const char* SDL_IOS_GetResourceDir();
 const char* SDL_IOS_GetDocumentsDir();
@@ -603,17 +603,17 @@ bool FileSystem::FileExists(const String& fileName) const
         return false;
 
 #ifdef __ANDROID__
-    if (URHO3D_IS_ASSET(fileName))
-    {
-        SDL_RWops* rwOps = SDL_RWFromFile(URHO3D_ASSET(fileName), "rb");
-        if (rwOps)
-        {
-            SDL_RWclose(rwOps);
-            return true;
-        }
-        else
-            return false;
-    }
+//    if (URHO3D_IS_ASSET(fileName))
+//    {
+//        SDL_RWops* rwOps = SDL_RWFromFile(URHO3D_ASSET(fileName), "rb");
+//        if (rwOps)
+//        {
+//            SDL_RWclose(rwOps);
+//            return true;
+//        }
+//        else
+//            return false;
+//    }
 #endif
 
     String fixedName = GetNativePath(RemoveTrailingSlash(fileName));
@@ -645,31 +645,31 @@ bool FileSystem::DirExists(const String& pathName) const
     String fixedName = GetNativePath(RemoveTrailingSlash(pathName));
 
 #ifdef __ANDROID__
-    if (URHO3D_IS_ASSET(fixedName))
-    {
-        // Split the pathname into two components: the longest parent directory path and the last name component
-        String assetPath(URHO3D_ASSET((fixedName + "/")));
-        String parentPath;
-        unsigned pos = assetPath.FindLast('/', assetPath.Length() - 2);
-        if (pos != String::NPOS)
-        {
-            parentPath = assetPath.Substring(0, pos);
-            assetPath = assetPath.Substring(pos + 1);
-        }
-        assetPath.Resize(assetPath.Length() - 1);
-
-        bool exist = false;
-        int count;
-        char** list = SDL_Android_GetFileList(parentPath.CString(), &count);
-        for (int i = 0; i < count; ++i)
-        {
-            exist = assetPath == list[i];
-            if (exist)
-                break;
-        }
-        SDL_Android_FreeFileList(&list, &count);
-        return exist;
-    }
+//    if (URHO3D_IS_ASSET(fixedName))
+//    {
+//        // Split the pathname into two components: the longest parent directory path and the last name component
+//        String assetPath(URHO3D_ASSET((fixedName + "/")));
+//        String parentPath;
+//        unsigned pos = assetPath.FindLast('/', assetPath.Length() - 2);
+//        if (pos != String::NPOS)
+//        {
+//            parentPath = assetPath.Substring(0, pos);
+//            assetPath = assetPath.Substring(pos + 1);
+//        }
+//        assetPath.Resize(assetPath.Length() - 1);
+//
+//        bool exist = false;
+//        int count;
+//        char** list = SDL_Android_GetFileList(parentPath.CString(), &count);
+//        for (int i = 0; i < count; ++i)
+//        {
+//            exist = assetPath == list[i];
+//            if (exist)
+//                break;
+//        }
+//        SDL_Android_FreeFileList(&list, &count);
+//        return exist;
+//    }
 #endif
 
 #ifdef _WIN32
@@ -730,7 +730,7 @@ String FileSystem::GetProgramDir() const
 String FileSystem::GetUserDocumentsDir() const
 {
 #if defined(__ANDROID__)
-    return AddTrailingSlash(SDL_Android_GetFilesDir());
+    return "";//AddTrailingSlash(SDL_Android_GetFilesDir());
 #elif defined(IOS) || defined(TVOS)
     return AddTrailingSlash(SDL_IOS_GetDocumentsDir());
 #elif defined(_WIN32)
@@ -808,39 +808,39 @@ void FileSystem::ScanDirInternal(Vector<String>& result, String path, const Stri
         filterExtension.Clear();
 
 #ifdef __ANDROID__
-    if (URHO3D_IS_ASSET(path))
-    {
-        String assetPath(URHO3D_ASSET(path));
-        assetPath.Resize(assetPath.Length() - 1);       // AssetManager.list() does not like trailing slash
-        int count;
-        char** list = SDL_Android_GetFileList(assetPath.CString(), &count);
-        for (int i = 0; i < count; ++i)
-        {
-            String fileName(list[i]);
-            if (!(flags & SCAN_HIDDEN) && fileName.StartsWith("."))
-                continue;
-
-#ifdef ASSET_DIR_INDICATOR
-            // Patch the directory name back after retrieving the directory flag
-            bool isDirectory = fileName.EndsWith(ASSET_DIR_INDICATOR);
-            if (isDirectory)
-            {
-                fileName.Resize(fileName.Length() - sizeof(ASSET_DIR_INDICATOR) / sizeof(char) + 1);
-                if (flags & SCAN_DIRS)
-                    result.Push(deltaPath + fileName);
-                if (recursive)
-                    ScanDirInternal(result, path + fileName, startPath, filter, flags, recursive);
-            }
-            else if (flags & SCAN_FILES)
-#endif
-            {
-                if (filterExtension.Empty() || fileName.EndsWith(filterExtension))
-                    result.Push(deltaPath + fileName);
-            }
-        }
-        SDL_Android_FreeFileList(&list, &count);
-        return;
-    }
+//    if (URHO3D_IS_ASSET(path))
+//    {
+//        String assetPath(URHO3D_ASSET(path));
+//        assetPath.Resize(assetPath.Length() - 1);       // AssetManager.list() does not like trailing slash
+//        int count;
+//        char** list = SDL_Android_GetFileList(assetPath.CString(), &count);
+//        for (int i = 0; i < count; ++i)
+//        {
+//            String fileName(list[i]);
+//            if (!(flags & SCAN_HIDDEN) && fileName.StartsWith("."))
+//                continue;
+//
+//#ifdef ASSET_DIR_INDICATOR
+//            // Patch the directory name back after retrieving the directory flag
+//            bool isDirectory = fileName.EndsWith(ASSET_DIR_INDICATOR);
+//            if (isDirectory)
+//            {
+//                fileName.Resize(fileName.Length() - sizeof(ASSET_DIR_INDICATOR) / sizeof(char) + 1);
+//                if (flags & SCAN_DIRS)
+//                    result.Push(deltaPath + fileName);
+//                if (recursive)
+//                    ScanDirInternal(result, path + fileName, startPath, filter, flags, recursive);
+//            }
+//            else if (flags & SCAN_FILES)
+//#endif
+//            {
+//                if (filterExtension.Empty() || fileName.EndsWith(filterExtension))
+//                    result.Push(deltaPath + fileName);
+//            }
+//        }
+//        SDL_Android_FreeFileList(&list, &count);
+//        return;
+//    }
 #endif
 #ifdef _WIN32
     WIN32_FIND_DATAW info;
