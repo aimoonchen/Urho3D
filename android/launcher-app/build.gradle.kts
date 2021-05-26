@@ -23,7 +23,6 @@
 plugins {
     id("com.android.application")
     kotlin("android")
-    kotlin("android.extensions")
 }
 
 val kotlinVersion: String by ext
@@ -35,7 +34,7 @@ android {
     ndkVersion = ndkSideBySideVersion
     compileSdkVersion(30)
     defaultConfig {
-        minSdkVersion(18)
+        minSdkVersion(25)
         targetSdkVersion(30)
         applicationId = "io.urho3d.launcher"
         versionCode = 1
@@ -83,7 +82,8 @@ android {
         cmake {
             version = cmakeVersion
             path = project.file("CMakeLists.txt")
-            setBuildStagingDirectory(buildStagingDir)
+            //setBuildStagingDirectory(buildStagingDir)
+            buildStagingDirectory = project.file(buildStagingDir)
         }
     }
 }
@@ -92,10 +92,10 @@ dependencies {
     implementation(project(":android:urho3d-lib"))
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
-    implementation("androidx.core:core-ktx:1.3.2")
-    implementation("androidx.appcompat:appcompat:1.2.0")
-    implementation("androidx.constraintlayout:constraintlayout:2.0.2")
-    testImplementation("junit:junit:4.13.1")
+    implementation("androidx.core:core-ktx:1.5.0")
+    implementation("androidx.appcompat:appcompat:1.3.0")
+    implementation("androidx.constraintlayout:constraintlayout:2.0.4")
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }

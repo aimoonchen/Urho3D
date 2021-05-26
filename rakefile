@@ -534,7 +534,7 @@ buildscript {
     val kotlinVersion: String by extra
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
         classpath("com.android.tools.build:gradle:#{first_match(/"com.android.tools.build:gradle:(.+)"/, template)}")
@@ -547,7 +547,7 @@ val kotlinVersion: String by ext
 allprojects {
     repositories {
         google()
-        jcenter()
+        mavenCentral()
         // Remove below two repos if you are only using released AAR from JCenter
         mavenLocal()
         if (System.getenv("GITHUB_ACTOR") != null && System.getenv("GITHUB_TOKEN") != null) {

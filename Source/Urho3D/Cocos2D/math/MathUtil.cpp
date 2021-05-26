@@ -23,7 +23,7 @@ This file was modified to fit the cocos2d-x project
 #include "base/ccMacros.h"
 
 #if (CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID)
-#include <cpu-features.h>
+//#include <cpu-features.h>
 #endif
 
 //#define USE_NEON32        : neon 32 code will be used

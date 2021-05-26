@@ -24,14 +24,14 @@ import org.gradle.internal.io.NullOutputStream
 import java.io.ByteArrayOutputStream
 
 buildscript {
-    extra["kotlinVersion"] = "1.4.10"
+    extra["kotlinVersion"] = "1.4.31"
     val kotlinVersion: String by extra
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     dependencies {
-        classpath("com.android.tools.build:gradle:4.0.2")
+        classpath("com.android.tools.build:gradle:4.2.1")
         classpath("org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion")
     }
 }
@@ -51,12 +51,12 @@ allprojects {
     """.trimIndent().replace('\n', ' ')
     repositories {
         google()
-        jcenter()
+        mavenCentral()
     }
     buildscript {
         ext {
             set("kotlinVersion", kotlinVersion)
-            set("ndkSideBySideVersion", "21.3.6528147")
+            set("ndkSideBySideVersion", "22.1.7171670")
             set("cmakeVersion", "3.17.3+")
             set("buildStagingDir", ".cxx")
         }

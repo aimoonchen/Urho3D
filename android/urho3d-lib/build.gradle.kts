@@ -27,7 +27,6 @@ plugins {
     id("com.android.library")
     id("com.jfrog.bintray")
     kotlin("android")
-    kotlin("android.extensions")
     `maven-publish`
 }
 
@@ -40,7 +39,7 @@ android {
     ndkVersion = ndkSideBySideVersion
     compileSdkVersion(30)
     defaultConfig {
-        minSdkVersion(18)
+        minSdkVersion(25)
         targetSdkVersion(30)
         versionCode = 1
         versionName = project.version.toString()
@@ -80,7 +79,8 @@ android {
         cmake {
             version = cmakeVersion
             path = project.file("../../CMakeLists.txt")
-            setBuildStagingDirectory(buildStagingDir)
+            //setBuildStagingDirectory(buildStagingDir)
+            buildStagingDirectory = project.file(buildStagingDir)
         }
     }
     sourceSets {
@@ -94,7 +94,7 @@ dependencies {
     implementation(fileTree(mapOf("dir" to "libs", "include" to listOf("*.jar", "*.aar"))))
     implementation("org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlinVersion")
     implementation("com.getkeepsafe.relinker:relinker:1.4.1")
-    testImplementation("junit:junit:4.13.1")
+    testImplementation("junit:junit:4.13.2")
     androidTestImplementation("androidx.test:runner:1.3.0")
     androidTestImplementation("androidx.test.espresso:espresso-core:3.3.0")
 }
