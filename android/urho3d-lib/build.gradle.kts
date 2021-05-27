@@ -79,7 +79,6 @@ android {
         cmake {
             version = cmakeVersion
             path = project.file("../../CMakeLists.txt")
-            //setBuildStagingDirectory(buildStagingDir)
             buildStagingDirectory = project.file(buildStagingDir)
         }
     }

@@ -747,7 +747,7 @@ bool Spawn::initWithTwoActions(FiniteTimeAction *action1, FiniteTimeAction *acti
     float d1 = action1->getDuration();
     float d2 = action2->getDuration();
 
-    if (ActionInterval::initWithDuration(MAX(d1, d2)))
+    if (ActionInterval::initWithDuration(std::max(d1, d2)))
     {
         _one = action1;
         _two = action2;

@@ -179,7 +179,7 @@ void DrawNode::ensureCapacity(int count)
     
     if(_bufferCount + count > _bufferCapacity)
     {
-        _bufferCapacity += MAX(_bufferCapacity, count);
+        _bufferCapacity += std::max(_bufferCapacity, count);
         _buffer = (V3F_C4B_T2F*)realloc(_buffer, _bufferCapacity*sizeof(V3F_C4B_T2F));
     }
 }
@@ -190,7 +190,7 @@ void DrawNode::ensureCapacityGLPoint(int count)
     
     if(_bufferCountGLPoint + count > _bufferCapacityGLPoint)
     {
-        _bufferCapacityGLPoint += MAX(_bufferCapacityGLPoint, count);
+        _bufferCapacityGLPoint += std::max(_bufferCapacityGLPoint, count);
         _bufferGLPoint = (V3F_C4B_T2F*)realloc(_bufferGLPoint, _bufferCapacityGLPoint*sizeof(V3F_C4B_T2F));
     }
 }
@@ -201,7 +201,7 @@ void DrawNode::ensureCapacityGLLine(int count)
     
     if(_bufferCountGLLine + count > _bufferCapacityGLLine)
     {
-        _bufferCapacityGLLine += MAX(_bufferCapacityGLLine, count);
+        _bufferCapacityGLLine += std::max(_bufferCapacityGLLine, count);
         _bufferGLLine = (V3F_C4B_T2F*)realloc(_bufferGLLine, _bufferCapacityGLLine*sizeof(V3F_C4B_T2F));
     }
 }
