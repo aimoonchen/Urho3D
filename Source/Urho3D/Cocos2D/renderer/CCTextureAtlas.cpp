@@ -336,7 +336,7 @@ void TextureAtlas::updateQuad(V3F_C4B_T2F_Quad *quad, ssize_t index)
 {
     CCASSERT( index >= 0 && index < _capacity, "updateQuadWithTexture: Invalid index");
 
-    _totalQuads = MAX( index+1, _totalQuads);
+    _totalQuads = std::max( index+1, _totalQuads);
 
     _quads[index] = *quad;    
 
@@ -480,7 +480,7 @@ bool TextureAtlas::resizeCapacity(ssize_t newCapacity)
     auto oldCapacity = _capacity;
 
     // update capacity and totalQuads
-    _totalQuads = MIN(_totalQuads, newCapacity);
+    _totalQuads = std::min(_totalQuads, newCapacity);
     _capacity = newCapacity;
 
     V3F_C4B_T2F_Quad* tmpQuads = nullptr;

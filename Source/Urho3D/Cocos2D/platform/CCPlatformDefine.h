@@ -30,17 +30,28 @@ THE SOFTWARE.
 
 #include "platform/CCPlatformConfig.h"
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
-#include "platform/mac/CCPlatformDefine-mac.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-#include "platform/ios/CCPlatformDefine-ios.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-#include "platform/android/CCPlatformDefine-android.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-#include "platform/win32/CCPlatformDefine-win32.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
-#include "platform/linux/CCPlatformDefine-linux.h"
+// #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+// #include "platform/mac/CCPlatformDefine-mac.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+// #include "platform/ios/CCPlatformDefine-ios.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+// #include "platform/android/CCPlatformDefine-android.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+// #include "platform/win32/CCPlatformDefine-win32.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+// #include "platform/linux/CCPlatformDefine-linux.h"
+// #endif
+#include <assert.h>
+
+#if CC_DISABLE_ASSERT > 0
+#define CC_ASSERT(cond)
+#else
+#define CC_ASSERT(cond) assert(cond)
 #endif
+
+#define CC_UNUSED_PARAM(unusedparam) (void)unusedparam
+
+#define CC_DLL
 
 /// @endcond
 #endif /* __PLATFORM_CCPLATFORMDEFINE_H__*/

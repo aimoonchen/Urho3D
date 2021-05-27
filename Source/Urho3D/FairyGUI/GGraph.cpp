@@ -158,7 +158,7 @@ void GGraph::updateShape()
         else
             _polygonPoints->clear();
 
-        float radius = MIN(getWidth(), getHeight()) * 0.5f;
+        float radius = std::min(getWidth(), getHeight()) * 0.5f;
         float angle = MATH_DEG_TO_RAD(_startAngle);
         float deltaAngle = 2 * M_PI / _sides;
         float dist;

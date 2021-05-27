@@ -30,21 +30,31 @@ THE SOFTWARE.
 
 #include "platform/CCPlatformConfig.h"
 
-#if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
-#include "platform/mac/CCGL-mac.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
-#include "platform/ios/CCGL-ios.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
-#include "platform/android/CCGL-android.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
-#include "platform/win32/CCGL-win32.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
-#include "platform/winrt/CCGL.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
-#include "platform/linux/CCGL-linux.h"
-#elif CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN
-#include "platform/tizen/CCGL-tizen.h"
-#endif
-
+// #if CC_TARGET_PLATFORM == CC_PLATFORM_MAC
+// #include "platform/mac/CCGL-mac.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_IOS
+// #include "platform/ios/CCGL-ios.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+// #include "platform/android/CCGL-android.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
+// #include "platform/win32/CCGL-win32.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_WINRT
+// #include "platform/winrt/CCGL.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_LINUX
+// #include "platform/linux/CCGL-linux.h"
+// #elif CC_TARGET_PLATFORM == CC_PLATFORM_TIZEN
+// #include "platform/tizen/CCGL-tizen.h"
+// #endif
+using GLboolean = unsigned char;
+using GLubyte = unsigned char;
+using GLfloat = float;
+using GLenum = unsigned int;
+using GLshort = short;
+using GLuint = unsigned int;
+using GLint = int;
+using GLsizei = int;
+using GLvoid = void;
+using GLushort = unsigned short;
+using GLclampf = float;
 /// @endcond
 #endif /* __PLATFORM_CCPLATFORMDEFINE_H__*/
