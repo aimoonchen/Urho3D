@@ -25,12 +25,12 @@ THE SOFTWARE.
 ****************************************************************************/
 #include "base/ccMacros.h"
 #include "platform/CCPlatformMacros.h"
-#include "platform/win32/CCUtils-win32.h"
+#include "platform/win32/CCUtilswin32.h"
 
 #include <sstream>
 
 NS_CC_BEGIN
-
+#if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 std::wstring StringUtf8ToWideChar(const std::string& strUtf8)
 {
     std::wstring ret;
@@ -105,5 +105,5 @@ std::string UTF8StringToMultiByte(const std::string& strUtf8)
 
     return ret;
 }
-
+#endif
 NS_CC_END

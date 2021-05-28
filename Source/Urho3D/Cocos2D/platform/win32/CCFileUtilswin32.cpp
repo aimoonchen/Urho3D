@@ -27,8 +27,8 @@ THE SOFTWARE.
 #include "platform/CCPlatformConfig.h"
 #if CC_TARGET_PLATFORM == CC_PLATFORM_WIN32
 
-#include "platform/win32/CCFileUtils-win32.h"
-#include "platform/win32/CCUtils-win32.h"
+#include "platform/win32/CCFileUtilswin32.h"
+#include "platform/win32/CCUtilswin32.h"
 #include "platform/CCCommon.h"
 //#include "tinydir/tinydir.h"
 #include <Shlobj.h>

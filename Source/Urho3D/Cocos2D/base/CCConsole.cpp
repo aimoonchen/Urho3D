@@ -58,7 +58,9 @@
 #include <sys/un.h>
 #include <sys/ioctl.h>
 #endif
-
+#if CC_TARGET_PLATFORM == CC_PLATFORM_ANDROID
+#include <android/log.h>
+#endif
 #include "base/CCDirector.h"
 #include "base/CCScheduler.h"
 #include "platform/CCPlatformConfig.h"

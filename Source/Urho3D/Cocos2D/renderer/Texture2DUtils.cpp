@@ -40,7 +40,7 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 
 #if CC_ENABLE_CACHE_TEXTURE_DATA
 	// cache the texture data
-	VolatileTextureMgr::addStringTexture(this, text, textDefinition);
+	//VolatileTextureMgr::addStringTexture(this, text, textDefinition);
 #endif
 
 	bool ret = false;
