@@ -121,8 +121,7 @@ private:
     void* handle_;
 #ifdef __ANDROID__
     /// SDL RWops context for Android asset loading.
-    //SDL_RWops* assetHandle_;
-    FILE* assetHandle_;
+    SDL_RWops* assetHandle_;
 #endif
     /// Read buffer for Android asset or compressed file loading.
     SharedArrayPtr<unsigned char> readBuffer_;

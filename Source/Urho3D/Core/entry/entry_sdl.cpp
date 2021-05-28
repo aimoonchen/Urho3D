@@ -14,14 +14,14 @@
 #elif BX_PLATFORM_WINDOWS
 #	define SDL_MAIN_HANDLED
 #endif
-
+#include <cstdio>
 #include <bx/os.h>
 
-#include <SDL.h>
+#include <SDL/SDL.h>
 
 BX_PRAGMA_DIAGNOSTIC_PUSH()
 BX_PRAGMA_DIAGNOSTIC_IGNORED_CLANG("-Wextern-c-compat")
-#include <SDL_syswm.h>
+#include <SDL/SDL_syswm.h>
 BX_PRAGMA_DIAGNOSTIC_POP()
 
 #include <bgfx/platform.h>

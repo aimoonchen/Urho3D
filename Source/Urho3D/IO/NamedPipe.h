@@ -27,7 +27,7 @@
 #include "../IO/AbstractFile.h"
 
 #ifdef __ANDROID__
-//#include <SDL/SDL_rwops.h>
+#include <SDL/SDL_rwops.h>
 #endif
 
 namespace Urho3D
