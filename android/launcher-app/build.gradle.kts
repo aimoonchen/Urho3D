@@ -46,6 +46,7 @@ android {
                     System.getenv("ANDROID_CCACHE")?.let { add("-D ANDROID_CCACHE=$it") }
                     add("-D BUILD_STAGING_DIR=${findProject(":android:urho3d-lib")!!.projectDir}/$buildStagingDir")
                     add("-D URHO3D_PLAYER=1")
+                    add("-D URHO3D_LIB_TYPE=STATIC")
                     // Skip building samples for 'STATIC' lib type to reduce the spacetime requirement
                     add("-D URHO3D_SAMPLES=${if (System.getenv("URHO3D_LIB_TYPE") == "SHARED") "1" else "0"}")
                     // Pass along matching env-vars as CMake build options
