@@ -255,7 +255,8 @@ namespace entry
 	void setMouseLock(WindowHandle _handle, bool _lock);
 	void setCurrentDir(const char* _dir);
     void* getNativeWindow();
-
+	void setWindowHint(const char* name, const char* value);
+	
 	struct WindowState
 	{
 		WindowState()

@@ -1162,6 +1162,12 @@ namespace entry
 		sdlPostEvent(SDL_USER_WINDOW_MOUSE_LOCK, _handle, NULL, _lock);
 	}
 
+	void setWindowHint(const char* name, const char* value)
+	{
+		//sdlPostEvent(name, _handle, value);
+		SDL_SetHint(name, value);
+	}
+
 	int32_t MainThreadEntry::threadFunc(bx::Thread* _thread, void* _userData)
 	{
 		BX_UNUSED(_thread);

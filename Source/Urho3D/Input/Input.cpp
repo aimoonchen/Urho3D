@@ -44,6 +44,7 @@
 
 #include "bgfx/bgfx.h"
 #include "../Core/entry/entry_p.h"
+#include "../Core/entry/entry.h"
 
 #ifdef __EMSCRIPTEN__
 #include <emscripten/html5.h>
@@ -461,8 +462,10 @@ Input::Input(Context* context) :
 
 #if defined(__ANDROID__)
     // Prevent mouse events from being registered as synthetic touch events and vice versa
-    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
-    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+//    SDL_SetHint(SDL_HINT_MOUSE_TOUCH_EVENTS, "0");
+//    SDL_SetHint(SDL_HINT_TOUCH_MOUSE_EVENTS, "0");
+    entry::setWindowHint("SDL_HINT_MOUSE_TOUCH_EVENTS", "0");
+    entry::setWindowHint("SDL_HINT_TOUCH_MOUSE_EVENTS", "0");
 #elif defined(__EMSCRIPTEN__)
     emscriptenInput_ = new EmscriptenInput(this);
 #endif
@@ -537,7 +540,7 @@ void Input::Update()
             GainFocus();
 
         // Check for losing focus. The window flags are not reliable when using an external window, so prevent losing focus in that case
-        if (inputFocus_ && !graphics_->GetExternalWindow()/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/ == 0)
+        if (inputFocus_ && !graphics_->GetExternalWindow()/* && (flags & SDL_WINDOW_INPUT_FOCUS) == 0*/)
             LoseFocus();
     }
     else
@@ -687,7 +690,7 @@ void Input::SetMouseVisible(bool enable, bool suppressEvent)
                     lastVisibleMousePosition_ = GetMousePosition();
 
                 if (mouseMode_ == MM_ABSOLUTE)
-                    SetMouseModeAbsolute(true/*SDL_TRUE*/);
+                    SetMouseModeAbsolute(SDL_TRUE);
 #else
                 if (mouseMode_ == MM_ABSOLUTE && !emscriptenPointerLock_)
                     emscriptenInput_->RequestPointerLock(MM_ABSOLUTE, suppressEvent);
@@ -704,7 +707,7 @@ void Input::SetMouseVisible(bool enable, bool suppressEvent)
 
 #ifndef __EMSCRIPTEN__
                 if (mouseMode_ == MM_ABSOLUTE)
-                    SetMouseModeAbsolute(false/*SDL_FALSE*/);
+                    SetMouseModeAbsolute(SDL_FALSE);
 
                 // Update cursor position
                 auto* ui = GetSubsystem<UI>();
@@ -966,11 +969,11 @@ void Input::SetMouseMode(MouseMode mode, bool suppressEvent)
             if (previousMode == MM_ABSOLUTE)
             {
                 if (!mouseVisible_)
-                    SetMouseModeAbsolute(false/*SDL_FALSE*/);
+                    SetMouseModeAbsolute(SDL_FALSE);
             }
             if (previousMode == MM_RELATIVE)
             {
-                SetMouseModeRelative(false/*SDL_FALSE*/);
+                SetMouseModeRelative(SDL_FALSE);
                 ResetMouseVisible();
             }
 //             else if (previousMode == MM_WRAP)
@@ -980,12 +983,12 @@ void Input::SetMouseMode(MouseMode mode, bool suppressEvent)
             if (mode == MM_ABSOLUTE)
             {
                 if (!mouseVisible_)
-                    SetMouseModeAbsolute(true/*SDL_TRUE*/);
+                    SetMouseModeAbsolute(SDL_TRUE);
             }
             else if (mode == MM_RELATIVE)
             {
                 SetMouseVisible(false, true);
-                SetMouseModeRelative(true/*SDL_TRUE*/);
+                SetMouseModeRelative(SDL_TRUE);
             }
             else if (mode == MM_WRAP)
             {
