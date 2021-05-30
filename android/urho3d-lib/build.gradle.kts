@@ -39,7 +39,7 @@ android {
     ndkVersion = ndkSideBySideVersion
     compileSdkVersion(30)
     defaultConfig {
-        minSdkVersion(25)
+        minSdkVersion(23)
         targetSdkVersion(30)
         versionCode = 1
         versionName = project.version.toString()
@@ -49,6 +49,7 @@ android {
                 arguments.apply {
                     System.getenv("ANDROID_CCACHE")?.let { add("-D ANDROID_CCACHE=$it") }
                     // add("-D URHO3D_LIB_TYPE=SHARED")
+                    add("-D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_CONSTANT_MACROS")
                     // Pass along matching env-vars as CMake build options
                     addAll(project.file("../../script/.build-options")
                         .readLines()

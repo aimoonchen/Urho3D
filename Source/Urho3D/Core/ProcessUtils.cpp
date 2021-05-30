@@ -29,8 +29,6 @@
 #include <cstdio>
 #include <fcntl.h>
 
-char* SDL_GetPrefPath(const char* org, const char* app);
-
 #ifdef __APPLE__
 #include "TargetConditionals.h"
 #endif
@@ -93,6 +91,10 @@ inline void SetFPUState(unsigned control)
 {
     __asm__ __volatile__ ("fldcw %0" : : "m" (control));
 }
+#endif
+
+#ifndef MINI_URHO
+#include <SDL/SDL.h>
 #endif
 
 #include "../DebugNew.h"

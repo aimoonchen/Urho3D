@@ -524,28 +524,28 @@ namespace entry
 
 			SDL_EventState(SDL_DROPFILE, SDL_ENABLE);
 
-			bx::FileReaderI* reader = NULL;
-			while (NULL == reader)
-			{
-				reader = getFileReader();
-				bx::sleep(100);
-			}
+			// bx::FileReaderI* reader = NULL;
+			// while (NULL == reader)
+			// {
+			// 	reader = getFileReader();
+			// 	bx::sleep(100);
+			// }
 
-			if (bx::open(reader, "gamecontrollerdb.txt") )
-			{
-				bx::AllocatorI* allocator = getAllocator();
-				uint32_t size = (uint32_t)bx::getSize(reader);
-				void* data = BX_ALLOC(allocator, size + 1);
-				bx::read(reader, data, size);
-				bx::close(reader);
-				((char*)data)[size] = '\0';
+			// if (bx::open(reader, "gamecontrollerdb.txt") )
+			// {
+			// 	bx::AllocatorI* allocator = getAllocator();
+			// 	uint32_t size = (uint32_t)bx::getSize(reader);
+			// 	void* data = BX_ALLOC(allocator, size + 1);
+			// 	bx::read(reader, data, size);
+			// 	bx::close(reader);
+			// 	((char*)data)[size] = '\0';
 
-				if (SDL_GameControllerAddMapping( (char*)data) < 0) {
-					DBG("SDL game controller add mapping failed: %s", SDL_GetError());
-				}
+			// 	if (SDL_GameControllerAddMapping( (char*)data) < 0) {
+			// 		DBG("SDL game controller add mapping failed: %s", SDL_GetError());
+			// 	}
 
-				BX_FREE(allocator, data);
-			}
+			// 	BX_FREE(allocator, data);
+			// }
 
 			bool exit = false;
 			SDL_Event event;

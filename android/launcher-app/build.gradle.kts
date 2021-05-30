@@ -34,7 +34,7 @@ android {
     ndkVersion = ndkSideBySideVersion
     compileSdkVersion(30)
     defaultConfig {
-        minSdkVersion(25)
+        minSdkVersion(23)
         targetSdkVersion(30)
         applicationId = "io.urho3d.launcher"
         versionCode = 1
@@ -47,6 +47,7 @@ android {
                     add("-D BUILD_STAGING_DIR=${findProject(":android:urho3d-lib")!!.projectDir}/$buildStagingDir")
                     add("-D URHO3D_PLAYER=1")
                     add("-D URHO3D_LIB_TYPE=STATIC")
+                    add("-D__STDC_LIMIT_MACROS -D__STDC_FORMAT_MACROS -D__STDC_CONSTANT_MACROS")
                     // Skip building samples for 'STATIC' lib type to reduce the spacetime requirement
                     add("-D URHO3D_SAMPLES=${if (System.getenv("URHO3D_LIB_TYPE") == "SHARED") "1" else "0"}")
                     // Pass along matching env-vars as CMake build options
@@ -56,6 +57,8 @@ android {
                         .mapNotNull { variable -> System.getenv(variable)?.let { "-D $variable=$it" } }
                     )
                 }
+                cppFlags += listOf("-L/Users/simonchen/Development/Urho3D/android/launcher-app/src/main/jniLibs/arm64-v8a")
+                cppFlags += listOf("-lEGL -lGLESv3")
             }
         }
         splits {
@@ -74,7 +77,21 @@ android {
         named("release") {
             isMinifyEnabled = false
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+//            externalNativeBuild {
+//                cmake {
+//                    ldFlags += listOf("bgfxRelease","bxRelease","bimgRelease")
+//                    ldLibs += ""
+//                }
+//            }
         }
+//        named("debug") {
+//            externalNativeBuild {
+//                cmake {
+//                    ldFlags += listOf("bgfxDebug","bxDebug","bimgDebug")
+//                    ldLibs += ""
+//                }
+//            }
+//        }
     }
     lintOptions {
         isAbortOnError = false

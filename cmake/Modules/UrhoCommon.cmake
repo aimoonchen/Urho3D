@@ -1784,7 +1784,16 @@ macro (_setup_target)
     include_directories (${INCLUDE_DIRS})
     # Link libraries
     define_dependency_libs (${TARGET_NAME})
-    target_link_libraries (${TARGET_NAME} ${ABSOLUTE_PATH_LIBS} ${LIBS})
+    if (${TARGET_NAME} STREQUAL Urho3D)
+        if (CMAKE_BUILD_TYPE STREQUAL Release)
+            target_link_libraries (${TARGET_NAME} ${ABSOLUTE_PATH_LIBS} ${LIBS} bgfxRelease bxRelease bimgRelease)
+        else ()
+            target_link_libraries (${TARGET_NAME} ${ABSOLUTE_PATH_LIBS} ${LIBS} bgfxDebug bxDebug bimgDebug)
+        endif ()
+    else()
+        target_link_libraries (${TARGET_NAME} ${ABSOLUTE_PATH_LIBS} ${LIBS})
+    endif()
+    
     # Enable PCH if requested
     if (${TARGET_NAME}_HEADER_PATHNAME)
         enable_pch (${${TARGET_NAME}_HEADER_PATHNAME})
