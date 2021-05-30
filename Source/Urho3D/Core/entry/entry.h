@@ -324,6 +324,8 @@ namespace entry
 	///
 	/*URHO3D_API*/ int runApp(AppI* _app, int _argc, const char* const* _argv);
 
+	int do_main(int _argc, char** _argv);
+	
 } // namespace entry
 
 #endif // ENTRY_H_HEADER_GUARD

@@ -1182,12 +1182,10 @@ namespace entry
 		return result;
 	}
 
+	int do_main(int _argc, char** _argv)
+	{
+		//using namespace entry;
+		return s_ctx.run(_argc, _argv);
+	}
 } // namespace entry
-
-int main(int _argc, char** _argv)
-{
-	using namespace entry;
-	return s_ctx.run(_argc, _argv);
-}
-
 #endif // ENTRY_CONFIG_USE_SDL
