@@ -73,8 +73,19 @@ android {
     }
     buildTypes {
         named("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled=true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
+        }
+        named("debug") {
+            externalNativeBuild {
+                cmake {
+                    cppFlags += listOf("-DBGFX_CONFIG_DEBUG=1","-DBX_CONFIG_DEBUG=1")
+                }
+            }
+            isMinifyEnabled=false
+            isDebuggable=true
+            isJniDebuggable=true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
     externalNativeBuild {

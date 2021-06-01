@@ -204,10 +204,7 @@ uint64_t Texture::GetCoordMode(TextureCoordinate coord) {
             return BGFX_SAMPLER_W_BORDER;
         }
     }
-    else
-    {
-        return 0;
-    }
+    return 0;
 }
 
 uint64_t Texture::GetFilterMode()

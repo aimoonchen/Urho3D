@@ -316,8 +316,8 @@ void Urho3DPlayer::HandleScriptReloadFailed(StringHash eventType, VariantMap& ev
 
 void Urho3DPlayer::GetScriptFileName()
 {
-   const Vector<String>& arguments = GetArguments();
-   if (arguments.Size() && arguments[0][0] != '-')
-       scriptFileName_ = GetInternalPath(arguments[0]);
-//    scriptFileName_ = "LuaScripts/04_StaticScene.lua";
+//   const Vector<String>& arguments = GetArguments();
+//   if (arguments.Size() && arguments[0][0] != '-')
+//       scriptFileName_ = GetInternalPath(arguments[0]);
+    scriptFileName_ = "LuaScripts/04_StaticScene.lua";
 }

@@ -47,7 +47,6 @@ namespace entry
 		{
 			return NULL;
 		}
-
 #	if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
 #		if ENTRY_CONFIG_USE_WAYLAND
 		wl_egl_window *win_impl = (wl_egl_window*)SDL_GetWindowData(_window, "wl_egl_window");
@@ -65,10 +64,12 @@ namespace entry
 #		else
 		return (void*)wmi.info.x11.window;
 #		endif
-#	elif BX_PLATFORM_OSX
+#	elif BX_PLATFORM_OSX || BX_PLATFORM_IOS
 		return wmi.info.cocoa.window;
 #	elif BX_PLATFORM_WINDOWS
 		return wmi.info.win.window;
+#   elif BX_PLATFORM_ANDROID
+		return wmi.info.android.window;
 #	endif // BX_PLATFORM_
 	}
 
@@ -80,7 +81,6 @@ namespace entry
 		{
 			return false;
 		}
-
 		bgfx::PlatformData pd;
 #	if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
 #		if ENTRY_CONFIG_USE_WAYLAND
@@ -94,12 +94,10 @@ namespace entry
 		pd.ndt          = NULL;
 #	endif // BX_PLATFORM_
 		pd.nwh          = sdlNativeWindowHandle(_window);
-
 		pd.context      = NULL;
 		pd.backBuffer   = NULL;
 		pd.backBufferDS = NULL;
 		bgfx::setPlatformData(pd);
-
 		return true;
 	}
 
@@ -1167,7 +1165,9 @@ namespace entry
 		//sdlPostEvent(name, _handle, value);
 		SDL_SetHint(name, value);
 	}
-
+#ifdef main
+#undef main
+#endif
 	int32_t MainThreadEntry::threadFunc(bx::Thread* _thread, void* _userData)
 	{
 		BX_UNUSED(_thread);

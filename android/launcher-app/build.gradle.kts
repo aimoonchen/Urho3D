@@ -57,7 +57,7 @@ android {
                         .mapNotNull { variable -> System.getenv(variable)?.let { "-D $variable=$it" } }
                     )
                 }
-                cppFlags += listOf("-L/Users/simonchen/Development/Urho3D/android/launcher-app/src/main/jniLibs/arm64-v8a")
+                cppFlags += listOf("-L/Users/simonchen/Development/Urho3D/3rd/bgfx/.build/android-x86/bin")
                 cppFlags += listOf("-lEGL -lGLESv3")
             }
         }
@@ -75,7 +75,7 @@ android {
     }
     buildTypes {
         named("release") {
-            isMinifyEnabled = false
+            isMinifyEnabled=true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
 //            externalNativeBuild {
 //                cmake {
@@ -84,14 +84,19 @@ android {
 //                }
 //            }
         }
-//        named("debug") {
-//            externalNativeBuild {
-//                cmake {
+        named("debug") {
+            externalNativeBuild {
+                cmake {
 //                    ldFlags += listOf("bgfxDebug","bxDebug","bimgDebug")
 //                    ldLibs += ""
-//                }
-//            }
-//        }
+                    cppFlags += listOf("-DBGFX_CONFIG_DEBUG=1","-DBX_CONFIG_DEBUG=1")
+                }
+            }
+            isMinifyEnabled=false
+            isDebuggable=true
+            isJniDebuggable=true
+            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
+        }
     }
     lintOptions {
         isAbortOnError = false
