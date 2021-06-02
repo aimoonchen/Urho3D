@@ -34,7 +34,7 @@ int sol2_InputLuaAPI_open(sol::state* luaState)
     
     lua.new_usertype<Input>("Input",
         "GetNumJoysticks", &Input::GetNumJoysticks,
-        "AddScreenJoystick", [](Input* obj, XMLFile* layoutFile, XMLFile* styleFile) { return (int32_t)obj->AddScreenJoystick();},
+        "AddScreenJoystick", &Input::AddScreenJoystick,
         "SetScreenJoystickVisible", &Input::SetScreenJoystickVisible,
         "GetNumJoysticks", &Input::GetNumJoysticks,
         "SetMouseMode", &Input::SetMouseMode,

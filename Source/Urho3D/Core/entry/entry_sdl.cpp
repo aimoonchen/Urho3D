@@ -544,7 +544,12 @@ namespace entry
 
 			// 	BX_FREE(allocator, data);
 			// }
-
+			auto getCopyEvent = [](const SDL_Event& event) {
+				auto size = sizeof(SDL_Event);
+				auto newEvent = BX_ALLOC(getAllocator(), size);
+				memcpy(newEvent, &event, size);
+				return newEvent;
+			};
 			bool exit = false;
 			SDL_Event event;
 			while (!exit)
@@ -553,8 +558,10 @@ namespace entry
 
 				while (SDL_PollEvent(&event) )
 				{
+					m_eventQueue.postRawEvent(defaultWindow, getCopyEvent(event));
 					switch (event.type)
 					{
+/*
 					case SDL_QUIT:
 						m_eventQueue.postExitEvent();
 						exit = true;
@@ -686,7 +693,7 @@ namespace entry
 							}
 						}
 						break;
-
+*/
 					case SDL_WINDOWEVENT:
 						{
 							const SDL_WindowEvent& wev = event.window;
@@ -726,7 +733,7 @@ namespace entry
 							}
 						}
 						break;
-
+/*
 					case SDL_JOYAXISMOTION:
 						{
 							const SDL_JoyAxisEvent& jev = event.jaxis;
@@ -851,7 +858,7 @@ namespace entry
 							}
 						}
 						break;
-
+*/
 					default:
 						{
 							const SDL_UserEvent& uev = event.user;
@@ -1165,6 +1172,12 @@ namespace entry
 		//sdlPostEvent(name, _handle, value);
 		SDL_SetHint(name, value);
 	}
+
+	int32_t getWindowFlags(WindowHandle _handle)
+	{
+		return SDL_GetWindowFlags(s_ctx.m_window[_handle.idx]) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS);
+	}
+
 #ifdef main
 #undef main
 #endif

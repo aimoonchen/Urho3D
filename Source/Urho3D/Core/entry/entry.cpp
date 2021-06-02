@@ -22,6 +22,8 @@ void OnMouseEvent(const void* me);
 void OnFocus(bool focus);
 void OnKey(const void* ke);
 
+void OnRawEvent(const void* ev);
+
 extern "C" int32_t _main_(int32_t _argc, char** _argv);
 
 namespace entry
@@ -683,33 +685,36 @@ restart:
 			{
 				switch (ev->m_type)
 				{
-				case Event::Axis:
-					{
-						const AxisEvent* axis = static_cast<const AxisEvent*>(ev);
-						inputSetGamepadAxis(axis->m_gamepad, axis->m_axis, axis->m_value);
-					}
+				case Event::RawEvent:
+					OnRawEvent(ev);
 					break;
-
-				case Event::Char:
-					{
-						const CharEvent* chev = static_cast<const CharEvent*>(ev);
-						inputChar(chev->m_len, chev->m_char);
-					}
-					break;
-
-				case Event::Exit:
-					return true;
-
-				case Event::Gamepad:
-					{
-//						const GamepadEvent* gev = static_cast<const GamepadEvent*>(ev);
-//						DBG("gamepad %d, %d", gev->m_gamepad.idx, gev->m_connected);
-					}
-					break;
-
-				case Event::Mouse:
-					{
-						const MouseEvent* mouse = static_cast<const MouseEvent*>(ev);
+// 				case Event::Axis:
+// 					{
+// 						const AxisEvent* axis = static_cast<const AxisEvent*>(ev);
+// 						inputSetGamepadAxis(axis->m_gamepad, axis->m_axis, axis->m_value);
+// 					}
+// 					break;
+// 
+// 				case Event::Char:
+// 					{
+// 						const CharEvent* chev = static_cast<const CharEvent*>(ev);
+// 						inputChar(chev->m_len, chev->m_char);
+// 					}
+// 					break;
+// 
+// 				case Event::Exit:
+// 					return true;
+// 
+// 				case Event::Gamepad:
+// 					{
+// //						const GamepadEvent* gev = static_cast<const GamepadEvent*>(ev);
+// //						DBG("gamepad %d, %d", gev->m_gamepad.idx, gev->m_connected);
+// 					}
+// 					break;
+// 
+// 				case Event::Mouse:
+// 					{
+// 						const MouseEvent* mouse = static_cast<const MouseEvent*>(ev);
 // 						handle = mouse->m_handle;
 // 
 // 						inputSetMousePos(mouse->m_mx, mouse->m_my, mouse->m_mz);
@@ -717,31 +722,31 @@ restart:
 // 						{
 // 							inputSetMouseButtonState(mouse->m_button, mouse->m_down);
 // 						}
-
-						if (NULL != _mouse
-						&&  !mouseLock)
-						{
-							_mouse->m_mx = mouse->m_mx;
-							_mouse->m_my = mouse->m_my;
-							_mouse->m_mz = mouse->m_mz;
-							if (!mouse->m_move)
-							{
-								_mouse->m_buttons[mouse->m_button] = mouse->m_down;
-							}
-						}
-                        OnMouseEvent(mouse);
-					}
-					break;
-
-				case Event::Key:
-					{
- 						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
+// 
+// // 						if (NULL != _mouse
+// // 						&&  !mouseLock)
+// // 						{
+// // 							_mouse->m_mx = mouse->m_mx;
+// // 							_mouse->m_my = mouse->m_my;
+// // 							_mouse->m_mz = mouse->m_mz;
+// // 							if (!mouse->m_move)
+// // 							{
+// // 								_mouse->m_buttons[mouse->m_button] = mouse->m_down;
+// // 							}
+// // 						}
+// //                         OnMouseEvent(mouse);
+// 					}
+// 					break;
+//
+// 				case Event::Key:
+// 					{
+//  						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
 // 						handle = key->m_handle;
 // 
 // 						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
-                        OnKey(key);
-					}
-					break;
+// //                        OnKey(key);
+// 					}
+// 					break;
 
 				case Event::Size:
 					{
@@ -758,32 +763,32 @@ restart:
 						needReset = true;
 					}
 					break;
-
-				case Event::Window:
-					break;
-
-				case Event::Suspend:
-					break;
-
-				case Event::DropFile:
-					{
-						const DropFileEvent* drop = static_cast<const DropFileEvent*>(ev);
-						DBG("%s", drop->m_filePath.getCPtr() );
-					}
-					break;
-                case Event::Focus:
-                    {
-						const FocusEvent* fe = static_cast<const FocusEvent*>(ev);
-                        OnFocus(fe->m_has_focus);
-					}
-                    break;
+ 
+// 				case Event::Window:
+// 					break;
+// 
+// 				case Event::Suspend:
+// 					break;
+// 
+// 				case Event::DropFile:
+// 					{
+// 						const DropFileEvent* drop = static_cast<const DropFileEvent*>(ev);
+// 						DBG("%s", drop->m_filePath.getCPtr() );
+// 					}
+// 					break;
+//                 case Event::Focus:
+//                     {
+// 						const FocusEvent* fe = static_cast<const FocusEvent*>(ev);
+//                         OnFocus(fe->m_has_focus);
+// 					}
+//                     break;
 
 				default:
 					break;
 				}
 			}
 
-			inputProcess();
+//			inputProcess();
 
 		} while (NULL != ev);
 

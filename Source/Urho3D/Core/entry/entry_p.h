@@ -95,6 +95,7 @@ namespace entry
 			Suspend,
 			DropFile,
 			Focus,
+			RawEvent
 		};
 
 		Event(Enum _type)
@@ -194,6 +195,12 @@ namespace entry
 
         bool m_has_focus;
     };
+
+	struct RawEvent : public Event
+	{
+		ENTRY_IMPLEMENT_EVENT(RawEvent, Event::RawEvent);
+		void* data;
+	};
 
 	const Event* poll();
 	const Event* poll(WindowHandle _handle);
@@ -315,6 +322,13 @@ namespace entry
             m_queue.push(ev);
         }
 
+		void postRawEvent(WindowHandle _handle, void* data)
+		{
+			RawEvent* ev = BX_NEW(getAllocator(), RawEvent)(_handle);
+			ev->data = data;
+			m_queue.push(ev);
+		}
+
 		const Event* poll()
 		{
 			return m_queue.pop();
@@ -337,6 +351,9 @@ namespace entry
 
 		void release(const Event* _event) const
 		{
+			if (_event->m_type == Event::RawEvent) {
+                BX_FREE(getAllocator(), ((RawEvent*)_event)->data);
+			}
 			BX_DELETE(getAllocator(), const_cast<Event*>(_event) );
 		}
 

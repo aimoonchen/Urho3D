@@ -57,7 +57,7 @@ android {
                         .mapNotNull { variable -> System.getenv(variable)?.let { "-D $variable=$it" } }
                     )
                 }
-                cppFlags += listOf("-L/Users/simonchen/Development/Urho3D/3rd/bgfx/.build/android-x86/bin")
+                cppFlags += listOf("-LD:/Github/Urho3D/3rd/bgfx/.build/android-x86/bin")
                 cppFlags += listOf("-lEGL -lGLESv3")
             }
         }
@@ -77,25 +77,6 @@ android {
         named("release") {
             isMinifyEnabled=true
             proguardFiles(getDefaultProguardFile("proguard-android-optimize.txt"), "proguard-rules.pro")
-//            externalNativeBuild {
-//                cmake {
-//                    ldFlags += listOf("bgfxRelease","bxRelease","bimgRelease")
-//                    ldLibs += ""
-//                }
-//            }
-        }
-        named("debug") {
-            externalNativeBuild {
-                cmake {
-//                    ldFlags += listOf("bgfxDebug","bxDebug","bimgDebug")
-//                    ldLibs += ""
-                    cppFlags += listOf("-DBGFX_CONFIG_DEBUG=1","-DBX_CONFIG_DEBUG=1")
-                }
-            }
-            isMinifyEnabled=false
-            isDebuggable=true
-            isJniDebuggable=true
-            proguardFiles(getDefaultProguardFile("proguard-android.txt"), "proguard-rules.pro")
         }
     }
     lintOptions {

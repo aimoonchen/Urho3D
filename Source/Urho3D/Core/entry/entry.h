@@ -256,7 +256,7 @@ namespace entry
 	void setCurrentDir(const char* _dir);
     void* getNativeWindow();
 	void setWindowHint(const char* name, const char* value);
-	
+	int32_t getWindowFlags(WindowHandle _handle);
 	struct WindowState
 	{
 		WindowState()

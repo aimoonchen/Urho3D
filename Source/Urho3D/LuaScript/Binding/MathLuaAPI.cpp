@@ -89,5 +89,6 @@ int sol2_MathLuaAPI_open(sol::state* lua)
 	);
 	(*lua)["RandomNormal"] = RandomNormal;
 	(*lua)["Clamp"] = Clamp<float>;
+	(*lua)["M_MAX_UNSIGNED"] = M_MAX_UNSIGNED;
 	return 0;
 }

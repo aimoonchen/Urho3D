@@ -353,6 +353,7 @@ public:
     void OnMouseEvent(const void* me);
     void OnFocus(bool focus) { m_focus = focus; }
     void OnKey(const void* ke);
+    void OnRawEvent(const void* rev);
     static Input* s_input_;
 
 private:

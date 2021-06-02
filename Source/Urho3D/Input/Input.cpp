@@ -33,7 +33,7 @@
 #include "../Input/Input.h"
 #include "../IO/FileSystem.h"
 #include "../IO/Log.h"
-//#include "../IO/RWOpsWrapper.h"
+#include "../IO/RWOpsWrapper.h"
 #include "../Resource/ResourceCache.h"
 #include "../UI/Text.h"
 #include "../UI/UI.h"
@@ -41,6 +41,8 @@
 #ifdef _WIN32
 #include "../Engine/Engine.h"
 #endif
+
+#include <SDL/SDL.h>
 
 #include "bgfx/bgfx.h"
 #include "../Core/entry/entry_p.h"
@@ -52,7 +54,7 @@
 
 #include "../DebugNew.h"
 
-//extern "C" int SDL_AddTouch(SDL_TouchID touchID, SDL_TouchDeviceType type, const char* name);
+extern "C" int SDL_AddTouch(SDL_TouchID touchID, SDL_TouchDeviceType type, const char* name);
 
 // Use a "click inside window to focus" mechanism on desktop platforms when the mouse cursor is hidden
 #if defined(_WIN32) || (defined(__APPLE__) && !defined(IOS) && !defined(TVOS)) || (defined(__linux__) && !defined(__ANDROID__))
@@ -62,6 +64,7 @@
 void OnMouseEvent(const void* mouseEvent) { Urho3D::Input::s_input_->OnMouseEvent(mouseEvent); }
 void OnFocus(bool focus) { Urho3D::Input::s_input_->OnFocus(focus); }
 void OnKey(const void* ke) { Urho3D::Input::s_input_->OnKey(ke); }
+void OnRawEvent(const void* ev) { Urho3D::Input::s_input_->OnRawEvent(ev); }
 
 namespace Urho3D
 {
@@ -80,7 +83,7 @@ Key ConvertSDLKeyCode(int keySym, int scanCode)
     if (scanCode == SCANCODE_AC_BACK)
         return KEY_ESCAPE;
     else
-        return {};//(Key)SDL_tolower(keySym);
+        return (Key)SDL_tolower(keySym);
 }
 
 UIElement* TouchState::GetTouchedElement()
@@ -422,6 +425,11 @@ void Input::OnKey(const void* ke)
     SetKey(ConvertBGFXKeyCode(keyEvent->m_key), {}, keyEvent->m_down);
 }
 
+void Input::OnRawEvent(const void* ev)
+{
+    HandleSDLEvent(((entry::RawEvent*)ev)->data);
+}
+
 Input::Input(Context* context) :
     Object(context),
     mouseButtonDown_(0),
@@ -524,13 +532,13 @@ void Input::Update()
 
     // Check for focus change this frame
 //     SDL_Window* window = graphics_->GetWindow();
-//     unsigned flags = window ? SDL_GetWindowFlags(window) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS) : 0;
+    unsigned flags = entry::getWindowFlags({0});//window ? SDL_GetWindowFlags(window) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS) : 0;
 #ifndef __EMSCRIPTEN__
     if (m_focus/*window*/)
     {
 #ifdef REQUIRE_CLICK_TO_FOCUS
         // When using the "click to focus" mechanism, only focus automatically in fullscreen or non-hidden mouse mode
-        if (!inputFocus_ && ((mouseVisible_ || mouseMode_ == MM_FREE) || graphics_->GetFullscreen())/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/)
+        if (!inputFocus_ && ((mouseVisible_ || mouseMode_ == MM_FREE) || graphics_->GetFullscreen()) && (flags & SDL_WINDOW_INPUT_FOCUS))
 #else
         if (!inputFocus_/* && (flags & SDL_WINDOW_INPUT_FOCUS)*/)
 #endif
@@ -540,7 +548,7 @@ void Input::Update()
             GainFocus();
 
         // Check for losing focus. The window flags are not reliable when using an external window, so prevent losing focus in that case
-        if (inputFocus_ && !graphics_->GetExternalWindow()/* && (flags & SDL_WINDOW_INPUT_FOCUS) == 0*/)
+        if (inputFocus_ && !graphics_->GetExternalWindow() && (flags & SDL_WINDOW_INPUT_FOCUS) == 0)
             LoseFocus();
     }
     else
@@ -1370,80 +1378,80 @@ void Input::RemoveAllGestures()
 #endif
 }
 
-// SDL_JoystickID Input::OpenJoystick(unsigned index)
-// {
-//     SDL_Joystick* joystick = SDL_JoystickOpen(index);
-//     if (!joystick)
-//     {
-//         URHO3D_LOGERRORF("Cannot open joystick #%d", index);
-//         return -1;
-//     }
-// 
-//     // Create joystick state for the new joystick
-//     int joystickID = SDL_JoystickInstanceID(joystick);
-//     JoystickState& state = joysticks_[joystickID];
-//     state.joystick_ = joystick;
-//     state.joystickID_ = joystickID;
-//     state.name_ = SDL_JoystickName(joystick);
-//     if (SDL_IsGameController(index))
-//         state.controller_ = SDL_GameControllerOpen(index);
-// 
-//     auto numButtons = (unsigned)SDL_JoystickNumButtons(joystick);
-//     auto numAxes = (unsigned)SDL_JoystickNumAxes(joystick);
-//     auto numHats = (unsigned)SDL_JoystickNumHats(joystick);
-// 
-//     // When the joystick is a controller, make sure there's enough axes & buttons for the standard controller mappings
-//     if (state.controller_)
-//     {
-//         if (numButtons < SDL_CONTROLLER_BUTTON_MAX)
-//             numButtons = SDL_CONTROLLER_BUTTON_MAX;
-//         if (numAxes < SDL_CONTROLLER_AXIS_MAX)
-//             numAxes = SDL_CONTROLLER_AXIS_MAX;
-//     }
-// 
-//     state.Initialize(numButtons, numAxes, numHats);
-// 
-//     return joystickID;
-// }
+SDL_JoystickID Input::OpenJoystick(unsigned index)
+{
+    SDL_Joystick* joystick = SDL_JoystickOpen(index);
+    if (!joystick)
+    {
+        URHO3D_LOGERRORF("Cannot open joystick #%d", index);
+        return -1;
+    }
+
+    // Create joystick state for the new joystick
+    int joystickID = SDL_JoystickInstanceID(joystick);
+    JoystickState& state = joysticks_[joystickID];
+    state.joystick_ = joystick;
+    state.joystickID_ = joystickID;
+    state.name_ = SDL_JoystickName(joystick);
+    if (SDL_IsGameController(index))
+        state.controller_ = SDL_GameControllerOpen(index);
+
+    auto numButtons = (unsigned)SDL_JoystickNumButtons(joystick);
+    auto numAxes = (unsigned)SDL_JoystickNumAxes(joystick);
+    auto numHats = (unsigned)SDL_JoystickNumHats(joystick);
+
+    // When the joystick is a controller, make sure there's enough axes & buttons for the standard controller mappings
+    if (state.controller_)
+    {
+        if (numButtons < SDL_CONTROLLER_BUTTON_MAX)
+            numButtons = SDL_CONTROLLER_BUTTON_MAX;
+        if (numAxes < SDL_CONTROLLER_AXIS_MAX)
+            numAxes = SDL_CONTROLLER_AXIS_MAX;
+    }
+
+    state.Initialize(numButtons, numAxes, numHats);
+
+    return joystickID;
+}
 
 Key Input::GetKeyFromName(const String& name) const
 {
-    return {}; // (Key)SDL_GetKeyFromName(name.CString());
+    return (Key)SDL_GetKeyFromName(name.CString());
 }
 
 Key Input::GetKeyFromScancode(Scancode scancode) const
 {
-    return {}; // (Key)SDL_GetKeyFromScancode((SDL_Scancode)scancode);
+    return (Key)SDL_GetKeyFromScancode((SDL_Scancode)scancode);
 }
 
 String Input::GetKeyName(Key key) const
 {
-    return {}; // String(SDL_GetKeyName(key));
+    return String(SDL_GetKeyName(key));
 }
 
 Scancode Input::GetScancodeFromKey(Key key) const
 {
-    return {}; // (Scancode)SDL_GetScancodeFromKey(key);
+    return (Scancode)SDL_GetScancodeFromKey(key);
 }
 
 Scancode Input::GetScancodeFromName(const String& name) const
 {
-    return {}; // (Scancode)SDL_GetScancodeFromName(name.CString());
+    return (Scancode)SDL_GetScancodeFromName(name.CString());
 }
 
 String Input::GetScancodeName(Scancode scancode) const
 {
-    return {}; // SDL_GetScancodeName((SDL_Scancode)scancode);
+    return SDL_GetScancodeName((SDL_Scancode)scancode);
 }
 
 bool Input::GetKeyDown(Key key) const
 {
-    return keyDown_.Contains(/*SDL_tolower*/(key));
+    return keyDown_.Contains(SDL_tolower(key));
 }
 
 bool Input::GetKeyPress(Key key) const
 {
-    return keyPress_.Contains(/*SDL_tolower*/(key));
+    return keyPress_.Contains(SDL_tolower(key));
 }
 
 bool Input::GetScancodeDown(Scancode scancode) const
@@ -1592,12 +1600,12 @@ bool Input::IsScreenJoystickVisible(SDL_JoystickID id) const
 
 bool Input::GetScreenKeyboardSupport() const
 {
-    return {}; // SDL_HasScreenKeyboardSupport();
+    return SDL_HasScreenKeyboardSupport();
 }
 
 bool Input::IsScreenKeyboardVisible() const
 {
-    return {}; // SDL_IsTextInputActive();
+    return SDL_IsTextInputActive();
 }
 
 bool Input::IsMouseLocked() const
@@ -1968,7 +1976,6 @@ void Input::UnsuppressMouseMove()
 
 void Input::HandleSDLEvent(void* sdlEvent)
 {
-    /*
     SDL_Event& evt = *static_cast<SDL_Event*>(sdlEvent);
 
     // While not having input focus, skip key/mouse/touch/joystick events, except for the "click to focus" mechanism
@@ -2500,7 +2507,6 @@ void Input::HandleSDLEvent(void* sdlEvent)
 
     default: break;
     }
-    */
 }
 
 void Input::HandleScreenMode(StringHash eventType, VariantMap& eventData)
@@ -2511,7 +2517,7 @@ void Input::HandleScreenMode(StringHash eventType, VariantMap& eventData)
     // Re-enable cursor clipping, and re-center the cursor (if needed) to the new screen size, so that there is no erroneous
     // mouse move event. Also get new window ID if it changed
 //     SDL_Window* window = graphics_->GetWindow();
-//     windowID_ = SDL_GetWindowID(window);
+// //    windowID_ = SDL_GetWindowID(window);
 // 
 //     // Resize screen joysticks to new screen size
 //     for (HashMap<SDL_JoystickID, JoystickState>::Iterator i = joysticks_.Begin(); i != joysticks_.End(); ++i)
@@ -2561,7 +2567,6 @@ void Input::HandleEndFrame(StringHash eventType, VariantMap& eventData)
 
 void Input::HandleScreenJoystickTouch(StringHash eventType, VariantMap& eventData)
 {
-    /*
     using namespace TouchBegin;
 
     // Only interested in events from screen joystick(s)
@@ -2699,7 +2704,6 @@ void Input::HandleScreenJoystickTouch(StringHash eventType, VariantMap& eventDat
 
     // Handle the fake SDL event to turn it into Urho3D genuine event
     HandleSDLEvent(&evt);
-    */
 }
 
 }
