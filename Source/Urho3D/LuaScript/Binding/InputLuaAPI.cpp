@@ -31,7 +31,11 @@ static void RegisterKeyboard(sol::state& lua)
 int sol2_InputLuaAPI_open(sol::state* luaState)
 {
     auto& lua = *luaState;
-    
+    lua.new_usertype<TouchState>("TouchState",
+        "position", &TouchState::position_,
+        "delta", &TouchState::delta_,
+        "touchedElement", sol::property([](TouchState* obj) { return obj->touchedElement_.Get(); })
+    );
     lua.new_usertype<Input>("Input",
         "GetNumJoysticks", &Input::GetNumJoysticks,
         "AddScreenJoystick", &Input::AddScreenJoystick,

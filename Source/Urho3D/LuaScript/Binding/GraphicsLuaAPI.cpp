@@ -58,10 +58,13 @@ int sol2_GraphicsLuaAPI_open(sol::state* luaState)
 			[context](Scene* scene, Camera* camera) { return new Viewport(context, scene, camera);/*return std::make_unique<Viewport>(context, scene, camera);*/ }));
 	lua.new_usertype<Camera>("Camera",
 		"farClip", sol::property(&Camera::GetFarClip, &Camera::SetFarClip),
+		"fov", sol::property(&Camera::GetFov, &Camera::SetFov),
 		sol::base_classes, sol::bases<Component>());
 	lua.new_usertype<Graphics>("Graphics",
 		"SetWindowIcon", &Graphics::SetWindowIcon,
-		"windowTitle", sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle));
+		"windowTitle", sol::property(&Graphics::GetWindowTitle, &Graphics::SetWindowTitle),
+		"width", sol::property(&Graphics::GetWidth),
+		"height", sol::property(&Graphics::GetHeight));
 	lua.new_usertype<Renderer>("Renderer", sol::constructors<Renderer(Context*)>(),
 		"SetViewport", &Renderer::SetViewport);
 	lua.new_usertype<Drawable>("Drawable",

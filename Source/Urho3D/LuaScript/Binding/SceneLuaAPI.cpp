@@ -62,6 +62,8 @@ int sol2_SceneLuaAPI_open(sol::state* lua)
         "rotation", sol::property(&Node::GetRotation, &Node::SetRotation),
         "position", sol::property(&Node::GetPosition, &Node::SetPosition),
         "SetScale", sol::overload(sol::resolve<void(float)>(&Node::SetScale), sol::resolve<void(const Vector3&)>(&Node::SetScale)),
+        "SetRotation", &Node::SetRotation,
+        "SetPosition", &Node::SetPosition,
         "Translate", [](Node* obj, const Vector3& translate) { obj->Translate(translate); },
         "Yaw", [](Node* obj, float angle) { obj->Yaw(angle); },
 		"direction", sol::property(&Node::GetDirection, &Node::SetDirection),

@@ -57,7 +57,7 @@ android {
                         .mapNotNull { variable -> System.getenv(variable)?.let { "-D $variable=$it" } }
                     )
                 }
-                cppFlags += listOf("-LD:/Github/Urho3D/3rd/bgfx/.build/android-x86/bin")
+                cppFlags += listOf("-L../../../../src/main/jniLibs/x86")
                 cppFlags += listOf("-lEGL -lGLESv3")
             }
         }
