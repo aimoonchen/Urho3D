@@ -1518,9 +1518,9 @@ IntVector2 Input::GetMousePosition() const
     if (!initialized_)
         return ret;
 
-    //SDL_GetMouseState(&ret.x_, &ret.y_);
-    ret.x_ = m_mouse_x;
-    ret.y_ = m_mouse_y;
+    SDL_GetMouseState(&ret.x_, &ret.y_);
+//     ret.x_ = m_mouse_x;
+//     ret.y_ = m_mouse_y;
     ret.x_ = (int)(ret.x_ * inputScale_.x_);
     ret.y_ = (int)(ret.y_ * inputScale_.y_);
 

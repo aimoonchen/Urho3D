@@ -14,7 +14,7 @@ uniform vec4 u_pointSize;
 void main()
 {
     gl_Position = mul(vec4(a_position, 1.0), CC_MVPMatrix);
-    gl_PointSize = u_pointSize.x;
+//    gl_PointSize = u_pointSize.x;
     v_fragmentColor = u_color;
 }
 #elif defined(COMPILEPS)

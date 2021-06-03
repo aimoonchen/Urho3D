@@ -561,12 +561,11 @@ namespace entry
 					m_eventQueue.postRawEvent(defaultWindow, getCopyEvent(event));
 					switch (event.type)
 					{
-/*
 					case SDL_QUIT:
 						m_eventQueue.postExitEvent();
 						exit = true;
 						break;
-
+/*
 					case SDL_MOUSEMOTION:
 						{
 							const SDL_MouseMotionEvent& mev = event.motion;
