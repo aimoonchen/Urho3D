@@ -14,44 +14,29 @@
 #include "../LuaScriptInstance.h"
 
 using namespace Urho3D;
-
-Urho3D::Context* GetContext(lua_State* L);
-
 int sol_lua_push(sol::types<Component*>, lua_State* L, const Component* obj)
 {
-    if (obj)
-    {
-        if (obj->GetTypeName() == "StaticModel")
-        {
+    if (obj) {
+        if (obj->GetTypeName() == "StaticModel") {
             return sol::make_object(L, static_cast<const StaticModel*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "AnimatedModel")
-        {
+        } else if (obj->GetTypeName() == "AnimatedModel") {
             return sol::make_object(L, static_cast<const AnimatedModel*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "Light")
-        {
+        } else if (obj->GetTypeName() == "Light") {
             return sol::make_object(L, static_cast<const Light*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "Octree")
-        {
+        } else if (obj->GetTypeName() == "Octree") {
             return sol::make_object(L, static_cast<const Octree*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "Camera")
-        {
+        } else if (obj->GetTypeName() == "Camera") {
             return sol::make_object(L, static_cast<const Camera*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "DebugRenderer")
-        {
+        } else if (obj->GetTypeName() == "DebugRenderer") {
             return sol::make_object(L, static_cast<const DebugRenderer*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "Zone")
-        {
+        } else if (obj->GetTypeName() == "Zone") {
             return sol::make_object(L, static_cast<const Zone*>(obj)).push(L);
         }
     }
     return sol::make_object(L, obj).push(L);
 }
+
+Urho3D::Context* GetContext(lua_State* L);
 
 int sol2_SceneLuaAPI_open(sol::state* lua)
 {

@@ -1,32 +1,26 @@
-#include <sol/sol.hpp>
-#include "GetPush.h"
 #include "../../Core/Context.h"
 #include "../../UI/UI.h"
 #include "../../UI/UIElement.h"
 #include "../../UI/Sprite.h"
 #include "../../UI/Font.h"
 #include "../../UI/Text.h"
-
-
-Urho3D::Context* GetContext(lua_State* L);
+#include <sol/sol.hpp>
+#include "GetPush.h"
 
 using namespace Urho3D;
-
 int sol_lua_push(sol::types<UIElement*>, lua_State* L, const UIElement* obj)
 {
-    if (obj)
-    {
-        if (obj->GetTypeName() == "Sprite")
-        {
+    if (obj) {
+        if (obj->GetTypeName() == "Sprite") {
             return sol::make_object(L, static_cast<const Sprite*>(obj)).push(L);
-        }
-        else if (obj->GetTypeName() == "Text")
-        {
+        } else if (obj->GetTypeName() == "Text") {
             return sol::make_object(L, static_cast<const Text*>(obj)).push(L);
         }
     }
     return sol::make_object(L, obj).push(L);
 }
+
+Urho3D::Context* GetContext(lua_State* L);
 
 int sol2_UILuaAPI_open(sol::state* luaState)
 {
@@ -35,8 +29,7 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetSize", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetSize), sol::resolve<void(const IntVector2&)>(&UIElement::SetSize)),
         "SetPosition", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetPosition), sol::resolve<void(const IntVector2&)>(&UIElement::SetPosition)),
         "SetAlignment", &UIElement::SetAlignment,
-        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },//&UIElement::CreateChild,//
-        //"CreateChild", [](UIElement* obj, const std::string& typeName) { return obj->CreateChild(typeName.c_str()); },//&UIElement::CreateChild,//
+        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),

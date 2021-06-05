@@ -34,3 +34,8 @@ bool sol_lua_check(sol::types<Urho3D::StringHash>, lua_State* L, int index, Hand
 }
 Urho3D::StringHash sol_lua_get(sol::types<Urho3D::StringHash>, lua_State* L, int index, sol::stack::record& tracking);
 // int sol_lua_push(lua_State* L, StringHash str);
+
+//namespace Urho3D {
+//class UIElement;
+//}
+//int sol_lua_push(sol::types<Urho3D::UIElement*>, lua_State* L, const Urho3D::UIElement* obj);
