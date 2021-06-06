@@ -4,7 +4,7 @@
  */
 
 #include "entry_p.h"
-
+#include <vector>
 #if ENTRY_CONFIG_USE_SDL
 
 #if BX_PLATFORM_LINUX || BX_PLATFORM_BSD
@@ -92,6 +92,8 @@ namespace entry
 		pd.ndt          = NULL;
 #	elif BX_PLATFORM_WINDOWS
 		pd.ndt          = NULL;
+#	elif BX_PLATFORM_ANDROID
+		pd.ndt			= NULL;
 #	endif // BX_PLATFORM_
 		pd.nwh          = sdlNativeWindowHandle(_window);
 		pd.context      = NULL;
@@ -495,15 +497,14 @@ namespace entry
 				);
 
 			m_windowAlloc.alloc();
-			m_window[0] = SDL_CreateWindow("bgfx"
-							, SDL_WINDOWPOS_UNDEFINED
-							, SDL_WINDOWPOS_UNDEFINED
-							, m_width
-							, m_height
-							, SDL_WINDOW_SHOWN
-							| SDL_WINDOW_RESIZABLE
-							);
-
+            m_window[0] = SDL_CreateWindow("bgfx"
+                    , SDL_WINDOWPOS_UNDEFINED
+                    , SDL_WINDOWPOS_UNDEFINED
+                    , m_width
+                    , m_height
+                    , SDL_WINDOW_SHOWN
+                    | SDL_WINDOW_RESIZABLE
+                    );
 			m_flags[0] = 0
 				| ENTRY_WINDOW_FLAG_ASPECT_RATIO
 				| ENTRY_WINDOW_FLAG_FRAME
@@ -528,7 +529,6 @@ namespace entry
 			// 	reader = getFileReader();
 			// 	bx::sleep(100);
 			// }
-
 			// if (bx::open(reader, "gamecontrollerdb.txt") )
 			// {
 			// 	bx::AllocatorI* allocator = getAllocator();

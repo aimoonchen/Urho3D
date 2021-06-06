@@ -22,22 +22,25 @@
 
 package io.urho3d.launcher
 
-import android.app.ExpandableListActivity
+import androidx.appcompat.app.AppCompatActivity
 import android.content.Intent
 import android.os.Bundle
 import android.view.View
+import android.widget.ExpandableListAdapter
 import android.widget.ExpandableListView
 import android.widget.SimpleExpandableListAdapter
 import io.urho3d.UrhoActivity
 
-class LauncherActivity : ExpandableListActivity() {
-
+class LauncherActivity : AppCompatActivity() {
+    private var expandableListView: ExpandableListView? = null
+    private var adapter: ExpandableListAdapter? = null
     // Filter to only include filename that has an extension
     private fun getScriptNames(path: String) = assets.list(path)!!.filter { it.contains('.') }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
-
+        setContentView(R.layout.activity_launcher)
+        expandableListView = findViewById(R.id.expendableList)
         // Only the sample library is selectable, excluding Urho3DPlayer which is handled separately
         val regex = Regex("^(?:Urho3D.*|.+_shared)\$")
         val libraryNames = UrhoActivity.getLibraryNames(this)
@@ -53,8 +56,7 @@ class LauncherActivity : ExpandableListActivity() {
         }
         items.filterValues { it.isEmpty() }.forEach { items.remove(it.key) }
 
-        setListAdapter(
-            SimpleExpandableListAdapter(
+        adapter = SimpleExpandableListAdapter(
                 this,
                 items.map {
                     mapOf("api" to it.key, "info" to "Click to expand/collapse")
@@ -71,19 +73,15 @@ class LauncherActivity : ExpandableListActivity() {
                 arrayOf("item"),
                 intArrayOf(android.R.id.text1)
             )
-        )
-        setContentView(R.layout.activity_launcher)
+        expandableListView!!.setAdapter(adapter)
+
+        expandableListView!!.setOnChildClickListener{ parent, v, groupPos, childPos, id ->
+            launch((parent.getExpandableListAdapter().getChild(groupPos, childPos) as Map<String, String>)["item"])
+            false
+        }
 
         // Pass the argument to the main activity, if any
         launch(intent.getStringExtra(MainActivity.argument))
-    }
-
-    override fun onChildClick(
-        parent: ExpandableListView?, v: View?, groupPos: Int, childPos: Int, id: Long
-    ): Boolean {
-        @Suppress("UNCHECKED_CAST")
-        launch((expandableListAdapter.getChild(groupPos, childPos) as Map<String, String>)["item"])
-        return true
     }
 
     private fun launch(argument: String?) {
