@@ -57,7 +57,12 @@ android {
                         .mapNotNull { variable -> System.getenv(variable)?.let { "-D $variable=$it" } }
                     )
                 }
-                cppFlags += listOf("-L../../../../src/main/jniLibs/x86")
+                val abi = project.findProperty("ANDROID_ABI") as String
+                if (abi == "x86") {
+                    cppFlags += listOf("-L../../../../../../3rd/bgfx/.build/android-x86/bin")
+                } else if (abi == "arm64-v8a") {
+                    cppFlags += listOf("-L../../../../../../3rd/bgfx/.build/android-arm64/bin")
+                }
                 cppFlags += listOf("-lEGL -lGLESv3")
             }
         }

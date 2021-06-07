@@ -33,7 +33,7 @@ import io.urho3d.UrhoActivity
 
 class LauncherActivity : AppCompatActivity() {
     private var expandableListView: ExpandableListView? = null
-    private var adapter: ExpandableListAdapter? = null
+    private var expandableListAdapter: ExpandableListAdapter? = null
     // Filter to only include filename that has an extension
     private fun getScriptNames(path: String) = assets.list(path)!!.filter { it.contains('.') }
 
@@ -56,7 +56,7 @@ class LauncherActivity : AppCompatActivity() {
         }
         items.filterValues { it.isEmpty() }.forEach { items.remove(it.key) }
 
-        adapter = SimpleExpandableListAdapter(
+        expandableListAdapter = SimpleExpandableListAdapter(
                 this,
                 items.map {
                     mapOf("api" to it.key, "info" to "Click to expand/collapse")
@@ -73,9 +73,9 @@ class LauncherActivity : AppCompatActivity() {
                 arrayOf("item"),
                 intArrayOf(android.R.id.text1)
             )
-        expandableListView!!.setAdapter(adapter)
+        expandableListView!!.setAdapter(expandableListAdapter)
 
-        expandableListView!!.setOnChildClickListener{ parent, v, groupPos, childPos, id ->
+        expandableListView!!.setOnChildClickListener{ parent, _, groupPos, childPos, _ ->
             launch((parent.getExpandableListAdapter().getChild(groupPos, childPos) as Map<String, String>)["item"])
             false
         }
