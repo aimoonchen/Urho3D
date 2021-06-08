@@ -1,7 +1,8 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="io.urho3d.launcher">
-
+          package="io.urho3d.launcher"
+    android:installLocation="auto">
+    <uses-permission android:name="android.permission.INTERNET"/>
     <application
         android:allowBackup="true"
         android:hardwareAccelerated="true"
@@ -13,16 +14,26 @@
             android:name=".LauncherActivity"
             android:screenOrientation="portrait"
             android:theme="@style/AppTheme">
+        </activity>
+        <activity
+            android:name=".MainActivity"
+            android:configChanges="keyboardHidden|orientation|screenSize"
+            android:screenOrientation="landscape"
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
             <intent-filter>
                 <action android:name="android.intent.action.MAIN"/>
                 <category android:name="android.intent.category.LAUNCHER"/>
             </intent-filter>
         </activity>
         <activity
-            android:name=".MainActivity"
+            android:name=".BGFXMainActivity"
             android:configChanges="keyboardHidden|orientation|screenSize"
             android:screenOrientation="landscape"
-            android:theme="@android:style/Theme.NoTitleBar.Fullscreen"/>
+            android:theme="@android:style/Theme.NoTitleBar.Fullscreen">
+            <!-- Tell NativeActivity the name of our .so (strip 'lib' and '.so') -->
+            <meta-data android:name="android.app.lib_name"
+                android:value="Urho3DPlayer" />
+        </activity>
     </application>
 
 </manifest>

@@ -40,7 +40,8 @@ class MainActivity : UrhoActivity() {
         libraryNames.retainAll { regex.matches(it) }
 
         // Parse the argument string
-        val argumentString = intent.getStringExtra(argument)
+        //val argumentString = intent.getStringExtra(argument)
+        val argumentString = "Urho3DPlayer:LuaScripts/main.lua"
         if (argumentString != null) arguments = argumentString.split(':')
         else throw IllegalArgumentException("The MainActivity requires an argument to start")
 
