@@ -75,7 +75,7 @@ function CreateScene()
     cameraNode:CreateComponent("Camera")
 
     -- Set an initial position for the camera scene node above the plane
-    cameraNode.position = Vector3(0.0, 5.0, 0.0)
+    cameraNode.position = Vector3(0.0, 5.0, -15.0)
 end
 
 function CreateInstructions()

@@ -25,7 +25,7 @@ OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 THE SOFTWARE.
 ****************************************************************************/
 #include "2d/CCProgressTimer.h"
-
+#include <float.h>
 #include <algorithm>
 
 #include "base/ccMacros.h"

@@ -40,7 +40,7 @@
 #endif
 
 #include "base/ccTypes.h"
-#include "platform/apple/CCDevice-apple.h"
+#include "platform/apple/CCDeviceapple.h"
 
 namespace FontUtils {
     NSMutableParagraphStyle* _calculateParagraphStyle(bool enableWrap, int overflow)

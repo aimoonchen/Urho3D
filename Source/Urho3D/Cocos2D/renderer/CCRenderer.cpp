@@ -464,22 +464,22 @@ void Renderer::processRenderCommand(RenderCommand* command)
     {
         flush();
         int renderQueueID = ((GroupCommand*) command)->getRenderQueueID();
-        CCGL_DEBUG_PUSH_GROUP_MARKER("RENDERER_GROUP_COMMAND");
+        //CCGL_DEBUG_PUSH_GROUP_MARKER("RENDERER_GROUP_COMMAND");
         visitRenderQueue(_renderGroups[renderQueueID]);
-        CCGL_DEBUG_POP_GROUP_MARKER();
+        //CCGL_DEBUG_POP_GROUP_MARKER();
     }
     else if(RenderCommand::Type::CUSTOM_COMMAND == commandType)
     {
         flush();
         auto cmd = static_cast<CustomCommand*>(command);
-        CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_CUSTOM_COMMAND");
+        //CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_CUSTOM_COMMAND");
         cmd->execute();
     }
     else if(RenderCommand::Type::BATCH_COMMAND == commandType)
     {
         flush();
         auto cmd = static_cast<BatchCommand*>(command);
-        CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_COMMAND");
+        //CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_COMMAND");
         cmd->execute();
     }
     else if(RenderCommand::Type::PRIMITIVE_COMMAND == commandType)
@@ -796,7 +796,7 @@ void Renderer::drawBatchedTriangles()
     if(_queuedTriangleCommands.empty())
         return;
 
-    CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_TRIANGLES");
+    //CCGL_DEBUG_INSERT_EVENT_MARKER("RENDERER_BATCH_TRIANGLES");
 
 //     _filledVertex = 0;
 //     _filledIndex = 0;

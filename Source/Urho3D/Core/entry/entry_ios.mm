@@ -145,6 +145,12 @@ namespace entry
 		BX_UNUSED(_handle, _lock);
 	}
 
+    int32_t getWindowFlags(WindowHandle _handle)
+    {
+        BX_UNUSED(_handle);
+        return 0;
+    }
+
 } // namespace entry
 
 using namespace entry;
@@ -376,10 +382,10 @@ static	void* m_device = NULL;
 
 int main(int _argc, const char* const* _argv)
 {
-	NSAutoreleasePool* pool = [ [NSAutoreleasePool alloc] init];
-	int exitCode = UIApplicationMain(_argc, (char**)_argv, @"UIApplication", NSStringFromClass([AppDelegate class]) );
-	[pool release];
-	return exitCode;
+    NSAutoreleasePool* pool = [ [NSAutoreleasePool alloc] init];
+    int exitCode = UIApplicationMain(_argc, (char**)_argv, @"UIApplication", NSStringFromClass([AppDelegate class]) );
+    [pool release];
+    return exitCode;
 }
 
 #endif // BX_PLATFORM_IOS

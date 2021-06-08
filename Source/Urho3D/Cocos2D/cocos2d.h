@@ -37,7 +37,7 @@ THE SOFTWARE.
 // all cocos2d include files
 //
 #include "base/ccConfig.h"
-
+#include <float.h>
 // base
 // #include "base/CCAsyncTaskPool.h"
 #include "base/CCAutoreleasePool.h"

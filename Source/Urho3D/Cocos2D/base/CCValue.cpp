@@ -24,6 +24,7 @@
 ****************************************************************************/
 
 #include "base/CCValue.h"
+#include <float.h>
 #include <cmath>
 #include <sstream>
 #include <iomanip>

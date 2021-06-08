@@ -132,7 +132,7 @@ protected:
 
 } // namespace Urho3D
 
-#if defined(__ANDROID__) || defined(IOS) || defined(TVOS)
+#if defined(__ANDROID__)
 #define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)  \
 int _main_(int _argc, char** _argv) {                   \
         bgfxApp<className> app(__VA_ARGS__);            \
@@ -142,6 +142,12 @@ extern "C" __attribute__((visibility("default"))) int SDL_main(int argc, char** 
 int SDL_main(int _argc, char** _argv) {                 \
 	return entry::do_main(_argc, _argv);                \
 }
+#elif defined(IOS) || defined(TVOS)
+#define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)  \
+int _main_(int _argc, char** _argv) {                   \
+        bgfxApp<className> app(__VA_ARGS__);            \
+        return entry::runApp(&app, _argc, _argv);       \
+    }
 #else
 #define URHO3D_DEFINE_APPLICATION_MAIN(className, ...)  \
 int _main_(int _argc, char** _argv) {                   \
