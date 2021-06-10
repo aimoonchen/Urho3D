@@ -52,8 +52,8 @@
         // on mobile hardware
         const float cubeMapSize = 1024.0; // TODO This only works with textures of a given size
         #ifndef GL_ES
-            vec3 cube = textureLod(sZoneCubeMap, FixCubeLookup(reflectVec, cubeMapSize), mipSelect).rgb;
-            vec3 cubeD = textureLod(sZoneCubeMap, FixCubeLookup(wsNormal, cubeMapSize), 9.0).rgb;
+            vec3 cube = textureCubeLod(sZoneCubeMap, FixCubeLookup(reflectVec, cubeMapSize), mipSelect).rgb;
+            vec3 cubeD = textureCubeLod(sZoneCubeMap, FixCubeLookup(wsNormal, cubeMapSize), 9.0).rgb;
         #else
             vec3 cube = textureCube(sEnvCubeMap, FixCubeLookup(reflectVec, cubeMapSize)).rgb;
             vec3 cubeD = textureCube(sEnvCubeMap, FixCubeLookup(wsNormal, cubeMapSize)).rgb;
