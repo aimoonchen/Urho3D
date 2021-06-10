@@ -364,8 +364,22 @@ void Input::OnMouseEvent(const void* mouseEvent)
     auto mouse = (entry::MouseEvent*)mouseEvent;
     if (!mouse->m_move)
     {
-        const auto mouseButton = static_cast<MouseButton>(1u << (mouse->m_button - 1u));
-        SetMouseButton(mouseButton, mouse->m_down, 1);
+        if (!touchEmulation_) {
+            const auto mouseButton = static_cast<MouseButton>(1u << (mouse->m_button - 1u));
+            SetMouseButton(mouseButton, mouse->m_down, 1);
+            if (mouse->m_down) {
+                GainFocus();
+            }
+        } else {
+            using namespace TouchBegin;
+
+            VariantMap& eventData = GetEventDataMap();
+            eventData[P_TOUCHID] = 0;
+            eventData[P_X] = (int)(mouse->m_mx * inputScale_.x_);
+            eventData[P_Y] = (int)(mouse->m_my * inputScale_.y_);
+            eventData[P_PRESSURE] = mouse->m_down;
+            SendEvent(mouse->m_down ? E_TOUCHBEGIN : E_TOUCHEND, eventData);
+        }
     }
     else
     {
@@ -406,6 +420,49 @@ void Input::OnMouseEvent(const void* mouseEvent)
                 eventData[P_BUTTONS] = (unsigned)mouseButtonDown_;
                 eventData[P_QUALIFIERS] = (unsigned)GetQualifiers();
                 SendEvent(E_MOUSEMOVE, eventData);
+            } else if (touchEmulation_ && touches_.Contains(0)) {
+                int x, y;
+                //SDL_GetMouseState(&x, &y);
+                x = (int)(mouse->m_mx * inputScale_.x_);
+                y = (int)(mouse->m_my * inputScale_.y_);
+
+                SDL_Event event;
+                event.type = SDL_FINGERMOTION;
+                event.tfinger.touchId = 0;
+                event.tfinger.fingerId = 0;
+                event.tfinger.pressure = 1.0f;
+                event.tfinger.x = (float)x / (float)graphics_->GetWidth();
+                event.tfinger.y = (float)y / (float)graphics_->GetHeight();
+                event.tfinger.dx = (float)xrel * inputScale_.x_ / (float)graphics_->GetWidth();
+                event.tfinger.dy = (float)yrel * inputScale_.y_ / (float)graphics_->GetHeight();
+                
+                int touchID = GetTouchIndexFromID(event.tfinger.fingerId & 0x7ffffffu);
+                // We don't want this event to create a new touches_ event if it doesn't exist (touchEmulation)
+                if (touchEmulation_ && !touches_.Contains(touchID)) {
+                    ;
+                } else {
+                    TouchState& state = touches_[touchID];
+                    state.touchID_ = touchID;
+                    state.position_ = IntVector2((int)(event.tfinger.x * graphics_->GetWidth()),
+                        (int)(event.tfinger.y * graphics_->GetHeight()));
+                    state.delta_ = state.position_ - state.lastPosition_;
+                    state.pressure_ = 1.0f;
+
+                    using namespace TouchMove;
+
+                    VariantMap& eventData = GetEventDataMap();
+                    eventData[P_TOUCHID] = touchID;
+                    eventData[P_X] = state.position_.x_;
+                    eventData[P_Y] = state.position_.y_;
+                    eventData[P_DX] = (int)(event.tfinger.dx * graphics_->GetWidth());
+                    eventData[P_DY] = (int)(event.tfinger.dy * graphics_->GetHeight());
+                    eventData[P_PRESSURE] = state.pressure_;
+                    SendEvent(E_TOUCHMOVE, eventData);
+
+                    // Finger touch may move the mouse cursor. Suppress next mouse move when cursor hidden to prevent jumps
+                    if (!mouseVisible_)
+                        SuppressNextMouseMove();
+                }
             }
         }
     }
