@@ -29,7 +29,8 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetSize", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetSize), sol::resolve<void(const IntVector2&)>(&UIElement::SetSize)),
         "SetPosition", sol::overload(sol::resolve<void(int, int)>(&UIElement::SetPosition), sol::resolve<void(const IntVector2&)>(&UIElement::SetPosition)),
         "SetAlignment", &UIElement::SetAlignment,
-        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },
+        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName, String::EMPTY, M_MAX_UNSIGNED); },
+//        "CreateChild", [](UIElement* obj, StringHash typeName) { return obj->CreateChild(typeName); },
         "opacity", sol::property(&UIElement::GetOpacity, &UIElement::SetOpacity),
         "horizontalAlignment", sol::property(&UIElement::GetHorizontalAlignment, &UIElement::SetHorizontalAlignment),
         "verticalAlignment", sol::property(&UIElement::GetVerticalAlignment, &UIElement::SetVerticalAlignment),
@@ -57,7 +58,7 @@ int sol2_UILuaAPI_open(sol::state* luaState)
         "SetText", &Text::SetText,
         "SetFont", sol::overload(sol::resolve<bool(const String&, float)>(&Text::SetFont), sol::resolve<bool(Font*, float)>(&Text::SetFont)),//[](Text* obj, Font* font, float fontsize) { obj->SetFont(font, fontsize); },
         "textAlignment", sol::property(&Text::GetTextAlignment, &Text::SetTextAlignment),
-        sol::base_classes, sol::bases<UIElement>());
+        sol::base_classes, sol::bases<UISelectable, UIElement>());
     lua.new_usertype<UI>("UI", sol::constructors<UI(Context*)>(),
         "root", sol::property(&UI::GetRoot),
         "focusElement", sol::property(&UI::GetFocusElement)

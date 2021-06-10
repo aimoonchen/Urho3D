@@ -21,7 +21,7 @@ bool sol_lua_check(sol::types<Urho3D::String>, lua_State* L, int index, Handler&
 }
 Urho3D::String sol_lua_get(sol::types<const Urho3D::String&>, lua_State* L, int index, sol::stack::record& tracking);
 Urho3D::String sol_lua_get(sol::types<Urho3D::String>, lua_State* L, int index, sol::stack::record& tracking);
-int sol_lua_push(lua_State* L, const Urho3D::String& str);
+// int sol_lua_push(lua_State* L, const Urho3D::String& str);
 
 template <typename Handler>
 bool sol_lua_check(sol::types<Urho3D::StringHash>, lua_State* L, int index, Handler&& handler, sol::stack::record& tracking)
@@ -34,8 +34,3 @@ bool sol_lua_check(sol::types<Urho3D::StringHash>, lua_State* L, int index, Hand
 }
 Urho3D::StringHash sol_lua_get(sol::types<Urho3D::StringHash>, lua_State* L, int index, sol::stack::record& tracking);
 // int sol_lua_push(lua_State* L, StringHash str);
-
-//namespace Urho3D {
-//class UIElement;
-//}
-//int sol_lua_push(sol::types<Urho3D::UIElement*>, lua_State* L, const Urho3D::UIElement* obj);

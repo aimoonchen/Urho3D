@@ -645,24 +645,20 @@ void BatchGroup::SetInstancingData(void* lockedData, unsigned stride, unsigned& 
     if (geometryType_ != GEOM_INSTANCED || instances_.Empty())
         return;
 
-    Graphics* graphics = geometry_->GetSubsystem<Graphics>();
-    bgfx_instances_ = graphics->AllocInstanceDataBuffer(instances_.Size(), stride, bgfx_instances_);
-
     startIndex_ = freeIndex;
-    //unsigned char* buffer = static_cast<unsigned char*>(lockedData) + startIndex_ * stride;
-    uint32_t writePos = 0;
-    for (unsigned i = 0; i < instances_.Size(); ++i)
-    {
-        const InstanceData& instance = instances_[i];
-
-        //memcpy(buffer, instance.worldTransform_, sizeof(Matrix3x4));
-        graphics->WriteInstanceData(bgfx_instances_, writePos, (void*)instance.worldTransform_, sizeof(Matrix3x4));
-        if (instance.instancingData_)
-            //memcpy(buffer + sizeof(Matrix3x4), instance.instancingData_, stride - sizeof(Matrix3x4));
-            graphics->WriteInstanceData(bgfx_instances_, writePos, (void*)instance.worldTransform_, sizeof(Matrix3x4));
-
-        //buffer += stride;
-    }
+    instanceStride_ = stride;
+//     unsigned char* buffer = static_cast<unsigned char*>(lockedData) + startIndex_ * stride;
+// 
+//     for (unsigned i = 0; i < instances_.Size(); ++i)
+//     {
+//         const InstanceData& instance = instances_[i];
+// 
+//         memcpy(buffer, instance.worldTransform_, sizeof(Matrix3x4));
+//         if (instance.instancingData_)
+//             memcpy(buffer + sizeof(Matrix3x4), instance.instancingData_, stride - sizeof(Matrix3x4));
+// 
+//         buffer += stride;
+//     }
 
     freeIndex += instances_.Size();
 }
@@ -705,7 +701,20 @@ void BatchGroup::Draw(View* view, Camera* camera, bool allowDepthWrite) const
             graphics->SetIndexBuffer(geometry_->GetIndexBuffer());
             graphics->SetVertexBuffers(geometry_->GetVertexBuffers());
             //graphics->SetVertexBuffers(vertexBuffers, startIndex_);
-            graphics->SetInstanceDataBuffer(bgfx_instances_);
+            void* instancesData = nullptr;
+            if (!instances_.Empty()) {
+                instancesData = graphics->AllocInstanceDataBuffer(instances_.Size(), instanceStride_);
+                uint32_t writePos = 0;
+                for (unsigned i = 0; i < instances_.Size(); ++i) {
+                    const InstanceData& instance = instances_[i];
+                    graphics->WriteInstanceData(instancesData, writePos, (void*)instance.worldTransform_,
+                                                sizeof(Matrix3x4));
+                    if (instance.instancingData_)
+                        graphics->WriteInstanceData(instancesData, writePos, (void*)instance.instancingData_,
+                            instanceStride_ - sizeof(Matrix3x4));
+                }
+                graphics->SetInstanceDataBuffer(instancesData);
+            }
             graphics->Draw(geometry_->GetPrimitiveType(), geometry_->GetIndexStart(), geometry_->GetIndexCount(),
                            geometry_->GetVertexStart(), geometry_->GetVertexCount());
             //             graphics->DrawInstanced(geometry_->GetPrimitiveType(), geometry_->GetIndexStart(), geometry_->GetIndexCount(),

@@ -3436,20 +3436,11 @@ void Graphics::SetVertexAttribDivisor(unsigned location, unsigned divisor)
 // #endif
 }
 
-void* Graphics::AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance)
+void* Graphics::AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride)
 {
-    auto newIdb = (bgfx::InstanceDataBuffer*)oldInstance;
-    if (newIdb)
-    {
-//         if (newIdb->num == numInstances && newIdb->stride == instanceStride)
-//         {
-//             return newIdb;
-//         }
-        delete newIdb;
-    }
-    newIdb = new bgfx::InstanceDataBuffer;
-    bgfx::allocInstanceDataBuffer(newIdb, numInstances, instanceStride);
-    return newIdb;
+    static bgfx::InstanceDataBuffer idb;
+    bgfx::allocInstanceDataBuffer(&idb, numInstances, instanceStride);
+    return &idb;
 }
 
 void Graphics::WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len)

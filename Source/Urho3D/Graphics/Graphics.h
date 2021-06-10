@@ -946,7 +946,7 @@ private:
     ShaderProgram* lastShaderProgram_{ nullptr };
 
 public:
-    void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride, void* oldInstance);
+    void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
     void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
     //

@@ -18,11 +18,11 @@ Urho3D::String sol_lua_get(sol::types<const Urho3D::String&>, lua_State* L, int 
     return String(p, (unsigned int)len);
 }
 
-int sol_lua_push(lua_State* L, const String& str)
-{
-    lua_pushlstring(L, str.CString(), str.Length());
-    return 1;
-}
+// int sol_lua_push(lua_State* L, const String& str)
+// {
+//     lua_pushlstring(L, str.CString(), str.Length());
+//     return 1;
+// }
 
 StringHash sol_lua_get(sol::types<StringHash>, lua_State* L, int index, sol::stack::record& tracking)
 {
