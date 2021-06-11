@@ -29,7 +29,7 @@ mat4 GetSkinMatrix(vec4 blendWeights, vec4 blendIndices)
 #endif
 
 #ifdef INSTANCED
-#define GetInstanceMatrix() mat4(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0))
+#define GetInstanceMatrix() mtxFromCols(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0))
 /*
 mat4 GetInstanceMatrix()
 {
