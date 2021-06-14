@@ -21,20 +21,20 @@ mat4 GetSkinMatrix(vec4 blendWeights, vec4 blendIndices)
 {
     ivec4 idx = ivec4(blendIndices) * 3;
     const vec4 lastColumn = vec4(0.0, 0.0, 0.0, 1.0);
-    return mat4(cSkinMatrices[idx.x], cSkinMatrices[idx.x + 1], cSkinMatrices[idx.x + 2], lastColumn) * blendWeights.x +
-        mat4(cSkinMatrices[idx.y], cSkinMatrices[idx.y + 1], cSkinMatrices[idx.y + 2], lastColumn) * blendWeights.y +
-        mat4(cSkinMatrices[idx.z], cSkinMatrices[idx.z + 1], cSkinMatrices[idx.z + 2], lastColumn) * blendWeights.z +
-        mat4(cSkinMatrices[idx.w], cSkinMatrices[idx.w + 1], cSkinMatrices[idx.w + 2], lastColumn) * blendWeights.w;
+    return mtxFromCols4(cSkinMatrices[idx.x], cSkinMatrices[idx.x + 1], cSkinMatrices[idx.x + 2], lastColumn) * blendWeights.x +
+        mtxFromCols4(cSkinMatrices[idx.y], cSkinMatrices[idx.y + 1], cSkinMatrices[idx.y + 2], lastColumn) * blendWeights.y +
+        mtxFromCols4(cSkinMatrices[idx.z], cSkinMatrices[idx.z + 1], cSkinMatrices[idx.z + 2], lastColumn) * blendWeights.z +
+        mtxFromCols4(cSkinMatrices[idx.w], cSkinMatrices[idx.w + 1], cSkinMatrices[idx.w + 2], lastColumn) * blendWeights.w;
 }
 #endif
 
 #ifdef INSTANCED
-#define GetInstanceMatrix() mtxFromCols(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0))
+#define GetInstanceMatrix() mtxFromCols4(i_data0, i_data1, i_data2, vec4(0.0, 0.0, 0.0, 1.0))
 /*
 mat4 GetInstanceMatrix()
 {
-    const vec4 lastColumn = vec4(0.0, 0.0, 0.0, 1.0);
-    //return mat4(a_texcoord4, a_texcoord5, a_texcoord6, lastColumn);
+//    const vec4 lastColumn = vec4(0.0, 0.0, 0.0, 1.0);
+//    //return mat4(a_texcoord4, a_texcoord5, a_texcoord6, lastColumn);
     return mat4(i_data0, i_data1, i_data2, lastColumn);
 }
 */
