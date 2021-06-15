@@ -3448,6 +3448,7 @@ void Graphics::WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t 
     memcpy(((bgfx::InstanceDataBuffer*)idb)->data + pos, data, len);
     pos += len;
 }
+
 String Graphics::GetCompiledShaderPath() const
 {
     switch (bgfx::getRendererType())
@@ -3487,6 +3488,12 @@ String Graphics::GetCompiledShaderPath() const
         break;
     }
 }
+
+bool IsRendererTypeOpendGL()
+{
+    return (bgfx::getRendererType() == bgfx::RendererType::OpenGL) || (bgfx::getRendererType() == bgfx::RendererType::OpenGLES);
+}
+
 uint64_t bgfxRSBend(Urho3D::BlendMode mode, bool alphaToCoverage)
 {
     uint64_t flag = 0;

@@ -956,6 +956,8 @@ public:
     String GetCompiledShaderPath() const;
 };
 
+bool IsRendererTypeOpendGL();
+
 /// Register Graphics library objects.
 /// @nobind
 void URHO3D_API RegisterGraphicsLibrary(Context* context);

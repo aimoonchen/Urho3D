@@ -113,13 +113,23 @@ void CalculateShadowMatrix(Matrix4& dest, LightBatchQueue* queue, unsigned split
     offset.x_ += scale.x_ + pixelUVOffset.x_ / width;
     offset.y_ += scale.y_ + pixelUVOffset.y_ / height;
 
+    if (IsRendererTypeOpendGL())
+    {
+        offset.z_ = 0.5f;
+        scale.z_ = 0.5f;
+        offset.y_ = 1.0f - offset.y_;
+    }
+    else
+    {
+        scale.y_ = -scale.y_;
+    }
 //#ifdef URHO3D_OPENGL
-    offset.z_ = 0.5f;
-    scale.z_ = 0.5f;
-    offset.y_ = 1.0f - offset.y_;
-// #else
-//     scale.y_ = -scale.y_;
-// #endif
+//    offset.z_ = 0.5f;
+//    scale.z_ = 0.5f;
+//    offset.y_ = 1.0f - offset.y_;
+//#else
+//    scale.y_ = -scale.y_;
+//#endif
 
     // If using 4 shadow samples, offset the position diagonally by half pixel
     if (renderer->GetShadowQuality() == SHADOWQUALITY_PCF_16BIT || renderer->GetShadowQuality() == SHADOWQUALITY_PCF_24BIT)
@@ -148,13 +158,23 @@ void CalculateSpotMatrix(Matrix4& dest, Light* light)
     spotProj.m22_ = 1.0f / Max(light->GetRange(), M_EPSILON);
     spotProj.m32_ = 1.0f;
 
+    if (IsRendererTypeOpendGL())
+    {
+        texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.5f));
+        texAdjust.SetScale(Vector3(0.5f, -0.5f, 0.5f));
+    }
+    else
+    {
+        texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.0f));
+        texAdjust.SetScale(Vector3(0.5f, -0.5f, 1.0f));
+    }
 //#ifdef URHO3D_OPENGL
-    texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.5f));
-    texAdjust.SetScale(Vector3(0.5f, -0.5f, 0.5f));
-// #else
-//     texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.0f));
-//     texAdjust.SetScale(Vector3(0.5f, -0.5f, 1.0f));
-// #endif
+//    texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.5f));
+//    texAdjust.SetScale(Vector3(0.5f, -0.5f, 0.5f));
+//#else
+//    texAdjust.SetTranslation(Vector3(0.5f, 0.5f, 0.0f));
+//    texAdjust.SetScale(Vector3(0.5f, -0.5f, 1.0f));
+//#endif
 
     dest = texAdjust * spotProj * spotView;
 }
@@ -427,17 +447,28 @@ void Batch::Prepare(View* view, Camera* camera, bool setModelTransform, bool all
                     auto faceHeight = (unsigned)(shadowMap->GetHeight() / 3);
                     auto width = (float)shadowMap->GetWidth();
                     auto height = (float)shadowMap->GetHeight();
-//#ifdef URHO3D_OPENGL
                     float mulX = (float)(faceWidth - 3) / width;
                     float mulY = (float)(faceHeight - 3) / height;
                     float addX = 1.5f / width;
                     float addY = 1.5f / height;
-// #else
-//                     float mulX = (float)(faceWidth - 4) / width;
-//                     float mulY = (float)(faceHeight - 4) / height;
-//                     float addX = 2.5f / width;
-//                     float addY = 2.5f / height;
-// #endif
+                    if (!IsRendererTypeOpendGL())
+                    {
+                        mulX = (float)(faceWidth - 4) / width;
+                        mulY = (float)(faceHeight - 4) / height;
+                        addX = 2.5f / width;
+                        addY = 2.5f / height;
+                    }
+//#ifdef URHO3D_OPENGL
+//    float mulX = (float)(faceWidth - 3) / width;
+//    float mulY = (float)(faceHeight - 3) / height;
+//    float addX = 1.5f / width;
+//    float addY = 1.5f / height;
+//#else
+//    float mulX = (float)(faceWidth - 4) / width;
+//    float mulY = (float)(faceHeight - 4) / height;
+//    float addX = 2.5f / width;
+//    float addY = 2.5f / height;
+//#endif
                     // If using 4 shadow samples, offset the position diagonally by half pixel
                     if (renderer->GetShadowQuality() == SHADOWQUALITY_PCF_16BIT || renderer->GetShadowQuality() == SHADOWQUALITY_PCF_24BIT)
                     {

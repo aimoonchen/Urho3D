@@ -320,7 +320,7 @@ bool View::Define(RenderSurface* renderTarget, Viewport* viewport)
 
     // On OpenGL flip the viewport if rendering to a texture for consistent UV addressing with Direct3D9
 //#ifdef URHO3D_OPENGL
-    if (renderTarget_)
+    if (renderTarget_ && IsRendererTypeOpendGL())
     {
         viewRect_.bottom_ = rtHeight - viewRect_.top_;
         viewRect_.top_ = viewRect_.bottom_ - viewSize_.y_;
@@ -598,7 +598,7 @@ void View::Render()
 #endif
 
 //#ifdef URHO3D_OPENGL
-    if (renderTarget_)
+    if (renderTarget_ && IsRendererTypeOpendGL())
     {
         // On OpenGL, flip the projection if rendering to a texture so that the texture can be addressed in the same way
         // as a render texture produced on Direct3D9
@@ -656,7 +656,7 @@ void View::Render()
     }
 
 //#ifdef URHO3D_OPENGL
-    if (renderTarget_)
+    if (renderTarget_ && IsRendererTypeOpendGL())
     {
         // Restores original setting of FlipVertical when flipped by code above.
         if (camera_)
@@ -747,11 +747,17 @@ void View::SetCameraShaderParameters(Camera* camera)
     graphics_->SetShaderParameter(VSP_FRUSTUMSIZE, farVector);
 
     Matrix4 projection = camera->GetGPUProjection();
+    if (IsRendererTypeOpendGL())
+    {
+        float constantBias = 2.0f * graphics_->GetDepthConstantBias();
+        projection.m22_ += projection.m32_ * constantBias;
+        projection.m23_ += projection.m33_ * constantBias;
+    }
 //#ifdef URHO3D_OPENGL
-    // Add constant depth bias manually to the projection matrix due to glPolygonOffset() inconsistency
-    float constantBias = 2.0f * graphics_->GetDepthConstantBias();
-    projection.m22_ += projection.m32_ * constantBias;
-    projection.m23_ += projection.m33_ * constantBias;
+//    // Add constant depth bias manually to the projection matrix due to glPolygonOffset() inconsistency
+//    float constantBias = 2.0f * graphics_->GetDepthConstantBias();
+//    projection.m22_ += projection.m32_ * constantBias;
+//    projection.m23_ += projection.m33_ * constantBias;
 //#endif
 
     graphics_->SetShaderParameter(VSP_VIEWPROJ, projection * camera->GetView());
@@ -2718,8 +2724,16 @@ void View::FinalizeShadowCamera(Camera* shadowCamera, Light* light, const IntRec
             shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 2.0f) / shadowMapWidth));
         else
         {
+            if (IsRendererTypeOpendGL())
+            {
+                shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 3.0f) / shadowMapWidth));
+            }
+            else
+            {
+                shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 4.0f) / shadowMapWidth));
+            }
 //#ifdef URHO3D_OPENGL
-            shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 3.0f) / shadowMapWidth));
+//            shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 3.0f) / shadowMapWidth));
 // #else
 //             shadowCamera->SetZoom(shadowCamera->GetZoom() * ((shadowMapWidth - 4.0f) / shadowMapWidth));
 // #endif
