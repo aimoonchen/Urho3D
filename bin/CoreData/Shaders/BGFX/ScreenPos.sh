@@ -43,7 +43,7 @@ vec3 GetFarRay(vec4 clipPos)
         clipPos.y / clipPos.w * cFrustumSize.y,
         cFrustumSize.z);
 
-    return viewRay * GetCameraRot();
+    return mul(viewRay, GetCameraRot());
 }
 
 vec3 GetNearRay(vec4 clipPos)
@@ -53,6 +53,6 @@ vec3 GetNearRay(vec4 clipPos)
         clipPos.y / clipPos.w * cFrustumSize.y,
         0.0);
 
-    return (viewRay * GetCameraRot()) * cDepthMode.x;
+    return mul(viewRay, GetCameraRot()) * cDepthMode.x;
 }
 #endif

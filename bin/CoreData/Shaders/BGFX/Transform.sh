@@ -57,7 +57,7 @@ vec4 GetClipPos(vec3 worldPos)
 
 float GetZonePos(vec3 worldPos)
 {
-    return clamp((vec4(worldPos, 1.0) * cZone).z, 0.0, 1.0);
+    return clamp(mul(vec4(worldPos, 1.0), cZone).z, 0.0, 1.0);
 }
 
 float GetDepth(vec4 clipPos)
@@ -94,14 +94,14 @@ mat3 GetFaceCameraRotation(vec3 position, vec3 direction)
 
 vec3 GetBillboardPos(vec4 iPos, vec3 iDirection, mat4 modelMatrix)
 {
-    vec3 worldPos = (iPos * modelMatrix).xyz;
-    return worldPos + vec3(a_texcoord1.x, 0.0, a_texcoord1.y) * GetFaceCameraRotation(worldPos, iDirection);
+    vec3 worldPos = mul(iPos, modelMatrix).xyz;
+    return worldPos + mul(vec3(a_texcoord1.x, 0.0, a_texcoord1.y), GetFaceCameraRotation(worldPos, iDirection));
 }
 
 vec3 GetBillboardNormal(vec4 iPos, vec3 iDirection, mat4 modelMatrix)
 {
-    vec3 worldPos = (iPos * modelMatrix).xyz;
-    return vec3(0.0, 1.0, 0.0) * GetFaceCameraRotation(worldPos, iDirection);
+    vec3 worldPos = mul(iPos, modelMatrix).xyz;
+    return mul(vec3(0.0, 1.0, 0.0), GetFaceCameraRotation(worldPos, iDirection));
 }
 #endif
 
@@ -110,7 +110,7 @@ vec3 GetTrailPos(vec4 iPos, vec3 iFront, float iScale, mat4 modelMatrix)
 {
     vec3 up = normalize(cCameraPos.xyz - iPos.xyz);
     vec3 right = normalize(cross(iFront, up));
-    return (vec4((iPos.xyz + right * iScale), 1.0) * modelMatrix).xyz;
+    return mul(vec4((iPos.xyz + right * iScale), 1.0), modelMatrix).xyz;
 }
 
 vec3 GetTrailNormal(vec4 iPos)
@@ -123,7 +123,7 @@ vec3 GetTrailNormal(vec4 iPos)
 vec3 GetTrailPos(vec4 iPos, vec3 iParentPos, float iScale, mat4 modelMatrix)
 {
     vec3 right = iParentPos - iPos.xyz;
-    return (vec4((iPos.xyz + right * iScale), 1.0) * modelMatrix).xyz;
+    return mul(vec4((iPos.xyz + right * iScale), 1.0), modelMatrix).xyz;
 }
 
 vec3 GetTrailNormal(vec4 iPos, vec3 iParentPos, vec3 iForward)
@@ -171,7 +171,7 @@ vec3 GetTrailNormal(vec4 iPos, vec3 iParentPos, vec3 iForward)
 #elif defined(DIRBILLBOARD)
     #define GetWorldTangent(modelMatrix) vec4(normalize(mul(vec3(1.0, 0.0, 0.0), GetNormalMatrix(modelMatrix))), 1.0)
 #else
-    #define GetWorldTangent(modelMatrix) vec4(normalize(a_tangent.xyz * GetNormalMatrix(modelMatrix)), a_tangent.w)
+    #define GetWorldTangent(modelMatrix) vec4(normalize(mul(a_tangent.xyz, GetNormalMatrix(modelMatrix))), a_tangent.w)
 #endif
 
 /*
