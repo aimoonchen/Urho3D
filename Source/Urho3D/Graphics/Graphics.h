@@ -269,7 +269,8 @@ public:
     /// Clear remembered transform shader parameter sources.
     void ClearTransformSources();
     /// Set texture.
-    void SetTexture(unsigned index, Texture* texture/*, uint32_t flags = UINT32_MAX*/);
+    void SetTexture(unsigned index, Texture* texture);
+    void SetTextureEx(unsigned index, Texture* texture , uint32_t flags = UINT32_MAX);
     /// Bind texture unit 0 for update. Called by Texture. Used only on OpenGL.
     /// @nobind
     void SetTextureForUpdate(Texture* texture);
@@ -844,7 +845,12 @@ private:
     /// Pixel shader in use.
     ShaderVariation* pixelShader_{};
     /// Textures in use.
-    Texture* textures_[MAX_TEXTURE_UNITS]{};
+    struct TextureRecord
+    {
+        Texture* texture{ nullptr };
+        uint32_t flags{ UINT32_MAX };
+    };
+    TextureRecord textures_[MAX_TEXTURE_UNITS]{};
     /// Texture unit mappings.
     HashMap<String, TextureUnit> textureUnits_;
     /// Rendertargets in use.

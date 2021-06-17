@@ -920,20 +920,15 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 //     }
 
     const auto& samples = impl_->shaderProgram_->GetSamplers();
-    for (auto [unit, handle] : samples)
-    {
-        if (textures_[unit])
-        {
-            bgfx::setTexture(unit, {handle}, {textures_[unit]->GetGPUObjectHandle()});
-        }
-        else
-        {
+    for (auto [unit, handle] : samples) {
+        if (textures_[unit].texture) {
+            bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
+        } else {
             URHO3D_LOGERRORF("texture unit %d invalid.", unit);
         }
     }
 
-    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
-    {
+    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
         auto buffer = vertexBuffers_[i];
         if (!buffer || buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle)
             continue;
@@ -942,8 +937,7 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
             ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
             : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
     }
-    if (current_instance_buffer_)
-    {
+    if (current_instance_buffer_) {
         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
     }
     render_state_ &= ~BGFX_STATE_PT_MASK;
@@ -989,8 +983,8 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 //     }
     const auto& samples = impl_->shaderProgram_->GetSamplers();
     for (auto [unit, handle] : samples) {
-        if (textures_[unit]) {
-            bgfx::setTexture(unit, {handle}, {textures_[unit]->GetGPUObjectHandle()});
+        if (textures_[unit].texture) {
+            bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
         } else {
             URHO3D_LOGERRORF("texture unit %d invalid.", unit);
         }
@@ -1706,7 +1700,12 @@ void Graphics::ClearTransformSources()
     }
 }
 
-void Graphics::SetTexture(unsigned index, Texture* texture/*, uint32_t flags*/)
+void Graphics::SetTexture(unsigned index, Texture* texture)
+{
+    SetTextureEx(index, texture, UINT32_MAX);
+}
+
+void Graphics::SetTextureEx(unsigned index, Texture* texture, uint32_t flags)
 {
     if (index >= MAX_TEXTURE_UNITS)
         return;
@@ -1748,9 +1747,10 @@ void Graphics::SetTexture(unsigned index, Texture* texture/*, uint32_t flags*/)
 //         {""},
 //         {"ZoneCubeMap"}
 //     };
-    if (textures_[index] != texture)
+    if (textures_[index].texture != texture)
     {
-        textures_[index] = texture;
+        textures_[index].texture = texture;
+        textures_[index].flags = flags;
     }
 //     if (texture && impl_->shaderProgram_)
 //     {
@@ -2486,7 +2486,7 @@ const String& Graphics::GetTextureUnitName(TextureUnit unit)
 
 Texture* Graphics::GetTexture(unsigned index) const
 {
-    return index < MAX_TEXTURE_UNITS ? textures_[index] : nullptr;
+    return index < MAX_TEXTURE_UNITS ? textures_[index].texture : nullptr;
 }
 
 RenderSurface* Graphics::GetRenderTarget(unsigned index) const
@@ -3220,7 +3220,8 @@ void Graphics::ResetCachedState()
 
     for (unsigned i = 0; i < MAX_TEXTURE_UNITS; ++i)
     {
-        textures_[i] = nullptr;
+        textures_[i].texture = nullptr;
+        textures_[i].flags = UINT32_MAX;
         impl_->textureTypes_[i] = 0;
     }
 

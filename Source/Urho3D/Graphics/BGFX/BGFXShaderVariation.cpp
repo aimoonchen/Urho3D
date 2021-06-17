@@ -81,6 +81,52 @@ void ShaderVariation::Release()
 
     compilerOutput_.Clear();
 }
+enum shader_target {
+    HLSL = 0,
+    ESSL,
+    GLSL,
+    METAL,
+    SPIRV,
+    MAX_TARGET
+};
+
+struct shader_flags {
+    const char* VS_FLAGS;
+    const char* FS_FLAGS;
+    const char* CS_FLAGS;
+    const char* SHADER_PATH;
+} compile_flags[MAX_TARGET] = {
+    {
+        " --platform windows -p vs_5_0 -O 3 --type vertex",
+        " --platform windows -p ps_5_0 -O 3 --type fragment",
+        " --platform windows -p cs_5_0 -O 1 --type compute",
+        "Shaders/BGFX/compiled/dx11/"
+    },
+    {
+        " --platform android --type vertex",
+        " --platform android --type fragment",
+        " --platform android --type compute",
+        "Shaders/BGFX/compiled/essl/"
+    },
+    {
+        " --platform linux -p 150 --type vertex",
+        " --platform linux -p 150 --type fragment",
+        " --platform linux -p 430 --type compute",
+        "Shaders/BGFX/compiled/glsl/"
+    },
+    {
+        " --platform osx -p metal -O 3 --type vertex",
+        " --platform osx -p metal -O 3 --type fragment",
+        " --platform osx -p metal -O 3 --type compute",
+        "Shaders/BGFX/compiled/metal/"
+    },
+    {
+        " --platform linux -p spirv --type vertex",
+        " --platform linux -p spirv --type fragment",
+        " --platform linux -p spirv --type compute",
+        "Shaders/BGFX/compiled/spirv/"
+    }
+};
 
 bool ShaderVariation::Create()
 {
@@ -127,7 +173,7 @@ bool ShaderVariation::Create()
     auto graphics = owner_->GetContext()->GetSubsystem<Graphics>();
     String fullBinName = "Shaders/BGFX/" + graphics->GetCompiledShaderPath() + binFilename;
     auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
-    if (!cache->Exists(fullBinName)) {
+    if (true/*!cache->Exists(fullBinName)*/) {
 #if defined(_WIN32)// || defined(__APPLE__)
 #ifdef __APPLE__
         String localPath("/Users/simonchen/Development/");
@@ -135,12 +181,11 @@ bool ShaderVariation::Create()
         String localPath("C:/GitProjects/");
         //String localPath("D:/Github/");
 #endif
-        auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](const String& platform) {
+        auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](shader_target target) {
             Vector<String> defines;
             defines.Push((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
             defines.Push("MAXBONES=" + String(Graphics::GetMaxBones()));
-            for (const auto& def : defineVec)
-            {
+            for (const auto& def : defineVec) {
                 defines.Push(def);
             }
 #ifdef __APPLE__
@@ -148,45 +193,39 @@ bool ShaderVariation::Create()
 #else
             String shader_command = localPath + "Urho3D/3rd/bgfx/.build/win64_vs2019/bin/shadercRelease.exe";
 #endif
+            shader_command += (type_ == VS) ? compile_flags[target].VS_FLAGS : compile_flags[target].FS_FLAGS;
+            shader_command += " --define " + String::Joined(defines, ";");
+            shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" + shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
             shader_command += " -i " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX";
             shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
-            shader_command += " --define " + String::Joined(defines, ";");
-            String typestr = (type_ == VS) ? "v" : "f";
-            shader_command += " --type " + typestr;
-            shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" +
-                              shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
-            if (platform == "ios")
-            {
-                shader_command += " --platform ios -p metal";
-                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/metal/" + binFilename;
-            }
-            else if (platform == "android")
-            {
-                shader_command += " --platform android";
-                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/essl/" + binFilename;
-            }
-            else if (platform == "windows")
-            {
-                shader_command += " --platform windows -p 150";
-                shader_command += " -o " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX/compiled/glsl/" + binFilename;
-            }
+            shader_command += " -o " + localPath + "Urho3D/bin/CoreData/" + compile_flags[target].SHADER_PATH + binFilename;
             return system(shader_command.CString());
         };
-        auto ret = compile_shader("windows");
+        auto ret = compile_shader(HLSL);
         if (ret != 0)
         {
             ;
         }
-        ret = compile_shader("ios");
-        if (ret != 0)
-        {
-            ;
-        }
-        ret = compile_shader("android");
-        if (ret != 0)
-        {
-            ;
-        }
+//         auto ret = compile_shader(GLSL);
+//         if (ret != 0)
+//         {
+//             ;
+//         }
+//         ret = compile_shader(METAL);
+//         if (ret != 0)
+//         {
+//             ;
+//         }
+//         ret = compile_shader(ESSL);
+//         if (ret != 0)
+//         {
+//             ;
+//         }
+//         auto ret = compile_shader(SPIRV);
+//         if (ret != 0)
+//         {
+//             ;
+//         }
 #else
         URHO3D_LOGERRORF("Can't found shader file : %s, source file : %s, defines : %s", fullBinName.CString(), shaderPath.CString(), defines_.CString());
         return false;

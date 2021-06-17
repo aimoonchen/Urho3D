@@ -867,67 +867,52 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 	
 	state.TextureIDs.fill(0);
 	currentTextures_.resize(count);
-	for (int32_t i = 0; i < count; i++)
-	{
+	for (int32_t i = 0; i < count; i++) {
 // 		state.TextureIDs[i] = (textures[i] != nullptr) ? 
 // 			RIDToInt64(textures[i].DownCast<Texture>()->GetRID()) : 0;
         Urho3D::Texture2D* urho3dTexture{ nullptr };
-		if (textures[i] != nullptr)
-		{
+		if (textures[i] != nullptr) {
 			auto texture = static_cast<EffekseerUrho3D::Texture*>(textures[i].Get());
             urho3dTexture = texture->GetUrho3DTexture();
 		}
 		// GLExt::glActiveTexture(GL_TEXTURE0 + i);
 		// glBindTexture(GL_TEXTURE_2D, id);
 
-		if (textures[i] != nullptr)
-		{
+		if (textures[i] != nullptr) {
 			// m_renderState->GetActiveState().TextureIDs[i] = id.idx;
 			currentTextures_[i] = textures[i];
-		}
-		else
-		{
+		} else {
 			// m_renderState->GetActiveState().TextureIDs[i] = 0;
 			currentTextures_[i].Reset();
 		}
 
-		if (shader->GetTextureSlotEnable(i))
-		{
+		if (shader->GetTextureSlotEnable(i)) {
             uint32_t flags = 0;
             auto filter_ = m_renderState->GetActiveState().TextureFilterTypes[i];
-            if (filter_ == ::Effekseer::TextureFilterType::Nearest)
-            {
+            if (filter_ == ::Effekseer::TextureFilterType::Nearest) {
                 flags |= BGFX_SAMPLER_MAG_POINT;
             }
 
-            if (textures[i]->GetHasMipmap())
-            {
-                if (filter_ == ::Effekseer::TextureFilterType::Nearest)
-                {
+            if (textures[i]->GetHasMipmap()) {
+                if (filter_ == ::Effekseer::TextureFilterType::Nearest) {
                     flags |= BGFX_SAMPLER_MIP_POINT;
                 }
-            }
-            else
-            {
-                if (filter_ == ::Effekseer::TextureFilterType::Nearest)
-                {
+            } else {
+                if (filter_ == ::Effekseer::TextureFilterType::Nearest) {
                     flags |= BGFX_SAMPLER_MIN_POINT;
                 }
             }
 
             auto wrap_ = m_renderState->GetActiveState().TextureWrapTypes[i];
-            if (wrap_ == ::Effekseer::TextureWrapType::Repeat)
-            {
+            if (wrap_ == ::Effekseer::TextureWrapType::Repeat) {
                 flags |= BGFX_SAMPLER_U_MIRROR | BGFX_SAMPLER_V_MIRROR | BGFX_SAMPLER_W_MIRROR;
-            }
-            else
-            {
+            } else {
                 flags |= BGFX_SAMPLER_U_CLAMP | BGFX_SAMPLER_V_CLAMP | BGFX_SAMPLER_W_CLAMP;
             }
 
 			// GLExt::glUniform1i(shader->GetTextureSlot(i), i);
 			// bgfx::setTexture(i, shader->GetTextureSlot(i), id);
-            graphics_->SetTexture(i, urho3dTexture/*, flags*/);
+            graphics_->SetTextureEx(i, urho3dTexture, flags);
 		}
  	}
 }
