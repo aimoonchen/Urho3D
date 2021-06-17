@@ -222,8 +222,6 @@ public:
     static unsigned GetDataType(unsigned format);
 
     uint16_t GetSampler() { return {}; }
-    uint64_t GetCoordMode(TextureCoordinate coord);
-    uint64_t GetFilterMode();
 
 protected:
     /// Check whether texture memory budget has been exceeded. Free unused materials in that case to release the texture references.

@@ -147,7 +147,7 @@ void main()
     // Get normal
     #ifdef NORMALMAP
         mat3 tbn = mat3(v_tangent.xyz, vec3(v_texcoord0.zw, v_tangent.w), v_normal);
-        vec3 normal = normalize(tbn * DecodeNormal(texture2D(sNormalMap, v_texcoord0.xy)));
+        vec3 normal = normalize(mul(tbn, DecodeNormal(texture2D(sNormalMap, v_texcoord0.xy))));
     #else
         vec3 normal = normalize(v_normal);
     #endif

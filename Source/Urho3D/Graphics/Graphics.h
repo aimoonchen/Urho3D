@@ -269,7 +269,7 @@ public:
     /// Clear remembered transform shader parameter sources.
     void ClearTransformSources();
     /// Set texture.
-    void SetTexture(unsigned index, Texture* texture);
+    void SetTexture(unsigned index, Texture* texture/*, uint32_t flags = UINT32_MAX*/);
     /// Bind texture unit 0 for update. Called by Texture. Used only on OpenGL.
     /// @nobind
     void SetTextureForUpdate(Texture* texture);

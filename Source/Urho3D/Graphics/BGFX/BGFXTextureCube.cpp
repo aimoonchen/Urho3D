@@ -407,7 +407,7 @@ bool TextureCube::Create()
 //     UpdateParameters();
 //     graphics_->SetTexture(0, nullptr);
 
-    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V) | GetCoordMode(COORD_W));
+    textureFlags |= (bgfxFilterMode(filterMode_) | bgfxAddressMode(COORD_U, addressModes_[COORD_U]) | bgfxAddressMode(COORD_V, addressModes_[COORD_V]) | bgfxAddressMode(COORD_W, addressModes_[COORD_W]));
     if (GetSRGB())
     {
         textureFlags |= BGFX_TEXTURE_SRGB;

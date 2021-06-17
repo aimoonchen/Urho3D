@@ -1706,7 +1706,7 @@ void Graphics::ClearTransformSources()
     }
 }
 
-void Graphics::SetTexture(unsigned index, Texture* texture)
+void Graphics::SetTexture(unsigned index, Texture* texture/*, uint32_t flags*/)
 {
     if (index >= MAX_TEXTURE_UNITS)
         return;
@@ -3711,5 +3711,66 @@ uint64_t bgfxRSPrimitiveType(Urho3D::PrimitiveType type)
         break;
     }
     return 0;
+}
+
+uint32_t bgfxAddressMode(Urho3D::TextureCoordinate coord, Urho3D::TextureAddressMode mode)
+{
+    if (coord == COORD_U) {
+        if (mode == ADDRESS_MIRROR) {
+            return BGFX_SAMPLER_U_MIRROR;
+        } else if (mode == ADDRESS_CLAMP) {
+            return BGFX_SAMPLER_U_CLAMP;
+        } else if (mode == ADDRESS_BORDER) {
+            return BGFX_SAMPLER_U_BORDER;
+        }
+    } else if (coord == COORD_V) {
+        if (mode == ADDRESS_MIRROR) {
+            return BGFX_SAMPLER_V_MIRROR;
+        } else if (mode == ADDRESS_CLAMP) {
+            return BGFX_SAMPLER_V_CLAMP;
+        } else if (mode == ADDRESS_BORDER) {
+            return BGFX_SAMPLER_V_BORDER;
+        }
+    } else if (coord == COORD_W) {
+        if (mode == ADDRESS_MIRROR) {
+            return BGFX_SAMPLER_W_MIRROR;
+        } else if (mode == ADDRESS_CLAMP) {
+            return BGFX_SAMPLER_W_CLAMP;
+        } else if (mode == ADDRESS_BORDER) {
+            return BGFX_SAMPLER_W_BORDER;
+        }
+    }
+    return 0;
+}
+
+uint32_t bgfxFilterMode(Urho3D::TextureFilterMode filter, int32_t levels)
+{
+    uint32_t flags = 0;
+    switch (filter) {
+    case FILTER_NEAREST:
+        flags |= BGFX_SAMPLER_MIN_POINT;
+        flags |= BGFX_SAMPLER_MAG_POINT;
+        if (levels > 1) {
+            flags |= BGFX_SAMPLER_MIP_POINT;
+        }
+        break;
+    case FILTER_BILINEAR:
+        if (levels > 1) {
+            flags = BGFX_SAMPLER_MIP_POINT;
+        }
+        break;
+    case FILTER_ANISOTROPIC:
+    case FILTER_TRILINEAR:
+        flags |= BGFX_SAMPLER_MIN_ANISOTROPIC;
+        flags |= BGFX_SAMPLER_MAG_ANISOTROPIC;
+        break;
+    case FILTER_NEAREST_ANISOTROPIC:
+        flags |= BGFX_SAMPLER_MIN_POINT;
+        flags |= BGFX_SAMPLER_MAG_POINT;
+        break;
+    default:
+        break;
+    }
+    return flags;
 }
 }

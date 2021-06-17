@@ -78,7 +78,7 @@ inline Effekseer::Matrix44 ToEfkMatrix44(const Urho3D::Matrix4& transform)
 {
 	Effekseer::Matrix44 matrix;
 	auto mat = transform.Transpose();
-	memcpy(matrix.Values, &mat.m00_, 16 * sizeof(16));
+	memcpy(matrix.Values, &mat.m00_, 16 * sizeof(float));
 // 	matrix.Values[0][0] = transform.basis[0][0];
 // 	matrix.Values[0][1] = transform.basis[0][1];
 // 	matrix.Values[0][2] = transform.basis[0][2];

@@ -14,4 +14,6 @@ uint64_t bgfxRSDepthWrite(bool enable);
 uint64_t bgfxRSAlphaToCoverage(bool enable);
 uint8_t bgfxCubeMapSide(Urho3D::CubeMapFace);
 uint64_t bgfxRSPrimitiveType(Urho3D::PrimitiveType type);
+uint32_t bgfxAddressMode(Urho3D::TextureCoordinate coord, Urho3D::TextureAddressMode address);
+uint32_t bgfxFilterMode(Urho3D::TextureFilterMode filter, int levels = 1);
 }

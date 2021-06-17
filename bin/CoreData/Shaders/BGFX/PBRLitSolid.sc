@@ -171,7 +171,7 @@ void main()
     #ifdef NORMALMAP
         vec3 nn = DecodeNormal(texture2D(sNormalMap, v_texcoord0.xy));
         //nn.rg *= 2.0;
-        vec3 normal = normalize(tbn * nn);
+        vec3 normal = normalize(mul(tbn, nn));
     #else
         vec3 normal = normalize(v_normal);
     #endif

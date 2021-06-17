@@ -35,6 +35,7 @@
 #include "../../Resource/XMLFile.h"
 
 #include "bgfx/bgfx.h"
+#include "bgfxGraphics.h"
 
 #include <vector>
 
@@ -404,7 +405,7 @@ bool Texture2D::Create()
 //     glTexParameteri(target_, GL_TEXTURE_MAX_LEVEL, levels_ - 1);
 // #endif
 
-    textureFlags |= (GetFilterMode() | GetCoordMode(COORD_U) | GetCoordMode(COORD_V));
+    textureFlags |= (bgfxFilterMode(filterMode_) | bgfxAddressMode(COORD_U, addressModes_[COORD_U]) | bgfxAddressMode(COORD_V, addressModes_[COORD_V]));
     if (usage_ >= TEXTURE_RENDERTARGET)
     {
         textureFlags |= BGFX_TEXTURE_RT;
