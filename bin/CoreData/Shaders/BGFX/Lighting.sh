@@ -1,3 +1,5 @@
+#ifndef LIGHTING_H_HEADER_GUARD
+#define LIGHTING_H_HEADER_GUARD
 #ifdef COMPILEVS
 vec3 GetAmbient(float zonePos)
 {
@@ -176,10 +178,8 @@ float GetIntensity(vec3 color)
 
 #ifdef SHADOW
 
-#if defined(DIRLIGHT) && (!defined(GL_ES) || defined(WEBGL))
+#if defined(DIRLIGHT)
     #define NUMCASCADES 4
-#else
-    #define NUMCASCADES 1
 #endif
 
 #ifdef VSM_SHADOW
@@ -333,13 +333,13 @@ float GetDirShadowDeferred(vec4 projWorldPos, vec3 normal, float depth)
             shadowPos = vec4(projWorldPos.xyz + cosAngle * cNormalOffsetScalePS.w * normal, 1.0) * cLightMatricesPS[3];
     #else
         if (depth < cShadowSplits.x)
-            shadowPos = projWorldPos * cLightMatricesPS[0];
+            shadowPos = mul(projWorldPos, cLightMatricesPS[0]);
         else if (depth < cShadowSplits.y)
-            shadowPos = projWorldPos * cLightMatricesPS[1];
+            shadowPos = mul(projWorldPos, cLightMatricesPS[1]);
         else if (depth < cShadowSplits.z)
-            shadowPos = projWorldPos * cLightMatricesPS[2];
+            shadowPos = mul(projWorldPos, cLightMatricesPS[2]);
         else
-            shadowPos = projWorldPos * cLightMatricesPS[3];
+            shadowPos = mul(projWorldPos, cLightMatricesPS[3]);
     #endif
 
     return GetDirShadowFade(GetShadow(shadowPos), depth);
@@ -374,7 +374,7 @@ float GetShadowDeferred(vec4 projWorldPos, vec3 normal, float depth)
         #endif
 
         #ifdef SPOTLIGHT
-            vec4 shadowPos = projWorldPos * cLightMatricesPS[1];
+            vec4 shadowPos = mul(projWorldPos, cLightMatricesPS[1]);
             return GetShadow(shadowPos);
         #else
             vec3 shadowPos = projWorldPos.xyz - cLightPosPS.xyz;
@@ -385,3 +385,4 @@ float GetShadowDeferred(vec4 projWorldPos, vec3 normal, float depth)
 #endif
 #endif
 #endif
+#endif // LIGHTING_H_HEADER_GUARD

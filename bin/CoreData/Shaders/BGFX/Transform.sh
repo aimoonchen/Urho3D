@@ -1,3 +1,5 @@
+#ifndef TRANSFORM_H_HEADER_GUARD
+#define TRANSFORM_H_HEADER_GUARD
 #ifdef COMPILEVS
 // attribute vec4 iPos;
 // attribute vec3 iNormal;
@@ -218,3 +220,5 @@ vec4 GetWorldTangent(mat4 modelMatrix)
 */
 
 #endif
+
+#endif // TRANSFORM_H_HEADER_GUARD

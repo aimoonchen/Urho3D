@@ -1,12 +1,6 @@
-// Use of constant buffers on OpenGL 3 commented out for now as it seems to be slower in practice
-//#define USE_CBUFFERS
-
-#if !defined(GL3) || !defined(USE_CBUFFERS)
-
-// OpenGL 2 uniforms (no constant buffers)
-
+#ifndef UNIFORMS_H_HEADER_GUARD
+#define UNIFORMS_H_HEADER_GUARD
 #ifdef COMPILEVS
-
 // Vertex shader uniforms
 uniform vec4 cAmbientStartColor;
 uniform vec4 cAmbientEndColor;
@@ -29,30 +23,17 @@ uniform mat4 cViewProj;
 uniform vec4 cUOffset;
 uniform vec4 cVOffset;
 uniform mat4 cZone;
-#if !defined(GL_ES) || defined(WEBGL)
-    uniform mat4 cLightMatrices[4];
-#else
-    uniform mat4 cLightMatrices[2];
-#endif
+uniform mat4 cLightMatrices[4];
 #ifdef SKINNED
     uniform vec4 cSkinMatrices[MAXBONES*3];
 #endif
 #ifdef NUMVERTEXLIGHTS
     uniform vec4 cVertexLights[4*3];
 #endif
-//#ifdef GL3
-    uniform vec4 cClipPlane;
-//#endif
+uniform vec4 cClipPlane;
 uniform vec4 cDepthBias;
-#endif
-
-#ifdef COMPILEPS
-
+#else
 // Fragment shader uniforms
-#ifdef GL_ES
-    precision mediump float;
-#endif
-
 uniform vec4 cAmbientColor;
 uniform vec4 cCameraPosPS;
 uniform vec4 cDeltaTimePS;
@@ -93,136 +74,5 @@ uniform mat4 cLightMatricesPS[4];
 #ifdef VSM_SHADOW
 uniform vec4 cVSMShadowParams;
 #endif
-#endif
-
-#else
-
-// OpenGL 3 uniforms (using constant buffers)
-
-#ifdef COMPILEVS
-
-uniform FrameVS
-{
-    float cDeltaTime;
-    float cElapsedTime;
-};
-
-uniform CameraVS
-{
-    vec3 cCameraPos;
-    float cNearClip;
-    float cFarClip;
-    vec4 cDepthMode;
-    vec3 cFrustumSize;
-    vec4 cGBufferOffsets;
-    mat4 cView;
-    mat4 cViewInv;
-    mat4 cViewProj;
-    vec4 cClipPlane;
-};
-
-uniform ZoneVS
-{
-    vec3 cAmbientStartColor;
-    vec3 cAmbientEndColor;
-    mat4 cZone;
-};
-
-uniform LightVS
-{
-    vec4 cLightPos;
-    vec3 cLightDir;
-    vec4 cNormalOffsetScale;
-#ifdef NUMVERTEXLIGHTS
-    vec4 cVertexLights[4 * 3];
-#else
-    mat4 cLightMatrices[4];
-#endif
-};
-
-#ifndef CUSTOM_MATERIAL_CBUFFER
-uniform MaterialVS
-{
-    vec4 cUOffset;
-    vec4 cVOffset;
-};
-#endif
-
-uniform ObjectVS
-{
-    mat4 cModel;
-#ifdef BILLBOARD
-    mat3 cBillboardRot;
-#endif
-#ifdef SKINNED
-    uniform vec4 cSkinMatrices[MAXBONES*3];
-#endif
-};
-
-#endif
-
-#ifdef COMPILEPS
-
-// Pixel shader uniforms
-uniform FramePS
-{
-    float cDeltaTimePS;
-    float cElapsedTimePS;
-};
-
-uniform CameraPS
-{
-    vec3 cCameraPosPS;
-    vec4 cDepthReconstruct;
-    vec2 cGBufferInvSize;
-    float cNearClipPS;
-    float cFarClipPS;
-};
-
-uniform ZonePS
-{
-    vec4 cAmbientColor;
-    vec4 cFogParams;
-    vec3 cFogColor;
-    vec3 cZoneMin;
-    vec3 cZoneMax;
-};
-
-uniform LightPS
-{
-    vec4 cLightColor;
-    vec4 cLightPosPS;
-    vec3 cLightDirPS;
-    vec4 cNormalOffsetScalePS;
-    vec4 cShadowCubeAdjust;
-    vec4 cShadowDepthFade;
-    vec2 cShadowIntensity;
-    vec2 cShadowMapInvSize;
-    vec4 cShadowSplits;
-    mat4 cLightMatricesPS[4];
-#ifdef VSM_SHADOW
-    vec2 cVSMShadowParams;
-#endif
-#ifdef PBR
-    float cLightRad;
-    float cLightLength;
-#endif
-};
-
-#ifndef CUSTOM_MATERIAL_CBUFFER
-uniform MaterialPS
-{
-    vec4 cMatDiffColor;
-    vec3 cMatEmissiveColor;
-    vec3 cMatEnvMapColor;
-    vec4 cMatSpecColor;
-#ifdef PBR
-    float cRoughness;
-    float cMetallic;
-#endif
-};
-#endif
-
-#endif
-
-#endif
+#endif // COMPILEVS
+#endif // UNIFORMS_H_HEADER_GUARD
