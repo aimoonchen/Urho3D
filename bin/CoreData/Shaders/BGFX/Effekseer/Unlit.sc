@@ -5,7 +5,7 @@ $output v_color0, v_texcoord0, v_ppos
 $input v_color0, v_texcoord0, v_ppos
 #endif
 
-#include "bgfx_shader.sh"
+#include "../bgfx_shader.sh"
 
 #if defined(COMPILEVS)
 //uniform mat4 mCamera;

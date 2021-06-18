@@ -5,7 +5,7 @@ $output v_fragmentColor, v_texCoord
 $input v_fragmentColor, v_texCoord
 #endif
 
-#include "bgfx_shader.sh"
+#include "../bgfx_shader.sh"
 
 #if defined(COMPILEVS)
 uniform mat4 CC_MVPMatrix;

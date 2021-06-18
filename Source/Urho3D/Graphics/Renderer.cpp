@@ -1864,11 +1864,25 @@ void Renderer::SetIndirectionTextureData()
         {
             for (unsigned x = 0; x < 256; ++x)
             {
-//#ifdef URHO3D_OPENGL
-                dest[0] = (unsigned char)x;
-                dest[1] = (unsigned char)(255 - y);
-                dest[2] = faceX;
-                dest[3] = (unsigned char)(255 * 2 / 3 - faceY);
+                if (IsRendererTypeOpendGL())
+                {
+                    dest[0] = (unsigned char)x;
+                    dest[1] = (unsigned char)(255 - y);
+                    dest[2] = faceX;
+                    dest[3] = (unsigned char)(255 * 2 / 3 - faceY);
+                }
+                else
+                {
+                    dest[0] = (unsigned char)x;
+                    dest[1] = (unsigned char)y;
+                    dest[2] = faceX;
+                    dest[3] = faceY;
+                }
+// #ifdef URHO3D_OPENGL
+//                 dest[0] = (unsigned char)x;
+//                 dest[1] = (unsigned char)(255 - y);
+//                 dest[2] = faceX;
+//                 dest[3] = (unsigned char)(255 * 2 / 3 - faceY);
 // #else
 //                 dest[0] = (unsigned char)x;
 //                 dest[1] = (unsigned char)y;

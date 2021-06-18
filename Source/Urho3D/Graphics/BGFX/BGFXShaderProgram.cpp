@@ -141,51 +141,36 @@ bool ShaderProgram::Link()
             bgfx::UniformInfo info;
             bgfx::getUniformInfo(uniform, info);
             
-            if (info.name[0] == 'c' || info.name[0] == 's')
-            {
+            if (info.name[0] == 'c' || info.name[0] == 's') {
                 uniforms_[StringHash(&info.name[1])] = uniform.idx;
 
-                if (info.type == bgfx::UniformType::Sampler && info.name[0] == 's')
-                {
+                if (info.type == bgfx::UniformType::Sampler && info.name[0] == 's') {
                     unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
-                    if (unit >= MAX_TEXTURE_UNITS)
-                    {
+                    if (unit >= MAX_TEXTURE_UNITS) {
                         // for terrain
-                        if (!strcmp(&info.name[1], "WeightMap0"))
-                        {
+                        if (!strcmp(&info.name[1], "WeightMap0")) {
                             unit = 0;
-                        }
-                        else if (!strcmp(&info.name[1], "DetailMap1"))
-                        {
+                        } else if (!strcmp(&info.name[1], "DetailMap1")) {
                             unit = 1;
-                        }
-                        else if (!strcmp(&info.name[1], "DetailMap2"))
-                        {
+                        } else if (!strcmp(&info.name[1], "DetailMap2")) {
                             unit = 2;
-                        }
-                        else if (!strcmp(&info.name[1], "DetailMap3"))
-                        {
+                        } else if (!strcmp(&info.name[1], "DetailMap3")) {
                             unit = 3;
-                        }
-                        else
-                        {
+                        } else {
                             unit = NumberPostfix(info.name);
                         }
                     }
 
-                    if (unit < MAX_TEXTURE_UNITS)
-                    {
-                        useTextureUnits_[unit] = true;
-                        samplers_.emplace_back(TextureUnit(unit), uniform.idx);
-                    }
-                    else
-                    {
+                    if (unit < MAX_TEXTURE_UNITS) {
+                        if (!useTextureUnits_[unit]) {
+                            useTextureUnits_[unit] = true;
+                            samplers_.emplace_back(TextureUnit(unit), uniform.idx);
+                        }
+                    } else {
                         URHO3D_LOGERRORF("Can't found texture unit : \"%s\"\n", &info.name[1]);
                     }
                 }
-            }
-            else
-            {
+            } else {
                 uniforms_[StringHash(info.name)] = uniform.idx;
             }
             

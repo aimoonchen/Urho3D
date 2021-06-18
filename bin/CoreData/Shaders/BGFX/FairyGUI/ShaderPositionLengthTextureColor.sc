@@ -5,7 +5,7 @@ $output v_color, v_texCoord
 $input v_color, v_texCoord
 #endif
 
-#include "bgfx_shader.sh"
+#include "../bgfx_shader.sh"
 
 #if defined(COMPILEVS)
 uniform vec4 u_alpha;

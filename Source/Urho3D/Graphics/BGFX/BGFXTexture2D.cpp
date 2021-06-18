@@ -112,18 +112,23 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
         return true;
     }
 
-    if (IsCompressed())
-    {
-        x &= ~3u;
-        y &= ~3u;
-    }
-
     int levelWidth = GetLevelWidth(level);
     int levelHeight = GetLevelHeight(level);
     if (x < 0 || x + width > levelWidth || y < 0 || y + height > levelHeight || width <= 0 || height <= 0)
     {
         URHO3D_LOGERROR("Illegal dimensions for setting data");
         return false;
+    }
+
+    if (IsCompressed())
+    {
+        x &= ~3u;
+        y &= ~3u;
+        // TODO : for dds
+        width += 3;
+        width &= 0xfffffffc;
+        height += 3;
+        height &= 0xfffffffc;
     }
 
     //graphics_->SetTextureForUpdate(this);

@@ -196,9 +196,10 @@ bool ShaderVariation::Create()
             shader_command += (type_ == VS) ? compile_flags[target].VS_FLAGS : compile_flags[target].FS_FLAGS;
             shader_command += " --define " + String::Joined(defines, ";");
             shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" + shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
-            shader_command += " -i " + localPath + "Urho3D/bin/CoreData/Shaders/BGFX";
             shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
             shader_command += " -o " + localPath + "Urho3D/bin/CoreData/" + compile_flags[target].SHADER_PATH + binFilename;
+            shader_command += " --debug";
+            //shader_command += " --bin2c";
             return system(shader_command.CString());
         };
         auto ret = compile_shader(HLSL);
