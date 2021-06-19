@@ -209,7 +209,6 @@ float Chebyshev(vec2 Moments, float depth)
 }
 #endif
 
-#ifndef GL_ES
 float GetShadow(vec4 shadowPos)
 {
     #if defined(SIMPLE_SHADOW)
@@ -224,48 +223,27 @@ float GetShadow(vec4 shadowPos)
         // Take four samples and average them
         // Note: in case of sampling a point light cube shadow, we optimize out the w divide as it has already been performed
         #ifndef POINTLIGHT
-            vec2 offsets = cShadowMapInvSize * shadowPos.w;
+            vec2 offsets = cShadowMapInvSize.xy * shadowPos.w;
         #else
-            vec2 offsets = cShadowMapInvSize;
+            vec2 offsets = cShadowMapInvSize.xy;
         #endif
-        #ifndef GL3
-            return cShadowIntensity.y + cShadowIntensity.x * (shadow2DProj(sShadowMap, shadowPos) +
-                shadow2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)) +
-                shadow2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)) +
-                shadow2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)));
-        #else
+        // vec3 texCoord = shadowPos.xyz/shadowPos.w;
+        // #ifndef GL3
+        //    return cShadowIntensity.y + cShadowIntensity.x * (shadow2D(sShadowMap, texCoord) +
+        //        shadow2D(sShadowMap, vec3(texCoord.x + offsets.x, texCoord.yz)) +
+        //        shadow2D(sShadowMap, vec3(texCoord.x, texCoord.y + offsets.y, texCoord.z)) +
+        //        shadow2D(sShadowMap, vec3(texCoord.xy + offsets.xy, texCoord.z)));
+        //#else
             return cShadowIntensity.y + cShadowIntensity.x * (texture2DProj(sShadowMap, shadowPos).r +
                 texture2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r +
                 texture2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r +
                 texture2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r);
-        #endif
+        //#endif
     #elif defined(VSM_SHADOW)
         vec2 samples = texture2D(sShadowMap, shadowPos.xy / shadowPos.w).rg; 
         return cShadowIntensity.y + cShadowIntensity.x * Chebyshev(samples, shadowPos.z / shadowPos.w);
     #endif
 }
-#else
-float GetShadow(vec4 shadowPos)
-{
-    #if defined(SIMPLE_SHADOW)
-        // Take one sample
-        return cShadowIntensity.y + (texture2DProj(sShadowMap, shadowPos).r * shadowPos.w > shadowPos.z ? cShadowIntensity.x : 0.0);
-    #elif defined(PCF_SHADOW)
-        // Take four samples and average them
-        vec2 offsets = cShadowMapInvSize * shadowPos.w;
-        vec4 inLight = vec4(
-            texture2DProj(sShadowMap, shadowPos).r * shadowPos.w > shadowPos.z,
-            texture2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r * shadowPos.w > shadowPos.z,
-            texture2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r * shadowPos.w > shadowPos.z,
-            texture2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r * shadowPos.w > shadowPos.z
-        );
-        return cShadowIntensity.y + dot(inLight, vec4(cShadowIntensity.x));
-    #elif defined(VSM_SHADOW)
-        vec2 samples = texture2D(sShadowMap, shadowPos.xy / shadowPos.w).rg; 
-        return cShadowIntensity.y + cShadowIntensity.x * Chebyshev(samples, shadowPos.z / shadowPos.w);
-    #endif
-}
-#endif
 
 #ifdef POINTLIGHT
 float GetPointShadow(vec3 lightVec)
