@@ -445,20 +445,37 @@ Matrix4 Camera::GetProjection() const
     return flipVertical_ ? flipMatrix * projection_ : projection_;
 }
 
+bool IsRendererTypeOpendGL();
+
 Matrix4 Camera::GetGPUProjection() const
 {
+    if (IsRendererTypeOpendGL())
+    {
+        Matrix4 ret = GetProjection();
+
+        ret.m20_ = 2.0f * ret.m20_ - ret.m30_;
+        ret.m21_ = 2.0f * ret.m21_ - ret.m31_;
+        ret.m22_ = 2.0f * ret.m22_ - ret.m32_;
+        ret.m23_ = 2.0f * ret.m23_ - ret.m33_;
+
+        return ret;
+    }
+    else
+    {
+        return GetProjection();
+    }
 // #ifndef URHO3D_OPENGL
 //     return GetProjection(); // Already matches API-specific format
 // #else
-    // See formulation for depth range conversion at http://www.ogre3d.org/forums/viewtopic.php?f=4&t=13357
-    Matrix4 ret = GetProjection();
-
-    ret.m20_ = 2.0f * ret.m20_ - ret.m30_;
-    ret.m21_ = 2.0f * ret.m21_ - ret.m31_;
-    ret.m22_ = 2.0f * ret.m22_ - ret.m32_;
-    ret.m23_ = 2.0f * ret.m23_ - ret.m33_;
-
-    return ret;
+//     // See formulation for depth range conversion at http://www.ogre3d.org/forums/viewtopic.php?f=4&t=13357
+//     Matrix4 ret = GetProjection();
+// 
+//     ret.m20_ = 2.0f * ret.m20_ - ret.m30_;
+//     ret.m21_ = 2.0f * ret.m21_ - ret.m31_;
+//     ret.m22_ = 2.0f * ret.m22_ - ret.m32_;
+//     ret.m23_ = 2.0f * ret.m23_ - ret.m33_;
+// 
+//     return ret;
 //#endif
 }
 

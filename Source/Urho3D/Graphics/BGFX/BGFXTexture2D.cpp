@@ -124,11 +124,15 @@ bool Texture2D::SetData(unsigned level, int x, int y, int width, int height, con
     {
         x &= ~3u;
         y &= ~3u;
-        // TODO : for dds
-        width += 3;
-        width &= 0xfffffffc;
-        height += 3;
-        height &= 0xfffffffc;
+        auto rt = bgfx::getRendererType();
+        if (rt == bgfx::RendererType::Direct3D9 || rt == bgfx::RendererType::Direct3D11 ||
+            rt == bgfx::RendererType::Direct3D12) {
+            // TODO : for dds, remove this
+            width += 3;
+            width &= 0xfffffffc;
+            height += 3;
+            height &= 0xfffffffc;
+        }       
     }
 
     //graphics_->SetTextureForUpdate(this);

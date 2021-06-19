@@ -173,7 +173,7 @@ bool ShaderVariation::Create()
     auto graphics = owner_->GetContext()->GetSubsystem<Graphics>();
     String fullBinName = "Shaders/BGFX/" + graphics->GetCompiledShaderPath() + binFilename;
     auto cache = owner_->GetContext()->GetSubsystem<ResourceCache>();
-    if (true/*!cache->Exists(fullBinName)*/) {
+    if (!cache->Exists(fullBinName)) {
 #if defined(_WIN32)// || defined(__APPLE__)
 #ifdef __APPLE__
         String localPath("/Users/simonchen/Development/");
@@ -184,6 +184,10 @@ bool ShaderVariation::Create()
         auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](shader_target target) {
             Vector<String> defines;
             defines.Push((type_ == VS) ? "COMPILEVS" : "COMPILEPS");
+            // TODO: remove this
+            if (target == GLSL || target == ESSL) {
+                defines.Push("HOMOGENEOUS_NDC");
+            }
             defines.Push("MAXBONES=" + String(Graphics::GetMaxBones()));
             for (const auto& def : defineVec) {
                 defines.Push(def);
@@ -198,30 +202,30 @@ bool ShaderVariation::Create()
             shader_command += " --varyingdef " + localPath + "Urho3D/bin/CoreData/" + shaderPath.Substring(0, shaderPath.FindLast('/')) + "/varying.def.sc";
             shader_command += " -f " + localPath + "Urho3D/bin/CoreData/" + shaderPath;
             shader_command += " -o " + localPath + "Urho3D/bin/CoreData/" + compile_flags[target].SHADER_PATH + binFilename;
-            shader_command += " --debug";
+            //shader_command += " --debug";
             //shader_command += " --bin2c";
             return system(shader_command.CString());
         };
-        auto ret = compile_shader(HLSL);
+//         auto ret = compile_shader(HLSL);
+//         if (ret != 0)
+//         {
+//             ;
+//         }
+        auto ret = compile_shader(GLSL);
         if (ret != 0)
         {
             ;
         }
-//         auto ret = compile_shader(GLSL);
-//         if (ret != 0)
-//         {
-//             ;
-//         }
-//         ret = compile_shader(METAL);
-//         if (ret != 0)
-//         {
-//             ;
-//         }
-//         ret = compile_shader(ESSL);
-//         if (ret != 0)
-//         {
-//             ;
-//         }
+        ret = compile_shader(METAL);
+        if (ret != 0)
+        {
+            ;
+        }
+        ret = compile_shader(ESSL);
+        if (ret != 0)
+        {
+            ;
+        }
 //         auto ret = compile_shader(SPIRV);
 //         if (ret != 0)
 //         {

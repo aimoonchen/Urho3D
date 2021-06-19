@@ -70,7 +70,7 @@ float GetVertexLightVolumetric(int index, vec3 worldPos)
 
 #ifdef SHADOW
 
-#if defined(DIRLIGHT) && (!defined(GL_ES) || defined(WEBGL))
+#if defined(DIRLIGHT)
     #define NUMCASCADES 4
 #else
     #define NUMCASCADES 1
@@ -180,6 +180,8 @@ float GetIntensity(vec3 color)
 
 #if defined(DIRLIGHT)
     #define NUMCASCADES 4
+#else
+    #define NUMCASCADES 1
 #endif
 
 #ifdef VSM_SHADOW

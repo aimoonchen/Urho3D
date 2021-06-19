@@ -725,9 +725,15 @@ void View::SetCameraShaderParameters(Camera* camera)
     if (camera->IsOrthographic())
     {
         depthMode.x_ = 1.0f;
-//#ifdef URHO3D_OPENGL
-        depthMode.z_ = 0.5f;
-        depthMode.w_ = 0.5f;
+        if (IsRendererTypeOpendGL()) {
+            depthMode.z_ = 0.5f;
+            depthMode.w_ = 0.5f;
+        } else {
+            depthMode.z_ = 1.0f;
+        }
+// #ifdef URHO3D_OPENGL
+//         depthMode.z_ = 0.5f;
+//         depthMode.w_ = 0.5f;
 // #else
 //         depthMode.z_ = 1.0f;
 // #endif

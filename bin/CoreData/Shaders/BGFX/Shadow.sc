@@ -39,7 +39,11 @@ void main()
     #endif
 
     #ifdef VSM_SHADOW
-        float depth = v_texcoord0.z / v_texcoord0.w * 0.5 + 0.5;
+        #ifdef HOMOGENEOUS_NDC
+            float depth = v_texcoord0.z / v_texcoord0.w * 0.5 + 0.5;
+        #else
+            float depth = v_texcoord0.z / v_texcoord0.w;
+        #endif
         gl_FragColor = vec4(depth, depth * depth, 1.0, 1.0);
     #else
         gl_FragColor = vec4_splat(1.0);
