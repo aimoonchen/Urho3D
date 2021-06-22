@@ -227,18 +227,15 @@ float GetShadow(vec4 shadowPos)
         #else
             vec2 offsets = cShadowMapInvSize.xy;
         #endif
-        // vec3 texCoord = shadowPos.xyz/shadowPos.w;
-        // #ifndef GL3
+        //vec3 texCoord = shadowPos.xyz/shadowPos.w;
         //    return cShadowIntensity.y + cShadowIntensity.x * (shadow2D(sShadowMap, texCoord) +
         //        shadow2D(sShadowMap, vec3(texCoord.x + offsets.x, texCoord.yz)) +
         //        shadow2D(sShadowMap, vec3(texCoord.x, texCoord.y + offsets.y, texCoord.z)) +
         //        shadow2D(sShadowMap, vec3(texCoord.xy + offsets.xy, texCoord.z)));
-        //#else
-            return cShadowIntensity.y + cShadowIntensity.x * (texture2DProj(sShadowMap, shadowPos).r +
-                texture2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r +
-                texture2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r +
-                texture2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r);
-        //#endif
+        return cShadowIntensity.y + cShadowIntensity.x * (texture2DProj(sShadowMap, shadowPos).r +
+            texture2DProj(sShadowMap, vec4(shadowPos.x + offsets.x, shadowPos.yzw)).r +
+            texture2DProj(sShadowMap, vec4(shadowPos.x, shadowPos.y + offsets.y, shadowPos.zw)).r +
+            texture2DProj(sShadowMap, vec4(shadowPos.xy + offsets.xy, shadowPos.zw)).r);
     #elif defined(VSM_SHADOW)
         vec2 samples = texture2D(sShadowMap, shadowPos.xy / shadowPos.w).rg; 
         return cShadowIntensity.y + cShadowIntensity.x * Chebyshev(samples, shadowPos.z / shadowPos.w);
