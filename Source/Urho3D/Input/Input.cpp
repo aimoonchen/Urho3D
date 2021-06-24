@@ -398,7 +398,7 @@ void Input::OnMouseEvent(const void* mouseEvent)
             if (emscriptenExitingPointerLock_)
             {
                 SuppressNextMouseMove();
-                break;
+                return;//break;
             }
 #endif
 
@@ -659,8 +659,8 @@ void Input::Update()
         }
     }
 #else
-    if (!window)
-        return;
+    // if (!window)
+    //     return;
 #endif
 
 #ifndef __EMSCRIPTEN__
