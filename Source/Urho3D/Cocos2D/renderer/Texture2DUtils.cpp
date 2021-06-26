@@ -87,7 +87,11 @@ bool InitWithString(Urho3D::Texture2D* texture, const char *text, const FontDefi
 	textDef._shadow._shadowEnabled = false;
 
 	bool hasPremultipliedAlpha;
+	#ifdef CC_PLATFORM_EMSCRIPTEN
+	Data outData;
+	#else
 	Data outData = Device::getTextureDataForText(text, textDef, align, imageWidth, imageHeight, hasPremultipliedAlpha);
+	#endif
 	if (outData.isNull())
 	{
 		return false;

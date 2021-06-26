@@ -421,12 +421,24 @@ namespace entry
 	{
 		BX_UNUSED(_handle, _lock);
 	}
+	
+	int32_t getWindowFlags(WindowHandle _handle)
+    {
+        BX_UNUSED(_handle);
+        return 0;
+    }
+	
+	int do_main(int _argc, char** _argv)
+	{
+		using namespace entry;
+		return s_ctx.run(_argc, _argv);
+	}
 }
 
-int main(int _argc, const char* const* _argv)
-{
-	using namespace entry;
-	return s_ctx.run(_argc, _argv);
-}
+// int main(int _argc, const char* const* _argv)
+// {
+// 	using namespace entry;
+// 	return s_ctx.run(_argc, _argv);
+// }
 
 #endif // BX_PLATFORM_EMSCRIPTEN
