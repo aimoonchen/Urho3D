@@ -631,14 +631,19 @@ restart:
 
 		int32_t result = bx::kExitSuccess;
 		s_restartArgs[0] = '\0';
-		if (0 == s_numApps)
-		{
-			result = ::_main_(_argc, (char**)_argv);
-		}
-		else
-		{
-			result = runApp(getCurrentApp(selected), _argc, _argv);
-		}
+// #if BX_PLATFORM_EMSCRIPTEN
+		bx::printf("call _main_\n");
+		result = ::_main_(_argc, (char**)_argv);
+// #else
+// 		if (0 == s_numApps)
+// 		{
+// 			result = ::_main_(_argc, (char**)_argv);
+// 		}
+// 		else
+// 		{
+// 			result = runApp(getCurrentApp(selected), _argc, _argv);
+// 		}
+// #endif
 
 		if (0 != bx::strLen(s_restartArgs) )
 		{

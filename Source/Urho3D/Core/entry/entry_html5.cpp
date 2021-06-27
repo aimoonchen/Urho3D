@@ -97,6 +97,9 @@ namespace entry
 			}
 		}
 
+#ifdef main
+#undef main
+#endif
 		int32_t run(int _argc, const char* const* _argv)
 		{
 			static const char* canvas = "#canvas";

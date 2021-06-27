@@ -82,7 +82,7 @@ int Application::Run()
 
         // Platforms other than iOS/tvOS and Emscripten run a blocking main loop
 //#if !defined(IOS) && !defined(TVOS) && !defined(__EMSCRIPTEN__)
-#if !defined(__EMSCRIPTEN__)
+// #if !defined(__EMSCRIPTEN__)
         while (!engine_->IsExiting()) {
             engine_->RunFrame();
         }
@@ -90,13 +90,15 @@ int Application::Run()
         Stop();
         // iOS/tvOS will setup a timer for running animation frames so eg. Game Center can run. In this case we do not
         // support calling the Stop() function, as the application will never stop manually
-#else
-#if defined(IOS) || defined(TVOS)
-//        SDL_iPhoneSetAnimationCallback(GetSubsystem<Graphics>()->GetWindow(), 1, &RunFrame, engine_);
-#elif defined(__EMSCRIPTEN__)
-        emscripten_set_main_loop_arg(RunFrame, engine_, 0, 1);
-#endif
-#endif
+// #else
+// #if defined(IOS) || defined(TVOS)
+// //        SDL_iPhoneSetAnimationCallback(GetSubsystem<Graphics>()->GetWindow(), 1, &RunFrame, engine_);
+// #elif defined(__EMSCRIPTEN__)
+//         printf("Application: before emscripten_set_main_loop_arg\n");
+//         emscripten_set_main_loop_arg(RunFrame, engine_, 0, 1);
+//         printf("Application: after emscripten_set_main_loop_arg\n");
+// #endif
+// #endif
 
         return exitCode_;
 #if !defined(__GNUC__) || __EXCEPTIONS

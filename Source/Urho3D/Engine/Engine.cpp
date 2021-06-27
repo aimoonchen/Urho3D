@@ -377,6 +377,7 @@ bool Engine::InitializeResourceCache(const VariantMap& parameters, bool removeOl
                 URHO3D_LOGERRORF(
                     "Failed to add resource path '%s', check the documentation on how to set the 'resource prefix path'",
                     resourcePaths[i].CString());
+                    printf("Failed to add resource path\n");
                 return false;
             }
         }

@@ -154,55 +154,56 @@ MouseMode EmscriptenInput::invalidatedRequestedMouseMode_ = MM_INVALID;
 EmscriptenInput::EmscriptenInput(Input* inputInst) :
     inputInst_(inputInst)
 {
-    auto* vInputInst = (void*)inputInst;
-
-    // Handle pointer lock
-    emscripten_set_pointerlockchange_callback(NULL, vInputInst, false, EmscriptenInput::HandlePointerLockChange);
-
-    // Handle mouse events to prevent mouse jumps
-    emscripten_set_mousedown_callback(NULL, vInputInst, true, EmscriptenInput::HandleMouseJump);
-    emscripten_set_mousemove_callback(NULL, vInputInst, true, EmscriptenInput::HandleMouseJump);
-
-    // Handle focus changes
-    emscripten_set_focusout_callback(NULL, vInputInst, false, EmscriptenInput::HandleFocusChange);
-    emscripten_set_focus_callback(NULL, vInputInst, false, EmscriptenInput::HandleFocusChange);
-
-    // Handle SDL events
-    SDL_AddEventWatch(EmscriptenInput::HandleSDLEvents, vInputInst);
+//     printf("Construct EmscriptenInput\n");
+//     auto* vInputInst = (void*)inputInst;
+// printf("In Construct EmscriptenInput1\n");
+//     // Handle pointer lock
+//     emscripten_set_pointerlockchange_callback(NULL, vInputInst, false, EmscriptenInput::HandlePointerLockChange);
+// printf("In Construct EmscriptenInput2\n");
+//     // Handle mouse events to prevent mouse jumps
+//     emscripten_set_mousedown_callback(NULL, vInputInst, true, EmscriptenInput::HandleMouseJump);
+//     emscripten_set_mousemove_callback(NULL, vInputInst, true, EmscriptenInput::HandleMouseJump);
+// printf("In Construct EmscriptenInput3\n");
+//     // Handle focus changes
+//     emscripten_set_focusout_callback(NULL, vInputInst, false, EmscriptenInput::HandleFocusChange);
+//     emscripten_set_focus_callback(NULL, vInputInst, false, EmscriptenInput::HandleFocusChange);
+//     printf("In Construct EmscriptenInput\n");
+//     // Handle SDL events
+//     SDL_AddEventWatch(EmscriptenInput::HandleSDLEvents, vInputInst);
 }
 
 void EmscriptenInput::RequestPointerLock(MouseMode mode, bool suppressEvent)
 {
-    requestedMouseMode_ = mode;
-    suppressMouseModeEvent_ = suppressEvent;
-    emscripten_request_pointerlock(NULL, true);
+    // requestedMouseMode_ = mode;
+    // suppressMouseModeEvent_ = suppressEvent;
+    // emscripten_request_pointerlock(NULL, true);
 }
 
 void EmscriptenInput::ExitPointerLock(bool suppressEvent)
 {
-    if (requestedMouseMode_ != MM_INVALID)
-    {
-        invalidatedRequestedMouseMode_ = requestedMouseMode_;
-        invalidatedSuppressMouseModeEvent_ = suppressMouseModeEvent_;
-    }
-    requestedMouseMode_ = MM_INVALID;
-    suppressMouseModeEvent_ = suppressEvent;
+    // if (requestedMouseMode_ != MM_INVALID)
+    // {
+    //     invalidatedRequestedMouseMode_ = requestedMouseMode_;
+    //     invalidatedSuppressMouseModeEvent_ = suppressMouseModeEvent_;
+    // }
+    // requestedMouseMode_ = MM_INVALID;
+    // suppressMouseModeEvent_ = suppressEvent;
 
-    if (inputInst_->IsMouseLocked())
-    {
-        inputInst_->emscriptenExitingPointerLock_ = true;
-        emscripten_exit_pointerlock();
-    }
+    // if (inputInst_->IsMouseLocked())
+    // {
+    //     inputInst_->emscriptenExitingPointerLock_ = true;
+    //     emscripten_exit_pointerlock();
+    // }
 }
 
 bool EmscriptenInput::IsVisible()
 {
-    EmscriptenVisibilityChangeEvent visibilityStatus;
-    if (emscripten_get_visibility_status(&visibilityStatus) >= EMSCRIPTEN_RESULT_SUCCESS)
-        return visibilityStatus.hidden >= EM_TRUE ? false : true;
+    // EmscriptenVisibilityChangeEvent visibilityStatus;
+    // if (emscripten_get_visibility_status(&visibilityStatus) >= EMSCRIPTEN_RESULT_SUCCESS)
+    //     return visibilityStatus.hidden >= EM_TRUE ? false : true;
 
-    // Assume visible
-    URHO3D_LOGWARNING("Could not determine visibility status.");
+    // // Assume visible
+    // URHO3D_LOGWARNING("Could not determine visibility status.");
     return true;
 }
 
