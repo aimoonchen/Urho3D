@@ -1625,10 +1625,6 @@ macro (setup_library)
     _setup_target ()
 
     if (PROJECT_NAME STREQUAL Urho3D)
-        if (${TARGET_NAME} STREQUAL Urho3D)
-            list (APPEND LINK_DEPENDS "../../../3rd/bgfx/.build/wasm/bin/bgfxDebug.bc ../../../3rd/bgfx/.build/wasm/bin/bxDebug.bc ../../../3rd/bgfx/.build/wasm/bin/bimgDebug.bc")
-            list (APPEND LINK_FLAGS "-s MAX_WEBGL_VERSION=2 -s TOTAL_MEMORY=32MB -s ALLOW_MEMORY_GROWTH=1")
-        endif ()
         # Accumulate all the dependent static libraries that are used in building the Urho3D library itself
         if (NOT ${TARGET_NAME} STREQUAL Urho3D AND LIB_TYPE STREQUAL STATIC_LIBRARY)
             set (STATIC_LIBRARY_TARGETS ${STATIC_LIBRARY_TARGETS} ${TARGET_NAME} PARENT_SCOPE)
@@ -1690,6 +1686,7 @@ macro (setup_main_executable)
             endif ()
         elseif (WEB)
             if (EMSCRIPTEN)
+                list (APPEND LINK_FLAGS "../../../../3rd/bgfx/.build/wasm/bin/bgfxDebug.bc ../../../../3rd/bgfx/.build/wasm/bin/bxDebug.bc ../../../../3rd/bgfx/.build/wasm/bin/bimgDebug.bc -s MAX_WEBGL_VERSION=2 -s TOTAL_MEMORY=32MB -s ALLOW_MEMORY_GROWTH=1")
                 # Output to HTML when a HTML shell-file is being added in source files list
                 foreach (FILE ${SOURCE_FILES})
                     get_property (EMCC_OPTION SOURCE ${FILE} PROPERTY EMCC_OPTION)
