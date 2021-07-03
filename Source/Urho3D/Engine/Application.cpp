@@ -111,6 +111,34 @@ int Application::Run()
 #endif
 }
 
+#ifdef __EMSCRIPTEN__
+int Application::Init()
+{
+    Setup();
+    if (exitCode_)
+        return exitCode_;
+    if (!engine_->Initialize(engineParameters_))
+    {
+        ErrorExit();
+        return exitCode_;
+    }
+    Start();
+    if (exitCode_)
+        return exitCode_;
+    
+    URHO3D_LOGINFO("Application Init Done");
+
+    return 0;
+}
+
+void Application::RunFrame()
+{
+    if (!engine_->IsExiting()) {
+        engine_->RunFrame();
+    }
+}
+#endif
+
 void Application::ErrorExit(const String& message)
 {
     engine_->Exit(); // Close the rendering window

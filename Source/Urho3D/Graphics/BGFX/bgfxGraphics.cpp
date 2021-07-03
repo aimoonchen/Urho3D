@@ -73,7 +73,7 @@ BX_PRAGMA_DIAGNOSTIC_POP()
 // #define glClearDepth glClearDepthf
 // #endif
 
-#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__0
 #include "../../Input/Input.h"
 #include "../../UI/Cursor.h"
 #include "../../UI/UI.h"
@@ -336,7 +336,7 @@ Graphics::Graphics(Context* context) :
     // Register Graphics library object factories
     RegisterGraphicsLibrary(context_);
 
-#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__0
     appContext = context_;
 #endif
 }
@@ -361,8 +361,9 @@ bool Graphics::SetScreenMode(int width, int height, const ScreenModeParams& para
 
     if (IsInitialized() && width == width_ && height == height_ && screenParams_ == newParams)
         return true;
-
+#ifndef __EMSCRIPTEN__
     entry::setWindowSize(default_window_, width, height);
+#endif
     width_ = width;
     height_ = height;
     window_ = true;//(SDL_Window*)entry::getNativeWindow(); // (SDL_Window*) 1;
@@ -2541,7 +2542,7 @@ void Graphics::OnWindowResized()
 
     URHO3D_LOGDEBUGF("Window was resized to %dx%d", width_, height_);
 
-#ifdef __EMSCRIPTEN__
+#ifdef __EMSCRIPTEN__0
     EM_ASM({
         Module.SetRendererSize($0, $1);
     }, width_, height_);

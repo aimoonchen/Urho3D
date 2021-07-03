@@ -30,7 +30,9 @@
 #include "../Resource/Decompress.h"
 
 //#include <SDL/SDL_surface.h>
+#ifndef __EMSCRIPTEN__
 #define STB_IMAGE_IMPLEMENTATION
+#endif
 #include <STB/stb_image.h>
 #define STB_IMAGE_WRITE_IMPLEMENTATION
 #include <STB/stb_image_write.h>

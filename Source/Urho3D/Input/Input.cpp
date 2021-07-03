@@ -547,6 +547,7 @@ Input::~Input()
 
 void Input::Update()
 {
+    return;
     assert(initialized_);
 
     URHO3D_PROFILE(UpdateInput);
@@ -590,7 +591,11 @@ void Input::Update()
 
     // Check for focus change this frame
 //     SDL_Window* window = graphics_->GetWindow();
+#ifndef __EMSCRIPTEN__
     unsigned flags = entry::getWindowFlags({0});//window ? SDL_GetWindowFlags(window) & (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS) : 0;
+#else
+    unsigned flags = 0;
+#endif
 #ifndef __EMSCRIPTEN__
     if (m_focus/*window*/)
     {
@@ -2616,6 +2621,7 @@ void Input::HandleBeginFrame(StringHash eventType, VariantMap& eventData)
 #ifdef __EMSCRIPTEN__
 void Input::HandleEndFrame(StringHash eventType, VariantMap& eventData)
 {
+    return;
     if (suppressNextMouseMove_ && mouseMove_ != IntVector2::ZERO)
         UnsuppressMouseMove();
 

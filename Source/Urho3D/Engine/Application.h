@@ -88,7 +88,10 @@ public:
 
     /// Cleanup after the main loop. Called by Application.
     virtual void Stop() { }
-
+#ifdef __EMSCRIPTEN__
+    int Init();
+    void RunFrame();
+#endif
     /// Initialize the engine and run the main loop, then return the application exit code. Catch out-of-memory exceptions while running.
     int Run();
     /// Show an error message (last log message if empty), terminate the main loop, and set failure exit code.

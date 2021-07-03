@@ -158,7 +158,7 @@ elseif (APPLE OR IOS)
 elseif (ANDROID)
     list (APPEND EXCLUDED_SOURCE_DIRS Cocos2d/platform/win32 Cocos2d/platform/apple Cocos2d/platform/linux)
 elseif (WEB)
-    list (APPEND EXCLUDED_SOURCE_DIRS Cocos2d/platform/android Cocos2d/platform/win32 Cocos2d/platform/apple Cocos2d/platform/linux)
+    list (APPEND EXCLUDED_SOURCE_DIRS Core/entry Cocos2d/platform/android Cocos2d/platform/win32 Cocos2d/platform/apple Cocos2d/platform/linux)
 endif ()
 
 if (APPLE AND NOT ARM)
