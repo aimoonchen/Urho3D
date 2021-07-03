@@ -149,7 +149,7 @@ cmake_dependent_option (URHO3D_64BIT "Enable 64-bit build, the default is set ba
 option (URHO3D_ANGELSCRIPT "Enable AngelScript scripting support" FALSE)
 cmake_dependent_option (URHO3D_FORCE_AS_MAX_PORTABILITY "Use generic calling convention for AngelScript on any platform" FALSE "URHO3D_ANGELSCRIPT" FALSE)
 option (URHO3D_IK "Enable inverse kinematics support" TRUE)
-option (URHO3D_LUA "Enable additional Lua scripting support" FALSE)
+option (URHO3D_LUA "Enable additional Lua scripting support" TRUE)
 option (URHO3D_NAVIGATION "Enable navigation support" TRUE)
 cmake_dependent_option (URHO3D_NETWORK "Enable networking support" TRUE "NOT WEB" FALSE)
 option (URHO3D_PHYSICS "Enable physics support" TRUE)
