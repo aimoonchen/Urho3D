@@ -1638,7 +1638,7 @@ void FileUtils::valueVectorCompact(ValueVector& /*valueVector*/) const
 {
 }
 
-#ifdef CC_PLATFORM_EMSCRIPTEN
+#if CC_TARGET_PLATFORM == CC_PLATFORM_EMSCRIPTEN
 class CC_DLL FileUtilsEmscripten : public FileUtils
 {
     friend class FileUtils;
