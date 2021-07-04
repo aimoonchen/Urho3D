@@ -39,9 +39,9 @@ namespace Urho3D
 enum MouseButton : unsigned
 {
     MOUSEB_NONE,
-    MOUSEB_LEFT, // = SDL_BUTTON_LMASK,
-    MOUSEB_MIDDLE, // = SDL_BUTTON_MMASK,
-    MOUSEB_RIGHT,  // = SDL_BUTTON_RMASK,
+    MOUSEB_LEFT     = (1 << ((1)-1)), // SDL_BUTTON_LMASK,
+    MOUSEB_MIDDLE   = (1 << ((2)-1)), // SDL_BUTTON_MMASK,
+    MOUSEB_RIGHT    = (1 << ((3)-1)),  // SDL_BUTTON_RMASK,
     MOUSEB_X1,     // = SDL_BUTTON_X1MASK,
     MOUSEB_X2,     // = SDL_BUTTON_X2MASK,
     MOUSEB_ANY,    // = M_MAX_UNSIGNED
