@@ -886,7 +886,8 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 			currentTextures_[i].Reset();
 		}
 
-		if (shader->GetTextureSlotEnable(i)) {
+		if (shader->GetTextureSlotEnable(i) && textures[i] != nullptr)
+        {
             uint32_t flags = 0;
             auto filter_ = m_renderState->GetActiveState().TextureFilterTypes[i];
             if (filter_ == ::Effekseer::TextureFilterType::Nearest) {

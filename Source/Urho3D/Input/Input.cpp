@@ -547,7 +547,9 @@ Input::~Input()
 
 void Input::Update()
 {
+#ifdef __EMSCRIPTEN__
     return;
+#endif
     assert(initialized_);
 
     URHO3D_PROFILE(UpdateInput);

@@ -411,11 +411,36 @@ private:
     static void slerpForSquad(const Quat& q1, const Quat& q2, float t, Quat* dst);
 };
 
+inline Quat Quat::operator*(const Quat& q) const
+{
+    Quat result(*this);
+    result.multiply(q);
+    return result;
+}
+
+inline Quat& Quat::operator*=(const Quat& q)
+{
+    multiply(q);
+    return *this;
+}
+
+inline Vec3 Quat::operator*(const Vec3& v) const
+{
+    Vec3 uv, uuv;
+    Vec3 qvec(x, y, z);
+    Vec3::cross(qvec, v, &uv);
+    Vec3::cross(qvec, uv, &uuv);
+
+    uv *= (2.0f * w);
+    uuv *= 2.0f;
+
+    return v + uv + uuv;
+}
+
 NS_CC_MATH_END
 /**
  end of base group
  @}
  */
-#include "math/Quat.inl"
 
 #endif

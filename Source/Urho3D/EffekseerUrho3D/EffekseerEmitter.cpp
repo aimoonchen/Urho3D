@@ -3,6 +3,8 @@
 // #include "GDLibrary.h"
 #include "../Core/Context.h"
 #include "../Scene/Node.h"
+#include "../Scene/Scene.h"
+#include "../Scene/SceneEvents.h"
 #include "EffekseerSystem.h"
 #include "EffekseerEmitter.h"
 #include "Utils/EffekseerUrho3D.Utils.h"
@@ -38,7 +40,6 @@ void EffekseerEmitter::_register_methods()
 EffekseerEmitter::EffekseerEmitter(Urho3D::Context* context)
 	: Drawable(context, DRAWABLE_GEOMETRY)
 {
-
 }
 
 EffekseerEmitter::~EffekseerEmitter()
@@ -73,21 +74,20 @@ void EffekseerEmitter::OnWorldBoundingBoxUpdate()
     worldBoundingBox_ = boundingBox_.Transformed(node_->GetWorldTransform());
 }
 
-void EffekseerEmitter::Update(const FrameInfo& frame)
+void EffekseerEmitter::HandleScenePostUpdate(StringHash eventType, VariantMap& eventData)
 {
     auto system = EffekseerSystem::get_instance();
     auto manager = system->get_manager();
-
     for (auto it = m_handles.begin(); it != m_handles.end();) {
         auto handle = *it;
         if (!manager->Exists(handle)) {
-			if (m_looping)
-			{
-                ;//play();
-			}
-            // m_handles.remove(i);
-            it = m_handles.erase(it);
-            continue;
+			if (m_looping) {
+                *it = play(0, false);
+                handle = *it;
+            } else {
+                it = m_handles.erase(it);
+                continue;
+            }
         }
         manager->SetMatrix(handle, EffekseerUrho3D::ToEfkMatrix43(node_->GetWorldTransform() /*get_global_transform()*/));
         ++it;
@@ -150,7 +150,7 @@ void EffekseerEmitter::_update_draw()
 // 	}
 }
 
-void EffekseerEmitter::play(int32_t startFrame)
+Effekseer::Handle EffekseerEmitter::play(int32_t startFrame, bool mgr)
 {
 	auto system = EffekseerSystem::get_instance();
 	auto manager = system->get_manager();
@@ -170,9 +170,15 @@ void EffekseerEmitter::play(int32_t startFrame)
 			if (m_color != Effekseer::Color(255, 255, 255, 255)) {
 				manager->SetAllColor(handle, m_color);
 			}
-			m_handles.push_back(handle);
+
+            if (mgr) {
+                m_handles.push_back(handle);
+			}
+				
+            return handle;
 		}
 	}
+    return -1;
 }
 
 void EffekseerEmitter::stop()
@@ -257,6 +263,10 @@ void EffekseerEmitter::SetEffect(EffekseerEffect* effect)
 {
 	m_effect = effect;
 	m_effect->setup();
+    Scene* scene = GetScene();
+    if (scene) {
+        SubscribeToEvent(scene, E_SCENEPOSTUPDATE, URHO3D_HANDLER(EffekseerEmitter, HandleScenePostUpdate));
+    }
 }
 
 }

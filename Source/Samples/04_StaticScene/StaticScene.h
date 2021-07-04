@@ -62,5 +62,8 @@ private:
     /// Handle the logic update event.
     void HandleUpdate(StringHash eventType, VariantMap& eventData);
 
-    Node* test_emitter_{nullptr};
+    Node* test_emitter0_{ nullptr };
+    Node* test_emitter1_{ nullptr };
+    Node* test_emitter2_{ nullptr };
+    Node* character_{ nullptr };
 };

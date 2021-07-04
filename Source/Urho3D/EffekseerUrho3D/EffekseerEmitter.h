@@ -17,7 +17,7 @@ public:
 
 	~EffekseerEmitter();
 	static void RegisterObject(Context* context);
-	void Update(const FrameInfo& frame) override;
+	//void Update(const FrameInfo& frame) override;
 
 	void _init();
 
@@ -31,7 +31,7 @@ public:
 
 	void _update_draw();
 
-	void play(int32_t startFrame = 0);
+	Effekseer::Handle play(int32_t startFrame = 0, bool manager = true);
 
 	void stop();
 
@@ -69,6 +69,7 @@ protected:
     void OnWorldBoundingBoxUpdate() override;
 
 private:
+    void HandleScenePostUpdate(StringHash eventType, VariantMap& eventData);
 	//Ref<EffekseerEffect> m_effect;
     EffekseerEffect* m_effect{ nullptr };
 	bool m_autoplay = true;

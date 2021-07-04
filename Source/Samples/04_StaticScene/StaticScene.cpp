@@ -19,9 +19,12 @@
 // OUT OF OR IN CONNECTION WITH THE SOFTWARE OR THE USE OR OTHER DEALINGS IN
 // THE SOFTWARE.
 //
-
+#include "FairyGUIExamples/BagScene.h"
 #include <Urho3D/Core/CoreEvents.h>
 #include <Urho3D/Engine/Engine.h>
+#include <Urho3D/Graphics/AnimatedModel.h>
+#include <Urho3D/Graphics/Animation.h>
+#include <Urho3D/Graphics/AnimationState.h>
 #include <Urho3D/Graphics/Camera.h>
 #include <Urho3D/Graphics/Graphics.h>
 #include <Urho3D/Graphics/Material.h>
@@ -71,6 +74,10 @@ void StaticScene::Start()
     // Hook up to the frame update events
     SubscribeToEvents();
 
+    auto scene = BagScene::create();
+
+    // run
+    cocos2d::Director::getInstance()->runWithScene(scene);
     // Set the mouse mode to use in the sample
     Sample::InitMouseMode(MM_RELATIVE);
 }
@@ -103,23 +110,16 @@ void StaticScene::CreateScene()
     lightNode->SetDirection(Vector3(0.6f, -1.0f, 0.8f)); // The direction vector does not need to be normalized
     auto* light = lightNode->CreateComponent<Light>();
     light->SetLightType(LIGHT_DIRECTIONAL);
-
+    //light->SetCastShadows(true);
     // Create more StaticModel objects to the scene, randomly positioned, rotated and scaled. For rotation, we construct
     // a quaternion from Euler angles where the Y angle (rotation about the Y axis) is randomized. The mushroom model
     // contains LOD levels, so the StaticModel component will automatically select the LOD level according to the view
     // distance (you'll see the model get simpler as it moves further away). Finally, rendering a large number of the
     // same object with the same material allows instancing to be used, if the GPU supports it. This reduces the amount
     // of CPU work in rendering the scene.
-    const unsigned NUM_OBJECTS = 1;// 200;
+    const unsigned NUM_OBJECTS = 200;
     for (unsigned i = 0; i < NUM_OBJECTS; ++i)
     {
-//         test_emitter_ = scene_->CreateChild("Mushroom");
-//         test_emitter_->SetPosition(Vector3(0.0f, 4.0f, 6.0f));
-//         auto ee = test_emitter_->CreateComponent<EffekseerEmitter>();
-//         // ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Laser01.efk"));
-//         ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
-//         ee->play();
-        //        ee->set_paused(true);
         Node* mushroomNode = scene_->CreateChild("Mushroom");
         mushroomNode->SetPosition(Vector3(Random(90.0f) - 45.0f, 0.0f, Random(90.0f) - 45.0f));
         mushroomNode->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
@@ -127,7 +127,52 @@ void StaticScene::CreateScene()
         auto* mushroomObject = mushroomNode->CreateComponent<StaticModel>();
         mushroomObject->SetModel(cache->GetResource<Model>("Models/Mushroom.mdl"));
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
+        //mushroomObject->SetCastShadows(true);
     }
+    character_ = scene_->CreateChild("Jill");
+    character_->SetScale(2);
+    //character_->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
+    character_->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
+    auto* modelObject = character_->CreateComponent<AnimatedModel>();
+    modelObject->SetModel(cache->GetResource<Model>("Models/Mutant/Mutant.mdl"));
+    modelObject->SetMaterial(cache->GetResource<Material>("Models/Mutant/Materials/mutant_M.xml"));
+    //modelObject->SetCastShadows(true);
+
+    // Create an AnimationState for a walk animation. Its time position will need to be manually updated to advance
+    // the animation, The alternative would be to use an AnimationController component which updates the animation
+    // automatically, but we need to update the model's position manually in any case
+    auto* walkAnimation = cache->GetResource<Animation>("Models/Mutant/Mutant_Idle0.ani");
+
+    AnimationState* state = modelObject->AddAnimationState(walkAnimation);
+    // The state would fail to create (return null) if the animation was not found
+    if (state) {
+        // Enable full blending weight and looping
+        state->SetWeight(1.0f);
+        state->SetLooped(true);
+        state->SetTime(Random(walkAnimation->GetLength()));
+    }
+    //     test_emitter0_ = scene_->CreateChild("emitter0");
+//     test_emitter0_->SetPosition(Vector3(-10.0f, 4.0f, 25.0f));
+//     //test_emitter0_->SetRotation(Quaternion(0.0f, -45.0f, 0.0f));
+//     auto ee = test_emitter0_->CreateComponent<EffekseerEmitter>();
+//     ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
+//     ee->play();
+//     ee->set_looping(true);
+
+    test_emitter1_ = scene_->CreateChild("emitter1");
+    test_emitter1_->SetPosition(Vector3(0.0f, 0.0f, 20.0f));
+    auto ee = test_emitter1_->CreateComponent<EffekseerEmitter>();
+    ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Simple_Turbulence_Fireworks.efk"));
+    ee->play();
+    ee->set_looping(true);
+
+//     test_emitter2_ = scene_->CreateChild("emitter2");
+//     test_emitter2_->SetPosition(Vector3(0.0f, 0.0f, 25.0f));
+//     //test_emitter2_->SetRotation(Quaternion(0.0f, 90.0f, 0.0f));
+//     ee = test_emitter2_->CreateComponent<EffekseerEmitter>();
+//     ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/NextSoft/PowerUp.efk"));
+//     ee->play();
+//     ee->set_looping(true);
 
     // Create a scene node for the camera, which we will move around
     // The camera will use default settings (1000 far clip distance, 45 degrees FOV, set aspect ratio automatically)
@@ -135,7 +180,8 @@ void StaticScene::CreateScene()
     auto cam = cameraNode_->CreateComponent<Camera>();
 
     // Set an initial position for the camera scene node above the plane
-    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -14.0f));
+    cameraNode_->SetPosition(Vector3(0.0f, 5.0f, -20.0f));
+    //cameraNode_->LookAt({0.0f, 0.0f, 0.0f});
     EffekseerSystem::get_instance()->SetCamera(cam);
 }
 
@@ -177,18 +223,18 @@ void StaticScene::MoveCamera(float timeStep)
 
     // Movement speed as world units per second
     const float MOVE_SPEED = 20.0f;
-    // Mouse sensitivity as degrees per pixel
-    const float MOUSE_SENSITIVITY = 0.1f;
-
-    // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
-    IntVector2 mouseMove = input->GetMouseMove();
-    yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
-    pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
-    pitch_ = Clamp(pitch_, -90.0f, 90.0f);
-
-    // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
-    cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
-
+    if (input->GetMouseButtonDown(MOUSEB_MIDDLE))
+    {
+        // Mouse sensitivity as degrees per pixel
+        const float MOUSE_SENSITIVITY = 0.1f;
+        // Use this frame's mouse motion to adjust camera node yaw and pitch. Clamp the pitch between -90 and 90 degrees
+        IntVector2 mouseMove = input->GetMouseMove();
+        yaw_ += MOUSE_SENSITIVITY * mouseMove.x_;
+        pitch_ += MOUSE_SENSITIVITY * mouseMove.y_;
+        pitch_ = Clamp(pitch_, -90.0f, 90.0f);
+        // Construct new orientation for the camera scene node from yaw and pitch. Roll is fixed to zero
+        cameraNode_->SetRotation(Quaternion(pitch_, yaw_, 0.0f));
+    }
     // Read WASD keys and move the camera scene node to the corresponding direction if they are pressed
     // Use the Translate() function (default local space) to move relative to the node's orientation.
     if (input->GetKeyDown(KEY_W))
@@ -213,12 +259,18 @@ void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 
     // Take the frame time step, which is stored as a float
     float timeStep = eventData[P_TIMESTEP].GetFloat();
-    if (test_emitter_)
-    {
-        auto oldpos = test_emitter_->GetPosition();
-        oldpos.x_ += 0.02;
-        test_emitter_->SetPosition(oldpos);
-    }
+//     if (test_emitter_)
+//     {
+//         auto oldpos = test_emitter_->GetPosition();
+//         oldpos.x_ += 0.02;
+//         test_emitter_->SetPosition(oldpos);
+//     }
     // Move the camera, scale movement with time step
     MoveCamera(timeStep);
+    auto* model = character_->GetComponent<AnimatedModel>(true);
+    if (model->GetNumAnimationStates())
+    {
+        AnimationState* state = model->GetAnimationStates()[0];
+        state->AddTime(timeStep);
+    }
 }
