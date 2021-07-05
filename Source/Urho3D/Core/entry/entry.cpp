@@ -741,17 +741,15 @@ restart:
 						OnMouseEvent(mouse);
 					}
 					break;
+				case Event::Key:
+					{
+ 						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
+						handle = key->m_handle;
 
-// 				case Event::Key:
-// 					{
-//  						const KeyEvent* key = static_cast<const KeyEvent*>(ev);
-// 						handle = key->m_handle;
-// 
-// 						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
-// //                        OnKey(key);
-// 					}
-// 					break;
-
+						inputSetKeyState(key->m_key, key->m_modifiers, key->m_down);
+						OnKey(key);
+					}
+					break;
 				case Event::Size:
 					{
 						const SizeEvent* size = static_cast<const SizeEvent*>(ev);
@@ -780,12 +778,12 @@ restart:
 // 						DBG("%s", drop->m_filePath.getCPtr() );
 // 					}
 // 					break;
-//                 case Event::Focus:
-//                     {
-// 						const FocusEvent* fe = static_cast<const FocusEvent*>(ev);
-//                         OnFocus(fe->m_has_focus);
-// 					}
-//                     break;
+                case Event::Focus:
+                    {
+						const FocusEvent* fe = static_cast<const FocusEvent*>(ev);
+                        OnFocus(fe->m_has_focus);
+					}
+                    break;
 
 				default:
 					break;

@@ -13,6 +13,7 @@
 #include "../Graphics/Graphics.h"
 #include "../Resource/ResourceCache.h"
 #include "../Input/InputConstants.h"
+#include "../IO/FileSystem.h"
 
 namespace Urho3D {
 	static cocos2d::Size designResolutionSize = cocos2d::Size(1136, 640);
@@ -24,10 +25,9 @@ namespace Urho3D {
 	{
 		context_ = context;
 		SetUrho3DContext(context);
-//  		cocos2d::FileUtils::getInstance()->addSearchPath("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
-//  		context->GetSubsystem<ResourceCache>()->AddResourceDir("D:/Github/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
- 		cocos2d::FileUtils::getInstance()->addSearchPath("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
-		context->GetSubsystem<ResourceCache>()->AddResourceDir("C:/GitProjects/FairyGUI-cocos2dx/Examples/proj.win32/Debug.win32/Resources");
+		auto uires_root = context_->GetSubsystem<FileSystem>()->GetProgramDir() + "Data/FairyGUI/Resources";
+  		cocos2d::FileUtils::getInstance()->addSearchPath(uires_root.CString());
+		context->GetSubsystem<ResourceCache>()->AddResourceDir(uires_root);
 		
 		cocos_renderder_ = new cocos2d::Renderer;
 		view_impl_ = new cocos2d::GLViewImpl();

@@ -1178,7 +1178,10 @@ namespace entry
 	{
 		PostMessage(s_ctx.m_hwnd[0], WM_USER_WINDOW_MOUSE_LOCK, _handle.idx, _lock);
 	}
-
+    int32_t getWindowFlags(WindowHandle _handle)
+    {
+		return 0;// SDL_GetWindowFlags(s_ctx.m_window[_handle.idx])& (SDL_WINDOW_INPUT_FOCUS | SDL_WINDOW_MOUSE_FOCUS);
+    }
 	int32_t MainThreadEntry::threadFunc(bx::Thread* /*_thread*/, void* _userData)
 	{
 		MainThreadEntry* self = (MainThreadEntry*)_userData;
@@ -1187,12 +1190,18 @@ namespace entry
 		return result;
 	}
     void* getNativeWindow() { return s_ctx.m_hwnd[0]; }
-    } // namespace entry
 
-/*URHO3D_API*/ int main(int _argc, const char* const* _argv)
-{
-	using namespace entry;
-	return s_ctx.run(_argc, _argv);
-}
+    int do_main(int _argc, char** _argv)
+    {
+        // using namespace entry;
+        return s_ctx.run(_argc, _argv);
+    }
+} // namespace entry
+
+// /*URHO3D_API*/ int main(int _argc, const char* const* _argv)
+// {
+// 	using namespace entry;
+// 	return s_ctx.run(_argc, _argv);
+// }
 
 #endif // BX_PLATFORM_WINDOWS

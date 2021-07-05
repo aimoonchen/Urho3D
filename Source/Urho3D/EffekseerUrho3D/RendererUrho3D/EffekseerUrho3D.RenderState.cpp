@@ -32,23 +32,15 @@ RenderState::~RenderState()
 void RenderState::Update(bool forced)
 {
     forced = true;
-//     uint64_t state = 0 | BGFX_STATE_WRITE_RGB |
-//                      BGFX_STATE_WRITE_A
-//                      //| BGFX_STATE_CULL_CW
-//                      //| BGFX_STATE_WRITE_Z
-//                      //| BGFX_STATE_DEPTH_TEST_LESS
-//                      | BGFX_STATE_FRONT_CCW | BGFX_STATE_MSAA;
     graphics_->SetDepthWrite(false);
     if (m_active.DepthTest != m_next.DepthTest || forced)
     {
         if (m_next.DepthTest)
         {
-            // state |= BGFX_STATE_DEPTH_TEST_LESS;
-            graphics_->SetDepthTest(Urho3D::CMP_LESS);
+            graphics_->SetDepthTest(Urho3D::CMP_LESSEQUAL/*Urho3D::CMP_LESS*/);
         }
         else
         {
-            // state |= BGFX_STATE_DEPTH_TEST_ALWAYS;
             graphics_->SetDepthTest(Urho3D::CMP_ALWAYS);
         }
     }
@@ -57,7 +49,6 @@ void RenderState::Update(bool forced)
     {
         if (m_next.DepthWrite)
         {
-            // state |= BGFX_STATE_WRITE_Z;
             graphics_->SetDepthWrite(true);
         }
     }
@@ -124,21 +115,23 @@ void RenderState::Update(bool forced)
             {
                 // GLExt::glBlendEquationSeparate(GL_FUNC_ADD, GL_MAX);
                 // GLExt::glBlendFuncSeparate(GL_ONE, GL_ZERO, GL_ONE, GL_ONE);
-                uint64_t state1 =
-                    BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_MAX);
-                state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO,
-                                                         BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
-                graphics_->SetBlendModeEx(state1);
+//                 uint64_t state1 =
+//                     BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_ADD, BGFX_STATE_BLEND_EQUATION_MAX);
+//                 state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ZERO,
+//                                                          BGFX_STATE_BLEND_ONE, BGFX_STATE_BLEND_ONE);
+//                 graphics_->SetBlendModeEx(state1);
+                graphics_->SetBlendMode(Urho3D::BLEND_REPLACE);
             }
             else if (m_next.AlphaBlend == ::Effekseer::AlphaBlendType::Sub)
             {
                 // GLExt::glBlendEquationSeparate(GL_FUNC_REVERSE_SUBTRACT, GL_FUNC_ADD);
                 // GLExt::glBlendFuncSeparate(GL_SRC_ALPHA, GL_ONE, GL_ZERO, GL_ONE);
-                uint64_t state1 =
-                    BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_REVSUB, BGFX_STATE_BLEND_EQUATION_ADD);
-                state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE,
-                                                         BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
-                graphics_->SetBlendModeEx(state1);
+//                 uint64_t state1 =
+//                     BGFX_STATE_BLEND_EQUATION_SEPARATE(BGFX_STATE_BLEND_EQUATION_REVSUB, BGFX_STATE_BLEND_EQUATION_ADD);
+//                 state1 |= BGFX_STATE_BLEND_FUNC_SEPARATE(BGFX_STATE_BLEND_SRC_ALPHA, BGFX_STATE_BLEND_ONE,
+//                                                          BGFX_STATE_BLEND_ZERO, BGFX_STATE_BLEND_ONE);
+//                 graphics_->SetBlendModeEx(state1);
+                graphics_->SetBlendMode(Urho3D::BLEND_SUBTRACT);
             }
             else
             {

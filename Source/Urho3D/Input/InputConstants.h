@@ -57,7 +57,7 @@ enum Qualifier : unsigned
     QUAL_ANY = 8
 };
 URHO3D_FLAGSET(Qualifier, QualifierFlags);
-
+/*
 enum Key : unsigned
 {
     KEY_UNKNOWN = SDLK_UNKNOWN,
@@ -300,8 +300,8 @@ enum Key : unsigned
     KEY_VOLUMEUP = SDLK_VOLUMEUP,
     KEY_WWW = SDLK_WWW,
 };
+*/
 
-/*
 enum Key : unsigned
 {
     KEY_UNKNOWN = entry::Key::None,
@@ -544,7 +544,6 @@ enum Key : unsigned
     KEY_VOLUMEUP, // = SDLK_VOLUMEUP,
     KEY_WWW, // = SDLK_WWW,
 };
-*/
 
 enum Scancode : unsigned
 {

@@ -1,7 +1,7 @@
 #ifndef __BAG_WINDOW_H__
 #define __BAG_WINDOW_H__
 
-#include "FairyGUI.h"
+#include "Urho3D/FairyGUI/FairyGUI.h"
 
 USING_NS_FGUI;
 

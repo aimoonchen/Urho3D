@@ -366,11 +366,11 @@ void Input::OnMouseEvent(const void* mouseEvent)
     if (!mouse->m_move)
     {
         if (!touchEmulation_) {
-            const auto mouseButton = static_cast<MouseButton>(1u << (mouse->m_button - 1u));
-            SetMouseButton(mouseButton, mouse->m_down, 1);
             if (mouse->m_down) {
                 GainFocus();
             }
+            const auto mouseButton = static_cast<MouseButton>(1u << (mouse->m_button - 1u));
+            SetMouseButton(mouseButton, mouse->m_down, 1);
         } else {
             using namespace TouchBegin;
 
@@ -599,7 +599,7 @@ void Input::Update()
     unsigned flags = 0;
 #endif
 #ifndef __EMSCRIPTEN__
-    if (m_focus/*window*/)
+    if (!m_focus/*window*/)
     {
 #ifdef REQUIRE_CLICK_TO_FOCUS
         // When using the "click to focus" mechanism, only focus automatically in fullscreen or non-hidden mouse mode
@@ -1511,12 +1511,21 @@ String Input::GetScancodeName(Scancode scancode) const
 
 bool Input::GetKeyDown(Key key) const
 {
+#if defined(__ANDROID__)
     return keyDown_.Contains(SDL_tolower(key));
+#else
+    return keyDown_.Contains(key);
+#endif
+
 }
 
 bool Input::GetKeyPress(Key key) const
 {
+#if defined(__ANDROID__)
     return keyPress_.Contains(SDL_tolower(key));
+#else
+    return keyPress_.Contains(key);
+#endif
 }
 
 bool Input::GetScancodeDown(Scancode scancode) const
@@ -1582,10 +1591,12 @@ IntVector2 Input::GetMousePosition() const
 
     if (!initialized_)
         return ret;
-
+#if defined(__ANDROID__)
     SDL_GetMouseState(&ret.x_, &ret.y_);
-//     ret.x_ = m_mouse_x;
-//     ret.y_ = m_mouse_y;
+#else
+    ret.x_ = m_mouse_x;
+    ret.y_ = m_mouse_y;
+#endif
     ret.x_ = (int)(ret.x_ * inputScale_.x_);
     ret.y_ = (int)(ret.y_ * inputScale_.y_);
 
