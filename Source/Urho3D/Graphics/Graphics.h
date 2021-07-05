@@ -694,6 +694,7 @@ public:
     static unsigned GetFormat(const String& formatName);
     static unsigned GetD32();
     static unsigned GetBGRAFormat();
+    static unsigned GetCompressedFormat(CompressedFormat format);
     /// Return UV offset required for pixel perfect rendering.
     static const Vector2& GetPixelUVOffset() { return pixelUVOffset; }
 

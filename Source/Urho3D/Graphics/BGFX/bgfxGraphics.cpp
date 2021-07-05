@@ -2374,47 +2374,48 @@ PODVector<int> Graphics::GetMultiSampleLevels() const
 
 unsigned Graphics::GetFormat(CompressedFormat format) const
 {
-    switch (format)
-    {
-    case CF_RGBA:
-        return bgfx::TextureFormat::RGBA8; // GL_RGBA;
-
-    case CF_DXT1:
-        return bgfx::TextureFormat::BC1; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : 0;
-
-#if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
-    case CF_DXT3:
-        return bgfx::TextureFormat::BC2; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : 0;
-
-    case CF_DXT5:
-        return bgfx::TextureFormat::BC3; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : 0;
-#endif
-#ifdef GL_ES_VERSION_2_0
-    case CF_ETC1:
-        return bgfx::TextureFormat::ETC1; // etcTextureSupport_ ? GL_ETC1_RGB8_OES : 0;
-
-    case CF_ETC2_RGB:
-        return bgfx::TextureFormat::ETC2; // etc2TextureSupport_ ? GL_ETC2_RGB8_OES : 0;
-
-    case CF_ETC2_RGBA:
-        return bgfx::TextureFormat::ETC2A; // etc2TextureSupport_ ? GL_ETC2_RGBA8_OES : 0;
-
-    case CF_PVRTC_RGB_2BPP:
-        return bgfx::TextureFormat::PTC12; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0;
-
-    case CF_PVRTC_RGB_4BPP:
-        return bgfx::TextureFormat::PTC14; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0;
-
-    case CF_PVRTC_RGBA_2BPP:
-        return bgfx::TextureFormat::PTC12A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0;
-
-    case CF_PVRTC_RGBA_4BPP:
-        return bgfx::TextureFormat::PTC14A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0;
-#endif
-
-    default:
-        return bgfx::TextureFormat::Unknown;
-    }
+    return GetCompressedFormat(format);
+//     switch (format)
+//     {
+//     case CF_RGBA:
+//         return bgfx::TextureFormat::RGBA8; // GL_RGBA;
+// 
+//     case CF_DXT1:
+//         return bgfx::TextureFormat::BC1; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : 0;
+// 
+// #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
+//     case CF_DXT3:
+//         return bgfx::TextureFormat::BC2; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : 0;
+// 
+//     case CF_DXT5:
+//         return bgfx::TextureFormat::BC3; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : 0;
+// #endif
+// #ifdef GL_ES_VERSION_2_0
+//     case CF_ETC1:
+//         return bgfx::TextureFormat::ETC1; // etcTextureSupport_ ? GL_ETC1_RGB8_OES : 0;
+// 
+//     case CF_ETC2_RGB:
+//         return bgfx::TextureFormat::ETC2; // etc2TextureSupport_ ? GL_ETC2_RGB8_OES : 0;
+// 
+//     case CF_ETC2_RGBA:
+//         return bgfx::TextureFormat::ETC2A; // etc2TextureSupport_ ? GL_ETC2_RGBA8_OES : 0;
+// 
+//     case CF_PVRTC_RGB_2BPP:
+//         return bgfx::TextureFormat::PTC12; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0;
+// 
+//     case CF_PVRTC_RGB_4BPP:
+//         return bgfx::TextureFormat::PTC14; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0;
+// 
+//     case CF_PVRTC_RGBA_2BPP:
+//         return bgfx::TextureFormat::PTC12A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0;
+// 
+//     case CF_PVRTC_RGBA_4BPP:
+//         return bgfx::TextureFormat::PTC14A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0;
+// #endif
+// 
+//     default:
+//         return bgfx::TextureFormat::Unknown;
+//     }
 }
 
 unsigned Graphics::GetMaxBones()
@@ -2935,6 +2936,51 @@ unsigned Graphics::GetD32()
 unsigned Graphics::GetBGRAFormat()
 {
     return bgfx::TextureFormat::BGRA8;
+}
+
+unsigned Graphics::GetCompressedFormat(CompressedFormat format)
+{
+    switch (format)
+    {
+    case CF_RGBA:
+        return bgfx::TextureFormat::RGBA8; // GL_RGBA;
+
+    case CF_DXT1:
+        return bgfx::TextureFormat::BC1; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT1_EXT : 0;
+
+#if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
+    case CF_DXT3:
+        return bgfx::TextureFormat::BC2; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT3_EXT : 0;
+
+    case CF_DXT5:
+        return bgfx::TextureFormat::BC3; // dxtTextureSupport_ ? GL_COMPRESSED_RGBA_S3TC_DXT5_EXT : 0;
+#endif
+#ifdef GL_ES_VERSION_2_0
+    case CF_ETC1:
+        return bgfx::TextureFormat::ETC1; // etcTextureSupport_ ? GL_ETC1_RGB8_OES : 0;
+
+    case CF_ETC2_RGB:
+        return bgfx::TextureFormat::ETC2; // etc2TextureSupport_ ? GL_ETC2_RGB8_OES : 0;
+
+    case CF_ETC2_RGBA:
+        return bgfx::TextureFormat::ETC2A; // etc2TextureSupport_ ? GL_ETC2_RGBA8_OES : 0;
+
+    case CF_PVRTC_RGB_2BPP:
+        return bgfx::TextureFormat::PTC12; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_2BPPV1_IMG : 0;
+
+    case CF_PVRTC_RGB_4BPP:
+        return bgfx::TextureFormat::PTC14; // pvrtcTextureSupport_ ? COMPRESSED_RGB_PVRTC_4BPPV1_IMG : 0;
+
+    case CF_PVRTC_RGBA_2BPP:
+        return bgfx::TextureFormat::PTC12A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_2BPPV1_IMG : 0;
+
+    case CF_PVRTC_RGBA_4BPP:
+        return bgfx::TextureFormat::PTC14A; // pvrtcTextureSupport_ ? COMPRESSED_RGBA_PVRTC_4BPPV1_IMG : 0;
+#endif
+
+    default:
+        return bgfx::TextureFormat::Unknown;
+    }
 }
 
 unsigned Graphics::GetFormat(const String& formatName)

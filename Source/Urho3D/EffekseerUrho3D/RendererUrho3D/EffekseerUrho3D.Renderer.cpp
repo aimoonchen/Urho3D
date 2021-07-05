@@ -455,10 +455,13 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 	m_renderCommand2Ds.resize((size_t)drawMaxCount);
 
 	m_standardRenderer.reset(new StandardRenderer(this));
-
+    
 	m_customData1Texture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
 	m_customData2Texture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
 	m_uvTangentTexture.Init(CUSTOM_DATA_TEXTURE_WIDTH, CUSTOM_DATA_TEXTURE_HEIGHT);
+	//
+	GetImpl()->CreateProxyTextures(this);
+    GetImpl()->isSoftParticleEnabled = true; // >= opengl3
 
 	auto applyPSAdvancedRendererParameterTexture = [](Shader* shader, int32_t offset) -> void {
         shader->SetTextureSlot(0 + offset, GetValidUniform(shader, "s_sampler_alphaTex"));
@@ -926,7 +929,28 @@ void RendererImplemented::ResetRenderState()
 
 Effekseer::Backend::TextureRef RendererImplemented::CreateProxyTexture(EffekseerRenderer::ProxyTextureType type)
 {
-	return nullptr;
+    std::array<uint8_t, 4> buf;
+
+    if (type == EffekseerRenderer::ProxyTextureType::White) {
+        buf = {255, 255, 255, 255};
+    } else if (type == EffekseerRenderer::ProxyTextureType::Normal) {
+        buf = {127, 127, 255, 255};
+    } else {
+        assert(0);
+    }
+
+    Effekseer::Backend::TextureParameter param;
+    param.Format = Effekseer::Backend::TextureFormatType::R8G8B8A8_UNORM;
+    param.Size = {1, 1};
+    param.GenerateMipmap = false;
+    param.InitialData.assign(buf.begin(), buf.end());
+
+	auto backend = Effekseer::MakeRefPtr<Texture>();
+    backend->Init(context_, param);
+
+	auto result = Effekseer::MakeRefPtr<Effekseer::Texture>();
+    result->SetBackend(backend);
+    return result;
 }
 
 void RendererImplemented::DeleteProxyTexture(Effekseer::Backend::TextureRef& texture)
