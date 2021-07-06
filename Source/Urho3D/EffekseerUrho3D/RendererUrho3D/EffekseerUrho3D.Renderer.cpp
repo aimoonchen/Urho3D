@@ -947,10 +947,10 @@ Effekseer::Backend::TextureRef RendererImplemented::CreateProxyTexture(Effekseer
 
 	auto backend = Effekseer::MakeRefPtr<Texture>();
     backend->Init(context_, param);
-
-	auto result = Effekseer::MakeRefPtr<Effekseer::Texture>();
-    result->SetBackend(backend);
-    return result;
+	return backend;
+// 	auto result = Effekseer::MakeRefPtr<Effekseer::Texture>();
+//     result->SetBackend(backend);
+//     return result;
 }
 
 void RendererImplemented::DeleteProxyTexture(Effekseer::Backend::TextureRef& texture)

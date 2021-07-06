@@ -107,13 +107,18 @@ void EffekseerSystem::HandleRenderUpdate(StringHash eventType, VariantMap& event
 
 void EffekseerSystem::Render()
 {
-	if (!main_camera_)
-	{
+	if (!main_camera_) {
 		return;
 	}
 //	Effekseer::Matrix44 matrix = EffekseerUrho3D::ToEfkMatrix44(camera_transform /*.inverse()*/);
 
 	m_renderer->SetCameraMatrix(EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetView().ToMatrix4()));
+	static bool first_time = true;
+	if (first_time) {
+		proj_mat_ = EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetGPUProjection());
+		first_time = false;
+	}
+	m_renderer->SetProjectionMatrix(proj_mat_);
     m_renderer->BeginRendering();
     m_manager->Draw();
     m_renderer->EndRendering();
@@ -129,7 +134,8 @@ void EffekseerSystem::SetCamera(Camera* camera)
     projection.m22_ += projection.m32_ * constantBias;
     projection.m23_ += projection.m33_ * constantBias;
 //#endif
-    m_renderer->SetProjectionMatrix(EffekseerUrho3D::ToEfkMatrix44(projection));
+	proj_mat_ = EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetGPUProjection());
+    m_renderer->SetProjectionMatrix(proj_mat_);
 }
 
 void EffekseerSystem::_init()

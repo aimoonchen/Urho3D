@@ -65,6 +65,7 @@ private:
 	//EffekseerUrho3D::RendererRef m_renderer;
 	EffekseerRenderer::RendererRef m_renderer;
     Camera* main_camera_{ nullptr };
+	Effekseer::Matrix44 proj_mat_;
 };
 
 }
