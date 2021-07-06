@@ -57,7 +57,7 @@ public:
     void HandleRenderUpdate(StringHash eventType, VariantMap& eventData);
     void Render();
     void SetCamera(Camera* camera);
-
+	void SetIsDistortionEnabled(bool value);
 private:
 	static EffekseerSystem* s_instance;
 
@@ -66,6 +66,9 @@ private:
 	EffekseerRenderer::RendererRef m_renderer;
     Camera* main_camera_{ nullptr };
 	Effekseer::Matrix44 proj_mat_;
+	bool is_distortion_enabled_{ false };
+	::EffekseerRenderer::DistortingCallback* distorting_callback_{ nullptr };
+	::Effekseer::RefPtr<::EffekseerRenderer::CommandList> command_list_{ nullptr };
 };
 
 }

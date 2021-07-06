@@ -37,6 +37,12 @@ void EffekseerSystem::_register_methods()
 // 	register_method("set_paused_to_all_effects", &EffekseerSystem::set_paused_to_all_effects);
 // 	register_method("get_total_instance_count", &EffekseerSystem::get_total_instance_count);
 }
+::EffekseerRenderer::DistortingCallback*
+CreateDistortingCallback(::EffekseerRenderer::RendererRef renderer,
+                         Effekseer::RefPtr<::EffekseerRenderer::CommandList> commandList)
+{
+	return nullptr;// new DistortingCallbackGL();
+}
 
 EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	: Object(context)
@@ -82,6 +88,7 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 	m_renderer = EffekseerUrho3D::Renderer::Create(context, squareMaxCount, drawMaxCount);
 	//m_renderer = EffekseerRendererBGFX::Renderer::Create(context->GetSubsystem<Graphics>(), squareMaxCount/*, drawMaxCount*/);
 	m_renderer->SetProjectionMatrix(Effekseer::Matrix44().Indentity());
+	distorting_callback_ = CreateDistortingCallback(m_renderer, command_list_);
 
 	m_manager->SetSpriteRenderer(m_renderer->CreateSpriteRenderer());
 	m_manager->SetRibbonRenderer(m_renderer->CreateRibbonRenderer());
@@ -92,6 +99,8 @@ EffekseerSystem::EffekseerSystem(Urho3D::Context* context)
 
 	// SubscribeToEvent(E_UPDATE, URHO3D_HANDLER(EffekseerSystem, HandleUpdate));
     SubscribeToEvent(E_RENDERUPDATE, URHO3D_HANDLER(EffekseerSystem, HandleRenderUpdate));
+	
+	//SetIsDistortionEnabled(true);
 }
 
 EffekseerSystem::~EffekseerSystem()
@@ -136,6 +145,16 @@ void EffekseerSystem::SetCamera(Camera* camera)
 //#endif
 	proj_mat_ = EffekseerUrho3D::ToEfkMatrix44(main_camera_->GetGPUProjection());
     m_renderer->SetProjectionMatrix(proj_mat_);
+}
+
+void EffekseerSystem::SetIsDistortionEnabled(bool value)
+{
+	is_distortion_enabled_ = value;
+    if (is_distortion_enabled_) {
+		m_renderer->SetDistortingCallback(distorting_callback_);
+    } else {
+		m_renderer->SetDistortingCallback(nullptr);
+    }
 }
 
 void EffekseerSystem::_init()

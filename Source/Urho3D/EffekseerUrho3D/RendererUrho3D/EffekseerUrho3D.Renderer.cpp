@@ -429,21 +429,21 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 		using namespace EffekseerRenderer;
 		using namespace EffekseerUrho3D::StandardShaders;
 
-		m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Unlit"*/, RendererShaderType::Unlit);
+		m_shaders[(size_t)RendererShaderType::Unlit] = Shader::Create(graphics_, "Effekseer/Unlit", RendererShaderType::Unlit);
 		m_shaders[(size_t)RendererShaderType::Unlit]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::Unlit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialLightweight, Unlit::Lightweight::code, Unlit::Lightweight::decl);
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::SpatialDepthFade, Unlit::SoftParticle::code, Unlit::SoftParticle::decl);
 		m_shaders[(size_t)RendererShaderType::Unlit]->Compile(Shader::RenderType::CanvasItem, Unlit::CanvasItem::code, Unlit::CanvasItem::decl);
 
-		m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Lighting"*/, RendererShaderType::Lit);
+		m_shaders[(size_t)RendererShaderType::Lit] = Shader::Create(graphics_, "Effekseer/Unlit", RendererShaderType::Lit);
 		m_shaders[(size_t)RendererShaderType::Lit]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::Lit]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialLightweight, Lighting::Lightweight::code, Lighting::Lightweight::decl);
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialDepthFade, Lighting::SoftParticle::code, Lighting::SoftParticle::decl);
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::CanvasItem, Lighting::CanvasItem::code, Lighting::CanvasItem::decl);
 
-		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(graphics_, "Effekseer/Unlit"/*"Sprite_Basic_Distortion"*/, RendererShaderType::BackDistortion);
+		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(graphics_, "Effekseer/BackDistortion", RendererShaderType::BackDistortion);
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialLightweight, Distortion::Lightweight::code, Distortion::Lightweight::decl);
@@ -473,8 +473,7 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 
 	auto shader_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Unlit)].get();
     //auto shader_ad_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedUnlit)].get();
-    for (auto& shader : {/*shader_ad_unlit, */shader_unlit})
-    {
+    for (auto& shader : {/*shader_ad_unlit, */shader_unlit}) {
         shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
         shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBuffer));
 
@@ -493,6 +492,32 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
     shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sNormalMap"));
     //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
 
+	auto shader_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].get();
+    // auto shader_ad_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)].get();
+
+	for (auto& shader : {/*shader_ad_distortion, */shader_distortion}) {
+        shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
+        shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBufferDistortion));
+
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
+
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"),
+                                        sizeof(Effekseer::Matrix44));
+
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"),
+                                        sizeof(Effekseer::Matrix44) * 2);
+
+        shader->SetTextureSlot(0, GetValidUniform(shader, "sDiffMap"));
+        shader->SetTextureSlot(2, GetValidUniform(shader, "sSpecMap"));
+
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"),
+                                        sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
+
+        AssignDistortionPixelConstantBuffer(shader);
+    }
+    //applyPSAdvancedRendererParameterTexture(shader_ad_distortion, 2);
+    shader_distortion->SetTextureSlot(1, GetValidUniform(shader_distortion, "sNormalMap"));
+    //shader_ad_distortion_->SetTextureSlot(7, GetValidUniform(shader_ad_distortion, "Sampler_sampler_depthTex"));
 	return true;
 }
 
