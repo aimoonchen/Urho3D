@@ -827,7 +827,10 @@ void RendererImplemented::DrawPolygon(int32_t vertexCount, int32_t indexCount)
 void RendererImplemented::DrawPolygonInstanced(int32_t vertexCount, int32_t indexCount, int32_t instanceCount)
 {
 //	assert(m_currentModel != nullptr);
-	graphics_->Draw(Urho3D::TRIANGLE_LIST, 0, indexCount, 0, vertexCount, instanceCount);
+	// TODO: create instance data
+    graphics_->SetInstanceDataBuffer(nullptr, 0, instanceCount);
+	graphics_->Draw(Urho3D::TRIANGLE_LIST, 0, indexCount, 0, vertexCount);
+    graphics_->SetInstanceDataBuffer(nullptr);
 	impl->drawcallCount++;
 	impl->drawvertexCount += vertexCount * instanceCount;
 }

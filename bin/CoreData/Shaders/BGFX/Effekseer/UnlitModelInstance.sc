@@ -9,9 +9,9 @@ $input v_color0, v_texcoord0, v_ppos
 
 #if defined(COMPILEVS)
 uniform mat4 mCameraProj;
-uniform mat4 mModel;
-uniform vec4 fUV;
-uniform vec4 fModelColor;
+uniform mat4 mModel_Inst[10];
+uniform vec4 fUV[10];
+uniform vec4 fModelColor[10];
 uniform vec4 fLightDirection;
 uniform vec4 fLightColor;
 uniform vec4 fLightAmbient;
@@ -19,17 +19,20 @@ uniform vec4 mUVInversed;
 
 void main()
 {
+    //ivec4 index = ivec4(a_indices);
+    int index = gl_InstanceID;
+    mat4 mModel = mModel_Inst[index];
     vec4 worldPos = mul(mModel, vec4(a_position, 1.0));
     vec4 proj_pos = mul(mCameraProj, worldPos);
     v_ppos = proj_pos;
     gl_Position = proj_pos;
     vec2 outputUV = a_texcoord0;
-    vec4 uv = fUV;
+    vec4 uv = fUV[index];
     outputUV.x = (outputUV.x * uv.z) + uv.x;
     outputUV.y = (outputUV.y * uv.w) + uv.y;
     outputUV.y = mUVInversed.x + (mUVInversed.y * outputUV.y);
     v_texcoord0 = outputUV;
-    v_color0 = fModelColor * a_color0;
+    v_color0 = fModelColor[index] * a_color0;
 }
 #elif defined(COMPILEPS)
 SAMPLER2D(sDiffMap, 0);

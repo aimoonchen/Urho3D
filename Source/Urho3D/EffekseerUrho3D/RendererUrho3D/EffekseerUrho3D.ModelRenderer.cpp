@@ -296,7 +296,7 @@ ModelRenderer::ModelRenderer(RendererImplemented* renderer)
 	m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialDepthFade, Distortion::SoftParticle::code, Distortion::SoftParticle::decl);
 	m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::CanvasItem, Distortion::CanvasItem::code, Distortion::CanvasItem::decl);
     
-	if (true/*renderer->GetDeviceType() == OpenGLDeviceType::OpenGL3 || renderer->GetDeviceType() == OpenGLDeviceType::OpenGLES3*/) {
+	if (false/*renderer->GetDeviceType() == OpenGLDeviceType::OpenGL3 || renderer->GetDeviceType() == OpenGLDeviceType::OpenGLES3*/) {
         VertexType = EffekseerRenderer::ModelRendererVertexType::Instancing;
         InitRenderer<InstanceCount>();
     } else {

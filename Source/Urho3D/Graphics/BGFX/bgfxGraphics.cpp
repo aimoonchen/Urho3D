@@ -938,8 +938,9 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
             ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
             : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
     }
-    if (current_instance_buffer_) {
-        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+    if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
+        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
+                                    instance_info_.count);
     }
     render_state_ &= ~BGFX_STATE_PT_MASK;
     if (type != TRIANGLE_LIST)
@@ -1006,9 +1007,9 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
                             : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
     }
 
-    if (current_instance_buffer_)
-    {
-        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)current_instance_buffer_);
+    if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
+        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
+                                    instance_info_.count);
     }
     render_state_ &= ~BGFX_STATE_PT_MASK;
     if (type != TRIANGLE_LIST)

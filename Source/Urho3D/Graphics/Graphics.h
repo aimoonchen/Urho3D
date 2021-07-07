@@ -935,10 +935,15 @@ private:
     uint64_t render_state_{0};
     uint32_t front_stencil_{ 0 };
     uint32_t back_stencil_{ 0 };
-    uint16_t last_view_id_{0xff};
-    uint16_t current_view_id_{0};
+    uint16_t last_view_id_{ 0xff };
+    uint16_t current_view_id_{ 0 };
     bool ui_view_{false};
-    void* current_instance_buffer_{nullptr};
+    struct InstanceInfo
+    {
+        void* buffer{ nullptr };
+        uint32_t start{ 0 };
+        uint32_t count{ UINT32_MAX };
+    } instance_info_;
 //     struct view_context_dirty
 //     {
 //         bool target_dirty   : 1;
@@ -955,7 +960,12 @@ private:
 public:
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
-    void SetInstanceDataBuffer(void* idb) { current_instance_buffer_ = idb; }
+    void SetInstanceDataBuffer(void* idb, uint32_t start = 0, uint32_t count = UINT32_MAX)
+    {
+        instance_info_.buffer = idb;
+        instance_info_.start = start;
+        instance_info_.count = count;
+    }
     //
     void SetUIMode(bool b) { ui_view_ = b; view_context_dirty_ = true; }
     ShaderProgram* GetLastShaderProgram() const { return lastShaderProgram_; }

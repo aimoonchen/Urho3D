@@ -92,7 +92,12 @@ bool IndexBuffer::SetData(const void* data)
     {
         if (object_.handle_ == bgfx::kInvalidHandle)
         {
-            auto handle = bgfx::createIndexBuffer(mem);
+            uint16_t flags = BGFX_BUFFER_NONE;
+            if (indexSize_ > 2)
+            {
+                flags |= BGFX_BUFFER_INDEX32;
+            }
+            auto handle = bgfx::createIndexBuffer(mem, flags);
             if (bgfx::isValid(handle))
             {
                 object_.handle_ = handle.idx;
@@ -241,7 +246,12 @@ bool IndexBuffer::Create()
         auto size = indexCount_ * (size_t)indexSize_;
         if (dynamic_)
         {
-            auto handle = bgfx::createDynamicIndexBuffer(size);
+            uint16_t flags = BGFX_BUFFER_NONE;
+            if (indexSize_ > 2)
+            {
+                flags |= BGFX_BUFFER_INDEX32;
+            }
+            auto handle = bgfx::createDynamicIndexBuffer(size, flags);
             if (!bgfx::isValid(handle))
             {
                 URHO3D_LOGERROR("createDynamicIndexBuffer Failed!");
