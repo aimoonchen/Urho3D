@@ -4,12 +4,15 @@
 // Include
 //----------------------------------------------------------------------------------
 #include "../EffekseerRendererCommon/EffekseerRenderer.VertexBufferBase.h"
+#include "Effekseer/Backend/GraphicsDevice.h"
 #include "EffekseerUrho3D.Base.h"
+#include "../../Container/Vector.h"
 
 namespace Urho3D
 {
 class Context;
 class VertexBuffer;
+struct VertexElement;
 }
 //-----------------------------------------------------------------------------------
 //
@@ -53,6 +56,31 @@ public:
 };
 using VertexBufferRef = Effekseer::RefPtr<VertexBuffer>;
 
+namespace Backend
+{
+	class VertexBuffer : public Effekseer::Backend::VertexBuffer
+	{
+	public:
+		static Effekseer::Backend::VertexBufferRef Create(Urho3D::Context* context, int count,
+			unsigned int layoutMask, const void* initialData = nullptr, bool isDynamic = false);
+        static Effekseer::Backend::VertexBufferRef Create(Urho3D::Context* context, int count, const Urho3D::PODVector<Urho3D::VertexElement>& elements,
+                                                          const void* initialData = nullptr, bool isDynamic = false);
+		VertexBuffer(Urho3D::Context* context, int size, unsigned int layoutMask, bool isDynamic = false);
+		VertexBuffer(Urho3D::Context* context, int size, const Urho3D::PODVector<Urho3D::VertexElement>& elements, bool isDynamic = false);
+		virtual ~VertexBuffer();
+        bool Allocate(int32_t size, bool isDynamic);
+        void Deallocate();
+        bool Init(int32_t size, bool isDynamic);
+		void UpdateData(const void* src, int32_t size, int32_t offset) override;
+		Urho3D::VertexBuffer* GetInterface() const { return urho3d_buffer_.get(); }
+	private:
+		uint32_t stride_{ 0 };
+        std::unique_ptr<Urho3D::VertexBuffer> urho3d_buffer_{nullptr};
+        std::vector<uint8_t> resources_;
+        int32_t size_ = 0;
+        bool isDynamic_ = false;
+	};
+}
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------

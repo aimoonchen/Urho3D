@@ -264,8 +264,8 @@ public:
 	void SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t size);
     void SetIndexBuffer(IndexBuffer* indexBuffer);
 
-	void SetVertexBuffer(Effekseer::Backend::VertexBufferRef vertexBuffer, int32_t size) {}
-	void SetIndexBuffer(Effekseer::Backend::IndexBufferRef indexBuffer) {}
+	void SetVertexBuffer(Effekseer::Backend::VertexBufferRef vertexBuffer, int32_t size);
+	void SetIndexBuffer(Effekseer::Backend::IndexBufferRef indexBuffer);
 
 	void SetLayout(Shader* shader);
 	void DrawSprites(int32_t spriteCount, int32_t vertexOffset);

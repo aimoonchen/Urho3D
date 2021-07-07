@@ -12,7 +12,8 @@ namespace EffekseerUrho3D
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-VertexBuffer::VertexBuffer(Urho3D::Context* context/*RendererImplemented* renderer*/, int size, bool isDynamic, unsigned int layoutMask)
+VertexBuffer::VertexBuffer(Urho3D::Context* context,
+    int size, bool isDynamic, unsigned int layoutMask)
 	: VertexBufferBase(size, isDynamic)
 	, m_buffer((size_t)size)
     , m_vertexRingStart(0)
@@ -38,7 +39,7 @@ VertexBuffer::~VertexBuffer()
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-Effekseer::RefPtr<VertexBuffer> VertexBuffer::Create(Urho3D::Context* context /*RendererImplemented* renderer*/,
+Effekseer::RefPtr<VertexBuffer> VertexBuffer::Create(Urho3D::Context* context,
                                                      int size, bool isDynamic,
                                                      unsigned int layoutMask)
 {
@@ -121,6 +122,85 @@ void VertexBuffer::Unlock()
 }
 
 bool VertexBuffer::IsValid() { return m_urho3d_buffer && m_urho3d_buffer->IsValid(); }
+
+namespace Backend
+{
+    VertexBuffer::VertexBuffer(Urho3D::Context* context, int count, unsigned int layoutMask, bool isDynamic)
+        : isDynamic_{ isDynamic }
+    {
+        urho3d_buffer_ = std::make_unique<Urho3D::VertexBuffer>(context);
+        urho3d_buffer_->SetSize(count, layoutMask, isDynamic);
+        stride_ = urho3d_buffer_->GetVertexSize();
+    }
+    VertexBuffer::VertexBuffer(Urho3D::Context* context, int count, const Urho3D::PODVector<Urho3D::VertexElement>& elements, bool isDynamic)
+        : isDynamic_{ isDynamic }
+    {
+        urho3d_buffer_ = std::make_unique<Urho3D::VertexBuffer>(context);
+        urho3d_buffer_->SetSize(count, elements, isDynamic);
+        stride_ = urho3d_buffer_->GetVertexSize();
+    }
+    
+    VertexBuffer::~VertexBuffer()
+    {
+        Deallocate();
+    }
+
+    void VertexBuffer::UpdateData(const void* src, int32_t count, int32_t offset)
+    {
+        urho3d_buffer_->SetDataRange(src, offset, count);
+    }
+
+    Effekseer::Backend::VertexBufferRef VertexBuffer::Create(Urho3D::Context* context, int count,
+        unsigned int layoutMask, const void* initialData, bool isDynamic)
+    {
+        //return Effekseer::MakeRefPtr<VertexBuffer>(context, size, isDynamic, layoutMask);
+        auto ret = Effekseer::MakeRefPtr<VertexBuffer>(context, count, layoutMask, isDynamic);
+
+        if (!ret->Init(count, isDynamic)) {
+            return nullptr;
+        }
+        if (initialData) {
+            ret->UpdateData(initialData, count, 0);
+        }
+        return ret;
+    }
+
+    Effekseer::Backend::VertexBufferRef VertexBuffer::Create(Urho3D::Context* context, int count,
+        const Urho3D::PODVector<Urho3D::VertexElement>& elements, const void* initialData, bool isDynamic)
+    {
+        // return Effekseer::MakeRefPtr<VertexBuffer>(context, size, isDynamic, layoutMask);
+        auto ret = Effekseer::MakeRefPtr<VertexBuffer>(context, count, elements, isDynamic);
+
+        if (!ret->Init(count, isDynamic))
+        {
+            return nullptr;
+        }
+        if (initialData)
+        {
+            ret->UpdateData(initialData, count, 0);
+        }
+        return ret;
+    }
+
+    bool VertexBuffer::Allocate(int32_t size, bool isDynamic)
+    {
+        resources_.resize(static_cast<size_t>(size));
+        return true;
+    }
+
+    void VertexBuffer::Deallocate()
+    {
+        urho3d_buffer_ = nullptr;
+    }
+
+    bool VertexBuffer::Init(int32_t count, bool isDynamic)
+    {
+        size_ = count * stride_;
+        isDynamic_ = isDynamic;
+
+        return Allocate(size_, isDynamic_);
+    }
+}
 
 //-----------------------------------------------------------------------------------
 //

@@ -4,6 +4,7 @@
 // Include
 //----------------------------------------------------------------------------------
 #include "../EffekseerRendererCommon/EffekseerRenderer.IndexBufferBase.h"
+#include "Effekseer/Backend/GraphicsDevice.h"
 #include "EffekseerUrho3D.Base.h"
 
 namespace Urho3D
@@ -46,6 +47,32 @@ public:
 	const uint8_t* Refer() const { return m_buffer.data(); }
 };
 using IndexBufferRef = Effekseer::RefPtr<IndexBuffer>;
+
+namespace Backend
+{
+class IndexBuffer : public Effekseer::Backend::IndexBuffer
+{
+private:
+    std::unique_ptr<Urho3D::IndexBuffer> urho3d_buffer_;
+    std::vector<uint8_t> resources_;
+    int32_t stride_ = 0;
+    bool isDynamic_ = false;
+public:
+    static Effekseer::Backend::IndexBufferRef Create(Urho3D::Context* context, int elementCount,
+        Effekseer::Backend::IndexBufferStrideType strideType,
+        const void* initialData = nullptr, bool isDynamic = false);
+    IndexBuffer(Urho3D::Context* context, int maxCount, bool isDynamic,
+        Effekseer::Backend::IndexBufferStrideType stride);
+
+    virtual ~IndexBuffer();
+    bool Allocate(int32_t elementCount, int32_t stride);
+    void Deallocate();
+    bool Init(int32_t elementCount, int32_t stride);
+    void UpdateData(const void* src, int32_t size, int32_t offset) override;
+    Urho3D::IndexBuffer* GetInterface() const { return urho3d_buffer_.get(); }
+};
+
+} // namespace Backend
 
 //-----------------------------------------------------------------------------------
 //

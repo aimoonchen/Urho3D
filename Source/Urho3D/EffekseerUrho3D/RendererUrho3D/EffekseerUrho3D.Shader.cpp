@@ -189,7 +189,12 @@ void Shader::SetConstantBuffer()
             // 			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
             // 				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
             // 			}
-            graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Matrix4*)data);
+            auto count = m_vertexConstantLayout[i].Count;
+            if (count > 1) {
+                graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, (float*)data, count);
+            } else {
+                graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Matrix4*)data);
+            }
         }
 
         else if (m_vertexConstantLayout[i].Type == CONSTANT_TYPE_VECTOR4)
@@ -200,7 +205,12 @@ void Shader::SetConstantBuffer()
             // 			if (bgfx::isValid(m_vertexConstantLayout[i].ID)) {
             // 				bgfx::setUniform(m_vertexConstantLayout[i].ID, data, m_vertexConstantLayout[i].Count);
             // 			}
-            graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Vector4*)data);
+            auto count = m_vertexConstantLayout[i].Count;
+            if (count > 1) {
+                graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, (float*)data, count);
+            } else {
+                graphics_->SetShaderParameter(m_vertexConstantLayout[i].ID, *(Urho3D::Vector4*)data);
+            }
         }
     }
 

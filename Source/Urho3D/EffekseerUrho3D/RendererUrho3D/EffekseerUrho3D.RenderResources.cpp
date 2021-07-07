@@ -5,6 +5,9 @@
 //#include <VisualServer.hpp>
 #include "../Utils/EffekseerUrho3D.Utils.h"
 #include "EffekseerUrho3D.RenderResources.h"
+#include "EffekseerUrho3D.VertexBuffer.h"
+#include "EffekseerUrho3D.IndexBuffer.h"
+#include "../../Cocos2d/Urho3DContext.h"
 #include "../../Graphics/Graphics.h"
 #include "../../Graphics/Texture2D.h"
 //-----------------------------------------------------------------------------------
@@ -12,7 +15,6 @@
 //-----------------------------------------------------------------------------------
 namespace EffekseerUrho3D
 {
-
 bool Texture::Init(Urho3D::Context* context, const Effekseer::Backend::TextureParameter& param)
 {
     type_ = Effekseer::Backend::TextureType::Color2D;
@@ -116,7 +118,20 @@ bool Texture::InitInternal(Urho3D::Context* context, const Effekseer::Backend::T
 Model::Model(const void* data, int32_t size)
 	: Effekseer::Model(data, size)
 {
-// 	int32_t vertexCount = GetVertexCount();
+    Urho3D::PODVector<Urho3D::VertexElement> layout;
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR3, Urho3D::SEM_POSITION, 0, false));
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR3, Urho3D::SEM_NORMAL, 0, false));
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR3, Urho3D::SEM_BINORMAL, 0, false));
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR3, Urho3D::SEM_TANGENT, 0, false));
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR2, Urho3D::SEM_TEXCOORD, 0, false));
+    layout.Push(Urho3D::VertexElement(Urho3D::TYPE_UBYTE4_NORM, Urho3D::SEM_COLOR, 0, false));
+    auto context = GetUrho3DContext();
+    for (int32_t f = 0; f < GetFrameCount(); f++) {
+        models_[f].vertexBuffer = Backend::VertexBuffer::Create(context, GetVertexCount(f), layout, models_[f].vertexes.data());//
+        models_[f].indexBuffer = Backend::IndexBuffer::Create(context, 3 * GetFaceCount(f), Effekseer::Backend::IndexBufferStrideType::Stride4, models_[f].faces.data());
+    }
+
+    // 	int32_t vertexCount = GetVertexCount();
 // 	const Vertex* vertexData = GetVertexes();
 // 	int32_t faceCount = GetFaceCount();
 // 	const Face* faceData = GetFaces();
@@ -158,6 +173,7 @@ Model::Model(const void* data, int32_t size)
 // 	auto vs = godot::VisualServer::get_singleton();
 // 	meshRid_ = vs->mesh_create();
 // 	vs->mesh_add_surface_from_arrays(meshRid_, godot::VisualServer::PRIMITIVE_TRIANGLES, arrays);
+
 }
 
 Model::~Model()

@@ -774,9 +774,9 @@ void RendererImplemented::SetModel(Effekseer::ModelRef model)
 //----------------------------------------------------------------------------------
 void RendererImplemented::DrawPolygon(int32_t vertexCount, int32_t indexCount)
 {
-// 	assert(m_currentShader != nullptr);
-// 	assert(m_currentModel != nullptr);
-// 
+	assert(m_currentShader != nullptr);
+//	assert(m_currentModel != nullptr);
+	graphics_->Draw(Urho3D::TRIANGLE_LIST, 0, indexCount, 0, vertexCount);
 // 	auto vs = godot::VisualServer::get_singleton();
 // 
 // 	const auto& state = m_standardRenderer->GetState();
@@ -819,14 +819,15 @@ void RendererImplemented::DrawPolygon(int32_t vertexCount, int32_t indexCount)
 // 		command.DrawSprites(emitter);
 // 		m_renderCount2D++;
 // 	}
-// 
-// 	impl->drawcallCount++;
-// 	impl->drawvertexCount += vertexCount;
+
+	impl->drawcallCount++;
+	impl->drawvertexCount += vertexCount;
 }
 
 void RendererImplemented::DrawPolygonInstanced(int32_t vertexCount, int32_t indexCount, int32_t instanceCount)
 {
-	assert(m_currentModel != nullptr);
+//	assert(m_currentModel != nullptr);
+	graphics_->Draw(Urho3D::TRIANGLE_LIST, 0, indexCount, 0, vertexCount, instanceCount);
 	impl->drawcallCount++;
 	impl->drawvertexCount += vertexCount * instanceCount;
 }
@@ -884,6 +885,16 @@ void RendererImplemented::SetVertexBuffer(VertexBuffer* vertexBuffer, int32_t si
 void RendererImplemented::SetIndexBuffer(IndexBuffer* indexBuffer)
 {
     graphics_->SetIndexBuffer(indexBuffer->GetInterface());
+}
+
+void RendererImplemented::SetVertexBuffer(Effekseer::Backend::VertexBufferRef vertexBuffer, int32_t size)
+{
+	graphics_->SetVertexBuffer(((Backend::VertexBuffer*)vertexBuffer.Get())->GetInterface());
+}
+
+void RendererImplemented::SetIndexBuffer(Effekseer::Backend::IndexBufferRef indexBuffer)
+{
+	graphics_->SetIndexBuffer(((Backend::IndexBuffer*)indexBuffer.Get())->GetInterface());
 }
 
 //----------------------------------------------------------------------------------
