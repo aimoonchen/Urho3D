@@ -116,6 +116,8 @@ public:
     void BeginScene();
     void EndScene();
 
+	Urho3D::StringHash GetUniformId(const char* name);
+
 private:
 	std::vector<uint8_t> m_constantBuffers[2];
 

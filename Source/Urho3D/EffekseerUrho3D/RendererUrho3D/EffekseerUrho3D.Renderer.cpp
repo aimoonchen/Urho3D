@@ -384,27 +384,6 @@ RendererImplemented::~RendererImplemented()
 	assert(GetRef() == 0);
 }
 
-static Urho3D::StringHash GetValidUniform(Shader* shader, const char* name)
-{
-    auto uniform_name = Urho3D::StringHash(name);
-    if (shader->HasUniform(uniform_name))
-    {
-        return uniform_name;
-    }
-    else
-    {
-        return "";
-    }
-    // 	auto& uniforms = shader->uniforms_;
-    // 	auto it = uniforms.find(name);
-    // 	if (it != uniforms.end()) {
-    // 		return it->second;
-    // 	}
-    // 	else {
-    // 		return { /*UINT16_MAX*/ };
-    // 	}
-};
-
 //----------------------------------------------------------------------------------
 //
 //----------------------------------------------------------------------------------
@@ -464,11 +443,11 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
     GetImpl()->isSoftParticleEnabled = true; // >= opengl3
 
 	auto applyPSAdvancedRendererParameterTexture = [](Shader* shader, int32_t offset) -> void {
-        shader->SetTextureSlot(0 + offset, GetValidUniform(shader, "s_sampler_alphaTex"));
-        shader->SetTextureSlot(1 + offset, GetValidUniform(shader, "s_sampler_uvDistortionTex"));
-        shader->SetTextureSlot(2 + offset, GetValidUniform(shader, "s_sampler_blendTex"));
-        shader->SetTextureSlot(3 + offset, GetValidUniform(shader, "s_sampler_blendAlphaTex"));
-        shader->SetTextureSlot(4 + offset, GetValidUniform(shader, "s_sampler_blendUVDistortionTex"));
+        shader->SetTextureSlot(0 + offset, shader->GetUniformId("s_sampler_alphaTex"));
+        shader->SetTextureSlot(1 + offset, shader->GetUniformId("s_sampler_uvDistortionTex"));
+        shader->SetTextureSlot(2 + offset, shader->GetUniformId("s_sampler_blendTex"));
+        shader->SetTextureSlot(3 + offset, shader->GetUniformId("s_sampler_blendAlphaTex"));
+        shader->SetTextureSlot(4 + offset, shader->GetUniformId("s_sampler_blendUVDistortionTex"));
     };
 
 	auto shader_unlit = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::Unlit)].get();
@@ -477,19 +456,19 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
         shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
         shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBuffer));
 
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mflipbookParameter"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mflipbookParameter"),
                                         sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCamera"), 0);
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCameraProj"),
                                         sizeof(Effekseer::Matrix44));
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"),
                                         sizeof(Effekseer::Matrix44) * 2);
-        shader->SetTextureSlot(0, GetValidUniform(shader, "sDiffMap"));
+        shader->SetTextureSlot(0, shader->GetUniformId("sDiffMap"));
         AssignPixelConstantBuffer(shader);
     }
 
     //applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-    shader_unlit->SetTextureSlot(1, GetValidUniform(shader_unlit, "sNormalMap"));
+    shader_unlit->SetTextureSlot(1, shader_unlit->GetUniformId("sNormalMap"));
     //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
 
 	auto shader_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].get();
@@ -499,24 +478,24 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
         shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
         shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBufferDistortion));
 
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCamera"), 0);
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCamera"), 0);
 
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, GetValidUniform(shader, "mCameraProj"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCameraProj"),
                                         sizeof(Effekseer::Matrix44));
 
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversed"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"),
                                         sizeof(Effekseer::Matrix44) * 2);
 
-        shader->SetTextureSlot(0, GetValidUniform(shader, "sDiffMap"));
-        shader->SetTextureSlot(2, GetValidUniform(shader, "sSpecMap"));
+        shader->SetTextureSlot(0, shader->GetUniformId("sDiffMap"));
+        shader->SetTextureSlot(2, shader->GetUniformId("sSpecMap"));
 
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"),
+        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFlipbookParameter"),
                                         sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
 
         AssignDistortionPixelConstantBuffer(shader);
     }
     //applyPSAdvancedRendererParameterTexture(shader_ad_distortion, 2);
-    shader_distortion->SetTextureSlot(1, GetValidUniform(shader_distortion, "sNormalMap"));
+    shader_distortion->SetTextureSlot(1, shader_distortion->GetUniformId("sNormalMap"));
     //shader_ad_distortion_->SetTextureSlot(7, GetValidUniform(shader_ad_distortion, "Sampler_sampler_depthTex"));
 	return true;
 }
@@ -1600,63 +1579,63 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
 void AssignPixelConstantBuffer(Shader* shader)
 {
     int psOffset = 0;
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightDirection"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fLightDirection"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightColor"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fLightColor"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fLightAmbient"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fLightAmbient"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFlipbookParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fUVDistortionParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fUVDistortionParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fBlendTextureParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fBlendTextureParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fCameraFrontDirection"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fCameraFrontDirection"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFalloffParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffBeginColor"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFalloffBeginColor"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFalloffEndColor"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFalloffEndColor"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEmissiveScaling"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fEmissiveScaling"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEdgeColor"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fEdgeColor"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fEdgeParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fEdgeParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "softParticleParam"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("softParticleParam"), psOffset);
     psOffset += sizeof(float[4]) * 1;
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam1"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam1"), psOffset);
     psOffset += sizeof(float[4]) * 1;
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam2"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam2"), psOffset);
     psOffset += sizeof(float[4]) * 1;
 }
 
@@ -1664,31 +1643,31 @@ void AssignDistortionPixelConstantBuffer(Shader* shader)
 {
     int psOffset = 0;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "g_scale"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("g_scale"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "mUVInversedBack"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversedBack"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fFlipbookParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFlipbookParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fUVDistortionParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fUVDistortionParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "fBlendTextureParameter"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fBlendTextureParameter"), psOffset);
 
     psOffset += sizeof(float[4]) * 1;
 
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "softParticleParam"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("softParticleParam"), psOffset);
     psOffset += sizeof(float[4]) * 1;
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam1"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam1"), psOffset);
     psOffset += sizeof(float[4]) * 1;
-    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, GetValidUniform(shader, "reconstructionParam2"), psOffset);
+    shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam2"), psOffset);
     psOffset += sizeof(float[4]) * 1;
 }
 } // namespace EffekseerUrho3D

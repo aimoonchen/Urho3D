@@ -254,6 +254,16 @@ void Shader::EndScene()
     // bgfx::submit(0, m_program);
 }
 
+Urho3D::StringHash Shader::GetUniformId(const char* name)
+{
+    auto uniform_name = Urho3D::StringHash(name);
+    if (HasUniform(uniform_name)) {
+        return uniform_name;
+    } else {
+        return "";
+    }
+}
+
 bool Shader::HasUniform(Urho3D::StringHash name) { return m_program->GetUniform(name) != UINT16_MAX; }
 
 void Shader::SetTextureSlot(int32_t index, Urho3D::StringHash /*bgfx::UniformHandle*/ value)

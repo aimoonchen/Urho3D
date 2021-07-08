@@ -5,25 +5,24 @@
 #include "../RendererUrho3D/EffekseerUrho3D.RenderResources.h"
 #include "../Utils/EffekseerUrho3D.Utils.h"
 #include "../EffekseerResource.h"
+#include "../../Core/Context.h"
+#include "../../Resource/ResourceCache.h"
+#include "../../Cocos2d/Urho3DContext.h"
 
 namespace EffekseerUrho3D
 {
 
 ::Effekseer::MaterialRef MaterialLoader::Load(const char16_t* path)
 {
-	// Load by Godot
-// 	auto loader = godot::ResourceLoader::get_singleton();
-// 	auto resource = loader->load(ToGdString(path), "");
-// 	if (!resource.is_valid())
-// 	{
-// 		return nullptr;
-// 	}
-// 
-// 	auto efkres = godot::as<godot::EffekseerResource>(resource.ptr());
-// 	auto& data = efkres->get_data_ref();
-// 
-// 	return Load(data.read().ptr(), data.size(), Effekseer::MaterialFileType::Code);
-	return nullptr;
+    static auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
+    Urho3D::String urho3dPath = ToGdString(path);
+    auto urhoFile = cache->GetFile(urho3dPath);
+    auto dataSize = urhoFile->GetSize();
+    auto data = std::make_unique<char[]>(dataSize);
+    if (urhoFile->Read(data.get(), dataSize) != dataSize) {
+        return nullptr;
+	}
+	return Load(data.get(), dataSize, Effekseer::MaterialFileType::Code);
 }
 
 ::Effekseer::MaterialRef MaterialLoader::LoadAcutually(const ::Effekseer::MaterialFile& materialFile)
