@@ -50,7 +50,7 @@ float CalcDepthFade(vec2 screenUV, float meshZ, float softParticleParam) { retur
 static const char* material_common_vs_define_450 = R"()"
 
 												   R"(
-#define TEX2D textureLod
+#define TEX2D texture2DLod
 
 )";
 
@@ -370,7 +370,6 @@ static const char g_material_sprite_vs_src_suf2[] =
 	gl_Position.y = - gl_Position.y;
 	#endif
 }
-
 )";
 
 static const char g_material_fs_src_pre[] =
@@ -532,7 +531,6 @@ static const char g_material_fs_src_suf2_lit[] =
 
 	FRAGCOLOR = Output;
 }
-
 )";
 
 static const char g_material_fs_src_suf2_unlit[] =
@@ -543,7 +541,6 @@ static const char g_material_fs_src_suf2_unlit[] =
 
 	FRAGCOLOR = vec4(emissive, opacity);
 }
-
 )";
 
 static const char g_material_fs_src_suf2_refraction[] =
@@ -562,7 +559,6 @@ static const char g_material_fs_src_suf2_refraction[] =
 	if(opacityMask <= 0.0) discard;
 	if(opacity <= 0.0) discard;
 }
-
 )";
 
 struct ShaderData

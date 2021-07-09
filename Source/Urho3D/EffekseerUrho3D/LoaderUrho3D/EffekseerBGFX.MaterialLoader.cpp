@@ -120,8 +120,7 @@ static const int GL_InstanceCount = 10;
         auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
         if (shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE))
         {
-            shaderFile->Write(binary->GetVertexShaderData(shaderTypes[st]),
-                              binary->GetVertexShaderSize(shaderTypes[st]));
+            shaderFile->Write(binary->GetVertexShaderData(shaderTypes[st]), binary->GetVertexShaderSize(shaderTypes[st]));
             shaderFile->Close();
         }
         shaderFile = nullptr;

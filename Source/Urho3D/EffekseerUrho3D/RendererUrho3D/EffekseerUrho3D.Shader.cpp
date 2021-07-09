@@ -287,6 +287,10 @@ void Shader::SetTextureSlot(int32_t index, Urho3D::StringHash /*bgfx::UniformHan
     // 	{
     m_textureSlots[index] = value;
     m_textureSlotEnables[index] = true;
+    auto handle = m_program->GetUniform(value);
+    if (handle != UINT16_MAX) {
+        m_program->BindSamplerUnit((Urho3D::TextureUnit)index, m_program->GetUniform(value));
+    }
     //	}
 }
 

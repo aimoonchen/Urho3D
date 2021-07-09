@@ -89,7 +89,12 @@ public:
     
     uint16_t GetUniform(StringHash param);
     const std::vector<std::pair<TextureUnit, uint16_t>>& GetSamplers() const { return samplers_; };
-
+    // TODO: auto setup sampler unit
+    void BindSamplerUnit(TextureUnit unit, uint16_t handle)
+    {
+        useTextureUnits_[unit] = true;
+        samplers_.emplace_back(std::pair{unit, handle});
+    }
     bool IsValid() const;
 
 private:

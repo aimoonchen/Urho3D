@@ -270,7 +270,7 @@ public:
     void ClearTransformSources();
     /// Set texture.
     void SetTexture(unsigned index, Texture* texture);
-    void SetTextureEx(unsigned index, Texture* texture , uint32_t flags = UINT32_MAX);
+    void SetTextureEx(unsigned index, StringHash uniformHandle, Texture* texture, uint32_t flags = UINT32_MAX);
     /// Bind texture unit 0 for update. Called by Texture. Used only on OpenGL.
     /// @nobind
     void SetTextureForUpdate(Texture* texture);
@@ -849,6 +849,7 @@ private:
     struct TextureRecord
     {
         Texture* texture{ nullptr };
+        StringHash uniform_handle{};
         uint32_t flags{ UINT32_MAX };
     };
     TextureRecord textures_[MAX_TEXTURE_UNITS]{};

@@ -1702,12 +1702,9 @@ void Graphics::ClearTransformSources()
     }
 }
 
-void Graphics::SetTexture(unsigned index, Texture* texture)
-{
-    SetTextureEx(index, texture, UINT32_MAX);
-}
+void Graphics::SetTexture(unsigned index, Texture* texture) { SetTextureEx(index, {}, texture, UINT32_MAX); }
 
-void Graphics::SetTextureEx(unsigned index, Texture* texture, uint32_t flags)
+void Graphics::SetTextureEx(unsigned index, StringHash uniformHandle, Texture* texture, uint32_t flags)
 {
     if (index >= MAX_TEXTURE_UNITS)
         return;
@@ -1752,6 +1749,7 @@ void Graphics::SetTextureEx(unsigned index, Texture* texture, uint32_t flags)
     if (textures_[index].texture != texture)
     {
         textures_[index].texture = texture;
+        textures_[index].uniform_handle = uniformHandle;
         textures_[index].flags = flags;
     }
 //     if (texture && impl_->shaderProgram_)

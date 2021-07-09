@@ -934,7 +934,7 @@ void RendererImplemented::SetTextures(Shader* shader, Effekseer::Backend::Textur
 
 			// GLExt::glUniform1i(shader->GetTextureSlot(i), i);
 			// bgfx::setTexture(i, shader->GetTextureSlot(i), id);
-            graphics_->SetTextureEx(i, urho3dTexture, flags);
+            graphics_->SetTextureEx(i, shader->GetTextureSlot(i), urho3dTexture, flags);
 		}
  	}
 }
