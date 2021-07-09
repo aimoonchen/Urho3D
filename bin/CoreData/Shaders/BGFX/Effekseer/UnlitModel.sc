@@ -1,8 +1,8 @@
 #if defined(COMPILEVS)
 $input a_position, a_color0, a_texcoord0
-$output v_color0, v_texcoord0, v_ppos
+$output v_VColor, v_UV1, v_PosP
 #elif defined(COMPILEPS)
-$input v_color0, v_texcoord0, v_ppos
+$input v_VColor, v_UV1, v_PosP
 #endif
 
 #include "../bgfx_shader.sh"
@@ -21,15 +21,15 @@ void main()
 {
     vec4 worldPos = mul(mModel, vec4(a_position, 1.0));
     vec4 proj_pos = mul(mCameraProj, worldPos);
-    v_ppos = proj_pos;
+    v_PosP = proj_pos;
     gl_Position = proj_pos;
     vec2 outputUV = a_texcoord0;
     vec4 uv = fUV;
     outputUV.x = (outputUV.x * uv.z) + uv.x;
     outputUV.y = (outputUV.y * uv.w) + uv.y;
     outputUV.y = mUVInversed.x + (mUVInversed.y * outputUV.y);
-    v_texcoord0 = outputUV;
-    v_color0 = fModelColor * a_color0;
+    v_UV1 = outputUV;
+    v_VColor = fModelColor * a_color0;
 }
 #elif defined(COMPILEPS)
 SAMPLER2D(sDiffMap, 0);
@@ -67,8 +67,8 @@ float SoftParticle(float backgroundZ, float meshZ, vec4 softparticleParam, vec4 
 
 void main()
 {
-	vec4 Output = texture2D(sDiffMap, v_texcoord0) * v_color0;
-    vec4 screenPos = v_ppos / vec4_splat(v_ppos.w);
+	vec4 Output = texture2D(sDiffMap, v_UV1) * v_VColor;
+    vec4 screenPos = v_PosP / vec4_splat(v_PosP.w);
     vec2 screenUV = (screenPos.xy + vec2_splat(1.0)) / vec2_splat(2.0);
     screenUV.y = 1.0 - screenUV.y;
     screenUV.y = 1.0 - screenUV.y;

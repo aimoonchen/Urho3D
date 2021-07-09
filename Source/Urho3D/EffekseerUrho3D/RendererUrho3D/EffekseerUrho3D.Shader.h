@@ -59,8 +59,10 @@ public:
 
 	virtual ~Shader();
 
-	static std::unique_ptr<Shader> Create(Urho3D::Graphics* graphics, const char* name,
-                                          EffekseerRenderer::RendererShaderType shaderType);
+    static std::unique_ptr<Shader> Create(Urho3D::Graphics* graphics, const char* shaderFileName,
+		EffekseerRenderer::RendererShaderType shaderType);
+	static std::unique_ptr<Shader> Create(Urho3D::Graphics* graphics, const char* vsFileName, const char* fsFileName,
+		const char* name);
 
 	template <size_t N>
 	bool Compile(RenderType renderType, const char* code, const ParamDecl (&paramDecls)[N])
@@ -130,8 +132,8 @@ private:
 	};
 	InternalShader m_internals[(size_t)RenderType::Max];
 
-	Shader(Urho3D::Graphics* graphics, const char* name, EffekseerRenderer::RendererShaderType shaderType);
-
+	Shader(Urho3D::Graphics* graphics, const char* shaderFileName, EffekseerRenderer::RendererShaderType shaderType);
+	Shader(Urho3D::Graphics* graphics, const char* vsFileName, const char* fsFileName, const char* name);
 	// Urho3D impl
 	Urho3D::Graphics* graphics_{ nullptr };
 	Urho3D::ShaderProgram* m_program{ nullptr };

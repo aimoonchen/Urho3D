@@ -41,12 +41,16 @@ static const char* DepthWriteMode[] = {
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
-std::unique_ptr<Shader> Shader::Create(Urho3D::Graphics* graphics, const char* name,
-                                       EffekseerRenderer::RendererShaderType shaderType)
+std::unique_ptr<Shader> Shader::Create(Urho3D::Graphics* graphics, const char* shaderFileName,
+    EffekseerRenderer::RendererShaderType shaderType)
 {
-    return std::unique_ptr<Shader>(new Shader(graphics, name, shaderType));
+    return std::unique_ptr<Shader>(new Shader(graphics, shaderFileName, shaderType));
 }
-
+std::unique_ptr<Shader> Shader::Create(Urho3D::Graphics* graphics, const char* vsFileName, const char* fsFileName,
+    const char* name)
+{
+    return std::unique_ptr<Shader>(new Shader(graphics, vsFileName, fsFileName, name));
+}
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------
@@ -62,6 +66,17 @@ Shader::Shader(Urho3D::Graphics* graphics, const char* name, EffekseerRenderer::
 	m_program = graphics_->GetShaderProgram();
 }
 
+Shader::Shader(Urho3D::Graphics* graphics, const char* vsFileName, const char* fsFileName, const char* name)
+{
+    m_name = name;
+    m_shaderType = EffekseerRenderer::RendererShaderType::Material;
+    //
+    graphics_ = graphics;
+    m_vs = graphics_->GetShader(Urho3D::VS, vsFileName, "");
+    m_fs = graphics_->GetShader(Urho3D::PS, fsFileName, "");
+    graphics_->SetShaders(m_vs, m_fs);
+    m_program = graphics_->GetShaderProgram();
+}
 //-----------------------------------------------------------------------------------
 //
 //-----------------------------------------------------------------------------------

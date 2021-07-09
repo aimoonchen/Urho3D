@@ -422,12 +422,12 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::SpatialDepthFade, Lighting::SoftParticle::code, Lighting::SoftParticle::decl);
 		m_shaders[(size_t)RendererShaderType::Lit]->Compile(Shader::RenderType::CanvasItem, Lighting::CanvasItem::code, Lighting::CanvasItem::decl);
 
-		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(graphics_, "Effekseer/BackDistortion", RendererShaderType::BackDistortion);
-		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
-		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
-		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialLightweight, Distortion::Lightweight::code, Distortion::Lightweight::decl);
-		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialDepthFade, Distortion::SoftParticle::code, Distortion::SoftParticle::decl);
-		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::CanvasItem, Distortion::CanvasItem::code, Distortion::CanvasItem::decl);
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion] = Shader::Create(graphics_, "Effekseer/BackDistortion", RendererShaderType::BackDistortion);
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetVertexConstantBufferSize(sizeof(StandardRendererVertexBuffer));
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion]->SetPixelConstantBufferSize(sizeof(PixelConstantBuffer));
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialLightweight, Distortion::Lightweight::code, Distortion::Lightweight::decl);
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::SpatialDepthFade, Distortion::SoftParticle::code, Distortion::SoftParticle::decl);
+// 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::CanvasItem, Distortion::CanvasItem::code, Distortion::CanvasItem::decl);
 	}
 
 	m_renderCommands.resize((size_t)drawMaxCount);
@@ -467,36 +467,36 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
         AssignPixelConstantBuffer(shader);
     }
 
-    //applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-    shader_unlit->SetTextureSlot(1, shader_unlit->GetUniformId("sNormalMap"));
-    //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
-
-	auto shader_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].get();
-    // auto shader_ad_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)].get();
-
-	for (auto& shader : {/*shader_ad_distortion, */shader_distortion}) {
-        shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
-        shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBufferDistortion));
-
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCamera"), 0);
-
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCameraProj"),
-                                        sizeof(Effekseer::Matrix44));
-
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"),
-                                        sizeof(Effekseer::Matrix44) * 2);
-
-        shader->SetTextureSlot(0, shader->GetUniformId("sDiffMap"));
-        shader->SetTextureSlot(2, shader->GetUniformId("sSpecMap"));
-
-        shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFlipbookParameter"),
-                                        sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
-
-        AssignDistortionPixelConstantBuffer(shader);
-    }
-    //applyPSAdvancedRendererParameterTexture(shader_ad_distortion, 2);
-    shader_distortion->SetTextureSlot(1, shader_distortion->GetUniformId("sNormalMap"));
-    //shader_ad_distortion_->SetTextureSlot(7, GetValidUniform(shader_ad_distortion, "Sampler_sampler_depthTex"));
+//     //applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
+//     shader_unlit->SetTextureSlot(1, shader_unlit->GetUniformId("sNormalMap"));
+//     //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
+// 
+// 	auto shader_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].get();
+//     // auto shader_ad_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::AdvancedBackDistortion)].get();
+// 
+// 	for (auto& shader : {/*shader_ad_distortion, */shader_distortion}) {
+//         shader->SetVertexConstantBufferSize(sizeof(EffekseerRenderer::StandardRendererVertexBuffer));
+//         shader->SetPixelConstantBufferSize(sizeof(EffekseerRenderer::PixelConstantBufferDistortion));
+// 
+//         shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCamera"), 0);
+// 
+//         shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("mCameraProj"),
+//                                         sizeof(Effekseer::Matrix44));
+// 
+//         shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"),
+//                                         sizeof(Effekseer::Matrix44) * 2);
+// 
+//         shader->SetTextureSlot(0, shader->GetUniformId("sDiffMap"));
+//         shader->SetTextureSlot(2, shader->GetUniformId("sSpecMap"));
+// 
+//         shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fFlipbookParameter"),
+//                                         sizeof(Effekseer::Matrix44) * 2 + sizeof(float) * 4);
+// 
+//         AssignDistortionPixelConstantBuffer(shader);
+//     }
+//     //applyPSAdvancedRendererParameterTexture(shader_ad_distortion, 2);
+//     shader_distortion->SetTextureSlot(1, shader_distortion->GetUniformId("sNormalMap"));
+//     //shader_ad_distortion_->SetTextureSlot(7, GetValidUniform(shader_ad_distortion, "Sampler_sampler_depthTex"));
 	return true;
 }
 

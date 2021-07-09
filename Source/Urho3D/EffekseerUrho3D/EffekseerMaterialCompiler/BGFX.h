@@ -9,21 +9,21 @@ namespace Effekseer
 namespace BGFX
 {
 
-static const char* material_common_define_450 = R"(
-#version 450
-#define LAYOUT(ind) layout(location = ind)
-#define lowp
-#define mediump
-#define highp
-#define IN in
-#define OUT out
-#define CENTROID centroid
-
-)";
-
-static const char* material_common_define_not_450 = R"(
-#define LAYOUT(ind) 
-)";
+// static const char* material_common_define_450 = R"(
+// #version 450
+// #define LAYOUT(ind) layout(location = ind)
+// #define lowp
+// #define mediump
+// #define highp
+// #define IN in
+// #define OUT out
+// #define CENTROID centroid
+// 
+// )";
+// 
+// static const char* material_common_define_not_450 = R"(
+// #define LAYOUT(ind) 
+// )";
 
 static const char* material_common_define =
 	R"(
@@ -31,9 +31,9 @@ static const char* material_common_define =
 #define FRAC fract
 #define LERP mix
 
-float atan2(in float y, in float x) {
-    return x == 0.0 ? sign(y)* 3.141592 / 2.0 : atan(y, x);
-}
+//float atan2(in float y, in float x) {
+//    return x == 0.0 ? sign(y)* 3.141592 / 2.0 : atan(y, x);
+//}
 
 )";
 
@@ -62,28 +62,30 @@ static const char* material_common_fs_define_450 = R"()"
 
 )";
 
-static const char g_material_model_vs_src_pre[] =
-	R"(
-
-LAYOUT(0) IN vec4 a_Position;
-LAYOUT(1) IN vec3 a_Normal;
-LAYOUT(2) IN vec3 a_Binormal;
-LAYOUT(3) IN vec3 a_Tangent;
-LAYOUT(4) IN vec2 a_TexCoord;
-LAYOUT(5) IN vec4 a_Color;
-)"
-	R"(
-
-LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
-LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
-LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
-LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
-LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
-LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
-LAYOUT(6) OUT mediump vec4 v_PosP;
-//$C_OUT1$
-//$C_OUT2$
+static const char g_material_model_vs_src_pre[] = R"($input a_position, a_normal, a_bitangent, a_tangent, a_texcoord0, a_color0
+$output v_VColor, v_UV1, v_UV2, v_WorldN_PX, v_WorldB_PY, v_WorldT_PZ, v_PosP, v_CustomData1, v_CustomData2
 )";
+// 	R"(
+// 
+// LAYOUT(0) IN vec4 a_Position;
+// LAYOUT(1) IN vec3 a_Normal;
+// LAYOUT(2) IN vec3 a_Binormal;
+// LAYOUT(3) IN vec3 a_Tangent;
+// LAYOUT(4) IN vec2 a_TexCoord;
+// LAYOUT(5) IN vec4 a_Color;
+// )"
+// 	R"(
+// 
+// LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
+// LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
+// LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
+// LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
+// LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
+// LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
+// LAYOUT(6) OUT mediump vec4 v_PosP;
+// //$C_OUT1$
+// //$C_OUT2$
+// )";
 
 static const char g_material_model_vs_src_pre_uniform[] =
 
@@ -105,8 +107,8 @@ uniform vec4 ModelColor[_INSTANCE_COUNT_];
 #endif
 
 uniform vec4 mUVInversed;
-uniform vec4 predefined_uniform;
-uniform vec4 cameraPosition;
+uniform vec4 vs_predefined_uniform;
+uniform vec4 vs_cameraPosition;
 )";
 
 static const char g_material_model_vs_src_suf1[] =
@@ -130,28 +132,28 @@ void main()
 #ifdef EFK__INSTANCING_DISABLED__
 	mat4 modelMatrix = ModelMatrix;
 	vec4 uvOffset = UVOffset;
-	vec4 modelColor = ModelColor * a_Color;
+	vec4 modelColor = ModelColor * a_color0;
 #else
 	mat4 modelMatrix = ModelMatrix[int(gl_InstanceID)];
 	vec4 uvOffset = UVOffset[int(gl_InstanceID)];
-	vec4 modelColor = ModelColor[int(gl_InstanceID)] * a_Color;
+	vec4 modelColor = ModelColor[int(gl_InstanceID)] * a_color0;
 #endif
 
+	vec3 worldPos = mul(modelMatrix, vec4(a_position, 1.0)).xyz;
 	mat3 modelMatRot = mat3(modelMatrix);
-	vec3 worldPos = (modelMatrix * a_Position).xyz;
-	vec3 worldNormal = normalize(modelMatRot * a_Normal);
-	vec3 worldBinormal = normalize(modelMatRot * a_Binormal);
-	vec3 worldTangent = normalize(modelMatRot * a_Tangent);
+	vec3 worldNormal = normalize(mul(modelMatRot, a_normal));
+	vec3 worldBinormal = normalize(mul(modelMatRot, a_bitangent));
+	vec3 worldTangent = normalize(mul(modelMatRot, a_tangent));
 	vec3 objectScale = vec3(1.0, 1.0, 1.0);
 
 	// Calculate ObjectScale
-	objectScale.x = length(modelMatRot * vec3(1.0, 0.0, 0.0));
-	objectScale.y = length(modelMatRot * vec3(0.0, 1.0, 0.0));
-	objectScale.z = length(modelMatRot * vec3(0.0, 0.0, 1.0));
+	objectScale.x = length(mul(modelMatRot, vec3(1.0, 0.0, 0.0)));
+	objectScale.y = length(mul(modelMatRot, vec3(0.0, 1.0, 0.0)));
+	objectScale.z = length(mul(modelMatRot, vec3(0.0, 0.0, 1.0)));
 
 	// UV
-	vec2 uv1 = a_TexCoord.xy * uvOffset.zw + uvOffset.xy;
-	vec2 uv2 = a_TexCoord.xy;
+	vec2 uv1 = a_texcoord0.xy * uvOffset.zw + uvOffset.xy;
+	vec2 uv2 = a_texcoord0.xy;
 
 	//uv1.y = mUVInversed.x + mUVInversed.y * uv1.y;
 	//uv1.y = mUVInversed.x + mUVInversed.y * uv1.y;
@@ -179,7 +181,7 @@ static const char g_material_model_vs_src_suf2[] =
 	v_UV1 = uv1;
 	v_UV2 = uv2;
 	v_VColor = vcolor;
-	gl_Position = ProjectionMatrix * vec4(worldPos, 1.0);
+	gl_Position = mul(ProjectionMatrix, vec4(worldPos, 1.0));
 //	v_ScreenUV.xy = gl_Position.xy / gl_Position.w;
 //	v_ScreenUV.xy = vec2(v_ScreenUV.x + 1.0, v_ScreenUV.y + 1.0) * 0.5;
 
@@ -191,58 +193,62 @@ static const char g_material_model_vs_src_suf2[] =
 }
 )";
 
-static const char g_material_sprite_vs_src_pre_simple[] =
-	R"(
-
-LAYOUT(0) IN vec4 atPosition;
-LAYOUT(1) IN vec4 atColor;
-LAYOUT(2) IN vec4 atTexCoord;
-)"
-
-	R"(
-LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
-LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
-LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
-LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
-LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
-LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
-LAYOUT(6) OUT mediump vec4 v_PosP;
+static const char g_material_sprite_vs_src_pre_simple[] =R"($input a_position, a_color0, a_texcoord0
+$output v_VColor, v_UV1, v_UV2, v_WorldN_PX, v_WorldB_PY, v_WorldT_PZ, v_PosP
 )";
+// 	R"(
+// 
+// LAYOUT(0) IN vec4 atPosition;
+// LAYOUT(1) IN vec4 atColor;
+// LAYOUT(2) IN vec4 atTexCoord;
+// )"
+// 
+// 	R"(
+// LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
+// LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
+// LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
+// LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
+// LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
+// LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
+// LAYOUT(6) OUT mediump vec4 v_PosP;
+// )";
 
 static const char g_material_sprite_vs_src_pre_simple_uniform[] =
 	R"(
 uniform mat4 uMatCamera;
 uniform mat4 uMatProjection;
 uniform vec4 mUVInversed;
-uniform vec4 predefined_uniform;
-uniform vec4 cameraPosition;
+uniform vec4 vs_predefined_uniform;
+uniform vec4 vs_cameraPosition;
 
 )";
 
-static const char g_material_sprite_vs_src_pre[] =
-	R"(
-
-LAYOUT(0) IN vec4 atPosition;
-LAYOUT(1) IN vec4 atColor;
-LAYOUT(2) IN vec3 atNormal;
-LAYOUT(3) IN vec3 atTangent;
-LAYOUT(4) IN vec2 atTexCoord;
-LAYOUT(5) IN vec2 atTexCoord2;
-//$C_IN1$
-//$C_IN2$
-)"
-
-	R"(
-LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
-LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
-LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
-LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
-LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
-LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
-LAYOUT(6) OUT mediump vec4 v_PosP;
-//$C_OUT1$
-//$C_OUT2$
+static const char g_material_sprite_vs_src_pre[] = R"($input a_position, a_color0, a_normal, a_tangent, a_texcoord0, a_texcoord1, i_data0, i_data1
+$output v_VColor, v_UV1, v_UV2, v_WorldN_PX, v_WorldB_PY, v_WorldT_PZ, v_PosP, v_CustomData1, v_CustomData2
 )";
+// 	R"(
+// 
+// LAYOUT(0) IN vec4 atPosition;
+// LAYOUT(1) IN vec4 atColor;
+// LAYOUT(2) IN vec3 atNormal;
+// LAYOUT(3) IN vec3 atTangent;
+// LAYOUT(4) IN vec2 atTexCoord;
+// LAYOUT(5) IN vec2 atTexCoord2;
+// //$C_IN1$
+// //$C_IN2$
+// )"
+// 
+// 	R"(
+// LAYOUT(0) CENTROID OUT lowp vec4 v_VColor;
+// LAYOUT(1) CENTROID OUT mediump vec2 v_UV1;
+// LAYOUT(2) CENTROID OUT mediump vec2 v_UV2;
+// LAYOUT(3) OUT mediump vec4 v_WorldN_PX;
+// LAYOUT(4) OUT mediump vec4 v_WorldB_PY;
+// LAYOUT(5) OUT mediump vec4 v_WorldT_PZ;
+// LAYOUT(6) OUT mediump vec4 v_PosP;
+// //$C_OUT1$
+// //$C_OUT2$
+// )";
 
 static const char g_material_sprite_vs_src_pre_uniform[] =
 
@@ -250,8 +256,8 @@ static const char g_material_sprite_vs_src_pre_uniform[] =
 uniform mat4 uMatCamera;
 uniform mat4 uMatProjection;
 uniform vec4 mUVInversed;
-uniform vec4 predefined_uniform;
-uniform vec4 cameraPosition;
+uniform vec4 vs_predefined_uniform;
+uniform vec4 vs_cameraPosition;
 
 )";
 
@@ -272,7 +278,7 @@ vec2 GetUVBack(vec2 uv)
 }
 
 void main() {
-	vec3 worldPos = atPosition.xyz;
+	vec3 worldPos = a_position.xyz;
 	vec3 objectScale = vec3(1.0, 1.0, 1.0);
 
 	// Dummy
@@ -280,7 +286,7 @@ void main() {
 	float meshZ = 0.0;
 
 	// UV
-	vec2 uv1 = atTexCoord.xy;
+	vec2 uv1 = a_texcoord0.xy;
 	//uv1.y = mUVInversed.x + mUVInversed.y * uv1.y;
 	vec2 uv2 = uv1;
 
@@ -293,7 +299,7 @@ void main() {
 	v_WorldT_PZ.xyz = worldTangent;
 
 	vec3 pixelNormalDir = worldNormal;
-	vec4 vcolor = atColor;
+	vec4 vcolor = a_color0;
 )";
 
 static const char g_material_sprite_vs_src_suf1[] =
@@ -313,7 +319,7 @@ vec2 GetUVBack(vec2 uv)
 }
 
 void main() {
-	vec3 worldPos = atPosition.xyz;
+	vec3 worldPos = a_position.xyz;
 	vec3 objectScale = vec3(1.0, 1.0, 1.0);
 
 	// Dummy
@@ -321,21 +327,21 @@ void main() {
 	float meshZ = 0.0;
 
 	// UV
-	vec2 uv1 = atTexCoord.xy;
+	vec2 uv1 = a_texcoord0.xy;
 	//uv1.y = mUVInversed.x + mUVInversed.y * uv1.y;
-	vec2 uv2 = atTexCoord2.xy;
+	vec2 uv2 = a_texcoord1.xy;
 	//uv2.y = mUVInversed.x + mUVInversed.y * uv2.y;
 
 	// NBT
-	vec3 worldNormal = (atNormal - vec3(0.5, 0.5, 0.5)) * 2.0;
-	vec3 worldTangent = (atTangent - vec3(0.5, 0.5, 0.5)) * 2.0;
+	vec3 worldNormal = (a_normal - vec3(0.5, 0.5, 0.5)) * 2.0;
+	vec3 worldTangent = (a_tangent - vec3(0.5, 0.5, 0.5)) * 2.0;
 	vec3 worldBinormal = cross(worldNormal, worldTangent);
 
 	v_WorldN_PX.xyz = worldNormal;
 	v_WorldB_PY.xyz = worldBinormal;
 	v_WorldT_PZ.xyz = worldTangent;
 	vec3 pixelNormalDir = worldNormal;
-	vec4 vcolor = atColor;
+	vec4 vcolor = a_color0;
 )";
 
 static const char g_material_sprite_vs_src_suf2[] =
@@ -343,10 +349,10 @@ static const char g_material_sprite_vs_src_suf2[] =
 	R"(
 	worldPos = worldPos + worldPositionOffset;
 
-	vec4 cameraPos = uMatCamera * vec4(worldPos, 1.0);
+	vec4 cameraPos = mul(uMatCamera, vec4(worldPos, 1.0));
 	cameraPos = cameraPos / cameraPos.w;
 
-	gl_Position = uMatProjection * cameraPos;
+	gl_Position = mul(uMatProjection, cameraPos);
 
 	v_WorldN_PX.w = worldPos.x;
 	v_WorldB_PY.w = worldPos.y;
@@ -368,26 +374,28 @@ static const char g_material_sprite_vs_src_suf2[] =
 )";
 
 static const char g_material_fs_src_pre[] =
-	R"(
-
-LAYOUT(0) CENTROID IN lowp vec4 v_VColor;
-LAYOUT(1) CENTROID IN mediump vec2 v_UV1;
-LAYOUT(2) CENTROID IN mediump vec2 v_UV2;
-LAYOUT(3) IN mediump vec4 v_WorldN_PX;
-LAYOUT(4) IN mediump vec4 v_WorldB_PY;
-LAYOUT(5) IN mediump vec4 v_WorldT_PZ;
-LAYOUT(6) IN mediump vec4 v_PosP;
-//$C_PIN1$
-//$C_PIN2$
-
+R"($input v_VColor, v_UV1, v_UV2, v_WorldN_PX, v_WorldB_PY, v_WorldT_PZ, v_PosP, v_CustomData1, v_CustomData2
 )";
+// 	R"(
+// 
+// LAYOUT(0) CENTROID IN lowp vec4 v_VColor;
+// LAYOUT(1) CENTROID IN mediump vec2 v_UV1;
+// LAYOUT(2) CENTROID IN mediump vec2 v_UV2;
+// LAYOUT(3) IN mediump vec4 v_WorldN_PX;
+// LAYOUT(4) IN mediump vec4 v_WorldB_PY;
+// LAYOUT(5) IN mediump vec4 v_WorldT_PZ;
+// LAYOUT(6) IN mediump vec4 v_PosP;
+// //$C_PIN1$
+// //$C_PIN2$
+// 
+// )";
 
 static const char g_material_fs_src_pre_uniform[] =
 	R"(
 
 uniform vec4 mUVInversedBack;
-uniform vec4 predefined_uniform;
-uniform vec4 cameraPosition;
+uniform vec4 fs_predefined_uniform;
+uniform vec4 fs_cameraPosition;
 uniform vec4 reconstructionParam1;
 uniform vec4 reconstructionParam2;
 
@@ -412,7 +420,7 @@ float CalcDepthFade(vec2 screenUV, float meshZ, float softParticleParam)
 {
 	float backgroundZ = TEX2D(efk_depth, GetUVBack(screenUV)).x;
 
-	float distance = softParticleParam * predefined_uniform.y;
+	float distance = softParticleParam * fs_predefined_uniform.y;
 	vec2 rescale = reconstructionParam1.xy;
 	vec4 params = reconstructionParam2;
 
@@ -512,7 +520,7 @@ void main()
 static const char g_material_fs_src_suf2_lit[] =
 	R"(
 
-	vec3 viewDir = normalize(cameraPosition.xyz - worldPos);
+	vec3 viewDir = normalize(fs_cameraPosition.xyz - worldPos);
 	vec3 diffuse = calcDirectionalLightDiffuseColor(baseColor, pixelNormalDir, lightDirection.xyz, ambientOcclusion);
 	vec3 specular = lightColor.xyz * lightScale * calcLightingGGX(pixelNormalDir, viewDir, lightDirection.xyz, roughness, 0.9);
 
@@ -542,7 +550,7 @@ static const char g_material_fs_src_suf2_refraction[] =
 	R"(
 	float airRefraction = 1.0;
 
-	vec3 dir = mat3(cameraMat) * pixelNormalDir;
+	vec3 dir = mul(mat3(cameraMat), pixelNormalDir);
 	vec2 distortUV = dir.xy * (refraction - airRefraction);
 
 	distortUV += screenUV;
@@ -633,7 +641,8 @@ class ShaderGenerator
 		}
 		else
 		{
-			maincode << "uniform sampler2D " << name << ";" << std::endl;
+			//maincode << "uniform sampler2D " << name << ";" << std::endl;
+			maincode << "SAMPLER2D(" << name << ", " << bind << ");" << std::endl;
 		}
 	}
 
@@ -647,26 +656,6 @@ class ShaderGenerator
 // 		{
 // 			maincode << material_common_define_not_450;
 // 		}
-
-		maincode << material_common_define;
-
-		if (stage == 0)
-		{
-			maincode << material_common_vs_define;
-		}
-
-		// Adhoc
-		if (is450)
-		{
-			if (stage == 0)
-			{
-				maincode << material_common_vs_define_450;
-			}
-			else if (stage == 1)
-			{
-				maincode << material_common_fs_define_450;
-			}
-		}
 
 		if (stage == 0)
 		{
@@ -691,12 +680,65 @@ class ShaderGenerator
 			maincode << g_material_fs_src_pre;
 		}
 
-		if (isOutputDefined && stage == 1)
+		maincode << R"(#include "../bgfx_shader.sh"
+)";
+
+        if (stage == 0)
+        {
+            maincode << "#define EFK__INSTANCING_DISABLED__ 1";
+        }
+        else if (stage == 1)
+        {
+            maincode << "#define FRAGCOLOR gl_FragColor";
+        }
+
+		maincode << material_common_define;
+
+		if (stage == 0)
 		{
-			maincode << "#define FRAGCOLOR out_flagColor" << std::endl;
-			maincode << "layout(location = 0) out vec4 out_flagColor;" << std::endl;
-			maincode << std::endl;
+			maincode << material_common_vs_define;
+        }
+
+		// Adhoc
+		if (true/*is450*/)
+		{
+			if (stage == 0)
+			{
+				maincode << material_common_vs_define_450;
+			}
+			else if (stage == 1)
+			{
+				maincode << material_common_fs_define_450;
+			}
 		}
+
+// 		if (stage == 0)
+// 		{
+// 			if (isSprite)
+// 			{
+// 				if (materialFile->GetIsSimpleVertex())
+// 				{
+// 					maincode << g_material_sprite_vs_src_pre_simple;
+// 				}
+// 				else
+// 				{
+// 					maincode << g_material_sprite_vs_src_pre;
+// 				}
+// 			}
+// 			else
+// 			{
+// 				maincode << g_material_model_vs_src_pre;
+// 			}
+// 		}
+// 		else
+// 		{
+// 			maincode << g_material_fs_src_pre;
+// 		}
+// 		if (isOutputDefined && stage == 1)
+// 		{
+// 			maincode << "layout(location = 0) out vec4 out_flagColor;" << std::endl;
+// 			maincode << std::endl;
+// 		}
 	}
 
 	void ExportDefaultUniform(std::ostringstream& maincode, MaterialFile* materialFile, int stage, bool isSprite)
@@ -755,7 +797,7 @@ class ShaderGenerator
 			{
 				if (isSprite)
 				{
-					maincode << GetType(materialFile->GetCustomData1Count()) + " customData1 = atCustomData1;\n";
+					maincode << GetType(materialFile->GetCustomData1Count()) + " customData1 = i_data0;\n";
 				}
 				else
 				{
@@ -770,7 +812,7 @@ class ShaderGenerator
 			{
 				if (isSprite)
 				{
-					maincode << GetType(materialFile->GetCustomData2Count()) + " customData2 = atCustomData2;\n";
+					maincode << GetType(materialFile->GetCustomData2Count()) + " customData2 = i_data1;\n";
 				}
 				else
 				{
@@ -865,7 +907,10 @@ public:
 				maincode << "#define _SCREEN_FLIPPED_ 1" << std::endl;
 			}
 
-			maincode << "#define _INSTANCE_COUNT_ " << instanceCount << std::endl;
+			if (stage == 0)
+			{
+				maincode << "#define _INSTANCE_COUNT_ " << instanceCount << std::endl;
+			}
 
 			// TODO : Replace DIRTY CODE
 			if (textureBindingOffset > 0)
@@ -874,17 +919,17 @@ public:
 				maincode << "#define gl_InstanceID gl_InstanceIndex" << std::endl;
 			}
 
-			int32_t actualTextureCount = std::min(maximumTextureCount, materialFile->GetTextureCount());
+            int32_t actualTextureCount = std::min(maximumTextureCount, materialFile->GetTextureCount());
 
-			for (int32_t i = 0; i < actualTextureCount; i++)
-			{
-				auto textureName = materialFile->GetTextureName(i);
+            for (int32_t i = 0; i < actualTextureCount; i++)
+            {
+                auto textureName = materialFile->GetTextureName(i);
 
-				ExportTexture(maincode, textureName, i, stage);
-			}
+                ExportTexture(maincode, textureName, i, stage);
+            }
 
 			ExportTexture(maincode, "efk_background", actualTextureCount + 0, stage);
-			ExportTexture(maincode, "efk_depth", actualTextureCount + 1, stage);
+            ExportTexture(maincode, "efk_depth", actualTextureCount + 1, stage);
 
 			// Uniform block begin
 			if (useUniformBlock)
@@ -961,9 +1006,14 @@ uniform vec4 customData2s[_INSTANCE_COUNT_];
 
 			for (int32_t i = 0; i < materialFile->GetUniformCount(); i++)
 			{
-				auto uniformName = materialFile->GetUniformName(i);
-
-				ExportUniform(maincode, 4, uniformName);
+				std::string orignName = materialFile->GetUniformName(i);
+				if (stage == 0) {
+					auto uniformName = "vs_" + orignName;
+					ExportUniform(maincode, 4, uniformName.c_str());
+				} else if (stage == 1) {
+					auto uniformName = "fs_" + orignName;
+					ExportUniform(maincode, 4, uniformName.c_str());
+				}
 			}
 
 			// Uniform block end
@@ -973,12 +1023,32 @@ uniform vec4 customData2s[_INSTANCE_COUNT_];
 			}
 
 			auto baseCode = std::string(materialFile->GetGenericCode());
+			for (int32_t i = 0; i < materialFile->GetUniformCount(); i++)
+			{
+				std::string orignName = materialFile->GetUniformName(i);
+				std::string newName;
+				if (stage == 0) {
+					newName = "vs_" + orignName;
+				}
+				else if (stage == 1) {
+					newName = "fs_" + orignName;
+				}
+				baseCode = Replace(baseCode, orignName, newName);
+			}
 			baseCode = Replace(baseCode, "$F1$", "float");
 			baseCode = Replace(baseCode, "$F2$", "vec2");
 			baseCode = Replace(baseCode, "$F3$", "vec3");
 			baseCode = Replace(baseCode, "$F4$", "vec4");
-			baseCode = Replace(baseCode, "$TIME$", "predefined_uniform.x");
-			baseCode = Replace(baseCode, "$EFFECTSCALE$", "predefined_uniform.y");
+			if (stage == 0)
+			{
+                baseCode = Replace(baseCode, "$TIME$", "vs_predefined_uniform.x");
+                baseCode = Replace(baseCode, "$EFFECTSCALE$", "vs_predefined_uniform.y");
+			}
+			else if (stage == 1)
+			{
+                baseCode = Replace(baseCode, "$TIME$", "fs_predefined_uniform.x");
+                baseCode = Replace(baseCode, "$EFFECTSCALE$", "fs_predefined_uniform.y");
+			}
 			baseCode = Replace(baseCode, "$UV$", "uv");
 			baseCode = Replace(baseCode, "$MOD", "mod");
 
@@ -1029,49 +1099,49 @@ uniform vec4 customData2s[_INSTANCE_COUNT_];
 		}
 
 		// custom data
-		int32_t layoutOffset = 6;
-		int32_t pvLayoutOffset = 7;
-
-		if (materialFile->GetCustomData1Count() > 0)
-		{
-			if (isSprite)
-			{
-				shaderData.CodeVS = Replace(shaderData.CodeVS,
-											"//$C_IN1$",
-											"LAYOUT(" + std::to_string(layoutOffset) + ") " + "IN " +
-												GetType(materialFile->GetCustomData1Count()) + " atCustomData1;");
-			}
-			shaderData.CodeVS = Replace(shaderData.CodeVS,
-										"//$C_OUT1$",
-										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "OUT mediump " +
-											GetType(materialFile->GetCustomData1Count()) + " v_CustomData1;");
-			shaderData.CodePS = Replace(shaderData.CodePS,
-										"//$C_PIN1$",
-										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "IN mediump " +
-											GetType(materialFile->GetCustomData1Count()) + " v_CustomData1;");
-
-			layoutOffset += 1;
-			pvLayoutOffset += 1;
-		}
-
-		if (materialFile->GetCustomData2Count() > 0)
-		{
-			if (isSprite)
-			{
-				shaderData.CodeVS = Replace(shaderData.CodeVS,
-											"//$C_IN2$",
-											"LAYOUT(" + std::to_string(layoutOffset) + ") " + "IN " +
-												GetType(materialFile->GetCustomData2Count()) + " atCustomData2;");
-			}
-			shaderData.CodeVS = Replace(shaderData.CodeVS,
-										"//$C_OUT2$",
-										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "OUT mediump " +
-											GetType(materialFile->GetCustomData2Count()) + " v_CustomData2;");
-			shaderData.CodePS = Replace(shaderData.CodePS,
-										"//$C_PIN2$",
-										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "IN mediump " +
-											GetType(materialFile->GetCustomData2Count()) + " v_CustomData2;");
-		}
+// 		int32_t layoutOffset = 6;
+// 		int32_t pvLayoutOffset = 7;
+// 
+// 		if (materialFile->GetCustomData1Count() > 0)
+// 		{
+// 			if (isSprite)
+// 			{
+// 				shaderData.CodeVS = Replace(shaderData.CodeVS,
+// 											"//$C_IN1$",
+// 											"LAYOUT(" + std::to_string(layoutOffset) + ") " + "IN " +
+// 												GetType(materialFile->GetCustomData1Count()) + " atCustomData1;");
+// 			}
+// 			shaderData.CodeVS = Replace(shaderData.CodeVS,
+// 										"//$C_OUT1$",
+// 										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "OUT mediump " +
+// 											GetType(materialFile->GetCustomData1Count()) + " v_CustomData1;");
+// 			shaderData.CodePS = Replace(shaderData.CodePS,
+// 										"//$C_PIN1$",
+// 										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "IN mediump " +
+// 											GetType(materialFile->GetCustomData1Count()) + " v_CustomData1;");
+// 
+// 			layoutOffset += 1;
+// 			pvLayoutOffset += 1;
+// 		}
+// 
+// 		if (materialFile->GetCustomData2Count() > 0)
+// 		{
+// 			if (isSprite)
+// 			{
+// 				shaderData.CodeVS = Replace(shaderData.CodeVS,
+// 											"//$C_IN2$",
+// 											"LAYOUT(" + std::to_string(layoutOffset) + ") " + "IN " +
+// 												GetType(materialFile->GetCustomData2Count()) + " atCustomData2;");
+// 			}
+// 			shaderData.CodeVS = Replace(shaderData.CodeVS,
+// 										"//$C_OUT2$",
+// 										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "OUT mediump " +
+// 											GetType(materialFile->GetCustomData2Count()) + " v_CustomData2;");
+// 			shaderData.CodePS = Replace(shaderData.CodePS,
+// 										"//$C_PIN2$",
+// 										"LAYOUT(" + std::to_string(pvLayoutOffset) + ") " + "IN mediump " +
+// 											GetType(materialFile->GetCustomData2Count()) + " v_CustomData2;");
+// 		}
 
 		return shaderData;
 	}

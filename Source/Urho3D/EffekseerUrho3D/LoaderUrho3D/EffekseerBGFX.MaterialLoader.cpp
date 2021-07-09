@@ -3,12 +3,15 @@
 #include "../RendererUrho3D/EffekseerUrho3D.Shader.h"
 
 #include <iostream>
+#include <fstream>
 
 #include "../EffekseerMaterialCompiler/EffekseerMaterialCompilerBGFX.h"
 #include "Effekseer/Material/Effekseer.CompiledMaterial.h"
 #include "../Utils/EffekseerUrho3D.Utils.h"
 #include "../../Core/Context.h"
+#include "../../IO/FileSystem.h"
 #include "../../Resource/ResourceCache.h"
+#include "../../Graphics/Graphics.h"
 #include "../../Cocos2d/Urho3DContext.h"
 
 #undef min
@@ -41,81 +44,106 @@ static const int GL_InstanceCount = 10;
 	{
 		shaderTypeCount = 2;
 	}
+    auto context = GetUrho3DContext();
+    auto dir = context->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir();
+    dir.Replace("/build/", "/");
+    dir += "CoreData/Shaders/BGFX/Effekseer/";
+    auto startPos = currentPath_.rfind('/');
+    auto endPos = currentPath_.rfind('.');
+    auto fileName = Urho3D::String(currentPath_.substr(startPos + 1, endPos - startPos - 1).c_str());
 
 	for (int32_t st = 0; st < shaderTypeCount; st++)
 	{
 		auto parameterGenerator = EffekseerRenderer::MaterialShaderParameterGenerator(materialFile, false, st, 1);
 
-		ShaderCodeView vs((const char*)binary->GetVertexShaderData(shaderTypes[st]));
-		ShaderCodeView ps((const char*)binary->GetPixelShaderData(shaderTypes[st]));
+//  		ShaderCodeView vs((const char*)binary->GetVertexShaderData(shaderTypes[st]));
+//  		ShaderCodeView ps((const char*)binary->GetPixelShaderData(shaderTypes[st]));
+// 		
+// 		auto shader = Shader::Create(graphicsDevice_, &vs, 1, &ps, 1, "CustomMaterial", true, true);
+// 
+// 		if (shader == nullptr) {
+// 			std::cout << "Vertex shader error" << std::endl;
+// 			std::cout << (const char*)binary->GetVertexShaderData(shaderTypesModel[st]) << std::endl;
+// 
+// 			std::cout << "Pixel shader error" << std::endl;
+// 			std::cout << (const char*)binary->GetPixelShaderData(shaderTypesModel[st]) << std::endl;
+//             
+// 			return nullptr;
+// 		}
+// 
+// 		if (material->IsSimpleVertex)
+// 		{
+// 			EffekseerRendererGL::ShaderAttribInfo sprite_attribs[3] = {
+// 				{"atPosition", GL_FLOAT, 3, 0, false}, {"atColor", GL_UNSIGNED_BYTE, 4, 12, true}, {"atTexCoord", GL_FLOAT, 2, 16, false}};
+// 			shader->GetAttribIdList(3, sprite_attribs);
+// 		}
+// 		else
+// 		{
+// 			EffekseerRendererGL::ShaderAttribInfo sprite_attribs[8] = {
+// 				{"atPosition", GL_FLOAT, 3, 0, false},
+// 				{"atColor", GL_UNSIGNED_BYTE, 4, 12, true},
+// 				{"atNormal", GL_UNSIGNED_BYTE, 4, 16, true},
+// 				{"atTangent", GL_UNSIGNED_BYTE, 4, 20, true},
+// 				{"atTexCoord", GL_FLOAT, 2, 24, false},
+// 				{"atTexCoord2", GL_FLOAT, 2, 32, false},
+// 				{"", GL_FLOAT, 0, 0, false},
+// 				{"", GL_FLOAT, 0, 0, false},
+// 			};
+// 
+// 			int32_t offset = 40;
+// 			int count = 6;
+// 			const char* customData1Name = "atCustomData1";
+// 			const char* customData2Name = "atCustomData2";
+// 
+// 			if (materialFile.GetCustomData1Count() > 0)
+// 			{
+// 				sprite_attribs[count].name = customData1Name;
+// 				sprite_attribs[count].count = static_cast<uint16_t>(materialFile.GetCustomData1Count());
+// 				sprite_attribs[count].offset = static_cast<uint16_t>(offset);
+// 				count++;
+// 				offset += sizeof(float) * materialFile.GetCustomData1Count();
+// 			}
+// 
+// 			if (materialFile.GetCustomData2Count() > 0)
+// 			{
+// 				sprite_attribs[count].name = customData2Name;
+// 				sprite_attribs[count].count = static_cast<uint16_t>(materialFile.GetCustomData2Count());
+// 				sprite_attribs[count].offset = static_cast<uint16_t>(offset);
+// 				count++;
+// 				offset += sizeof(float) * materialFile.GetCustomData2Count();
+// 			}
+// 
+// 			shader->GetAttribIdList(count, sprite_attribs);
+// 		}
 
-		auto shader = Shader::Create(graphicsDevice_, &vs, 1, &ps, 1, "CustomMaterial", true, true);
+        auto vsFileName = "vs_" + fileName;
+        auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+        if (shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE))
+        {
+            shaderFile->Write(binary->GetVertexShaderData(shaderTypes[st]),
+                              binary->GetVertexShaderSize(shaderTypes[st]));
+            shaderFile->Close();
+        }
+        shaderFile = nullptr;
+        auto fsFileName = "fs_" + fileName;
+        shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+        if (shaderFile->Open(dir + fsFileName + ".sc", Urho3D::FILE_WRITE))
+        {
+            shaderFile->Write(binary->GetPixelShaderData(shaderTypes[st]), binary->GetPixelShaderSize(shaderTypes[st]));
+            shaderFile->Close();
+        }
 
-		if (shader == nullptr)
-		{
-			std::cout << "Vertex shader error" << std::endl;
-			std::cout << (const char*)binary->GetVertexShaderData(shaderTypesModel[st]) << std::endl;
-
-			std::cout << "Pixel shader error" << std::endl;
-			std::cout << (const char*)binary->GetPixelShaderData(shaderTypesModel[st]) << std::endl;
-
-			return nullptr;
-		}
-
-		if (material->IsSimpleVertex)
-		{
-			EffekseerRendererGL::ShaderAttribInfo sprite_attribs[3] = {
-				{"atPosition", GL_FLOAT, 3, 0, false}, {"atColor", GL_UNSIGNED_BYTE, 4, 12, true}, {"atTexCoord", GL_FLOAT, 2, 16, false}};
-			shader->GetAttribIdList(3, sprite_attribs);
-		}
-		else
-		{
-			EffekseerRendererGL::ShaderAttribInfo sprite_attribs[8] = {
-				{"atPosition", GL_FLOAT, 3, 0, false},
-				{"atColor", GL_UNSIGNED_BYTE, 4, 12, true},
-				{"atNormal", GL_UNSIGNED_BYTE, 4, 16, true},
-				{"atTangent", GL_UNSIGNED_BYTE, 4, 20, true},
-				{"atTexCoord", GL_FLOAT, 2, 24, false},
-				{"atTexCoord2", GL_FLOAT, 2, 32, false},
-				{"", GL_FLOAT, 0, 0, false},
-				{"", GL_FLOAT, 0, 0, false},
-			};
-
-			int32_t offset = 40;
-			int count = 6;
-			const char* customData1Name = "atCustomData1";
-			const char* customData2Name = "atCustomData2";
-
-			if (materialFile.GetCustomData1Count() > 0)
-			{
-				sprite_attribs[count].name = customData1Name;
-				sprite_attribs[count].count = static_cast<uint16_t>(materialFile.GetCustomData1Count());
-				sprite_attribs[count].offset = static_cast<uint16_t>(offset);
-				count++;
-				offset += sizeof(float) * materialFile.GetCustomData1Count();
-			}
-
-			if (materialFile.GetCustomData2Count() > 0)
-			{
-				sprite_attribs[count].name = customData2Name;
-				sprite_attribs[count].count = static_cast<uint16_t>(materialFile.GetCustomData2Count());
-				sprite_attribs[count].offset = static_cast<uint16_t>(offset);
-				count++;
-				offset += sizeof(float) * materialFile.GetCustomData2Count();
-			}
-
-			shader->GetAttribIdList(count, sprite_attribs);
-		}
-
+        auto shader = Shader::Create(context->GetSubsystem<Urho3D::Graphics>(), ("Effekseer/" + vsFileName).CString(), ("Effekseer/" + fsFileName).CString(), "CustomMaterial");
+		
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("uMatCamera"), parameterGenerator.VertexCameraMatrixOffset);
 
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("uMatProjection"), parameterGenerator.VertexProjectionMatrixOffset);
 
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"), parameterGenerator.VertexInversedFlagOffset);
 
-		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("predefined_uniform"), parameterGenerator.VertexPredefinedOffset);
+		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("vs_predefined_uniform"), parameterGenerator.VertexPredefinedOffset);
 
-		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("cameraPosition"), parameterGenerator.VertexCameraPositionOffset);
+		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("vs_cameraPosition"), parameterGenerator.VertexCameraPositionOffset);
 
 		for (int32_t ui = 0; ui < materialFile.GetUniformCount(); ui++)
 		{
@@ -128,9 +156,9 @@ static const int GL_InstanceCount = 10;
 
 		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversedBack"), parameterGenerator.PixelInversedFlagOffset);
 
-		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("predefined_uniform"), parameterGenerator.PixelPredefinedOffset);
+		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fs_predefined_uniform"), parameterGenerator.PixelPredefinedOffset);
 
-		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("cameraPosition"), parameterGenerator.PixelCameraPositionOffset);
+		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fs_cameraPosition"), parameterGenerator.PixelCameraPositionOffset);
 
 		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam1"), parameterGenerator.PixelReconstructionParam1Offset);
 
@@ -179,11 +207,11 @@ static const int GL_InstanceCount = 10;
 
 		if (st == 0)
 		{
-			material->UserPtr = shader.get();
+			material->UserPtr = shader.release();
 		}
 		else
 		{
-			material->RefractionUserPtr = shader.get();
+			material->RefractionUserPtr = shader.release();
 		}
 	}
 
@@ -191,33 +219,49 @@ static const int GL_InstanceCount = 10;
 	{
 		auto parameterGenerator = EffekseerRenderer::MaterialShaderParameterGenerator(materialFile, true, st, instancing ? GL_InstanceCount : 1);
 
-		ShaderCodeView vs((const char*)binary->GetVertexShaderData(shaderTypesModel[st]));
-		ShaderCodeView ps((const char*)binary->GetPixelShaderData(shaderTypesModel[st]));
+// 		ShaderCodeView vs((const char*)binary->GetVertexShaderData(shaderTypesModel[st]));
+// 		ShaderCodeView ps((const char*)binary->GetPixelShaderData(shaderTypesModel[st]));
+// 
+// 		auto shader = Shader::Create(graphicsDevice_, &vs, 1, &ps, 1, "CustomMaterial", true);
+// 		std::unique_ptr<Shader> shader = nullptr;
+// 		if (shader == nullptr)
+// 		{
+// 			std::cout << "Vertex shader error" << std::endl;
+// 			std::cout << (const char*)binary->GetVertexShaderData(shaderTypesModel[st]) << std::endl;
+// 
+// 			std::cout << "Pixel shader error" << std::endl;
+// 			std::cout << (const char*)binary->GetPixelShaderData(shaderTypesModel[st]) << std::endl;
+// 
+// 			return nullptr;
+// 		}
+//		
+// 		const int32_t NumAttribs = 6;
+// 		static ShaderAttribInfo g_model_attribs[NumAttribs] = {
+// 			{"a_Position", GL_FLOAT, 3, 0, false},
+// 			{"a_Normal", GL_FLOAT, 3, 12, false},
+// 			{"a_Binormal", GL_FLOAT, 3, 24, false},
+// 			{"a_Tangent", GL_FLOAT, 3, 36, false},
+// 			{"a_TexCoord", GL_FLOAT, 2, 48, false},
+// 			{"a_Color", GL_UNSIGNED_BYTE, 4, 56, true},
+// 		};
+// 
+// 		shader->GetAttribIdList(NumAttribs, g_model_attribs);
+		
+		auto vsFileName = "vs_model_" + fileName;
+        auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+        if (shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE)) {
+            shaderFile->Write(binary->GetVertexShaderData(shaderTypesModel[st]), binary->GetVertexShaderSize(shaderTypesModel[st]));
+            shaderFile->Close();
+        }
+        shaderFile = nullptr;
+        auto fsFileName = "fs_model_" + fileName;
+        shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+        if (shaderFile->Open(dir + fsFileName + ".sc", Urho3D::FILE_WRITE)) {
+            shaderFile->Write(binary->GetPixelShaderData(shaderTypesModel[st]), binary->GetPixelShaderSize(shaderTypesModel[st]));
+            shaderFile->Close();
+        }
 
-		auto shader = Shader::Create(graphicsDevice_, &vs, 1, &ps, 1, "CustomMaterial", true);
-
-		if (shader == nullptr)
-		{
-			std::cout << "Vertex shader error" << std::endl;
-			std::cout << (const char*)binary->GetVertexShaderData(shaderTypesModel[st]) << std::endl;
-
-			std::cout << "Pixel shader error" << std::endl;
-			std::cout << (const char*)binary->GetPixelShaderData(shaderTypesModel[st]) << std::endl;
-
-			return nullptr;
-		}
-
-		const int32_t NumAttribs = 6;
-		static ShaderAttribInfo g_model_attribs[NumAttribs] = {
-			{"a_Position", GL_FLOAT, 3, 0, false},
-			{"a_Normal", GL_FLOAT, 3, 12, false},
-			{"a_Binormal", GL_FLOAT, 3, 24, false},
-			{"a_Tangent", GL_FLOAT, 3, 36, false},
-			{"a_TexCoord", GL_FLOAT, 2, 48, false},
-			{"a_Color", GL_UNSIGNED_BYTE, 4, 56, true},
-		};
-
-		shader->GetAttribIdList(NumAttribs, g_model_attribs);
+		auto shader = Shader::Create(context->GetSubsystem<Urho3D::Graphics>(), ("Effekseer/" + vsFileName).CString(), ("Effekseer/" + fsFileName).CString(), "CustomMaterial");
 
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("ProjectionMatrix"), parameterGenerator.VertexProjectionMatrixOffset);
 
@@ -240,9 +284,9 @@ static const int GL_InstanceCount = 10;
 
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversed"), parameterGenerator.VertexInversedFlagOffset);
 
-		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("predefined_uniform"), parameterGenerator.VertexPredefinedOffset);
+		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("vs_predefined_uniform"), parameterGenerator.VertexPredefinedOffset);
 
-		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("cameraPosition"), parameterGenerator.VertexCameraPositionOffset);
+		shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("vs_cameraPosition"), parameterGenerator.VertexCameraPositionOffset);
 
 		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("reconstructionParam1"), parameterGenerator.PixelReconstructionParam1Offset);
 
@@ -275,8 +319,9 @@ static const int GL_InstanceCount = 10;
 
 		for (int32_t ui = 0; ui < materialFile.GetUniformCount(); ui++)
 		{
+			auto name = std::string("vs_") + materialFile.GetUniformName(ui);
 			shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4,
-											shader->GetUniformId(materialFile.GetUniformName(ui)),
+											shader->GetUniformId(name.c_str()),
 											parameterGenerator.VertexUserUniformOffset + sizeof(float) * 4 * ui);
 		}
 
@@ -284,9 +329,9 @@ static const int GL_InstanceCount = 10;
 
 		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("mUVInversedBack"), parameterGenerator.PixelInversedFlagOffset);
 
-		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("predefined_uniform"), parameterGenerator.PixelPredefinedOffset);
+		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fs_predefined_uniform"), parameterGenerator.PixelPredefinedOffset);
 
-		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("cameraPosition"), parameterGenerator.PixelCameraPositionOffset);
+		shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId("fs_cameraPosition"), parameterGenerator.PixelCameraPositionOffset);
 
 		// shiding model
 		if (materialFile.GetShadingModel() == ::Effekseer::ShadingModelType::Lit)
@@ -307,8 +352,9 @@ static const int GL_InstanceCount = 10;
 
 		for (int32_t ui = 0; ui < materialFile.GetUniformCount(); ui++)
 		{
+			auto name = std::string("fs_") + materialFile.GetUniformName(ui);
 			shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4,
-										   shader->GetUniformId(materialFile.GetUniformName(ui)),
+										   shader->GetUniformId(name.c_str()),
 										   parameterGenerator.PixelUserUniformOffset + sizeof(float) * 4 * ui);
 		}
 
@@ -329,11 +375,11 @@ static const int GL_InstanceCount = 10;
 
 		if (st == 0)
 		{
-			material->ModelUserPtr = shader.get();
+			material->ModelUserPtr = shader.release();
 		}
 		else
 		{
-			material->RefractionModelUserPtr = shader.get();
+			material->RefractionModelUserPtr = shader.release();
 		}
 	}
 
@@ -387,28 +433,29 @@ MaterialLoader ::~MaterialLoader()
 
 	// code file
 	{
-		std::unique_ptr<Effekseer::FileReader> reader(fileInterface_->OpenRead(path));
+//		std::unique_ptr<Effekseer::FileReader> reader(fileInterface_->OpenRead(path));
         static auto cache = GetUrho3DContext()->GetSubsystem<Urho3D::ResourceCache>();
-        Urho3D::String urho3dPath = ToGdString(path);
-        auto urhoFile = cache->GetFile(urho3dPath);
-        auto dataSize = urhoFile->GetSize();
-        auto data = std::make_unique<char[]>(dataSize);
-        if (urhoFile->Read(data.get(), dataSize) != dataSize)
+		auto urhoPath = ToGdString(path);
+		currentPath_ = urhoPath.CString();
+        auto urhoFile = cache->GetFile(urhoPath);
+        auto size = urhoFile->GetSize();
+        auto data = std::make_unique<char[]>(size);
+        if (urhoFile->Read(data.get(), size) != size)
         {
             return nullptr;
         }
 
-		if (reader.get() != nullptr)
-		{
-			size_t size = reader->GetLength();
-			std::vector<char> data;
-			data.resize(size);
-			reader->Read(data.data(), size);
+// 		if (reader.get() != nullptr)
+// 		{
+// 			size_t size = reader->GetLength();
+// 			std::vector<char> data;
+// 			data.resize(size);
+// 			reader->Read(data.data(), size);
 
-			auto material = Load(data.data(), (int32_t)size, ::Effekseer::MaterialFileType::Code);
+			auto material = Load(data.get(), (int32_t)size, ::Effekseer::MaterialFileType::Code);
 
 			return material;
-		}
+//		}
 	}
 
 	return nullptr;

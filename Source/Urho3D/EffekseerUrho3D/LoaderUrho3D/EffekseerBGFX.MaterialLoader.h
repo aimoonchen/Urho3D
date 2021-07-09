@@ -17,7 +17,7 @@ class MaterialLoader : public ::Effekseer::MaterialLoader
 {
 private:
 	bool canLoadFromCache_ = false;
-
+	std::string currentPath_;
 	::Effekseer::FileInterface* fileInterface_ = nullptr;
 	::Effekseer::DefaultFileInterface defaultFileInterface_;
 
