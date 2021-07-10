@@ -564,6 +564,14 @@ VertexBuffer* RendererImplemented::GetVertexBuffer()
 		shaderType = m_standardRenderer->GetState().Collector.ShaderType;
 	}
     //auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
+    if (shaderType == EffekseerRenderer::RendererShaderType::Material) {
+        auto mtlptr = m_standardRenderer->GetState().Collector.MaterialDataPtr;
+        if (!mtlptr->IsSimpleVertex) {
+			// TODO:
+            assert(mtlptr->CustomData1 == 4 && mtlptr->CustomData2 == 0);
+            return m_buffers[static_cast<int>(shaderType) + 1].m_vertexBuffer.Get();
+		}
+	}
     return m_buffers[static_cast<int>(shaderType)].m_vertexBuffer.Get();
 	//return m_vertexBuffer.Get();
 }
@@ -1442,16 +1450,13 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
 
     auto calculate_stride = [](EffekseerRenderer::RendererShaderType shaderType) {
         size_t stride = 0;
-        if (shaderType == EffekseerRenderer::RendererShaderType::Material)
-        {
-            stride = sizeof(EffekseerRenderer::DynamicVertexWithCustomData);
-        }
-        else if (shaderType == EffekseerRenderer::RendererShaderType::Lit ||
+        if (shaderType == EffekseerRenderer::RendererShaderType::Lit ||
                  shaderType == EffekseerRenderer::RendererShaderType::BackDistortion)
         {
             stride = sizeof(EffekseerRenderer::LightingVertex);
         }
-        else if (shaderType == EffekseerRenderer::RendererShaderType::Unlit)
+        else if (shaderType == EffekseerRenderer::RendererShaderType::Unlit ||
+                 shaderType == EffekseerRenderer::RendererShaderType::Material)
         {
             stride = sizeof(EffekseerRenderer::SimpleVertex);
         }
@@ -1469,9 +1474,9 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
     };
     auto get_vertex_layout = [](EffekseerRenderer::RendererShaderType shaderType) {
         uint32_t layoutMask = 0;
-        switch (shaderType)
-        {
+        switch (shaderType) {
         case EffekseerRenderer::RendererShaderType::Unlit:
+        case EffekseerRenderer::RendererShaderType::Material:
             layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
             //         .vertex_layout_.begin()
             //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
@@ -1518,19 +1523,6 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
             //         .add(bgfx::Attrib::TexCoord4, 4, bgfx::AttribType::Float)
             //         .end();
             break;
-        case EffekseerRenderer::RendererShaderType::Material:
-            layoutMask = Urho3D::MASK_POSITION | Urho3D::MASK_COLOR | Urho3D::MASK_TEXCOORD1;
-            //         .m_vertexLayout.begin()
-            //         .add(bgfx::Attrib::Position, 3, bgfx::AttribType::Float)
-            //         .add(bgfx::Attrib::Color0, 4, bgfx::AttribType::Uint8, true)
-            //         .add(bgfx::Attrib::Normal, 4, bgfx::AttribType::Uint8, true, true)
-            //         .add(bgfx::Attrib::Tangent, 4, bgfx::AttribType::Uint8, true, true)
-            //         .add(bgfx::Attrib::TexCoord0, 2, bgfx::AttribType::Float)
-            //         .add(bgfx::Attrib::TexCoord1, 2, bgfx::AttribType::Float)
-            //         .add(bgfx::Attrib::TexCoord2, 4, bgfx::AttribType::Float)
-            //         .add(bgfx::Attrib::TexCoord3, 4, bgfx::AttribType::Float)
-            //         .end();
-            break;
         default:
             break;
         }
@@ -1550,9 +1542,24 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
 
         // generate a vertex buffer
         {
-            buffer.m_vertexBuffer =
-                VertexBuffer::Create(context_, calculate_stride(EffekseerRenderer::RendererShaderType(i)) * m_squareMaxCount * 4, true,
-                get_vertex_layout(EffekseerRenderer::RendererShaderType(i)));
+            if (i == 7) {
+				// TOTO: may be exist three type of vertexSize
+                auto vertexSize = sizeof(EffekseerRenderer::DynamicVertex) + sizeof(float) * 4; // (materialFile.GetCustomData1Count() + materialFile.GetCustomData2Count());
+                Urho3D::PODVector<Urho3D::VertexElement> layout;
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR3, Urho3D::SEM_POSITION, 0, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_UBYTE4_NORM, Urho3D::SEM_COLOR, 0, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_UBYTE4_NORM, Urho3D::SEM_NORMAL, 0, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_UBYTE4_NORM, Urho3D::SEM_TANGENT, 0, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR2, Urho3D::SEM_TEXCOORD, 0, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR2, Urho3D::SEM_TEXCOORD, 1, false));
+                layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR4, Urho3D::SEM_TEXCOORD, 2, false));
+                //layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR4, Urho3D::SEM_TEXCOORD, 3, false));
+                buffer.m_vertexBuffer = VertexBuffer::Create(context_, m_squareMaxCount * 4, true, layout);
+            } else {
+                buffer.m_vertexBuffer = VertexBuffer::Create(context_, m_squareMaxCount * 4, true,
+                    get_vertex_layout(EffekseerRenderer::RendererShaderType(i)));
+			}
+            
             if (buffer.m_vertexBuffer == nullptr)
                 return;
         }

@@ -159,9 +159,9 @@ static const int GL_InstanceCount = 10;
 
 		for (int32_t ui = 0; ui < materialFile.GetUniformCount(); ui++)
 		{
-			shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4,
-											shader->GetUniformId(materialFile.GetUniformName(ui)),
-											parameterGenerator.VertexUserUniformOffset + sizeof(float) * 4 * ui);
+            auto name = std::string("vs_") + materialFile.GetUniformName(ui);
+            shader->AddVertexConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId(name.c_str()),
+                                            parameterGenerator.VertexUserUniformOffset + sizeof(float) * 4 * ui);
 		}
 
 		shader->SetVertexConstantBufferSize(parameterGenerator.VertexShaderUniformBufferSize);
@@ -194,9 +194,9 @@ static const int GL_InstanceCount = 10;
 
 		for (int32_t ui = 0; ui < materialFile.GetUniformCount(); ui++)
 		{
-			shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4,
-										   shader->GetUniformId(materialFile.GetUniformName(ui)),
-										   parameterGenerator.PixelUserUniformOffset + sizeof(float) * 4 * ui);
+            auto name = std::string("fs_") + materialFile.GetUniformName(ui);
+            shader->AddPixelConstantLayout(CONSTANT_TYPE_VECTOR4, shader->GetUniformId(name.c_str()),
+                                           parameterGenerator.PixelUserUniformOffset + sizeof(float) * 4 * ui);
 		}
 
 		shader->SetPixelConstantBufferSize(parameterGenerator.PixelShaderUniformBufferSize);

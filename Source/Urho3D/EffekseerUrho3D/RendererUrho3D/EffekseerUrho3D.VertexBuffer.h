@@ -38,12 +38,15 @@ private:
 	int32_t m_ringLockedSize;
 
 public:
-    VertexBuffer(Urho3D::Context* context/*RendererImplemented* renderer*/, int size, bool isDynamic, unsigned int layoutMask);
-
+    VertexBuffer(Urho3D::Context* context, int count, bool isDynamic, unsigned int layoutMask);
+    VertexBuffer(Urho3D::Context* context, int count, bool isDynamic,
+                 const Urho3D::PODVector<Urho3D::VertexElement>& elements);
 	virtual ~VertexBuffer();
 
-	static Effekseer::RefPtr<VertexBuffer> Create(Urho3D::Context* context /*RendererImplemented* renderer*/, int size,
+	static Effekseer::RefPtr<VertexBuffer> Create(Urho3D::Context* context, int count,
                                                   bool isDynamic, unsigned int layoutMask);
+    static Effekseer::RefPtr<VertexBuffer> Create(Urho3D::Context* context, int count,
+                                                  bool isDynamic, const Urho3D::PODVector<Urho3D::VertexElement>& elements);
 
 public:
 	void Lock() override;

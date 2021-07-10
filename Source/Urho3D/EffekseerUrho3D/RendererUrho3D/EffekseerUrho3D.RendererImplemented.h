@@ -148,7 +148,7 @@ private:
         IndexBufferRef m_indexBuffer;
         IndexBufferRef m_indexBufferForWireframe;
     };
-    std::array<Buffers, 6> m_buffers;
+    std::array<Buffers, 8> m_buffers;
     int32_t indexBufferStride_ = 2;
     int32_t indexBufferCurrentStride_ = 0;
     int32_t GetIndexSpriteCount() const;

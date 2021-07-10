@@ -223,7 +223,7 @@ uniform vec4 vs_cameraPosition;
 
 )";
 
-static const char g_material_sprite_vs_src_pre[] = R"($input a_position, a_color0, a_normal, a_tangent, a_texcoord0, a_texcoord1, i_data0, i_data1
+static const char g_material_sprite_vs_src_pre[] = R"($input a_position, a_color0, a_normal, a_tangent, a_texcoord0, a_texcoord1, a_texcoord2, a_texcoord3
 $output v_VColor, v_UV1, v_UV2, v_WorldN_PX, v_WorldB_PY, v_WorldT_PZ, v_PosP, v_CustomData1, v_CustomData2
 )";
 // 	R"(
@@ -793,7 +793,7 @@ class ShaderGenerator
 			{
 				if (isSprite)
 				{
-					maincode << GetType(materialFile->GetCustomData1Count()) + " customData1 = i_data0;\n";
+					maincode << GetType(materialFile->GetCustomData1Count()) + " customData1 = a_texcoord2;\n";
 				}
 				else
 				{
@@ -808,7 +808,7 @@ class ShaderGenerator
 			{
 				if (isSprite)
 				{
-					maincode << GetType(materialFile->GetCustomData2Count()) + " customData2 = i_data1;\n";
+					maincode << GetType(materialFile->GetCustomData2Count()) + " customData2 = a_texcoord3;\n";
 				}
 				else
 				{
