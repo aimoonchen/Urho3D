@@ -45,12 +45,41 @@ static const int GL_InstanceCount = 10;
 		shaderTypeCount = 2;
 	}
     auto context = GetUrho3DContext();
-    auto dir = context->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir();
+    auto dir = context->GetSubsystem<Urho3D::FileSystem>()->GetProgramDir() + "CoreData/Shaders/BGFX/Effekseer/";
     dir.Replace("/build/", "/");
-    dir += "CoreData/Shaders/BGFX/Effekseer/";
     auto startPos = currentPath_.rfind('/');
-    auto endPos = currentPath_.rfind('.');
-    auto fileName = Urho3D::String(currentPath_.substr(startPos + 1, endPos - startPos - 1).c_str());
+    auto fileName = Urho3D::String(currentPath_.substr(startPos + 1, currentPath_.rfind('.') - startPos - 1).c_str());
+    
+	auto create_shader = [context, &dir, &fileName](::Effekseer::CompiledMaterialBinary* binary,
+                                                    Effekseer::MaterialShaderType type, bool isModel) {
+        auto vsFileName = "vs_" + fileName;
+		if (isModel) {
+            vsFileName += "_model";
+		}
+        auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+        auto fullName = dir + vsFileName + ".sc";
+        auto exist = context->GetSubsystem<Urho3D::FileSystem>()->FileExists(fullName);
+        if (/*!exist && */shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE)) {
+            shaderFile->Write(binary->GetVertexShaderData(type), binary->GetVertexShaderSize(type));
+            shaderFile->Close();
+        }
+        auto fsFileName = "fs_" + fileName;
+        if (isModel) {
+            fsFileName += "_model";
+        }
+        fullName = dir + fsFileName + ".sc";
+        exist = context->GetSubsystem<Urho3D::FileSystem>()->FileExists(fullName);
+        if (true/*!exist*/) {
+            shaderFile = nullptr;
+            shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
+            if (shaderFile->Open(dir + fsFileName + ".sc", Urho3D::FILE_WRITE)) {
+                shaderFile->Write(binary->GetPixelShaderData(type), binary->GetPixelShaderSize(type));
+                shaderFile->Close();
+            }
+        }
+        return Shader::Create(context->GetSubsystem<Urho3D::Graphics>(), ("Effekseer/" + vsFileName).CString(),
+                                     ("Effekseer/" + fsFileName).CString(), "CustomMaterial");
+	};
 
 	for (int32_t st = 0; st < shaderTypeCount; st++)
 	{
@@ -116,23 +145,7 @@ static const int GL_InstanceCount = 10;
 // 			shader->GetAttribIdList(count, sprite_attribs);
 // 		}
 
-        auto vsFileName = "vs_" + fileName;
-        auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
-        if (shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE))
-        {
-            shaderFile->Write(binary->GetVertexShaderData(shaderTypes[st]), binary->GetVertexShaderSize(shaderTypes[st]));
-            shaderFile->Close();
-        }
-        shaderFile = nullptr;
-        auto fsFileName = "fs_" + fileName;
-        shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
-        if (shaderFile->Open(dir + fsFileName + ".sc", Urho3D::FILE_WRITE))
-        {
-            shaderFile->Write(binary->GetPixelShaderData(shaderTypes[st]), binary->GetPixelShaderSize(shaderTypes[st]));
-            shaderFile->Close();
-        }
-
-        auto shader = Shader::Create(context->GetSubsystem<Urho3D::Graphics>(), ("Effekseer/" + vsFileName).CString(), ("Effekseer/" + fsFileName).CString(), "CustomMaterial");
+        auto shader = create_shader(binary, shaderTypes[st], false);
 		
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("uMatCamera"), parameterGenerator.VertexCameraMatrixOffset);
 
@@ -246,21 +259,7 @@ static const int GL_InstanceCount = 10;
 // 
 // 		shader->GetAttribIdList(NumAttribs, g_model_attribs);
 		
-		auto vsFileName = "vs_model_" + fileName;
-        auto shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
-        if (shaderFile->Open(dir + vsFileName + ".sc", Urho3D::FILE_WRITE)) {
-            shaderFile->Write(binary->GetVertexShaderData(shaderTypesModel[st]), binary->GetVertexShaderSize(shaderTypesModel[st]));
-            shaderFile->Close();
-        }
-        shaderFile = nullptr;
-        auto fsFileName = "fs_model_" + fileName;
-        shaderFile = std::make_unique<Urho3D::File>(GetUrho3DContext());
-        if (shaderFile->Open(dir + fsFileName + ".sc", Urho3D::FILE_WRITE)) {
-            shaderFile->Write(binary->GetPixelShaderData(shaderTypesModel[st]), binary->GetPixelShaderSize(shaderTypesModel[st]));
-            shaderFile->Close();
-        }
-
-		auto shader = Shader::Create(context->GetSubsystem<Urho3D::Graphics>(), ("Effekseer/" + vsFileName).CString(), ("Effekseer/" + fsFileName).CString(), "CustomMaterial");
+		auto shader = create_shader(binary, shaderTypesModel[st], true);
 
 		shader->AddVertexConstantLayout(CONSTANT_TYPE_MATRIX44, shader->GetUniformId("ProjectionMatrix"), parameterGenerator.VertexProjectionMatrixOffset);
 

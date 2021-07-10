@@ -5,8 +5,8 @@ vec4 v_WorldN_PX    : TEXCOORD2 = vec4(0.0, 0.0, 0.0, 0.0);
 vec4 v_WorldB_PY    : TEXCOORD3 = vec4(0.0, 0.0, 0.0, 0.0);
 vec4 v_WorldT_PZ    : TEXCOORD4 = vec4(0.0, 0.0, 0.0, 0.0);
 vec4 v_PosP         : TEXCOORD5 = vec4(0.0, 0.0, 0.0, 0.0);
-vec4 v_CustomData1  : TEXCOORD6    = vec4(0.0, 0.0, 0.0, 0.0);
-vec4 v_CustomData2  : TEXCOORD7    = vec4(0.0, 0.0, 0.0, 0.0);
+vec4 v_CustomData1  : TEXCOORD6 = vec4(0.0, 0.0, 0.0, 0.0);
+vec4 v_CustomData2  : TEXCOORD7 = vec4(0.0, 0.0, 0.0, 0.0);
 
 vec3 a_position  : POSITION;
 vec3 a_normal	 : NORMAL;
