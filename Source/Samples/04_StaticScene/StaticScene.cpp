@@ -129,8 +129,9 @@ void StaticScene::CreateScene()
         mushroomObject->SetMaterial(cache->GetResource<Material>("Materials/Mushroom.xml"));
         //mushroomObject->SetCastShadows(true);
     }
+    
     character_ = scene_->CreateChild("Jill");
-    character_->SetScale(2);
+    character_->SetScale(3);
     //character_->SetRotation(Quaternion(0.0f, Random(360.0f), 0.0f));
     character_->SetPosition(Vector3(0.0f, 0.0f, 0.0f));
     auto* modelObject = character_->CreateComponent<AnimatedModel>();
@@ -151,28 +152,27 @@ void StaticScene::CreateScene()
         state->SetLooped(true);
         state->SetTime(Random(walkAnimation->GetLength()));
     }
-    //     test_emitter0_ = scene_->CreateChild("emitter0");
-//     test_emitter0_->SetPosition(Vector3(-10.0f, 4.0f, 25.0f));
-//     //test_emitter0_->SetRotation(Quaternion(0.0f, -45.0f, 0.0f));
-//     auto ee = test_emitter0_->CreateComponent<EffekseerEmitter>();
-//     ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
-//     ee->play();
-//     ee->set_looping(true);
+    
+    test_emitter0_ = scene_->CreateChild("emitter0");
+    test_emitter0_->SetPosition(Vector3(-25.0f, 6.0f, 20.0f));
+    auto ee = test_emitter0_->CreateComponent<EffekseerEmitter>();
+    ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Laser03.efk"));
+    ee->play();
+    ee->set_looping(true);
 
     test_emitter1_ = scene_->CreateChild("emitter1");
-    test_emitter1_->SetPosition(Vector3(0.0f, 0.0f, 20.0f));
-    auto ee = test_emitter1_->CreateComponent<EffekseerEmitter>();
+    test_emitter1_->SetPosition(Vector3(0.0f, 0.0f, 30.0f));
+    ee = test_emitter1_->CreateComponent<EffekseerEmitter>();
     ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Basic/Simple_Turbulence_Fireworks.efk"));
     ee->play();
     ee->set_looping(true);
 
-//     test_emitter2_ = scene_->CreateChild("emitter2");
-//     test_emitter2_->SetPosition(Vector3(0.0f, 0.0f, 25.0f));
-//     //test_emitter2_->SetRotation(Quaternion(0.0f, 90.0f, 0.0f));
-//     ee = test_emitter2_->CreateComponent<EffekseerEmitter>();
-//     ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/NextSoft/PowerUp.efk"));
-//     ee->play();
-//     ee->set_looping(true);
+    test_emitter2_ = scene_->CreateChild("emitter2");
+    test_emitter2_->SetPosition(Vector3(0.0f, 0.1f, 0.0f));
+    ee = test_emitter2_->CreateComponent<EffekseerEmitter>();
+    ee->SetEffect(cache->GetResource<EffekseerEffect>("Effekseer/Tktk03/Light.efk"));
+    ee->play();
+    ee->set_looping(true);
 
     // Create a scene node for the camera, which we will move around
     // The camera will use default settings (1000 far clip distance, 45 degrees FOV, set aspect ratio automatically)
@@ -223,7 +223,7 @@ void StaticScene::MoveCamera(float timeStep)
 
     // Movement speed as world units per second
     const float MOVE_SPEED = 20.0f;
-    if (input->GetMouseButtonDown(MOUSEB_MIDDLE))
+    if (input->GetMouseButtonDown(MOUSEB_RIGHT))
     {
         // Mouse sensitivity as degrees per pixel
         const float MOUSE_SENSITIVITY = 0.1f;
@@ -266,7 +266,7 @@ void StaticScene::HandleUpdate(StringHash eventType, VariantMap& eventData)
 //         test_emitter_->SetPosition(oldpos);
 //     }
     // Move the camera, scale movement with time step
-    MoveCamera(timeStep);
+     MoveCamera(timeStep);
     auto* model = character_->GetComponent<AnimatedModel>(true);
     if (model->GetNumAnimationStates())
     {
