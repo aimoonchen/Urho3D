@@ -140,7 +140,7 @@ void main()
 #endif
 
 	vec3 worldPos = mul(modelMatrix, vec4(a_position, 1.0)).xyz;
-	mat3 modelMatRot = mat3(modelMatrix);
+	mat3 modelMatRot = mat3(modelMatrix[0].xyz, modelMatrix[1].xyz, modelMatrix[2].xyz);//mat3(modelMatrix);
 	vec3 worldNormal = normalize(mul(modelMatRot, a_normal));
 	vec3 worldBinormal = normalize(mul(modelMatRot, a_bitangent));
 	vec3 worldTangent = normalize(mul(modelMatRot, a_tangent));

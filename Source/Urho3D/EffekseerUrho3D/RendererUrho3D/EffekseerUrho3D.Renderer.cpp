@@ -372,6 +372,7 @@ RendererImplemented::RendererImplemented(Urho3D::Context* context, int32_t squar
     graphics_ = context->GetSubsystem<Urho3D::Graphics>();
 	// dummy
 	m_background = Effekseer::MakeRefPtr<Texture>();
+	m_buffers.resize(static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1 + 1);
 }
 
 //----------------------------------------------------------------------------------
