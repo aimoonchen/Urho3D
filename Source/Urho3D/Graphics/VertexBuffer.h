@@ -27,9 +27,12 @@
 #include "../Graphics/GPUObject.h"
 #include "../Graphics/GraphicsDefs.h"
 
+namespace bgfx {
+    struct TransientVertexBuffer;
+}
+
 namespace Urho3D
 {
-
 /// Hardware vertex buffer.
 class URHO3D_API VertexBuffer : public Object, public GPUObject
 {
@@ -141,6 +144,10 @@ public:
 
     bool IsValid() const;
 
+    ///
+    void AllocTransientVertexBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements = nullptr);
+    bgfx::TransientVertexBuffer* GetTransientVertexBuffer() { return transient_vertex_buffer_.get(); }
+    void* GetTransientVertexData();
 private:
     /// Update offsets of vertex elements.
     void UpdateOffsets();
@@ -179,6 +186,9 @@ private:
     bool shadowed_{};
     /// Discard lock flag. Used by OpenGL only.
     bool discardLock_{};
+    /// 
+    std::unique_ptr<bgfx::TransientVertexBuffer> transient_vertex_buffer_{};
 };
+
 
 }

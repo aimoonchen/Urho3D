@@ -27,7 +27,7 @@ class VertexBuffer
 	, public Effekseer::ReferenceObject
 {
 private:
-	std::vector<uint8_t> m_buffer;
+	//std::vector<uint8_t> m_buffer;
     uint16_t m_stride;
     Urho3D::VertexBuffer* m_urho3d_buffer{nullptr};
     uint32_t m_vertexRingStart;
@@ -55,7 +55,7 @@ public:
 	void Unlock() override;
     bool IsValid();
     Urho3D::VertexBuffer* GetInterface() const { return m_urho3d_buffer; }
-	const uint8_t* Refer() const { return m_buffer.data(); }
+//	const uint8_t* Refer() const { return m_buffer.data(); }
 };
 using VertexBufferRef = Effekseer::RefPtr<VertexBuffer>;
 

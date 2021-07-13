@@ -122,10 +122,10 @@ private:
 	Shader* m_currentShader = nullptr;
 	//godot::World* m_world = nullptr;
 
-	std::vector<RenderCommand> m_renderCommands;
-	size_t m_renderCount = 0;
-	std::vector<RenderCommand2D> m_renderCommand2Ds;
-	size_t m_renderCount2D = 0;
+// 	std::vector<RenderCommand> m_renderCommands;
+// 	size_t m_renderCount = 0;
+// 	std::vector<RenderCommand2D> m_renderCommand2Ds;
+// 	size_t m_renderCount2D = 0;
 
 	Effekseer::ModelRef m_currentModel = nullptr;
 	DynamicTexture m_customData1Texture;

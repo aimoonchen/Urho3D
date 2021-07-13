@@ -43,6 +43,7 @@ uniform vec4 fEdgeParameter;
 uniform vec4 softParticleParam;
 uniform vec4 reconstructionParam1;
 uniform vec4 reconstructionParam2;
+uniform vec4 mUVInversedBack;
 
 float SoftParticle(float backgroundZ, float meshZ, vec4 softparticleParam, vec4 reconstruct1, vec4 reconstruct2)
 {
@@ -61,10 +62,13 @@ float SoftParticle(float backgroundZ, float meshZ, vec4 softparticleParam, vec4 
 void main()
 {
 	vec4 Output = texture2D(sDiffMap, v_UV1) * v_VColor;
+    vec3 scaling = Output.xyz * fEmissiveScaling.x;
+    Output = vec4(scaling.x, scaling.y, scaling.z, Output.w);
     vec4 screenPos = v_PosP / vec4_splat(v_PosP.w);
     vec2 screenUV = (screenPos.xy + vec2_splat(1.0)) / vec2_splat(2.0);
     screenUV.y = 1.0 - screenUV.y;
     screenUV.y = 1.0 - screenUV.y;
+    screenUV.y = mUVInversedBack.x + (mUVInversedBack.y * screenUV.y);
     if (!(softParticleParam.w == 0.0))
     {
         float backgroundZ = texture2D(sNormalMap, screenUV).x;

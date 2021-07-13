@@ -26,7 +26,9 @@ VertexBuffer::VertexBuffer(Urho3D::Context* context,
     buffer->SetSize(count, layoutMask, isDynamic);
     m_stride = buffer->GetVertexSize();
     m_size = count * m_stride;
-    m_buffer.resize(m_size);
+    //m_buffer.resize(m_size);
+    m_resource = new uint8_t[m_size];
+    memset(m_resource, 0, (size_t)m_size);
     m_urho3d_buffer = buffer;
 }
 
@@ -44,7 +46,9 @@ VertexBuffer::VertexBuffer(Urho3D::Context* context, int count, bool isDynamic,
     buffer->SetSize(count, elements, isDynamic);
     m_stride = buffer->GetVertexSize();
     m_size = count * m_stride;
-    m_buffer.resize(m_size);
+    //m_buffer.resize(m_size);
+    m_resource = new uint8_t[m_size];
+    memset(m_resource, 0, (size_t)m_size);
     m_urho3d_buffer = buffer;
 }
 
@@ -53,6 +57,7 @@ VertexBuffer::VertexBuffer(Urho3D::Context* context, int count, bool isDynamic,
 //-----------------------------------------------------------------------------------
 VertexBuffer::~VertexBuffer()
 {
+    delete [] m_resource;
 	delete m_urho3d_buffer;
 }
 
@@ -79,7 +84,7 @@ void VertexBuffer::Lock()
 	//assert(!m_ringBufferLock);
 
 	m_isLock = true;
-	m_resource = m_buffer.data();
+	//m_resource = m_buffer.data();
 	m_offset = 0;
     m_vertexRingStart = 0;
 }
@@ -89,6 +94,10 @@ void VertexBuffer::Lock()
 //-----------------------------------------------------------------------------------
 bool VertexBuffer::RingBufferLock(int32_t size, int32_t& offset, void*& data, int32_t alignment)
 {
+    m_urho3d_buffer->AllocTransientVertexBuffer(size / m_urho3d_buffer->GetVertexSize());
+    data = m_urho3d_buffer->GetTransientVertexData();
+    return true;
+
 	assert(!m_isLock);
 	assert(!m_ringBufferLock);
     assert(this->m_isDynamic);
@@ -117,7 +126,7 @@ bool VertexBuffer::RingBufferLock(int32_t size, int32_t& offset, void*& data, in
 
     m_offset = size;
 	m_ringBufferLock = true;
-	data = m_resource = m_buffer.data();
+    data = m_resource;// = m_buffer.data();
 
 	return true;
 }
@@ -135,12 +144,14 @@ bool VertexBuffer::TryRingBufferLock(int32_t size, int32_t& offset, void*& data,
 //-----------------------------------------------------------------------------------
 void VertexBuffer::Unlock()
 {
+    return;
+
 	assert(m_isLock || m_ringBufferLock);
     m_urho3d_buffer->SetDataRange(m_resource, m_vertexRingStart / m_stride, m_offset / m_stride);
     if (m_isLock) {
         m_vertexRingOffset += m_offset;
     }
-	m_resource = NULL;
+	//m_resource = NULL;
 	m_isLock = false;
 	m_ringBufferLock = false;
 }

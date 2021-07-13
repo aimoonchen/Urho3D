@@ -23,7 +23,7 @@
 // This file contains VertexBuffer code common to all graphics APIs.
 
 #include "../Precompiled.h"
-
+#include "bgfx/bgfx.h"
 #include "../Graphics/Graphics.h"
 #include "../Graphics/VertexBuffer.h"
 #include "../Math/MathDefs.h"

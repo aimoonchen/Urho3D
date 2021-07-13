@@ -896,49 +896,53 @@ bool Graphics::ResolveToTexture(TextureCube* texture)
 // #endif
 }
 
-void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCount)
+void Graphics::DoDraw(PrimitiveType type, uint32_t start, uint32_t count, bool useIndex)
 {
-    if (!vertexCount || !impl_->shaderProgram_)
-        return;
-
     PrepareDraw();
 
     unsigned primitiveCount;
-    GetGLPrimitiveType(vertexCount, type, primitiveCount);
-//     glDrawArrays(glPrimitiveType, vertexStart, vertexCount);
-    
-//     if (HasTextureUnit(TU_FACESELECT))
-//     {
-//         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
-//     }
-//     if (HasTextureUnit(TU_INDIRECTION))
-//     {
-//         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
-//     }
-//     if (HasTextureUnit(TU_ENVIRONMENT))
-//     {
-//         SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
-//     }
+    GetGLPrimitiveType(count, type, primitiveCount);
 
     const auto& samples = impl_->shaderProgram_->GetSamplers();
-    for (auto [unit, handle] : samples) {
-        if (textures_[unit].texture) {
+    for (auto [unit, handle] : samples)
+    {
+        if (textures_[unit].texture)
+        {
             bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
-        } else {
+        }
+        else
+        {
             URHO3D_LOGERRORF("texture unit %d invalid.", unit);
         }
     }
-
-    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
-        auto buffer = vertexBuffers_[i];
-        if (!buffer || buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle)
-            continue;
-
-        buffer->IsDynamic()
-            ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
-            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
+    if (useIndex) {
+        indexBuffer_->IsDynamic()
+            ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{indexBuffer_->GetGPUObjectHandle()}, start, count)
+            : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{indexBuffer_->GetGPUObjectHandle()}, start, count);
+        start = 0;
+        count = UINT32_MAX;
     }
-    if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
+
+    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
+    {
+        auto buffer = vertexBuffers_[i];
+        if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+            continue;
+        auto tvb = buffer->GetTransientVertexBuffer();
+        if (tvb)
+        {
+            bgfx::setVertexBuffer(i, tvb);
+        }
+        else
+        {
+            buffer->IsDynamic()
+                ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()}, start, count)
+                : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()}, start, count);
+        }
+    }
+
+    if (instance_info_.buffer || instance_info_.count < UINT32_MAX)
+    {
         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
                                     instance_info_.count);
     }
@@ -955,6 +959,59 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
     ++numBatches_;
 }
 
+void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCount)
+{
+    if (!vertexCount || !impl_->shaderProgram_)
+        return;
+
+    DoDraw(type, vertexStart, vertexCount, false);
+    
+    return;
+
+//     PrepareDraw();
+// 
+//     unsigned primitiveCount;
+//     GetGLPrimitiveType(vertexCount, type, primitiveCount);
+//     
+//     const auto& samples = impl_->shaderProgram_->GetSamplers();
+//     for (auto [unit, handle] : samples) {
+//         if (textures_[unit].texture) {
+//             bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
+//         } else {
+//             URHO3D_LOGERRORF("texture unit %d invalid.", unit);
+//         }
+//     }
+// 
+//     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
+//         auto buffer = vertexBuffers_[i];
+//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+//             continue;
+//         auto tvb = buffer->GetTransientVertexBuffer();
+//         if (tvb) {
+//             bgfx::setVertexBuffer(i, tvb);
+//         } else {
+//             buffer->IsDynamic()
+//                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount)
+//                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{ buffer->GetGPUObjectHandle() }, vertexStart, vertexCount);
+//         }
+//     }
+//     if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
+//         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
+//                                     instance_info_.count);
+//     }
+//     render_state_ &= ~BGFX_STATE_PT_MASK;
+//     if (type != TRIANGLE_LIST)
+//     {
+//         render_state_ |= bgfxRSPrimitiveType(type);
+//     }
+//     bgfx::setState(render_state_);
+//     bgfx::setStencil(front_stencil_);
+//     bgfx::submit(current_view_id_, {impl_->shaderProgram_->GetGPUObjectHandle()});
+// 
+//     numPrimitives_ += primitiveCount;
+//     ++numBatches_;
+}
+
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount)
 {
     if (!indexCount || !indexBuffer_ || !impl_->shaderProgram_ ||
@@ -964,148 +1021,71 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
         return;
     }
     
-    PrepareDraw();
+    DoDraw(type, indexStart, indexCount);
 
-    unsigned primitiveCount;
-    GetGLPrimitiveType(indexCount, type, primitiveCount);
-//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-//     glDrawElements(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize));
-    
-//     if (HasTextureUnit(TU_FACESELECT))
-//     {
-//         SetTexture(TU_FACESELECT, textures_[TU_FACESELECT]);
+    return;
+
+//     PrepareDraw();
+// 
+//     unsigned primitiveCount;
+//     GetGLPrimitiveType(indexCount, type, primitiveCount);
+// 
+//     const auto& samples = impl_->shaderProgram_->GetSamplers();
+//     for (auto [unit, handle] : samples) {
+//         if (textures_[unit].texture) {
+//             bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
+//         } else {
+//             URHO3D_LOGERRORF("texture unit %d invalid.", unit);
+//         }
 //     }
-//     if (HasTextureUnit(TU_INDIRECTION))
-//     {
-//         SetTexture(TU_INDIRECTION, textures_[TU_INDIRECTION]);
+// 
+//     indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
+//                         : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount);
+//     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
+//         auto buffer = vertexBuffers_[i];
+//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+//             continue;
+//         auto tvb = buffer->GetTransientVertexBuffer();
+//         if (tvb) {
+//             bgfx::setVertexBuffer(i, tvb);
+//         } else {
+//             buffer->IsDynamic()
+//                 ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
+//                 : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
+//         }
 //     }
-//     if (HasTextureUnit(TU_ENVIRONMENT))
-//     {
-//         SetTexture(TU_ENVIRONMENT, textures_[TU_ENVIRONMENT]);
+// 
+//     if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
+//         bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
+//                                     instance_info_.count);
 //     }
-    const auto& samples = impl_->shaderProgram_->GetSamplers();
-    for (auto [unit, handle] : samples) {
-        if (textures_[unit].texture) {
-            bgfx::setTexture(unit, {handle}, {textures_[unit].texture->GetGPUObjectHandle()}, textures_[unit].flags);
-        } else {
-            URHO3D_LOGERRORF("texture unit %d invalid.", unit);
-        }
-    }
-
-    indexBuffer_->IsDynamic() ? bgfx::setIndexBuffer(bgfx::DynamicIndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount)
-                        : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount);
-    for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
-    {
-        VertexBuffer* buffer = vertexBuffers_[i];
-        // Beware buffers with missing OpenGL objects, as binding a zero buffer object means accessing CPU memory
-        // for vertex data, in which case the pointer will be invalid and cause a crash
-        if (!buffer ||
-            buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle /*GetGPUObjectName*/ /* || !impl_->vertexAttributes_*/)
-            continue;
-
-        buffer->IsDynamic() ? bgfx::setVertexBuffer(i, bgfx::DynamicVertexBufferHandle{buffer->GetGPUObjectHandle()})
-                            : bgfx::setVertexBuffer(i, bgfx::VertexBufferHandle{buffer->GetGPUObjectHandle()});
-    }
-
-    if (instance_info_.buffer || instance_info_.count < UINT32_MAX) {
-        bgfx::setInstanceDataBuffer((bgfx::InstanceDataBuffer*)instance_info_.buffer, instance_info_.start,
-                                    instance_info_.count);
-    }
-    render_state_ &= ~BGFX_STATE_PT_MASK;
-    if (type != TRIANGLE_LIST)
-    {
-        render_state_ |= bgfxRSPrimitiveType(type);
-    }
-    bgfx::setState(render_state_);
-    bgfx::setStencil(front_stencil_);
-    bgfx::submit(current_view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
-
-    numPrimitives_ += primitiveCount;
-    ++numBatches_;
+//     render_state_ &= ~BGFX_STATE_PT_MASK;
+//     if (type != TRIANGLE_LIST) {
+//         render_state_ |= bgfxRSPrimitiveType(type);
+//     }
+//     bgfx::setState(render_state_);
+//     bgfx::setStencil(front_stencil_);
+//     bgfx::submit(current_view_id_, { impl_->shaderProgram_->GetGPUObjectHandle() });
+// 
+//     numPrimitives_ += primitiveCount;
+//     ++numBatches_;
 }
 
 void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned baseVertexIndex, unsigned minVertex, unsigned vertexCount)
 {
     assert(false);
-// #ifndef GL_ES_VERSION_2_0
-//     if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName())
-//         return;
-// 
-//     PrepareDraw();
-// 
-//     unsigned indexSize = indexBuffer_->GetIndexSize();
-//     unsigned primitiveCount;
-//     GLenum glPrimitiveType;
-// 
-//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-//     glDrawElementsBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<GLvoid*>(indexStart * indexSize), baseVertexIndex);
-// 
-//     numPrimitives_ += primitiveCount;
-//     ++numBatches_;
-// #endif
 }
 
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned minVertex, unsigned vertexCount,
     unsigned instanceCount)
 {
     assert(false);
-    // #if !defined(GL_ES_VERSION_2_0) || defined(__EMSCRIPTEN__)
-//     if (!indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
-//         return;
-// 
-//     PrepareDraw();
-// 
-//     unsigned indexSize = indexBuffer_->GetIndexSize();
-//     unsigned primitiveCount;
-//     GLenum glPrimitiveType;
-// 
-//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-// #ifdef __EMSCRIPTEN__
-//     glDrawElementsInstancedANGLE(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-//         instanceCount);
-// #else
-//     if (gl3Support)
-//     {
-//         glDrawElementsInstanced(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-//             instanceCount);
-//     }
-//     else
-//     {
-//         glDrawElementsInstancedARB(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-//             instanceCount);
-//     }
-// #endif
-// 
-//     numPrimitives_ += instanceCount * primitiveCount;
-//     ++numBatches_;
-// #endif
 }
 
 void Graphics::DrawInstanced(PrimitiveType type, unsigned indexStart, unsigned indexCount, unsigned baseVertexIndex, unsigned minVertex,
         unsigned vertexCount, unsigned instanceCount)
 {
     assert(false);
-// #ifndef GL_ES_VERSION_2_0
-//     if (!gl3Support || !indexCount || !indexBuffer_ || !indexBuffer_->GetGPUObjectName() || !instancingSupport_)
-//         return;
-// 
-//     PrepareDraw();
-// 
-//     unsigned indexSize = indexBuffer_->GetIndexSize();
-//     unsigned primitiveCount;
-//     GLenum glPrimitiveType;
-// 
-//     GetGLPrimitiveType(indexCount, type, primitiveCount, glPrimitiveType);
-//     GLenum indexType = indexSize == sizeof(unsigned short) ? GL_UNSIGNED_SHORT : GL_UNSIGNED_INT;
-// 
-//     glDrawElementsInstancedBaseVertex(glPrimitiveType, indexCount, indexType, reinterpret_cast<const GLvoid*>(indexStart * indexSize),
-//         instanceCount, baseVertexIndex);
-// 
-//     numPrimitives_ += instanceCount * primitiveCount;
-//     ++numBatches_;
-// #endif
 }
 
 void Graphics::SetVertexBuffer(VertexBuffer* buffer)

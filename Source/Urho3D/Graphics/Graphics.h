@@ -959,6 +959,7 @@ private:
     ShaderProgram* lastShaderProgram_{ nullptr };
 
 public:
+    void DoDraw(PrimitiveType type, uint32_t start, uint32_t count, bool useIndex = true);
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);
     void SetInstanceDataBuffer(void* idb, uint32_t start = 0, uint32_t count = UINT32_MAX)

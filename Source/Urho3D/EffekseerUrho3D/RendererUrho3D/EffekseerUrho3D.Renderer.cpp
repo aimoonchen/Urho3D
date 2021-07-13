@@ -431,8 +431,8 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 // 		m_shaders[(size_t)RendererShaderType::BackDistortion]->Compile(Shader::RenderType::CanvasItem, Distortion::CanvasItem::code, Distortion::CanvasItem::decl);
 	}
 
-	m_renderCommands.resize((size_t)drawMaxCount);
-	m_renderCommand2Ds.resize((size_t)drawMaxCount);
+// 	m_renderCommands.resize((size_t)drawMaxCount);
+// 	m_renderCommand2Ds.resize((size_t)drawMaxCount);
 
 	m_standardRenderer.reset(new StandardRenderer(this));
     
@@ -469,7 +469,7 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
     }
 
 //     //applyPSAdvancedRendererParameterTexture(shader_ad_unlit, 1);
-//     shader_unlit->SetTextureSlot(1, shader_unlit->GetUniformId("sNormalMap"));
+	shader_unlit->SetTextureSlot(1, shader_unlit->GetUniformId("sNormalMap"));
 //     //shader_ad_unlit->SetTextureSlot(6, GetValidUniform(shader_ad_unlit, "sNormalMap"));
 // 
 // 	auto shader_distortion = m_shaders[static_cast<size_t>(EffekseerRenderer::RendererShaderType::BackDistortion)].get();
@@ -506,23 +506,23 @@ bool RendererImplemented::Initialize(int32_t drawMaxCount)
 //----------------------------------------------------------------------------------
 void RendererImplemented::Destroy()
 {
-	m_renderCommands.clear();
-	m_renderCommand2Ds.clear();
+// 	m_renderCommands.clear();
+// 	m_renderCommand2Ds.clear();
 }
 
 void RendererImplemented::ResetState()
 {
-	for (size_t i = 0; i < m_renderCount; i++)
-	{
-		m_renderCommands[i].Reset();
-	}
-	m_renderCount = 0;
-
-	for (size_t i = 0; i < m_renderCount2D; i++)
-	{
-		m_renderCommand2Ds[i].Reset();
-	}
-	m_renderCount2D = 0;
+// 	for (size_t i = 0; i < m_renderCount; i++)
+// 	{
+// 		m_renderCommands[i].Reset();
+// 	}
+// 	m_renderCount = 0;
+// 
+// 	for (size_t i = 0; i < m_renderCount2D; i++)
+// 	{
+// 		m_renderCommand2Ds[i].Reset();
+// 	}
+// 	m_renderCount2D = 0;
 
 	m_vertexTextureOffset = 0;
 }
@@ -673,7 +673,7 @@ void RendererImplemented::SetLayout(Shader* shader)
 void RendererImplemented::DrawSprites(int32_t spriteCount, int32_t vertexOffset)
 {
     auto indexBuffer = GetIndexBuffer();
-    graphics_->Draw(Urho3D::TRIANGLE_LIST, vertexOffset / 4 * 6, spriteCount * 6, 0, 0);
+    graphics_->Draw(Urho3D::TRIANGLE_LIST, 0/*vertexOffset / 4 * 6*/, spriteCount * 6, 0, 0);
     indexBufferCurrentStride_ = indexBuffer->GetStride();
 // 	assert(m_currentShader != nullptr);
 // 

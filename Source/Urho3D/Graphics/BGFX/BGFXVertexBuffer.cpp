@@ -172,6 +172,12 @@ bool VertexBuffer::SetData(const void* data)
         return false;
     }
 
+    if (transient_vertex_buffer_)
+    {
+        memcpy(transient_vertex_buffer_->data, data, transient_vertex_buffer_->size);
+        return true;
+    }
+
     if (shadowData_ && data != shadowData_.Get())
         memcpy(shadowData_.Get(), data, vertexCount_ * (size_t)vertexSize_);
 
@@ -367,6 +373,24 @@ void* VertexBuffer::MapBuffer(unsigned start, unsigned count, bool discard)
 void VertexBuffer::UnmapBuffer()
 {
     // Never called on OpenGL
+}
+
+void VertexBuffer::AllocTransientVertexBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements)
+{
+    static bgfx::VertexLayout layout;
+    if (!transient_vertex_buffer_) {
+        transient_vertex_buffer_ = std::make_unique<bgfx::TransientVertexBuffer>();
+        if (!elements) {
+            elements = &elements_;
+        }
+        layout = Urho3DLayoutToBGFXLayout(*elements);
+    }
+    bgfx::allocTransientVertexBuffer(transient_vertex_buffer_.get(), vertexCount, layout);
+}
+
+void* VertexBuffer::GetTransientVertexData()
+{
+    return transient_vertex_buffer_->data;
 }
 
 }

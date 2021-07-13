@@ -514,13 +514,14 @@ void SetVertexAlphaThreshold(U& v, float value)
 
 inline int32_t GetMaximumVertexSizeInAllTypes()
 {
-	size_t size = sizeof(DynamicVertexWithCustomData);
-	size = (std::max)(size, sizeof(SimpleVertex));
-	size = (std::max)(size, sizeof(LightingVertex));
-	size = (std::max)(size, sizeof(AdvancedSimpleVertex));
-	size = (std::max)(size, sizeof(AdvancedLightingVertex));
-
-	return static_cast<int32_t>(size);
+// 	size_t size = sizeof(DynamicVertexWithCustomData);
+// 	size = (std::max)(size, sizeof(SimpleVertex));
+// 	size = (std::max)(size, sizeof(LightingVertex));
+// 	size = (std::max)(size, sizeof(AdvancedSimpleVertex));
+// 	size = (std::max)(size, sizeof(AdvancedLightingVertex));
+// 
+// 	return static_cast<int32_t>(size);
+	return static_cast<int32_t>(sizeof(SimpleVertex));
 };
 
 template <typename T>
