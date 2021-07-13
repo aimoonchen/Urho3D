@@ -926,9 +926,9 @@ void Graphics::DoDraw(PrimitiveType type, uint32_t start, uint32_t count, bool u
     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i)
     {
         auto buffer = vertexBuffers_[i];
-        if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+        if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientBuffer()))
             continue;
-        auto tvb = buffer->GetTransientVertexBuffer();
+        auto tvb = buffer->GetTransientBuffer();
         if (tvb)
         {
             bgfx::setVertexBuffer(i, tvb);
@@ -984,9 +984,9 @@ void Graphics::Draw(PrimitiveType type, unsigned vertexStart, unsigned vertexCou
 // 
 //     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
 //         auto buffer = vertexBuffers_[i];
-//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientBuffer()))
 //             continue;
-//         auto tvb = buffer->GetTransientVertexBuffer();
+//         auto tvb = buffer->GetTransientBuffer();
 //         if (tvb) {
 //             bgfx::setVertexBuffer(i, tvb);
 //         } else {
@@ -1043,9 +1043,9 @@ void Graphics::Draw(PrimitiveType type, unsigned indexStart, unsigned indexCount
 //                         : bgfx::setIndexBuffer(bgfx::IndexBufferHandle{ indexBuffer_->GetGPUObjectHandle()}, indexStart, indexCount);
 //     for (unsigned i = MAX_VERTEX_STREAMS - 1; i < MAX_VERTEX_STREAMS; --i) {
 //         auto buffer = vertexBuffers_[i];
-//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientVertexBuffer()))
+//         if (!buffer || (buffer->GetGPUObjectHandle() == bgfx::kInvalidHandle && !buffer->GetTransientBuffer()))
 //             continue;
-//         auto tvb = buffer->GetTransientVertexBuffer();
+//         auto tvb = buffer->GetTransientBuffer();
 //         if (tvb) {
 //             bgfx::setVertexBuffer(i, tvb);
 //         } else {

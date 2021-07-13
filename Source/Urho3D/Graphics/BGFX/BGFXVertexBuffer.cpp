@@ -172,9 +172,9 @@ bool VertexBuffer::SetData(const void* data)
         return false;
     }
 
-    if (transient_vertex_buffer_)
+    if (transient_buffer_)
     {
-        memcpy(transient_vertex_buffer_->data, data, transient_vertex_buffer_->size);
+        memcpy(transient_buffer_->data, data, transient_buffer_->size);
         return true;
     }
 
@@ -375,22 +375,23 @@ void VertexBuffer::UnmapBuffer()
     // Never called on OpenGL
 }
 
-void VertexBuffer::AllocTransientVertexBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements)
+void VertexBuffer::AllocTransientBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements)
 {
-    static bgfx::VertexLayout layout;
-    if (!transient_vertex_buffer_) {
-        transient_vertex_buffer_ = std::make_unique<bgfx::TransientVertexBuffer>();
+    if (!transient_buffer_) {
+        transient_buffer_ = std::make_unique<bgfx::TransientVertexBuffer>();
         if (!elements) {
             elements = &elements_;
         }
-        layout = Urho3DLayoutToBGFXLayout(*elements);
+        transient_layout_ = std::make_unique<bgfx::VertexLayout>(Urho3DLayoutToBGFXLayout(*elements));
+        vertexSize_ = transient_layout_->getStride();
     }
-    bgfx::allocTransientVertexBuffer(transient_vertex_buffer_.get(), vertexCount, layout);
+    bgfx::allocTransientVertexBuffer(transient_buffer_.get(), vertexCount, *transient_layout_);
+    vertexCount_ = vertexCount;
 }
 
-void* VertexBuffer::GetTransientVertexData()
+void* VertexBuffer::GetTransientData()
 {
-    return transient_vertex_buffer_->data;
+    return transient_buffer_->data;
 }
 
 }

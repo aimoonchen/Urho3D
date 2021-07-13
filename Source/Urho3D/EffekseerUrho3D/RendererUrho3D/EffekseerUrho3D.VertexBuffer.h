@@ -55,7 +55,6 @@ public:
 	void Unlock() override;
     bool IsValid();
     Urho3D::VertexBuffer* GetInterface() const { return m_urho3d_buffer; }
-//	const uint8_t* Refer() const { return m_buffer.data(); }
 };
 using VertexBufferRef = Effekseer::RefPtr<VertexBuffer>;
 

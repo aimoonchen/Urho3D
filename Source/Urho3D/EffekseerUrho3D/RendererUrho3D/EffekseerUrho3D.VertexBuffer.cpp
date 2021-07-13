@@ -94,8 +94,8 @@ void VertexBuffer::Lock()
 //-----------------------------------------------------------------------------------
 bool VertexBuffer::RingBufferLock(int32_t size, int32_t& offset, void*& data, int32_t alignment)
 {
-    m_urho3d_buffer->AllocTransientVertexBuffer(size / m_urho3d_buffer->GetVertexSize());
-    data = m_urho3d_buffer->GetTransientVertexData();
+    m_urho3d_buffer->AllocTransientBuffer(size / m_urho3d_buffer->GetVertexSize());
+    data = m_urho3d_buffer->GetTransientData();
     return true;
 
 	assert(!m_isLock);

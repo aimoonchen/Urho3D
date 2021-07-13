@@ -29,6 +29,7 @@
 
 namespace bgfx {
     struct TransientVertexBuffer;
+    struct VertexLayout;
 }
 
 namespace Urho3D
@@ -145,9 +146,9 @@ public:
     bool IsValid() const;
 
     ///
-    void AllocTransientVertexBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements = nullptr);
-    bgfx::TransientVertexBuffer* GetTransientVertexBuffer() { return transient_vertex_buffer_.get(); }
-    void* GetTransientVertexData();
+    void AllocTransientBuffer(unsigned vertexCount, const PODVector<VertexElement>* elements = nullptr);
+    bgfx::TransientVertexBuffer* GetTransientBuffer() { return transient_buffer_.get(); }
+    void* GetTransientData();
 private:
     /// Update offsets of vertex elements.
     void UpdateOffsets();
@@ -187,7 +188,8 @@ private:
     /// Discard lock flag. Used by OpenGL only.
     bool discardLock_{};
     /// 
-    std::unique_ptr<bgfx::TransientVertexBuffer> transient_vertex_buffer_{};
+    std::unique_ptr<bgfx::TransientVertexBuffer> transient_buffer_{};
+    std::unique_ptr<bgfx::VertexLayout> transient_layout_{};
 };
 
 
