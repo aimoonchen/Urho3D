@@ -142,13 +142,9 @@ private:
     std::vector<::Effekseer::Backend::TextureRef> currentTextures_;
     Urho3D::Context* context_{nullptr};
     Urho3D::Graphics* graphics_{nullptr};
-	struct Buffers
-    {
-        VertexBufferRef m_vertexBuffer;
-        IndexBufferRef m_indexBuffer;
-        IndexBufferRef m_indexBufferForWireframe;
-    };
-    std::vector<Buffers> m_buffers;
+    std::vector<VertexBufferRef> m_vertexBuffers;
+    IndexBufferRef m_indexBuffer;
+    IndexBufferRef m_indexBufferForWireframe;
     int32_t indexBufferStride_ = 2;
     int32_t indexBufferCurrentStride_ = 0;
     int32_t GetIndexSpriteCount() const;

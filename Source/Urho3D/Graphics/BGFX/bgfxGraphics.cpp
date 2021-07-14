@@ -744,21 +744,26 @@ void Graphics::Clear(ClearTargetFlags flags, const Color& color, float depth, un
 
 bool Graphics::ResolveToTexture(Texture2D* destination, const IntRect& viewport)
 {
-//     if (!destination || !destination->GetRenderSurface())
-//         return false;
-// 
-//     URHO3D_PROFILE(ResolveToTexture);
-// 
-//     IntRect vpCopy = viewport;
-//     if (vpCopy.right_ <= vpCopy.left_)
-//         vpCopy.right_ = vpCopy.left_ + 1;
-//     if (vpCopy.bottom_ <= vpCopy.top_)
-//         vpCopy.bottom_ = vpCopy.top_ + 1;
-//     vpCopy.left_ = Clamp(vpCopy.left_, 0, width_);
-//     vpCopy.top_ = Clamp(vpCopy.top_, 0, height_);
-//     vpCopy.right_ = Clamp(vpCopy.right_, 0, width_);
-//     vpCopy.bottom_ = Clamp(vpCopy.bottom_, 0, height_);
-// 
+    if (!destination || !destination->GetRenderSurface())
+        return false;
+
+    if (!last_viewport_render_target_)
+    {
+        return false;
+    }
+
+    URHO3D_PROFILE(ResolveToTexture);
+
+    IntRect vpCopy = viewport;
+    if (vpCopy.right_ <= vpCopy.left_)
+        vpCopy.right_ = vpCopy.left_ + 1;
+    if (vpCopy.bottom_ <= vpCopy.top_)
+        vpCopy.bottom_ = vpCopy.top_ + 1;
+    vpCopy.left_ = Clamp(vpCopy.left_, 0, width_);
+    vpCopy.top_ = Clamp(vpCopy.top_, 0, height_);
+    vpCopy.right_ = Clamp(vpCopy.right_, 0, width_);
+    vpCopy.bottom_ = Clamp(vpCopy.bottom_, 0, height_);
+ 
 //     // Make sure the FBO is not in use
 //     ResetRenderTargets();
 // 
@@ -766,7 +771,10 @@ bool Graphics::ResolveToTexture(Texture2D* destination, const IntRect& viewport)
 //     SetTextureForUpdate(destination);
 //     glCopyTexSubImage2D(GL_TEXTURE_2D, 0, 0, 0, vpCopy.left_, height_ - vpCopy.bottom_, vpCopy.Width(), vpCopy.Height());
 //     SetTexture(0, nullptr);
-
+    // TODO : modify view id ?
+    bgfx::blit(current_view_id_ + 1, { destination->GetGPUObjectHandle() }, 0, 0, { last_viewport_render_target_->GetParentTexture()->GetGPUObjectHandle() }, vpCopy.left_, height_ - vpCopy.bottom_, vpCopy.Width(), vpCopy.Height());
+    current_view_id_++;
+    view_context_dirty_ = true;
     return true;
 }
 

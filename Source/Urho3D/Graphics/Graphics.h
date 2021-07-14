@@ -945,20 +945,19 @@ private:
         uint32_t start{ 0 };
         uint32_t count{ UINT32_MAX };
     } instance_info_;
-//     struct view_context_dirty
-//     {
-//         bool target_dirty   : 1;
-//         bool rect_dirty     : 1;
-//         bool scissor_dirty  : 1;
-//         bool transform_dirty : 1;
-//         bool clear_dirty    : 1;
-//     };
-//     view_context_dirty vc_dirty_{false, false, false, false, false };
+
     bool view_context_dirty_{false};
     // last used ShaderProgram
     ShaderProgram* lastShaderProgram_{ nullptr };
-
+    
+    // TODO : record viewport rendertarget
+    RenderSurface* last_viewport_render_target_{ nullptr };
 public:
+    RenderSurface* GetViewportRenderTarget() const { return last_viewport_render_target_; }
+    void RecordViewportRenderTarget(RenderSurface* surface)
+    {
+        last_viewport_render_target_ = surface;
+    }
     void DoDraw(PrimitiveType type, uint32_t start, uint32_t count, bool useIndex = true);
     void* AllocInstanceDataBuffer(uint32_t numInstances, uint16_t instanceStride);
     void WriteInstanceData(void* idb, uint32_t& pos, void* data, uint32_t len);

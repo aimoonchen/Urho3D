@@ -372,7 +372,7 @@ RendererImplemented::RendererImplemented(Urho3D::Context* context, int32_t squar
     graphics_ = context->GetSubsystem<Urho3D::Graphics>();
 	// dummy
 	m_background = Effekseer::MakeRefPtr<Texture>();
-	m_buffers.resize(static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1 + 1);
+	m_vertexBuffers.resize(static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1 + 1);
 }
 
 //----------------------------------------------------------------------------------
@@ -564,17 +564,15 @@ VertexBuffer* RendererImplemented::GetVertexBuffer()
 	if (m_standardRenderer) {
 		shaderType = m_standardRenderer->GetState().Collector.ShaderType;
 	}
-    //auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
     if (shaderType == EffekseerRenderer::RendererShaderType::Material) {
         auto mtlptr = m_standardRenderer->GetState().Collector.MaterialDataPtr;
         if (!mtlptr->IsSimpleVertex) {
 			// TODO:
             assert(mtlptr->CustomData1 == 4 && mtlptr->CustomData2 == 0);
-            return m_buffers[static_cast<int>(shaderType) + 1].m_vertexBuffer.Get();
+            return m_vertexBuffers[static_cast<int>(shaderType) + 1].Get();
 		}
 	}
-    return m_buffers[static_cast<int>(shaderType)].m_vertexBuffer.Get();
-	//return m_vertexBuffer.Get();
+    return m_vertexBuffers[static_cast<int>(shaderType)].Get();
 }
 
 //----------------------------------------------------------------------------------
@@ -582,16 +580,13 @@ VertexBuffer* RendererImplemented::GetVertexBuffer()
 //----------------------------------------------------------------------------------
 IndexBuffer* RendererImplemented::GetIndexBuffer()
 {
-    auto shaderType = m_standardRenderer->GetState().Collector.ShaderType;
 	if (GetRenderMode() == ::Effekseer::RenderMode::Wireframe)
 	{
-        return m_buffers[static_cast<int>(shaderType)].m_indexBufferForWireframe.Get();
-		//return m_indexBufferForWireframe.Get();
+        return m_indexBufferForWireframe.Get();
 	}
 	else
 	{
-        return m_buffers[static_cast<int>(shaderType)].m_indexBuffer.Get();
-		//return m_indexBuffer.Get();
+        return m_indexBuffer.Get();
 	}
 }
 
@@ -1401,47 +1396,44 @@ void RendererImplemented::GenerateIndexData()
 
 template <typename T> void RendererImplemented::GenerateIndexDataStride()
 {
-    for (auto& buffers : m_buffers)
+    auto indexBuffer = m_indexBuffer;
+    // generate an index buffer
+    if (indexBuffer != nullptr)
     {
-        auto indexBuffer = buffers.m_indexBuffer;
-        // generate an index buffer
-        if (indexBuffer != nullptr)
+        indexBuffer->Lock();
+        for (int i = 0; i < GetIndexSpriteCount(); i++)
         {
-            indexBuffer->Lock();
-            for (int i = 0; i < GetIndexSpriteCount(); i++)
-            {
-                std::array<T, 6> buf;
-                buf[0] = (T)(3 + 4 * i);
-                buf[1] = (T)(1 + 4 * i);
-                buf[2] = (T)(0 + 4 * i);
-                buf[3] = (T)(3 + 4 * i);
-                buf[4] = (T)(0 + 4 * i);
-                buf[5] = (T)(2 + 4 * i);
-                memcpy(indexBuffer->GetBufferDirect(6), buf.data(), sizeof(T) * 6);
-            }
-            indexBuffer->Unlock();
+            std::array<T, 6> buf;
+            buf[0] = (T)(3 + 4 * i);
+            buf[1] = (T)(1 + 4 * i);
+            buf[2] = (T)(0 + 4 * i);
+            buf[3] = (T)(3 + 4 * i);
+            buf[4] = (T)(0 + 4 * i);
+            buf[5] = (T)(2 + 4 * i);
+            memcpy(indexBuffer->GetBufferDirect(6), buf.data(), sizeof(T) * 6);
         }
+        indexBuffer->Unlock();
+    }
 
-        auto indexBufferForWireframe = buffers.m_indexBufferForWireframe;
-        // generate an index buffer for a wireframe
-        if (indexBufferForWireframe != nullptr)
+    auto indexBufferForWireframe = m_indexBufferForWireframe;
+    // generate an index buffer for a wireframe
+    if (indexBufferForWireframe != nullptr)
+    {
+        indexBufferForWireframe->Lock();
+        for (int i = 0; i < GetIndexSpriteCount(); i++)
         {
-            indexBufferForWireframe->Lock();
-            for (int i = 0; i < GetIndexSpriteCount(); i++)
-            {
-                std::array<T, 8> buf;
-                buf[0] = (T)(0 + 4 * i);
-                buf[1] = (T)(1 + 4 * i);
-                buf[2] = (T)(2 + 4 * i);
-                buf[3] = (T)(3 + 4 * i);
-                buf[4] = (T)(0 + 4 * i);
-                buf[5] = (T)(2 + 4 * i);
-                buf[6] = (T)(1 + 4 * i);
-                buf[7] = (T)(3 + 4 * i);
-                memcpy(indexBufferForWireframe->GetBufferDirect(8), buf.data(), sizeof(T) * 8);
-            }
-            indexBufferForWireframe->Unlock();
+            std::array<T, 8> buf;
+            buf[0] = (T)(0 + 4 * i);
+            buf[1] = (T)(1 + 4 * i);
+            buf[2] = (T)(2 + 4 * i);
+            buf[3] = (T)(3 + 4 * i);
+            buf[4] = (T)(0 + 4 * i);
+            buf[5] = (T)(2 + 4 * i);
+            buf[6] = (T)(1 + 4 * i);
+            buf[7] = (T)(3 + 4 * i);
+            memcpy(indexBufferForWireframe->GetBufferDirect(8), buf.data(), sizeof(T) * 8);
         }
+        indexBufferForWireframe->Unlock();
     }
 }
 
@@ -1531,13 +1523,13 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
     };
 
     size_t shaderTypeCount = static_cast<size_t>(EffekseerRenderer::RendererShaderType::Material) + 1;
-    for (size_t i = 0; i < m_buffers.size(); i++)
+    for (size_t i = 0; i < m_vertexBuffers.size(); i++)
     {
-        auto& buffer = m_buffers[i];
-        if (buffer.m_vertexBuffer != nullptr)
-            AddRef();
-        if (buffer.m_indexBuffer != nullptr)
-            AddRef();
+        auto& buffer = m_vertexBuffers[i];
+//         if (buffer.m_vertexBuffer != nullptr)
+//             AddRef();
+//         if (buffer.m_indexBuffer != nullptr)
+//             AddRef();
 //         ES_SAFE_DELETE(bgfxBuffer.m_vertexBuffer);
 //         ES_SAFE_DELETE(bgfxBuffer.m_indexBuffer);
 
@@ -1555,31 +1547,31 @@ void RendererImplemented::SetSquareMaxCount(int32_t count)
                 layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR2, Urho3D::SEM_TEXCOORD, 1, false));
                 layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR4, Urho3D::SEM_TEXCOORD, 2, false));
                 //layout.Push(Urho3D::VertexElement(Urho3D::TYPE_VECTOR4, Urho3D::SEM_TEXCOORD, 3, false));
-                buffer.m_vertexBuffer = VertexBuffer::Create(context_, m_squareMaxCount * 4, true, layout);
+                buffer = VertexBuffer::Create(context_, /*m_squareMaxCount * */4, true, layout);
             } else {
-                buffer.m_vertexBuffer = VertexBuffer::Create(context_, m_squareMaxCount * 4, true,
+                buffer = VertexBuffer::Create(context_, /*m_squareMaxCount * */4, true,
                     get_vertex_layout(EffekseerRenderer::RendererShaderType(i)));
 			}
             
-            if (buffer.m_vertexBuffer == nullptr)
+            if (buffer == nullptr)
                 return;
         }
 
-        // generate an index buffer
-        {
-            buffer.m_indexBuffer =
-                IndexBuffer::Create(context_, GetIndexSpriteCount() * 6, true, indexBufferStride_);
-            if (buffer.m_indexBuffer == nullptr)
-                return;
-        }
 
-        // generate an index buffer for a wireframe
-        {
-            buffer.m_indexBufferForWireframe =
-                IndexBuffer::Create(context_, GetIndexSpriteCount() * 8, true, indexBufferStride_);
-            if (buffer.m_indexBufferForWireframe == nullptr)
-                return;
-        }
+    }
+    // generate an index buffer
+    {
+        m_indexBuffer = IndexBuffer::Create(context_, GetIndexSpriteCount() * 6, true, indexBufferStride_);
+        if (m_indexBuffer == nullptr)
+            return;
+    }
+
+    // generate an index buffer for a wireframe
+    {
+        m_indexBufferForWireframe =
+            IndexBuffer::Create(context_, GetIndexSpriteCount() * 8, true, indexBufferStride_);
+        if (m_indexBufferForWireframe == nullptr)
+            return;
     }
     // generate index data
     GenerateIndexData();

@@ -140,6 +140,7 @@ public:
     /// D3D11 vertex semantic names. Used internally.
     static const char* elementSemanticNames[];
 
+    bool IsUrho3DType() const { return isUrho3DType_; }
 private:
     /// Load bytecode from a file. Return true if successful.
     bool LoadByteCode(const String& binaryShaderName);
@@ -174,6 +175,7 @@ private:
     String definesClipPlane_;
     /// Shader compile error string.
     String compilerOutput_;
+    bool isUrho3DType_{ false };
 };
 
 }

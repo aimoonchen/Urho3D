@@ -1752,6 +1752,10 @@ void View::SetRenderTargets(RenderPathCommand& command)
         {
             graphics_->SetRenderTarget(index, currentRenderTarget_);
             useViewportOutput = true;
+//             if (currentRenderTarget_)
+//             {
+//                 graphics_->RecordViewportRenderTarget(currentRenderTarget_);
+//             }
         }
         else
         {
@@ -1822,6 +1826,10 @@ bool View::SetTextures(RenderPathCommand& command)
         // Bind the rendered output
         if (!command.textureNames_[i].Compare("viewport", false))
         {
+//             auto rt = graphics_->GetViewportRenderTarget();
+//             if (rt) {
+//                 graphics_->SetTexture(i, rt->GetParentTexture());
+//             }
             graphics_->SetTexture(i, currentViewportTexture_);
             continue;
         }

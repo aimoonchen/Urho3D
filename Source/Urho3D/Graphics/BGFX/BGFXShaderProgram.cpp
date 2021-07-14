@@ -110,66 +110,6 @@ void ShaderProgram::Release()
 
 bool ShaderProgram::Link()
 {
-    static std::set<unsigned> predefinedUniform{
-        VSP_DEPTHBIAS.Value(),
-        VSP_AMBIENTSTARTCOLOR.Value(),
-        VSP_AMBIENTENDCOLOR.Value(),
-        VSP_BILLBOARDROT.Value(),
-        VSP_CAMERAPOS.Value(),
-        VSP_CLIPPLANE.Value(),
-        VSP_NEARCLIP.Value(),
-        VSP_FARCLIP.Value(),
-        VSP_DEPTHMODE.Value(),
-        VSP_DELTATIME.Value(),
-        VSP_ELAPSEDTIME.Value(),
-        VSP_FRUSTUMSIZE.Value(),
-        VSP_GBUFFEROFFSETS.Value(),
-        VSP_LIGHTDIR.Value(),
-        VSP_LIGHTPOS.Value(),
-        VSP_NORMALOFFSETSCALE.Value(),
-        VSP_MODEL.Value(),
-        VSP_VIEW.Value(),
-        VSP_VIEWINV.Value(),
-        VSP_VIEWPROJ.Value(),
-        VSP_UOFFSET.Value(),
-        VSP_VOFFSET.Value(),
-        VSP_ZONE.Value(),
-        VSP_LIGHTMATRICES.Value(),
-        VSP_SKINMATRICES.Value(),
-        VSP_VERTEXLIGHTS.Value(),
-        PSP_AMBIENTCOLOR.Value(),
-        PSP_CAMERAPOS.Value(),
-        PSP_DELTATIME.Value(),
-        PSP_DEPTHRECONSTRUCT.Value(),
-        PSP_ELAPSEDTIME.Value(),
-        PSP_FOGCOLOR.Value(),
-        PSP_FOGPARAMS.Value(),
-        PSP_GBUFFERINVSIZE.Value(),
-        PSP_LIGHTCOLOR.Value(),
-        PSP_LIGHTDIR.Value(),
-        PSP_LIGHTPOS.Value(),
-        PSP_NORMALOFFSETSCALE.Value(),
-        PSP_MATDIFFCOLOR.Value(),
-        PSP_MATEMISSIVECOLOR.Value(),
-        PSP_MATENVMAPCOLOR.Value(),
-        PSP_MATSPECCOLOR.Value(),
-        PSP_NEARCLIP.Value(),
-        PSP_FARCLIP.Value(),
-        PSP_SHADOWCUBEADJUST.Value(),
-        PSP_SHADOWDEPTHFADE.Value(),
-        PSP_SHADOWINTENSITY.Value(),
-        PSP_SHADOWMAPINVSIZE.Value(),
-        PSP_SHADOWSPLITS.Value(),
-        PSP_LIGHTMATRICES.Value(),
-        PSP_VSMSHADOWPARAMS.Value(),
-        PSP_ROUGHNESS.Value(),
-        PSP_METALLIC.Value(),
-        PSP_LIGHTRAD.Value(),
-        PSP_LIGHTLENGTH.Value(),
-        PSP_ZONEMIN.Value(),
-        PSP_ZONEMAX.Value()
-    };
-
     Release();
 
     if (!vertexShader_ || !pixelShader_ || !vertexShader_->GetGPUObjectName() || !pixelShader_->GetGPUObjectName())
@@ -192,6 +132,8 @@ bool ShaderProgram::Link()
     auto uniformCount = vsUniformCount + psUniformCount;
     samplers_.clear();
     uniforms_.Clear();
+
+    bool isUrho3DType = vertexShader_->IsUrho3DType();
     if (uniformCount > 0) {
         uniforms.resize(uniformCount);
         auto psOffset = bgfx::getShaderUniforms(vsHandle, &uniforms[0], vsUniformCount);
@@ -201,39 +143,39 @@ bool ShaderProgram::Link()
         for (auto& uniform : uniforms) {
             bgfx::UniformInfo info;
             bgfx::getUniformInfo(uniform, info);
-            if (info.name[0] == 'c') {
-                auto hashName = StringHash(&info.name[1]);
-                if (predefinedUniform.find(hashName.Value()) != predefinedUniform.end()) {
-                    uniforms_[hashName] = uniform.idx;
-                    continue;
-                }
-            } else if (info.type == bgfx::UniformType::Sampler && info.name[0] == 's') {
-                unsigned unit = graphics_->GetTextureUnit(&info.name[1]);
-                if (unit >= MAX_TEXTURE_UNITS) {
-                    // for terrain
-                    if (!strcmp(&info.name[1], "WeightMap0")) {
-                        unit = 0;
-                    } else if (!strcmp(&info.name[1], "DetailMap1")) {
-                        unit = 1;
-                    } else if (!strcmp(&info.name[1], "DetailMap2")) {
-                        unit = 2;
-                    } else if (!strcmp(&info.name[1], "DetailMap3")) {
-                        unit = 3;
+            if (isUrho3DType && ((info.type == bgfx::UniformType::Sampler && info.name[0] == 's') || info.name[0] == 'c')) {
+                const char* realName = &info.name[1];
+                uniforms_[StringHash(realName)] = uniform.idx;
+                if (info.type == bgfx::UniformType::Sampler) {
+                    if (!strcmp(realName, "EnvMap"))
+                    {
+                        printf("");
+                    }
+                    unsigned unit = graphics_->GetTextureUnit(realName);
+                    if (unit >= MAX_TEXTURE_UNITS) {
+                        // for terrain
+                        if (!strcmp(realName, "WeightMap0")) {
+                            unit = 0;
+                        } else if (!strcmp(realName, "DetailMap1")) {
+                            unit = 1;
+                        } else if (!strcmp(realName, "DetailMap2")) {
+                            unit = 2;
+                        } else if (!strcmp(realName, "DetailMap3")) {
+                            unit = 3;
+                        } else {
+                            ;// unit = NumberPostfix(info.name);
+                        }
+                    }
+                    if (unit < MAX_TEXTURE_UNITS) {
+                        if (!useTextureUnits_[unit]) {
+                            useTextureUnits_[unit] = true;
+                            samplers_.emplace_back(TextureUnit(unit), uniform.idx);
+                        }
                     } else {
-                        ; // unit = NumberPostfix(info.name);
+                        URHO3D_LOGERRORF("Can't found texture unit : \"%s\"\n", realName);
                     }
                 }
-                if (unit < MAX_TEXTURE_UNITS) {
-                    if (!useTextureUnits_[unit]) {
-                        useTextureUnits_[unit] = true;
-                        samplers_.emplace_back(TextureUnit(unit), uniform.idx);
-                    }
-                    auto hashName = StringHash(&info.name[1]);
-                    uniforms_[hashName] = uniform.idx;
-                    continue;
-                } else {
-                    URHO3D_LOGERRORF("Can't found texture unit : \"%s\"\n", &info.name[1]);
-                }
+                continue;
             }
             uniforms_[StringHash(info.name)] = uniform.idx;
         }

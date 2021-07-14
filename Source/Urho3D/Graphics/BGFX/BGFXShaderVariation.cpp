@@ -166,6 +166,10 @@ bool ShaderVariation::Create()
 #endif
 
     const auto& shaderPath = owner_->GetShaderPath();
+    if (shaderPath.Substring(0, shaderPath.FindLast('/')) == "Shaders/BGFX")
+    {
+        isUrho3DType_ = true;
+    }
     StringHash filenameHash(shaderPath.Substring(13, shaderPath.FindLast('/') - 12) + GetName() +
                            ((type_ == VS) ? "vs" : "fs") + String::Joined(defineVec, " "));
     String binFilename = String(StringHash(filenameHash).Value()) + ".bin";
@@ -178,8 +182,8 @@ bool ShaderVariation::Create()
 #ifdef __APPLE__
         String localPath("/Users/simonchen/Development/");
 #else
-        String localPath("C:/GitProjects/");
-        //String localPath("D:/Github/");
+        //String localPath("C:/GitProjects/");
+        String localPath("D:/Github/");
 #endif
         auto compile_shader = [this, &localPath, &shaderPath, &binFilename, &defineVec](shader_target target) {
             Vector<String> defines;
