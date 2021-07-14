@@ -491,4 +491,13 @@ bool ShaderProgram::IsValid() const
 {
     return GetGPUObjectHandle() != bgfx::kInvalidHandle;
 }
+void ShaderProgram::BindSamplerUnit(TextureUnit unit, uint16_t handle)
+{
+    if (handle == bgfx::kInvalidHandle)
+    {
+        return;
+    }
+    useTextureUnits_[unit] = true;
+    samplers_.emplace_back(std::pair{unit, handle});
+}
 }

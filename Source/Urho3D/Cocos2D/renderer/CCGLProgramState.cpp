@@ -5,6 +5,7 @@
 #include "../../Graphics/Graphics.h"
 #include "../../Resource/ResourceCache.h"
 #include "../../Graphics/Texture2D.h"
+#include "../../Graphics/ShaderProgram.h"
 #include "Urho3DContext.h"
 
 NS_CC_BEGIN
@@ -80,15 +81,27 @@ void GLProgramState::setUniformsForBuiltins(const Mat4& modelView)
     }
 }
 
+void GLProgramState::bindSampler()
+{
+    if (bind_) {
+        return;
+    }
+    bind_ = true;
+    auto prog = graphics_->GetShaderProgram();
+    prog->BindSamplerUnit(Urho3D::TextureUnit::TU_DIFFUSE, prog->GetUniform(sampler0Name_));
+}
+
 void GLProgramState::apply(const Mat4& modelView)
 {
     graphics_->SetShaders(vs_, fs_);
     setUniformsForBuiltins(modelView);
+    bindSampler();
 }
 
 void GLProgramState::apply()
 {
     graphics_->SetShaders(vs_, fs_);
+    bindSampler();
 }
 
 GLProgramState* GLProgramState::getOrCreateWithGLProgramName(const std::string& glProgramName, Urho3D::Texture2D* texture)

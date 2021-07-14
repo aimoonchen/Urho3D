@@ -78,8 +78,9 @@ public:
     void setUniformsForBuiltins(const Mat4& modelView);
     void setUniformsForBuiltins();
     void setUniforms(const Urho3D::StringHash& name, float value);
-
+    Urho3D::StringHash getSampler0Name() const { return sampler0Name_; }
 private:
+    void bindSampler();
     Urho3D::ShaderVariation* vs_{ nullptr };
     Urho3D::ShaderVariation* fs_{ nullptr };
     Urho3D::Graphics* graphics_{ nullptr };
@@ -87,6 +88,9 @@ private:
     Urho3D::StringHash modelViewName_{ "CC_MVMatrix" };
     Urho3D::StringHash projMatName_{ "CC_PMatrix" };
     Urho3D::StringHash modelViewProjName_{ "CC_MVPMatrix" };
+    //
+    bool bind_ = {false};
+    Urho3D::StringHash sampler0Name_{ "sDiffMap" };
     static std::unordered_map<std::string, std::shared_ptr<GLProgramState>> programs_;
 };
 
